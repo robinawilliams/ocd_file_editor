@@ -17,7 +17,15 @@ class FileRenamerApp:
         # Load categories from a configuration file
         self.categories = self.load_categories()
 
+        # Initialize output directory
+        self.output_directory = ""
+
+        # Variable to track the user's placement choice (prefix or suffix)
+        self.placement_choice = tk.StringVar()
+        self.placement_choice.set("suffix")  # Default to suffix
+
         self.create_gui()
+
 
     def create_gui(self):
         # File Label
@@ -75,21 +83,53 @@ class FileRenamerApp:
         category_separator = ttk.Separator(self.root, orient="horizontal")
         category_separator.pack(fill="x", pady=10)
 
-        # Create a frame to group the "Custom text entry:" label, custom text entry, and Rename File button
+        # Create a frame to group the custom text entry and Rename button
         custom_text_frame = ttk.Frame(self.root)
         custom_text_frame.pack(pady=5)
+
+        # Output Directory Label
+        output_directory_label = tk.Label(custom_text_frame, text="Output Directory:")
+        output_directory_label.pack(side="left")
+
+        # Output Directory Entry
+        self.output_directory_entry = tk.Entry(custom_text_frame, width=40)
+        self.output_directory_entry.pack(side="left")
+
+        # Output Directory Browse Button
+        output_directory_browse_button = tk.Button(custom_text_frame, text="Browse", command=self.browse_output_directory)
+        output_directory_browse_button.pack(side="left")
 
         # Custom Text Entry Label
         self.custom_text_label = tk.Label(custom_text_frame, text="Custom text entry:")
         self.custom_text_label.pack(side="left")
 
         # Custom Text Entry
-        self.custom_text_entry = tk.Entry(custom_text_frame)
-        self.custom_text_entry.pack(side="left", padx=5)
+        self.custom_text_entry = tk.Entry(custom_text_frame, width=40)
+        self.custom_text_entry.pack(side="left")
+
+        # Create a frame for the "Rename File" button
+        rename_button_frame = ttk.Frame(self.root)
+        rename_button_frame.pack(pady=5)
 
         # Rename File Button
         self.rename_button = tk.Button(custom_text_frame, text="Rename File", command=self.rename_files)
-        self.rename_button.pack(side="left", padx=5)
+        self.rename_button.pack()
+
+        # Create a frame for the placement choice
+        placement_frame = ttk.Frame(self.root)
+        placement_frame.pack(pady=5)
+
+        # Placement Label
+        placement_label = tk.Label(placement_frame, text="Placement:")
+        placement_label.pack(side="left")
+
+        # Radio button for Prefix
+        prefix_radio = tk.Radiobutton(placement_frame, text="Prefix", variable=self.placement_choice, value="prefix")
+        prefix_radio.pack(side="left")
+
+        # Radio button for Suffix
+        suffix_radio = tk.Radiobutton(placement_frame, text="Suffix", variable=self.placement_choice, value="suffix")
+        suffix_radio.pack(side="left")
 
         # Add a separator line underneath the custom text section
         custom_text_separator = ttk.Separator(self.root, orient="horizontal")
@@ -131,6 +171,13 @@ class FileRenamerApp:
         # Bind file drop event
         self.root.drop_target_register(DND_FILES)
         self.root.dnd_bind('<<Drop>>', self.on_drop)
+
+    def browse_output_directory(self):
+        output_directory = filedialog.askdirectory()
+        if output_directory:
+            self.output_directory = output_directory
+            self.output_directory_entry.delete(0, tk.END)
+            self.output_directory_entry.insert(0, self.output_directory)
 
     def move_to_trash(self):
         if self.selected_file:
@@ -238,24 +285,34 @@ class FileRenamerApp:
     def rename_files(self):
         if self.selected_file and (self.queue or self.custom_text_entry.get().strip()):
             custom_text = self.custom_text_entry.get().strip()
-            new_name = os.path.splitext(self.selected_file)[0] + " " + custom_text + " " + " ".join(self.queue) + os.path.splitext(self.selected_file)[1]
+            base_name, extension = os.path.splitext(os.path.basename(self.selected_file))
+
+            if self.placement_choice.get() == "prefix":
+                new_name = custom_text + " " + base_name + " ".join(self.queue) + extension
+            else:
+                new_name = base_name + " " + custom_text + " " + " ".join(self.queue) + extension
 
             # Remove double spaces and trailing spaces
             new_name = " ".join(new_name.split())  # Remove double spaces
             new_name = new_name.strip()  # Remove trailing spaces
 
+            # If the output directory is not explicitly set, use the file's current location
+            if not self.output_directory:
+                self.output_directory = os.path.dirname(self.selected_file)
+
+            # Save the renamed file to the output directory
+            new_path = os.path.join(self.output_directory, os.path.basename(new_name))
             try:
-                os.rename(self.selected_file, new_name)
+                os.rename(self.selected_file, new_path)
                 self.selected_file = ""
                 self.queue = []
                 self.file_display.config(text="")
                 self.custom_text_entry.delete(0, tk.END)
-                self.last_used_file = new_name
-                self.last_used_display.config(text=os.path.basename(new_name))
-                self.show_message("File renamed successfully")
+                self.last_used_file = new_path
+                self.last_used_display.config(text=os.path.basename(new_path))
+                self.show_message("File renamed and saved successfully")
             except OSError as e:
                 self.show_message("Error: " + str(e), error=True)
-
 
     def browse_file(self):
         file_path = filedialog.askopenfilename()
