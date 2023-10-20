@@ -5,6 +5,8 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 from tkinter import filedialog, messagebox
 import send2trash
 from tkinter import ttk
+import re
+
 
 class FileRenamerApp:
     def __init__(self, root):
@@ -24,8 +26,18 @@ class FileRenamerApp:
         self.placement_choice = tk.StringVar()
         self.placement_choice.set("suffix")  # Default to suffix
 
-        self.create_gui()
+        # Define weights for categories
+        self.weights = {
+            "Lo-fi": 1,
+            "Acoustic": 2,
+            "Tropical": 3,
+        }
 
+        # Variable to track whether to enable the text moving feature
+        self.move_text_var = tk.BooleanVar()
+        self.move_text_var.set(False)  # Default to disabled
+
+        self.create_gui()
 
     def create_gui(self):
         # File Label
@@ -58,7 +70,6 @@ class FileRenamerApp:
             if col == 8:
                 col = 0
                 row += 1
-
         # Create a frame for the category-related elements
         category_frame = ttk.Frame(self.root)
         category_frame.pack(pady=5)
@@ -96,7 +107,8 @@ class FileRenamerApp:
         self.output_directory_entry.pack(side="left")
 
         # Output Directory Browse Button
-        output_directory_browse_button = tk.Button(custom_text_frame, text="Browse", command=self.browse_output_directory)
+        output_directory_browse_button = tk.Button(custom_text_frame, text="Browse",
+                                                   command=self.browse_output_directory)
         output_directory_browse_button.pack(side="left")
 
         # Custom Text Entry Label
@@ -111,25 +123,32 @@ class FileRenamerApp:
         rename_button_frame = ttk.Frame(self.root)
         rename_button_frame.pack(pady=5)
 
-        # Rename File Button
-        self.rename_button = tk.Button(custom_text_frame, text="Rename File", command=self.rename_files)
-        self.rename_button.pack()
-
-        # Create a frame for the placement choice
-        placement_frame = ttk.Frame(self.root)
-        placement_frame.pack(pady=5)
+        # Add a frame for the placement choice and the new feature checkbox
+        placement_feature_frame = ttk.Frame(self.root)
+        placement_feature_frame.pack(pady=5)
 
         # Placement Label
-        placement_label = tk.Label(placement_frame, text="Placement:")
+        placement_label = tk.Label(placement_feature_frame, text="Placement:")
         placement_label.pack(side="left")
 
         # Radio button for Prefix
-        prefix_radio = tk.Radiobutton(placement_frame, text="Prefix", variable=self.placement_choice, value="prefix")
+        prefix_radio = tk.Radiobutton(placement_feature_frame, text="Prefix", variable=self.placement_choice,
+                                      value="prefix")
         prefix_radio.pack(side="left")
 
         # Radio button for Suffix
-        suffix_radio = tk.Radiobutton(placement_frame, text="Suffix", variable=self.placement_choice, value="suffix")
+        suffix_radio = tk.Radiobutton(placement_feature_frame, text="Suffix", variable=self.placement_choice,
+                                      value="suffix")
         suffix_radio.pack(side="left")
+
+        # Rename File Button
+        self.rename_button = tk.Button(placement_feature_frame, text="Rename File", command=self.rename_files)
+        self.rename_button.pack(side="right")
+
+        # Checkbox for the new feature
+        self.move_text_checkbox = tk.Checkbutton(placement_feature_frame, text="Move Text", variable=self.move_text_var,
+                                                 onvalue=True, offvalue=False)
+        self.move_text_checkbox.pack(side="right")
 
         # Add a separator line underneath the custom text section
         custom_text_separator = ttk.Separator(self.root, orient="horizontal")
@@ -181,7 +200,8 @@ class FileRenamerApp:
 
     def move_to_trash(self):
         if self.selected_file:
-            confirmation = messagebox.askyesno("Confirm Action", "Are you sure you want to move this file to the trash?")
+            confirmation = messagebox.askyesno("Confirm Action",
+                                               "Are you sure you want to move this file to the trash?")
             if confirmation:
                 send2trash.send2trash(self.selected_file)
                 self.selected_file = ""
@@ -196,8 +216,7 @@ class FileRenamerApp:
             self.file_display.config(text=os.path.basename(self.selected_file))
             self.queue = []
             self.update_file_display()
-            self.show_message("Last used file selected: " + os.path.basename(self.selected_file))  # Update the message
-
+            self.show_message("Last used file selected: " + os.path.basename(self.selected_file))
 
     def on_drop(self, event):
         self.selected_file = event.data.strip('{}')
@@ -206,17 +225,21 @@ class FileRenamerApp:
         self.update_file_display()
         self.show_message("File selected: " + os.path.basename(self.selected_file))  # Update the message
 
-
     def add_to_queue(self, category):
         if self.selected_file:
-            self.queue.append(category)
+            if category in self.weights:
+                self.queue.insert(self.weights[category] - 1, category)
+            else:
+                self.queue.append(category)
+
             self.update_file_display()
             self.show_message("Category added: " + category)
 
     def update_file_display(self):
         if self.selected_file:
             custom_text = self.custom_text_entry.get().strip()
-            new_name = os.path.splitext(self.selected_file)[0] + " " + custom_text + " " + " ".join(self.queue) + os.path.splitext(self.selected_file)[1]
+            new_name = os.path.splitext(self.selected_file)[0] + " " + custom_text + " " + " ".join(self.queue) + \
+                       os.path.splitext(self.selected_file)[1]
 
             # Remove double spaces and trailing spaces
             new_name = " ".join(new_name.split())  # Remove double spaces
@@ -287,10 +310,35 @@ class FileRenamerApp:
             custom_text = self.custom_text_entry.get().strip()
             base_name, extension = os.path.splitext(os.path.basename(self.selected_file))
 
+            weighted_categories = [category for category in self.queue if category in self.weights]
+
+            # Sort weighted categories based on their weights
+            weighted_categories.sort(key=lambda category: self.weights[category])
+
+            # Construct the new name based on placement choice (prefix or suffix)
             if self.placement_choice.get() == "prefix":
-                new_name = custom_text + " " + base_name + " ".join(self.queue) + extension
-            else:
-                new_name = base_name + " " + custom_text + " " + " ".join(self.queue) + extension
+                new_name = base_name
+                for category in weighted_categories:
+                    new_name = new_name + " " + category
+                for category in self.queue:
+                    if category not in weighted_categories:
+                        new_name = new_name + " " + category
+                new_name = custom_text + " " + new_name
+            else:  # Default to suffix
+                new_name = base_name
+                for category in weighted_categories:
+                    new_name = new_name + " " + category
+                for category in self.queue:
+                    if category not in weighted_categories:
+                        new_name = new_name + " " + category
+                new_name = new_name + " " + custom_text
+                new_name = new_name.strip()
+
+            new_name = new_name + extension
+
+            if self.move_text_var.get():
+                # Apply the feature if the checkbox is selected
+                new_name = re.sub(r"^(.*) - (.*?)__-__ (.*)\.(mp4)$", r"\1 \2 \3.\4", new_name)
 
             # Remove double spaces and trailing spaces
             new_name = " ".join(new_name.split())  # Remove double spaces
