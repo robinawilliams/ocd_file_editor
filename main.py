@@ -6,7 +6,8 @@ from tkinter import filedialog, messagebox
 import send2trash
 from tkinter import ttk
 import re
-
+import subprocess
+import platform
 
 class FileRenamerApp:
     def __init__(self, root):
@@ -25,6 +26,9 @@ class FileRenamerApp:
         # Variable to track the user's placement choice (prefix or suffix)
         self.placement_choice = tk.StringVar()
         self.placement_choice.set("suffix")  # Default to suffix
+
+        # Add a checkbox to enable/disable open on drop behavior
+        self.open_on_drop_var = tk.BooleanVar(value=True)
 
         # Define weights for categories
         self.weights = {
@@ -145,6 +149,9 @@ class FileRenamerApp:
         self.rename_button = tk.Button(placement_feature_frame, text="Rename File", command=self.rename_files)
         self.rename_button.pack(side="right")
 
+        self.open_on_drop_checkbox = tk.Checkbutton(placement_feature_frame, text="Open on Drop", variable=self.open_on_drop_var)
+        self.open_on_drop_checkbox.pack(side="left", padx=5)
+
         # Checkbox for the new feature
         self.move_text_checkbox = tk.Checkbutton(placement_feature_frame, text="Move Text", variable=self.move_text_var,
                                                  onvalue=True, offvalue=False)
@@ -224,6 +231,17 @@ class FileRenamerApp:
         self.queue = []
         self.update_file_display()
         self.show_message("File selected: " + os.path.basename(self.selected_file))  # Update the message
+
+        if self.open_on_drop_var.get():
+            if platform.system() == "Linux":
+                # Open the dropped file using xdg-open on Linux
+                subprocess.Popen(['xdg-open', self.selected_file])
+            elif platform.system() == "Windows":
+                # Open the dropped file using the Windows start command
+                subprocess.Popen(['start', self.selected_file])
+            else:
+                # Use 'open' command on macOS, you can customize this as needed
+                subprocess.Popen(['open', self.selected_file])
 
     def add_to_queue(self, category):
         if self.selected_file:
