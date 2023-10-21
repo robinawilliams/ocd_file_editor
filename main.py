@@ -338,7 +338,10 @@ class FileRenamerApp:
 
             if self.move_text_var.get():
                 # Apply the feature if the checkbox is selected
-                new_name = re.sub(r"^(.*) - (.*?)__-__ (.*)\.(mp4)$", r"\1 \2 \3.\4", new_name)
+                match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", new_name)
+                if match:
+                    prefix, moved_text, suffix, extension = match.groups()
+                    new_name = f"{prefix} {suffix} {moved_text}.{extension}"
 
             # Remove double spaces and trailing spaces
             new_name = " ".join(new_name.split())  # Remove double spaces
