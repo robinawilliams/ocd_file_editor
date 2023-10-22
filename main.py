@@ -9,6 +9,7 @@ import re
 import subprocess
 import platform
 
+
 class FileRenamerApp:
     def __init__(self, root):
         self.root = root
@@ -40,6 +41,9 @@ class FileRenamerApp:
         # Variable to track whether to enable the text moving feature
         self.move_text_var = tk.BooleanVar()
         self.move_text_var.set(False)  # Default to disabled
+
+        # Add a checkbox for moving the file up one folder
+        self.move_up_var = tk.BooleanVar(value=False)
 
         self.create_gui()
 
@@ -149,8 +153,20 @@ class FileRenamerApp:
         self.rename_button = tk.Button(placement_feature_frame, text="Rename File", command=self.rename_files)
         self.rename_button.pack(side="right")
 
-        self.open_on_drop_checkbox = tk.Checkbutton(placement_feature_frame, text="Open on Drop", variable=self.open_on_drop_var)
+        self.open_on_drop_checkbox = tk.Checkbutton(placement_feature_frame, text="Open on Drop",
+                                                    variable=self.open_on_drop_var)
         self.open_on_drop_checkbox.pack(side="left", padx=5)
+
+        # Inside the create_gui method, add the checkbox for duplicate removal
+        self.remove_duplicates_var = tk.BooleanVar(value=False)
+        remove_duplicates_checkbox = tk.Checkbutton(placement_feature_frame, text="Remove Duplicates",
+                                                    variable=self.remove_duplicates_var)
+        remove_duplicates_checkbox.pack(side="left")
+
+        # Checkbox for moving the file up one folder
+        self.move_up_checkbox = tk.Checkbutton(placement_feature_frame, text="Move Up One Folder",
+                                               variable=self.move_up_var)
+        self.move_up_checkbox.pack(side="left", padx=5)
 
         # Checkbox for the new feature
         self.move_text_checkbox = tk.Checkbutton(placement_feature_frame, text="Move Text", variable=self.move_text_var,
@@ -237,7 +253,7 @@ class FileRenamerApp:
                 # Open the dropped file using xdg-open on Linux
                 subprocess.Popen(['xdg-open', self.selected_file])
             elif platform.system() == "Windows":
-                # Open the dropped file using the Windows start command
+                # Open the dropped file using the Windows start command. shell=True
                 subprocess.Popen(['start', self.selected_file])
             else:
                 # Use 'open' command on macOS, you can customize this as needed
@@ -328,6 +344,10 @@ class FileRenamerApp:
             custom_text = self.custom_text_entry.get().strip()
             base_name, extension = os.path.splitext(os.path.basename(self.selected_file))
 
+            # Remove duplicate entries in the queue if the checkbox is selected
+            if self.remove_duplicates_var.get():
+                self.queue = list(dict.fromkeys(self.queue))
+
             weighted_categories = [category for category in self.queue if category in self.weights]
 
             # Sort weighted categories based on their weights
@@ -380,6 +400,13 @@ class FileRenamerApp:
                 self.last_used_file = new_path
                 self.last_used_display.config(text=os.path.basename(new_path))
                 self.show_message("File renamed and saved successfully")
+
+                if self.move_up_var.get():
+                    # Move the file up one folder
+                    parent_directory = os.path.dirname(os.path.dirname(new_path))
+                    new_location = os.path.join(parent_directory, os.path.basename(new_path))
+                    os.rename(new_path, new_location)
+                    self.selected_file = new_location
             except OSError as e:
                 self.show_message("Error: " + str(e), error=True)
 
