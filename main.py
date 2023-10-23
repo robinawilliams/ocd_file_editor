@@ -45,6 +45,9 @@ class FileRenamerApp:
         # Add a checkbox for moving the file up one folder
         self.move_up_var = tk.BooleanVar(value=False)
 
+        # Variable to track whether to enable the reset output directory feature.
+        self.reset_output_directory_var = tk.BooleanVar(value=False)  # Default state is not to reset
+
         self.create_gui()
 
     def create_gui(self):
@@ -135,6 +138,11 @@ class FileRenamerApp:
         placement_feature_frame = ttk.Frame(self.root)
         placement_feature_frame.pack(pady=5)
 
+        # Add a checkbox to enable/disable resetting the Output Directory
+        self.reset_output_directory_checkbox = tk.Checkbutton(placement_feature_frame, text="Reset Output Directory",
+                                                              variable=self.reset_output_directory_var)
+        self.reset_output_directory_checkbox.pack(side="left")
+
         # Placement Label
         placement_label = tk.Label(placement_feature_frame, text="Placement:")
         placement_label.pack(side="left")
@@ -157,8 +165,8 @@ class FileRenamerApp:
                                                     variable=self.open_on_drop_var)
         self.open_on_drop_checkbox.pack(side="left", padx=5)
 
-        # Inside the create_gui method, add the checkbox for duplicate removal
-        self.remove_duplicates_var = tk.BooleanVar(value=False)
+        # Checkbox for duplicate removal
+        self.remove_duplicates_var = tk.BooleanVar(value=True)
         remove_duplicates_checkbox = tk.Checkbutton(placement_feature_frame, text="Remove Duplicates",
                                                     variable=self.remove_duplicates_var)
         remove_duplicates_checkbox.pack(side="left")
@@ -215,7 +223,9 @@ class FileRenamerApp:
         self.root.dnd_bind('<<Drop>>', self.on_drop)
 
     def browse_output_directory(self):
-        output_directory = filedialog.askdirectory()
+        initial_directory = "/path/to/your/starting/directory"  # Change this to your desired initial directory
+        output_directory = filedialog.askdirectory(initialdir=initial_directory)
+
         if output_directory:
             self.output_directory = output_directory
             self.output_directory_entry.delete(0, tk.END)
@@ -407,11 +417,17 @@ class FileRenamerApp:
                     new_location = os.path.join(parent_directory, os.path.basename(new_path))
                     os.rename(new_path, new_location)
                     self.selected_file = new_location
+                if self.reset_output_directory_var.get():
+                    # Clear and reset the Output Directory to the current directory
+                    self.output_directory = os.path.dirname(self.selected_file)
+                    self.output_directory_entry.delete(0, tk.END)
+                    self.output_directory_entry.insert(0, self.output_directory)
             except OSError as e:
                 self.show_message("Error: " + str(e), error=True)
 
     def browse_file(self):
-        file_path = filedialog.askopenfilename()
+        initial_directory = "/path/to/your/starting/directory"  # Change this to your desired initial directory
+        file_path = filedialog.askopenfilename(initialdir=initial_directory)
         if file_path:
             self.selected_file = file_path
             self.file_display.config(text=self.selected_file)
