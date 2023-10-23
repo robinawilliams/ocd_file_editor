@@ -9,6 +9,10 @@ import re
 import subprocess
 import platform
 
+# Constants
+INITIAL_DIRECTORY = "/path/to/your/starting/directory"  # Change this to your desired initial directory
+CATEGORIES_FILE = "categories.json"
+
 
 class FileRenamerApp:
     def __init__(self, root):
@@ -17,19 +21,6 @@ class FileRenamerApp:
 
         self.selected_file = ""
         self.queue = []
-
-        # Load categories from a configuration file
-        self.categories = self.load_categories()
-
-        # Initialize output directory
-        self.output_directory = ""
-
-        # Variable to track the user's placement choice (prefix or suffix)
-        self.placement_choice = tk.StringVar()
-        self.placement_choice.set("suffix")  # Default to suffix
-
-        # Add a checkbox to enable/disable open on drop behavior
-        self.open_on_drop_var = tk.BooleanVar(value=True)
 
         # Define weights for categories
         self.weights = {
@@ -47,6 +38,23 @@ class FileRenamerApp:
 
         # Variable to track whether to enable the reset output directory feature.
         self.reset_output_directory_var = tk.BooleanVar(value=False)  # Default state is not to reset
+
+        # Load categories from a configuration file
+        self.categories = self.load_categories()
+
+        # Initialize output directory
+        self.output_directory = ""
+
+        # Variable to track the user's placement choice (prefix or suffix)
+        self.placement_choice = tk.StringVar()
+        self.placement_choice.set("suffix")  # Default to suffix
+
+        # Add a checkbox to enable/disable open on drop behavior
+        self.open_on_drop_var = tk.BooleanVar(value=False)
+
+        # Error message label
+        self.message_label = tk.Label(self.root, text="", fg="red")
+        self.message_label.pack()
 
         self.create_gui()
 
@@ -340,13 +348,13 @@ class FileRenamerApp:
 
     def load_categories(self):
         try:
-            with open("categories.json", "r") as file:
+            with open(CATEGORIES_FILE, "r") as file:
                 return json.load(file)
         except (FileNotFoundError, json.JSONDecodeError):
             return []
 
     def save_categories(self):
-        with open("categories.json", "w") as file:
+        with open(CATEGORIES_FILE, "w") as file:
             json.dump(self.categories, file)
 
     def rename_files(self):
@@ -354,76 +362,69 @@ class FileRenamerApp:
             custom_text = self.custom_text_entry.get().strip()
             base_name, extension = os.path.splitext(os.path.basename(self.selected_file))
 
-            # Remove duplicate entries in the queue if the checkbox is selected
             if self.remove_duplicates_var.get():
                 self.queue = list(dict.fromkeys(self.queue))
 
             weighted_categories = [category for category in self.queue if category in self.weights]
-
-            # Sort weighted categories based on their weights
             weighted_categories.sort(key=lambda category: self.weights[category])
 
-            # Construct the new name based on placement choice (prefix or suffix)
-            if self.placement_choice.get() == "prefix":
-                new_name = base_name
-                for category in weighted_categories:
-                    new_name = new_name + " " + category
-                for category in self.queue:
-                    if category not in weighted_categories:
-                        new_name = new_name + " " + category
-                new_name = custom_text + " " + new_name
-            else:  # Default to suffix
-                new_name = base_name
-                for category in weighted_categories:
-                    new_name = new_name + " " + category
-                for category in self.queue:
-                    if category not in weighted_categories:
-                        new_name = new_name + " " + category
-                new_name = new_name + " " + custom_text
-                new_name = new_name.strip()
-
-            new_name = new_name + extension
+            new_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
 
             if self.move_text_var.get():
-                # Apply the feature if the checkbox is selected
-                match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", new_name)
-                if match:
-                    prefix, moved_text, suffix, extension = match.groups()
-                    new_name = f"{prefix} {suffix} {moved_text}.{extension}"
+                new_name = self.move_text(new_name)
 
-            # Remove double spaces and trailing spaces
-            new_name = " ".join(new_name.split())  # Remove double spaces
-            new_name = new_name.strip()  # Remove trailing spaces
+            new_name = self.sanitize_file_name(new_name)
 
-            # If the output directory is not explicitly set, use the file's current location
             if not self.output_directory:
                 self.output_directory = os.path.dirname(self.selected_file)
 
-            # Save the renamed file to the output directory
             new_path = os.path.join(self.output_directory, os.path.basename(new_name))
             try:
                 os.rename(self.selected_file, new_path)
-                self.selected_file = ""
-                self.queue = []
-                self.file_display.config(text="")
-                self.custom_text_entry.delete(0, tk.END)
-                self.last_used_file = new_path
-                self.last_used_display.config(text=os.path.basename(new_path))
-                self.show_message("File renamed and saved successfully")
-
-                if self.move_up_var.get():
-                    # Move the file up one folder
-                    parent_directory = os.path.dirname(os.path.dirname(new_path))
-                    new_location = os.path.join(parent_directory, os.path.basename(new_path))
-                    os.rename(new_path, new_location)
-                    self.selected_file = new_location
-                if self.reset_output_directory_var.get():
-                    # Clear and reset the Output Directory to the current directory
-                    self.output_directory = os.path.dirname(self.selected_file)
-                    self.output_directory_entry.delete(0, tk.END)
-                    self.output_directory_entry.insert(0, self.output_directory)
+                self.handle_rename_success(new_path)
             except OSError as e:
                 self.show_message("Error: " + str(e), error=True)
+
+    def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
+        # Construct the new name based on placement choice (prefix or suffix)
+        if self.placement_choice.get() == "prefix":
+            new_name = f"{custom_text} {base_name} {' '.join(weighted_categories)} {' '.join(self.queue)}"
+        else:  # Default to suffix
+            new_name = f"{base_name} {' '.join(weighted_categories)} {' '.join(self.queue)} {custom_text}"
+        return new_name + extension
+
+    def move_text(self, name):
+        match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", name)
+        if match:
+            prefix, moved_text, suffix, extension = match.groups()
+            name = f"{prefix} {suffix} {moved_text}.{extension}"
+        return name
+
+    def sanitize_file_name(self, name):
+        # Remove double spaces and trailing spaces
+        return " ".join(name.split()).strip()
+
+    def handle_rename_success(self, new_path):
+        self.selected_file = ""
+        self.queue = []
+        self.file_display.config(text="")
+        self.custom_text_entry.delete(0, tk.END)
+        self.last_used_file = new_path
+        self.last_used_display.config(text=os.path.basename(new_path))
+        self.show_message("File renamed and saved successfully")
+
+        if self.move_up_var.get():
+            # Move the file up one folder
+            parent_directory = os.path.dirname(os.path.dirname(new_path))
+            new_location = os.path.join(parent_directory, os.path.basename(new_path))
+            os.rename(new_path, new_location)
+            self.selected_file = new_location
+
+        if self.reset_output_directory_var.get():
+            # Clear and reset the Output Directory to the current directory
+            self.output_directory = os.path.dirname(self.selected_file)
+            self.output_directory_entry.delete(0, tk.END)
+            self.output_directory_entry.insert(0, self.output_directory)
 
     def browse_file(self):
         initial_directory = "/path/to/your/starting/directory"  # Change this to your desired initial directory
