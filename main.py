@@ -231,8 +231,7 @@ class FileRenamerApp:
         self.root.dnd_bind('<<Drop>>', self.on_drop)
 
     def browse_output_directory(self):
-        initial_directory = "/path/to/your/starting/directory"  # Change this to your desired initial directory
-        output_directory = filedialog.askdirectory(initialdir=initial_directory)
+        output_directory = filedialog.askdirectory(initialdir=INITIAL_DIRECTORY)
 
         if output_directory:
             self.output_directory = output_directory
@@ -427,8 +426,7 @@ class FileRenamerApp:
             self.output_directory_entry.insert(0, self.output_directory)
 
     def browse_file(self):
-        initial_directory = "/path/to/your/starting/directory"  # Change this to your desired initial directory
-        file_path = filedialog.askopenfilename(initialdir=initial_directory)
+        file_path = filedialog.askopenfilename(initialdir=INITIAL_DIRECTORY)
         if file_path:
             self.selected_file = file_path
             self.file_display.config(text=self.selected_file)
