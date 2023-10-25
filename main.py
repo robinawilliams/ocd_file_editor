@@ -31,7 +31,7 @@ class FileRenamerApp:
 
         # Variable to track whether to enable the text moving feature
         self.move_text_var = tk.BooleanVar()
-        self.move_text_var.set(False)  # Default to disabled
+        self.move_text_var.set(True)  # Default to disabled
 
         # Add a checkbox for moving the file up one folder
         self.move_up_var = tk.BooleanVar(value=False)
@@ -290,7 +290,7 @@ class FileRenamerApp:
         if self.selected_file:
             custom_text = self.custom_text_entry.get().strip()
             new_name = os.path.splitext(self.selected_file)[0] + " " + custom_text + " " + " ".join(self.queue) + \
-                       os.path.splitext(self.selected_file)[1]
+                os.path.splitext(self.selected_file)[1]
 
             # Remove double spaces and trailing spaces
             new_name = " ".join(new_name.split())  # Remove double spaces
