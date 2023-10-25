@@ -1,5 +1,5 @@
 
-# dynamic_file_renamer  
+# O.C.D. File Renamer 
   
 ## A python tool to dynamically rename files  
   
@@ -10,16 +10,17 @@
   
 ## How to run this project  
   
- - run the command - `python main.py`  
+ - run the command - `python gui.py`  
   
 ## How to use this project
  - Drag and drop the file into the window or choose "Browse" to select the file.
- - Click the buttons for items you want to add. 
+ - Click the buttons for words you want to add. 
  - Click "Rename Files" to confirm changes.
-
  - Undo will revert the last button clicked.   
  - Clear will remove everything including the selected file.
  - You can add or remove categories based on your needs.
+ - You can weight categories to have them appear earlier or later in the queue.
+ - Use " - " and "\_\_-__ " in the preprocessed file name and check the box "Move Text" to move all text within it to the end of the file when renaming. For example, "Artist - WORDS TO MOVE__-__ .mp3"
 
 ## Find a bug?  
   
