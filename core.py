@@ -1,17 +1,20 @@
 import os
 import re
 import json
-import tkinter as tk
-from tkinter import filedialog, messagebox, ttk, END
-from tkinterdnd2 import DND_FILES, TkinterDnD
+from tkinter import filedialog, messagebox
 import send2trash
 import subprocess
 import platform
-import customtkinter
+import customtkinter as ctk
+import configparser
 
-# Constants
-INITIAL_DIRECTORY = "/path/to/your/starting/directory"  # Change this to your desired initial directory
-CATEGORIES_FILE = "categories.json"
+# Create a configuration parser
+config = configparser.ConfigParser()
+config.read('config.ini')
+
+# Read configuration options
+INITIAL_DIRECTORY = config.get('Paths', 'INITIAL_DIRECTORY')
+CATEGORIES_FILE = config.get('Files', 'CATEGORIES_FILE')
 
 
 def browse_output_directory(self):
@@ -19,7 +22,7 @@ def browse_output_directory(self):
 
     if output_directory:
         self.output_directory = output_directory
-        self.output_directory_entry.delete(0, tk.END)
+        self.output_directory_entry.delete(0, ctk.END)
         self.output_directory_entry.insert(0, self.output_directory)
 
 
@@ -32,7 +35,7 @@ def move_to_trash(self):
             self.selected_file = ""
             self.queue = []
             self.file_display.configure(text="")
-            self.custom_text_entry.delete(0, tk.END)
+            self.custom_text_entry.delete(0, ctk.END)
             self.show_message("File moved to trash successfully")
 
 
@@ -106,10 +109,10 @@ def add_category(self):
     new_category = self.category_entry.get().strip()
     if new_category:
         self.categories.append(new_category)
-        self.categories.sort()  # Sort the categories alphabetically
+        self.categories.sort(key=lambda x: x.lower())
         self.save_categories()
         self.refresh_category_buttons()
-        self.category_entry.delete(0, tk.END)
+        self.category_entry.delete(0, ctk.END)
         self.show_message("Category added: " + new_category)
 
 
@@ -119,7 +122,7 @@ def remove_category(self):
         self.categories.remove(category_to_remove)
         self.save_categories()
         self.refresh_category_buttons()
-        self.remove_category_entry.delete(0, tk.END)
+        self.remove_category_entry.delete(0, ctk.END)
         self.show_message("Category removed: " + category_to_remove)
 
 
@@ -131,11 +134,11 @@ def refresh_category_buttons(self):
     row = 0
     col = 0
     for category in self.categories:
-        button = customtkinter.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
+        button = ctk.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
         button.grid(row=row, column=col, padx=5, pady=5)
         self.buttons.append(button)
         col += 1
-        if col == 8:
+        if col == 6:
             col = 0
             row += 1
 
@@ -191,7 +194,7 @@ def construct_new_name(self, base_name, custom_text, extension):
     return new_name + extension
 
 
-def move_text(self, name):
+def move_text(name):
     match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", name)
     if match:
         prepend, moved_text, append, extension = match.groups()
@@ -199,7 +202,7 @@ def move_text(self, name):
     return name
 
 
-def sanitize_file_name(self, name):
+def sanitize_file_name(name):
     # Remove double spaces and trailing spaces
     return " ".join(name.split()).strip()
 
@@ -208,7 +211,7 @@ def handle_rename_success(self, new_path):
     self.selected_file = ""
     self.queue = []
     self.file_display.configure(text="")
-    self.custom_text_entry.delete(0, tk.END)
+    self.custom_text_entry.delete(0, ctk.END)
     self.last_used_file = new_path
     self.last_used_display.configure(text=os.path.basename(new_path))
     self.show_message("File renamed and saved successfully")
@@ -223,7 +226,7 @@ def handle_rename_success(self, new_path):
     if self.reset_output_directory_var.get():
         # Clear and reset the Output Directory to the current directory
         self.output_directory = os.path.dirname(self.selected_file)
-        self.output_directory_entry.delete(0, tk.END)
+        self.output_directory_entry.delete(0, ctk.END)
         self.output_directory_entry.insert(0, self.output_directory)
 
 
@@ -239,6 +242,6 @@ def browse_file(self):
 
 def show_message(self, message, error=False):
     if error:
-        self.message_label.configure(text=message, fg_color="red")
+        self.message_label.configure(text=message, text_color="red")
     else:
-        self.message_label.configure(text=message, fg_color="black")
+        self.message_label.configure(text=message, text_color="white")
