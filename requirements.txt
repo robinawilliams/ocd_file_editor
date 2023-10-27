@@ -1,4 +1,4 @@
 Pillow==10.1.0
 send2trash==1.8.2
 tkinterdnd2==0.3.0
-customtkinter~=5.2.1
+customtkinter==5.2.1
