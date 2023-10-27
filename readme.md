@@ -20,7 +20,7 @@
  - Clear will remove everything including the selected file.
  - You can add or remove categories based on your needs.
  - You can weight categories to have them appear earlier or later in the queue.
- - Use " - " and "\_\_-__ " in the preprocessed file name and check the box "Move Text" to move all text within it to the end of the file when renaming. For example, "Artist - WORDS TO MOVE__-__ .mp3"
+ - Use " - " and "\_\_-\_\_" in the preprocessed file name and check the box "Move Text" to move all text within it to the end of the file when renaming. For example, "Artist - WORDS TO MOVE__-__ .mp3"
 
 ## Find a bug?  
   
