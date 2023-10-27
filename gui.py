@@ -38,9 +38,9 @@ class OCDFileRenamer:
         # Initialize output directory
         self.output_directory = ""
 
-        # Variable to track the user's placement choice (prefix or suffix)
+        # Variable to track the user's placement choice (prepend or append)
         self.placement_choice = tk.StringVar()
-        self.placement_choice.set("suffix")  # Default to suffix
+        self.placement_choice.set("append")  # Default to append
 
         # Add a checkbox to enable/disable open on drop behavior
         self.open_on_drop_var = tk.BooleanVar(value=False)
@@ -148,15 +148,15 @@ class OCDFileRenamer:
         placement_label = tk.Label(placement_feature_frame, text="Placement:")
         placement_label.pack(side="left")
 
-        # Radio button for Prefix
-        prefix_radio = tk.Radiobutton(placement_feature_frame, text="Prefix", variable=self.placement_choice,
-                                      value="prefix")
-        prefix_radio.pack(side="left")
+        # Radio button for prepend
+        prepend_radio = tk.Radiobutton(placement_feature_frame, text="Prepend", variable=self.placement_choice,
+                                      value="prepend")
+        prepend_radio.pack(side="left")
 
-        # Radio button for Suffix
-        suffix_radio = tk.Radiobutton(placement_feature_frame, text="Suffix", variable=self.placement_choice,
-                                      value="suffix")
-        suffix_radio.pack(side="left")
+        # Radio button for append
+        append_radio = tk.Radiobutton(placement_feature_frame, text="Append", variable=self.placement_choice,
+                                      value="append")
+        append_radio.pack(side="left")
 
         # Rename File Button
         self.rename_button = tk.Button(placement_feature_frame, text="Rename File", command=self.rename_files)
@@ -271,19 +271,19 @@ class OCDFileRenamer:
     def browse_file(self):
         core.browse_file(self)
 
-    def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
-        # Construct the new name based on placement choice (prefix or suffix)
-        if self.placement_choice.get() == "prefix":
-            new_name = f"{custom_text} {base_name} {' '.join(weighted_categories)} {' '.join(self.queue)}"
-        else:  # Default to suffix
-            new_name = f"{base_name} {' '.join(weighted_categories)} {' '.join(self.queue)} {custom_text}"
+    def construct_new_name(self, base_name, custom_text, extension):
+        # Construct the new name based on placement choice (prepend or append)
+        if self.placement_choice.get() == "prepend":
+            new_name = f"{custom_text} {base_name} {' '.join(self.queue)}"
+        else:  # Default to append
+            new_name = f"{base_name} {' '.join(self.queue)} {custom_text}"
         return new_name + extension
 
     def move_text(self, name):
         match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", name)
         if match:
-            prefix, moved_text, suffix, extension = match.groups()
-            name = f"{prefix} {suffix} {moved_text}.{extension}"
+            prepend, moved_text, append, extension = match.groups()
+            name = f"{prepend} {append} {moved_text}.{extension}"
         return name
 
     def sanitize_file_name(self, name):

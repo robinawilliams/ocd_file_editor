@@ -7,6 +7,7 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 import send2trash
 import subprocess
 import platform
+import customtkinter
 
 # Constants
 INITIAL_DIRECTORY = "/path/to/your/starting/directory"  # Change this to your desired initial directory
@@ -30,7 +31,7 @@ def move_to_trash(self):
             send2trash.send2trash(self.selected_file)
             self.selected_file = ""
             self.queue = []
-            self.file_display.config(text="")
+            self.file_display.configure(text="")
             self.custom_text_entry.delete(0, tk.END)
             self.show_message("File moved to trash successfully")
 
@@ -38,7 +39,7 @@ def move_to_trash(self):
 def load_last_used_file(self):
     if self.last_used_file:
         self.selected_file = self.last_used_file
-        self.file_display.config(text=os.path.basename(self.selected_file))
+        self.file_display.configure(text=os.path.basename(self.selected_file))
         self.queue = []
         self.update_file_display()
         self.show_message("Last used file selected: " + os.path.basename(self.selected_file))
@@ -46,7 +47,7 @@ def load_last_used_file(self):
 
 def on_drop(self, event):
     self.selected_file = event.data.strip('{}')
-    self.file_display.config(text=os.path.basename(self.selected_file))  # Display only the filename
+    self.file_display.configure(text=os.path.basename(self.selected_file))  # Display only the filename
     self.queue = []
     self.update_file_display()
     self.show_message("File selected: " + os.path.basename(self.selected_file))  # Update the message
@@ -84,7 +85,7 @@ def update_file_display(self):
         new_name = " ".join(new_name.split())  # Remove double spaces
         new_name = new_name.strip()  # Remove trailing spaces
 
-        self.file_display.config(text=os.path.basename(new_name))
+        self.file_display.configure(text=os.path.basename(new_name))
 
 
 def undo_last(self):
@@ -97,7 +98,7 @@ def undo_last(self):
 def clear_selection(self):
     self.selected_file = ""
     self.queue = []
-    self.file_display.config(text="")
+    self.file_display.configure(text="")
     self.show_message("Selection cleared")
 
 
@@ -130,7 +131,7 @@ def refresh_category_buttons(self):
     row = 0
     col = 0
     for category in self.categories:
-        button = tk.Button(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
+        button = customtkinter.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
         button.grid(row=row, column=col, padx=5, pady=5)
         self.buttons.append(button)
         col += 1
@@ -163,7 +164,7 @@ def rename_files(self):
         weighted_categories = [category for category in self.queue if category in self.weights]
         weighted_categories.sort(key=lambda category: self.weights[category])
 
-        new_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
+        new_name = self.construct_new_name(base_name, custom_text, extension)
 
         if self.move_text_var.get():
             new_name = self.move_text(new_name)
@@ -181,20 +182,20 @@ def rename_files(self):
             self.show_message("Error: " + str(e), error=True)
 
 
-def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
-    # Construct the new name based on placement choice (prefix or suffix)
-    if self.placement_choice.get() == "prefix":
-        new_name = f"{custom_text} {base_name} {' '.join(weighted_categories)} {' '.join(self.queue)}"
-    else:  # Default to suffix
-        new_name = f"{base_name} {' '.join(weighted_categories)} {' '.join(self.queue)} {custom_text}"
+def construct_new_name(self, base_name, custom_text, extension):
+    # Construct the new name based on placement choice (prepend or append)
+    if self.placement_choice.get() == "prepend":
+        new_name = f"{custom_text} {base_name} {' '.join(self.queue)}"
+    else:  # Default to append
+        new_name = f"{base_name} {' '.join(self.queue)} {custom_text}"
     return new_name + extension
 
 
 def move_text(self, name):
     match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", name)
     if match:
-        prefix, moved_text, suffix, extension = match.groups()
-        name = f"{prefix} {suffix} {moved_text}.{extension}"
+        prepend, moved_text, append, extension = match.groups()
+        name = f"{prepend} {append} {moved_text}.{extension}"
     return name
 
 
@@ -206,10 +207,10 @@ def sanitize_file_name(self, name):
 def handle_rename_success(self, new_path):
     self.selected_file = ""
     self.queue = []
-    self.file_display.config(text="")
+    self.file_display.configure(text="")
     self.custom_text_entry.delete(0, tk.END)
     self.last_used_file = new_path
-    self.last_used_display.config(text=os.path.basename(new_path))
+    self.last_used_display.configure(text=os.path.basename(new_path))
     self.show_message("File renamed and saved successfully")
 
     if self.move_up_var.get():
@@ -230,7 +231,7 @@ def browse_file(self):
     file_path = filedialog.askopenfilename(initialdir=INITIAL_DIRECTORY)
     if file_path:
         self.selected_file = file_path
-        self.file_display.config(text=self.selected_file)
+        self.file_display.configure(text=self.selected_file)
         self.queue = []  # Clear the queue when a new file is selected
         self.update_file_display()
         self.show_message("File selected: " + os.path.basename(self.selected_file))
@@ -238,6 +239,6 @@ def browse_file(self):
 
 def show_message(self, message, error=False):
     if error:
-        self.message_label.config(text=message, fg="red")
+        self.message_label.configure(text=message, fg_color="red")
     else:
-        self.message_label.config(text=message, fg="black")
+        self.message_label.configure(text=message, fg_color="black")
