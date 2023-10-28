@@ -13,12 +13,12 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 # Read configuration options
-INITIAL_DIRECTORY = config.get('Paths', 'INITIAL_DIRECTORY')
-CATEGORIES_FILE = config.get('Files', 'CATEGORIES_FILE')
+initial_directory = config.get('Paths', 'initial_directory')
+categories_file = config.get('Files', 'categories_file')
 
 
 def browse_output_directory(self):
-    output_directory = filedialog.askdirectory(initialdir=INITIAL_DIRECTORY)
+    output_directory = filedialog.askdirectory(initialdir=initial_directory)
 
     if output_directory:
         self.output_directory = output_directory
@@ -149,14 +149,14 @@ def refresh_category_buttons(self):
 
 def load_categories():
     try:
-        with open(CATEGORIES_FILE, "r") as file:
+        with open(categories_file, "r") as file:
             return json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
 
 def save_categories(self):
-    with open(CATEGORIES_FILE, "w") as file:
+    with open(categories_file, "w") as file:
         json.dump(self.categories, file)
 
 
@@ -238,7 +238,7 @@ def handle_rename_success(self, new_path):
 
 
 def browse_file(self):
-    file_path = filedialog.askopenfilename(initialdir=INITIAL_DIRECTORY)
+    file_path = filedialog.askopenfilename(initialdir=initial_directory)
     if file_path:
         self.selected_file = file_path
         self.file_display.configure(text=self.selected_file)
