@@ -185,6 +185,7 @@ def rename_files(self):
         try:
             os.rename(self.selected_file, new_path)
             self.handle_rename_success(new_path)
+            self.output_directory = None
         except OSError as e:
             self.show_message("Error: " + str(e), error=True)
 
