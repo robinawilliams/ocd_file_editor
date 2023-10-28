@@ -193,10 +193,10 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
     # Construct the new name based on placement choice (prefix or suffix)
     if self.placement_choice.get() == "prefix":
         categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
-        new_name = f"{custom_text} {base_name} {' '.join(categories)}"
+        new_name = f"{custom_text} {base_name} {' '.join(categories)}".strip()
     else:  # Default to suffix
         categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
-        new_name = f"{base_name} {' '.join(categories)} {custom_text}"
+        new_name = f"{base_name} {' '.join(categories)} {custom_text}".strip()
     return new_name + extension
 
 
