@@ -11,7 +11,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
         self.title("OCD File Renamer")
-        self.geometry("1280x750")
+        self.geometry(f"{1280}x{750}")
 
         self.selected_file = ""
         self.queue = []
@@ -80,22 +80,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                    command=self.add_remove_categories_event)
         self.add_remove_categories.grid(row=2, column=0, sticky="ew")
 
-        self.logs_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
-                                         text="Logs",
-                                         fg_color="transparent", text_color=("gray10", "gray90"),
-                                         hover_color=("gray70", "gray30"),
-                                         image=self.add_user_image, anchor="w",
-                                         command=self.logs_button_event)
-        self.logs_button.grid(row=3, column=0, sticky="ew")
-
-        self.appearance_mode_menu = ctk.CTkOptionMenu(self.navigation_frame,
-                                                      values=["Light", "Dark", "System"],
-                                                      command=self.change_appearance_mode_event)
-        self.appearance_mode_menu.grid(row=6, column=0, padx=20, pady=20, sticky="s")
+        self.settings_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                             text="Settings",
+                                             fg_color="transparent", text_color=("gray10", "gray90"),
+                                             hover_color=("gray70", "gray30"),
+                                             image=self.add_user_image, anchor="w",
+                                             command=self.settings_button_event)
+        self.settings_button.grid(row=3, column=0, sticky="ew")
 
         self.home_window()  # Window 1
         self.category_window()  # Window 2
-        self.logs_window()  # Window 3
+        self.settings_window()  # Window 3
+
+        # Set default value for scaling
+        self.scaling_optionemenu.set("100%")
 
         # Select default frame
         self.select_frame_by_name("home")
@@ -110,7 +108,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Browse Button
-        self.browse_button = ctk.CTkButton(self.home_top_frame, text="Select a file: ", image=self.image_icon_image,
+        self.browse_button = ctk.CTkButton(self.home_top_frame, text="Browse", image=self.image_icon_image,
                                            command=self.browse_file)
         self.browse_button.grid(row=0, column=0, padx=5, pady=5)
 
@@ -142,27 +140,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.custom_text_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
         self.custom_text_frame.grid(row=2, column=0, padx=10, pady=10)
 
-        # Output Directory Label
-        self.output_directory_label = ctk.CTkLabel(self.custom_text_frame, text="Output Directory: ")
-        self.output_directory_label.grid(row=0, column=0, padx=5, pady=5)
+        # Output Directory Browse Button
+        self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Output Directory",
+                                                            image=self.image_icon_image,
+                                                            command=self.browse_output_directory)
+        self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Output Directory Entry
         self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=150)
         self.output_directory_entry.grid(row=0, column=1, padx=5, pady=5)
 
-        # Output Directory Browse Button
-        self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Browse",
-                                                            image=self.image_icon_image,
-                                                            command=self.browse_output_directory)
-        self.output_directory_browse_button.grid(row=0, column=2, padx=5, pady=5)
-
         # Custom Text Entry Label
         self.custom_text_label = ctk.CTkLabel(self.custom_text_frame, text="Custom text entry: ")
-        self.custom_text_label.grid(row=0, column=3, padx=5, pady=5)
+        self.custom_text_label.grid(row=0, column=2, padx=5, pady=5)
 
         # Custom Text Entry
         self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=150)
-        self.custom_text_entry.grid(row=0, column=4, padx=10, pady=10)
+        self.custom_text_entry.grid(row=0, column=3, padx=10, pady=10)
+
+        # Rename File Button
+        self.rename_button = ctk.CTkButton(self.custom_text_frame, text="Rename File",
+                                           command=self.rename_files)
+        self.rename_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Create a frame to group the folder operations frame
         self.folder_operations_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
@@ -181,55 +180,33 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                 variable=self.move_up_var)
         self.move_up_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
-        # Checkbox to enable/disable open on drop behavior
-        self.open_on_drop_var = ctk.BooleanVar(value=False)
-        self.open_on_drop_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Open on Drop",
-                                                     variable=self.open_on_drop_var)
-        self.open_on_drop_checkbox.grid(row=0, column=2, padx=5, pady=5)
-
-        # Checkbox to enable/disable for duplicate removal
-        self.remove_duplicates_var = ctk.BooleanVar(value=True)
-        self.remove_duplicates_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
-                                                          text="Remove Duplicates",
-                                                          variable=self.remove_duplicates_var)
-        self.remove_duplicates_checkbox.grid(row=0, column=3, padx=5, pady=5)
-
-        # Create a frame to group the placement
-        self.placement_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
-        self.placement_frame.grid(row=4, column=0, padx=10, pady=10)
-
         # Checkbox for the text moving feature
         self.move_text_var = ctk.BooleanVar()
-        self.move_text_var.set(True)  # Default to disabled
-        self.move_text_checkbox = ctk.CTkCheckBox(self.placement_frame, text="Move Text",
+        self.move_text_var.set(True)  # Default to enabled
+        self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var,
                                                   onvalue=True, offvalue=False)
-        self.move_text_checkbox.grid(row=0, column=0, padx=5, pady=5)
+        self.move_text_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
-        # Custom Text Entry Label
-        self.placement_label = ctk.CTkLabel(self.placement_frame, text="Placement:")
-        self.placement_label.grid(row=0, column=1, padx=5, pady=5)
+        # Placement Label
+        self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
+        self.placement_label.grid(row=0, column=3, padx=10, pady=5)
 
         # Variable to track the user's placement choice (prefix or suffix)
         self.placement_choice = ctk.StringVar()
         self.placement_choice.set("suffix")  # Default to suffix
 
         # Radio button for prefix
-        self.prefix_radio = ctk.CTkRadioButton(self.placement_frame, text="Prefix",
+        self.prefix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Prefix",
                                                variable=self.placement_choice,
                                                value="prefix")
-        self.prefix_radio.grid(row=0, column=2, padx=5, pady=5)
+        self.prefix_radio.grid(row=0, column=4, padx=5, pady=5)
 
         # Radio button for suffix
-        self.suffix_radio = ctk.CTkRadioButton(self.placement_frame, text="Suffix",
+        self.suffix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Suffix",
                                                variable=self.placement_choice,
                                                value="suffix")
-        self.suffix_radio.grid(row=0, column=3, padx=5, pady=5)
-
-        # Rename File Button
-        self.rename_button = ctk.CTkButton(self.placement_frame, text="Rename File",
-                                           command=self.rename_files)
-        self.rename_button.grid(row=0, column=4, padx=5, pady=5)
+        self.suffix_radio.grid(row=0, column=5, padx=5, pady=5)
 
         # Create a frame to group the misc. buttons
         self.button_group_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
@@ -248,26 +225,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                           command=self.move_to_trash)
         self.trash_button.grid(row=0, column=2, padx=10, pady=10)
 
+        # Select Last Used File Button
+        self.last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Select Last Used File",
+                                                   command=self.load_last_used_file)
+        self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
+
         # Create a frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
-        self.last_used_frame.grid(row=6, column=0, padx=10, pady=10)
+        self.last_used_frame.grid(row=6, column=0, padx=5, pady=5)
 
-        # Select Last Used File Button
-        self.last_used_file_button = ctk.CTkButton(self.last_used_frame, text="Select Last Used File: ",
-                                                   command=self.load_last_used_file)
-        self.last_used_file_button.grid(row=0, column=0, padx=10, pady=10)
+        # Last Used File Label
+        self.last_used_display_label = ctk.CTkLabel(self.last_used_frame, text="Last used file:")
+        self.last_used_display_label.grid(row=0, column=0, padx=5, pady=5)
 
         # Last Used File Display
         self.last_used_display = ctk.CTkLabel(self.last_used_frame, text="")
-        self.last_used_display.grid(row=0, column=1, padx=10, pady=10)
+        self.last_used_display.grid(row=0, column=1, padx=5, pady=5)
 
-        # Create a frame to display the last used file
+        # Create a frame to display messages
         self.message_label_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
         self.message_label_frame.grid(row=7, column=0, padx=10, pady=10)
 
         # Message Label
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
-        self.message_label.grid(row=0, column=2, padx=10, pady=10)
+        self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
     def category_window(self):
         # Create add/remove categories frame
@@ -279,7 +260,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.cat_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add/Remove Categories Label
-        self.file_label = ctk.CTkLabel(self.cat_top_frame, text="Add/Remove Categories")
+        self.file_label = ctk.CTkLabel(self.cat_top_frame, text="Add/Remove Categories",
+                                       font=ctk.CTkFont(size=15, weight="bold"))
         self.file_label.grid(row=0, column=0, padx=5, pady=5)
 
         # Categories button frame
@@ -306,7 +288,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.cat_frame.grid(row=2, column=0, padx=10, pady=10)
 
         # Add Category Entry
-        self.category_entry = ctk.CTkEntry(self.cat_frame)
+        self.category_entry = ctk.CTkEntry(self.cat_frame, width=705)
         self.category_entry.grid(row=0, column=0, padx=20, pady=10)
 
         # Add Category Button
@@ -315,30 +297,75 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_category_button.grid(row=0, column=1, padx=20, pady=10)
 
         # Remove Category Entry
-        self.remove_category_entry = ctk.CTkEntry(self.cat_frame)
-        self.remove_category_entry.grid(row=0, column=2, padx=20, pady=10)
+        self.remove_category_entry = ctk.CTkEntry(self.cat_frame, width=705)
+        self.remove_category_entry.grid(row=1, column=0, padx=20, pady=10)
 
         # Remove Category Button
         self.remove_category_button = ctk.CTkButton(self.cat_frame, text="Remove Category",
                                                     command=self.remove_category)
-        self.remove_category_button.grid(row=0, column=3, padx=20, pady=10)
+        self.remove_category_button.grid(row=1, column=1, padx=20, pady=10)
 
-    def logs_window(self):
-        # Create logs frame
-        self.logs_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.logs_frame.grid_columnconfigure(0, weight=1)
+        # Create a frame to display messages
+        self.message_label_frame = ctk.CTkFrame(self.cat_frame, corner_radius=0, fg_color="transparent")
+        self.message_label_frame.grid(row=3, column=0, padx=10, pady=10)
 
-        # Coming soon label
-        self.logs_label = ctk.CTkLabel(self.logs_frame, text="COMING SOON",
-                                       font=ctk.CTkFont(size=25, weight="bold"))
-        self.logs_label.grid(row=0, column=0, padx=5, pady=5)
+        # Message Label
+        self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
+        self.message_label.grid(row=0, column=0, padx=10, pady=10)
+
+    def settings_window(self):
+        # Create settings frame
+        self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.settings_frame.grid_columnconfigure(0, weight=1)
+
+        # Top frame
+        self.settings_top_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
+        self.settings_top_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Settings label
+        self.settings_label = ctk.CTkLabel(self.settings_top_frame, text="Settings",
+                                           font=ctk.CTkFont(size=15, weight="bold"))
+        self.settings_label.grid(row=0, column=0, padx=5, pady=5)
+
+        # Checkbox to enable/disable open on drop behavior
+        self.open_on_drop_var = ctk.BooleanVar(value=False)
+        self.open_on_drop_switch = ctk.CTkSwitch(self.settings_top_frame, text="Open File on Drag and Drop",
+                                                 variable=self.open_on_drop_var)
+        self.open_on_drop_switch.grid(row=1, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable for duplicate removal
+        self.remove_duplicates_var = ctk.BooleanVar(value=True)
+        self.remove_duplicates_switch = ctk.CTkSwitch(self.settings_top_frame,
+                                                      text="Remove Duplicates",
+                                                      variable=self.remove_duplicates_var)
+        self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
+
+        # Select light or dark label
+        self.appearance_mode_label = ctk.CTkLabel(self.settings_top_frame, text="Appearance:")
+        self.appearance_mode_label.grid(row=2, column=0, padx=10, pady=10)
+
+        # Select light or dark mode
+        self.appearance_mode_menu = ctk.CTkOptionMenu(self.settings_top_frame,
+                                                      values=["Light", "Dark", "System"],
+                                                      command=self.change_appearance_mode_event)
+        self.appearance_mode_menu.grid(row=2, column=1, padx=10, pady=10)
+
+        # Select scaling label
+        self.scaling_label = ctk.CTkLabel(self.settings_top_frame, text="UI Scaling:")
+        self.scaling_label.grid(row=3, column=0, padx=10, pady=10)
+
+        # Select scaling level
+        self.scaling_optionemenu = ctk.CTkOptionMenu(self.settings_top_frame,
+                                                     values=["80%", "90%", "100%", "110%", "120%"],
+                                                     command=self.change_scaling_event)
+        self.scaling_optionemenu.grid(row=3, column=1, padx=10, pady=10)
 
     def select_frame_by_name(self, name):
         # set button color for selected button
         self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
         self.add_remove_categories.configure(
             fg_color=("gray75", "gray25") if name == "add_remove_categories" else "transparent")
-        self.logs_button.configure(fg_color=("gray75", "gray25") if name == "logs" else "transparent")
+        self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings" else "transparent")
 
         # show selected frame
         if name == "home":
@@ -349,10 +376,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.category_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.category_frame.grid_forget()
-        if name == "logs":
-            self.logs_frame.grid(row=0, column=1, sticky="nsew")
+        if name == "settings":
+            self.settings_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.logs_frame.grid_forget()
+            self.settings_frame.grid_forget()
 
     def home_button_event(self):
         self.select_frame_by_name("home")
@@ -360,11 +387,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def add_remove_categories_event(self):
         self.select_frame_by_name("add_remove_categories")
 
-    def logs_button_event(self):
-        self.select_frame_by_name("logs")
+    def settings_button_event(self):
+        self.select_frame_by_name("settings")
 
     def change_appearance_mode_event(self, new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
+
+    def change_scaling_event(self, new_scaling: str):
+        new_scaling_float = int(new_scaling.replace("%", "")) / 100
+        ctk.set_widget_scaling(new_scaling_float)
 
     def browse_output_directory(self):
         core.browse_output_directory(self)
