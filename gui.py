@@ -11,7 +11,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
         self.title("OCD File Renamer")
-        self.geometry("1200x650")
+        self.geometry("1280x750")
 
         self.selected_file = ""
         self.queue = []
@@ -26,13 +26,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize output directory
         self.output_directory = ""
 
-        # Error message label
-        self.message_label = ctk.CTkLabel(self, text="message label text", fg_color="red")
-        self.message_label.grid(row=0, column=0, padx=5, pady=5)
-
         # Drag and drop
         self.drop_target_register(DND_FILES)
-        self.dnd_bind('<<Drop>>', self.on_drop)  # Bind drop event to on_drop method
+        self.dnd_bind('<<Drop>>', self.on_drop)
 
         self.create_gui()
 
@@ -122,7 +118,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_display = ctk.CTkLabel(self.home_top_frame, text="")
         self.file_display.grid(row=0, column=1, padx=5, pady=5)
 
-        # Button frame
+        # Categories button frame
         self.button_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
@@ -172,26 +168,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.folder_operations_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
         self.folder_operations_frame.grid(row=3, column=0, padx=10, pady=10)
 
-        # Add a checkbox to enable/disable resetting the Output Directory
-        self.reset_output_directory_var = ctk.BooleanVar(value=False)  # Default state is not to reset
+        # Checkbox to enable/disable resetting the Output Directory
+        self.reset_output_directory_var = ctk.BooleanVar(value=False)  # Default not to reset
         self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
                                                                text="Reset Output Directory",
                                                                variable=self.reset_output_directory_var)
         self.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
-        # Checkbox for moving the file up one folder
+        # Checkbox to enable/disable moving the file up one folder
         self.move_up_var = ctk.BooleanVar(value=False)
         self.move_up_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Up One Folder",
                                                 variable=self.move_up_var)
         self.move_up_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
-        # Add a checkbox to enable/disable open on drop behavior
+        # Checkbox to enable/disable open on drop behavior
         self.open_on_drop_var = ctk.BooleanVar(value=False)
         self.open_on_drop_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Open on Drop",
                                                      variable=self.open_on_drop_var)
         self.open_on_drop_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
-        # Checkbox for duplicate removal
+        # Checkbox to enable/disable for duplicate removal
         self.remove_duplicates_var = ctk.BooleanVar(value=True)
         self.remove_duplicates_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
                                                           text="Remove Duplicates",
@@ -214,28 +210,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.placement_label = ctk.CTkLabel(self.placement_frame, text="Placement:")
         self.placement_label.grid(row=0, column=1, padx=5, pady=5)
 
-        # Variable to track the user's placement choice (prepend or append)
+        # Variable to track the user's placement choice (prefix or suffix)
         self.placement_choice = ctk.StringVar()
-        self.placement_choice.set("append")  # Default to append
+        self.placement_choice.set("suffix")  # Default to suffix
 
-        # Radio button for prepend
-        self.prepend_radio = ctk.CTkRadioButton(self.placement_frame, text="Prepend",
+        # Radio button for prefix
+        self.prefix_radio = ctk.CTkRadioButton(self.placement_frame, text="Prefix",
                                                variable=self.placement_choice,
-                                               value="prepend")
-        self.prepend_radio.grid(row=0, column=2, padx=5, pady=5)
+                                               value="prefix")
+        self.prefix_radio.grid(row=0, column=2, padx=5, pady=5)
 
-        # Radio button for append
-        self.append_radio = ctk.CTkRadioButton(self.placement_frame, text="Append",
+        # Radio button for suffix
+        self.suffix_radio = ctk.CTkRadioButton(self.placement_frame, text="Suffix",
                                                variable=self.placement_choice,
-                                               value="append")
-        self.append_radio.grid(row=0, column=3, padx=5, pady=5)
+                                               value="suffix")
+        self.suffix_radio.grid(row=0, column=3, padx=5, pady=5)
 
         # Rename File Button
         self.rename_button = ctk.CTkButton(self.placement_frame, text="Rename File",
                                            command=self.rename_files)
         self.rename_button.grid(row=0, column=4, padx=5, pady=5)
 
-        # Create a frame to group the buttons
+        # Create a frame to group the misc. buttons
         self.button_group_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
         self.button_group_frame.grid(row=5, column=0, padx=10, pady=10)
 
@@ -286,7 +282,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_label = ctk.CTkLabel(self.cat_top_frame, text="Add/Remove Categories")
         self.file_label.grid(row=0, column=0, padx=5, pady=5)
 
-        # Button frame
+        # Categories button frame
         self.button_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
@@ -332,7 +328,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.logs_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.logs_frame.grid_columnconfigure(0, weight=1)
 
-        # Custom Text Entry Label
+        # Coming soon label
         self.logs_label = ctk.CTkLabel(self.logs_frame, text="COMING SOON",
                                        font=ctk.CTkFont(size=25, weight="bold"))
         self.logs_label.grid(row=0, column=0, padx=5, pady=5)
@@ -418,8 +414,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def browse_file(self):
         core.browse_file(self)
 
-    def construct_new_name(self, base_name, custom_text, extension):
-        return core.construct_new_name(self, base_name, custom_text, extension)
+    def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
+        return core.construct_new_name(self, base_name, weighted_categories, custom_text, extension)
 
     def move_text(self, name):
         return core.move_text(name)

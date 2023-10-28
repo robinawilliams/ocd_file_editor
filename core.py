@@ -70,9 +70,13 @@ def on_drop(self, event):
 def add_to_queue(self, category):
     if self.selected_file:
         if category in self.weights:
-            self.queue.insert(self.weights[category] - 1, category)
+            # Check if the category is not already in the queue
+            if category not in self.queue:
+                self.queue.insert(self.weights[category] - 1, category)
         else:
-            self.queue.append(category)
+            # Check if the category is not already in the queue
+            if category not in self.queue:
+                self.queue.append(category)
 
         self.update_file_display()
         self.show_message("Word added: " + category)
@@ -167,7 +171,7 @@ def rename_files(self):
         weighted_categories = [category for category in self.queue if category in self.weights]
         weighted_categories.sort(key=lambda category: self.weights[category])
 
-        new_name = self.construct_new_name(base_name, custom_text, extension)
+        new_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
 
         if self.move_text_var.get():
             new_name = self.move_text(new_name)
@@ -185,20 +189,22 @@ def rename_files(self):
             self.show_message("Error: " + str(e), error=True)
 
 
-def construct_new_name(self, base_name, custom_text, extension):
-    # Construct the new name based on placement choice (prepend or append)
-    if self.placement_choice.get() == "prepend":
-        new_name = f"{custom_text} {base_name} {' '.join(self.queue)}"
-    else:  # Default to append
-        new_name = f"{base_name} {' '.join(self.queue)} {custom_text}"
+def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
+    # Construct the new name based on placement choice (prefix or suffix)
+    if self.placement_choice.get() == "prefix":
+        categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
+        new_name = f"{custom_text} {base_name} {' '.join(categories)}"
+    else:  # Default to suffix
+        categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
+        new_name = f"{base_name} {' '.join(categories)} {custom_text}"
     return new_name + extension
 
 
 def move_text(name):
     match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", name)
     if match:
-        prepend, moved_text, append, extension = match.groups()
-        name = f"{prepend} {append} {moved_text}.{extension}"
+        prefix, moved_text, suffix, extension = match.groups()
+        name = f"{prefix} {suffix} {moved_text}.{extension}"
     return name
 
 
