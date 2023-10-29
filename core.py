@@ -8,17 +8,16 @@ import platform
 import customtkinter as ctk
 import configparser
 
-# Create a configuration parser
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-# Read configuration options
-initial_directory = config.get('Paths', 'initial_directory')
-categories_file = config.get('Files', 'categories_file')
+# Read the settings
+initial_directory = config.get('Settings', 'initial_directory')
+categories_file = config.get('Settings', 'categories_file')
 
 
 def browse_output_directory(self):
-    output_directory = filedialog.askdirectory(initialdir=initial_directory)
+    output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
 
     if output_directory:
         self.output_directory = output_directory
@@ -185,6 +184,7 @@ def rename_files(self):
         try:
             os.rename(self.selected_file, new_path)
             self.handle_rename_success(new_path)
+            # TODO temporary directory bug workaround
             self.output_directory = None
         except OSError as e:
             self.show_message("Error: " + str(e), error=True)
@@ -238,7 +238,7 @@ def handle_rename_success(self, new_path):
 
 
 def browse_file(self):
-    file_path = filedialog.askopenfilename(initialdir=initial_directory)
+    file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
     if file_path:
         self.selected_file = file_path
         self.file_display.configure(text=self.selected_file)
