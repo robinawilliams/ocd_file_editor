@@ -94,7 +94,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_window()  # Window 3
 
         # Set default value for scaling
-        self.scaling_optionemenu.set("100%")
+        self.scaling_optionemenu.set("90%")
 
         # Select default frame
         self.select_frame_by_name("home")
@@ -464,28 +464,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Checkbox to enable/disable resetting the Output Directory
         app.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)  # Default not to reset
         app.reset_output_directory_checkbox = ctk.CTkCheckBox(app.folder_operations_frame,
-                                                               text="Reset Output Directory",
-                                                               variable=app.reset_output_directory_var)
+                                                              text="Reset Output Directory",
+                                                              variable=app.reset_output_directory_var)
         app.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable moving the file up one folder
         app.move_up_var = ctk.BooleanVar(value=move_up_var)
         app.move_up_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Move Up One Folder",
-                                                variable=app.move_up_var)
+                                               variable=app.move_up_var)
         app.move_up_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
         # Checkbox to enable/disable open on drop behavior
         app.open_on_drop_var = ctk.BooleanVar(value=open_on_drop_var)
         app.open_on_drop_switch = ctk.CTkSwitch(app.settings_top_frame, text="Open File on Drag and Drop",
-                                                 variable=app.open_on_drop_var)
+                                                variable=app.open_on_drop_var)
         app.open_on_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable for duplicate removal
         app.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
         app.remove_duplicates_switch = ctk.CTkSwitch(app.settings_top_frame,
-                                                      text="Remove Duplicates",
-                                                      variable=app.remove_duplicates_var)
+                                                     text="Remove Duplicates",
+                                                     variable=app.remove_duplicates_var)
         app.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
+
 
 if __name__ == "__main__":
     app = OCDFileRenamer()
