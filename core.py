@@ -280,6 +280,7 @@ def load_configuration():
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
     open_on_drop_var = config.get("Settings", "open_on_drop_var", fallback=False)
+    remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
 
     return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, \
-        move_up_var, open_on_drop_var
+        move_up_var, open_on_drop_var, remove_duplicates_var

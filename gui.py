@@ -266,7 +266,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
-
     def settings_window(self):
         # Create settings frame
         self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -406,7 +405,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def variables(self):
         # Read settings from the configuration file
-        move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, move_up_var, open_on_drop_var = app.load_configuration()
+        move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, move_up_var, \
+            open_on_drop_var, remove_duplicates_var = app.load_configuration()
 
         app.move_text_var = move_text_var  # Set the move_text_var attribute
         app.initial_directory = initial_directory  # Set the initial_directory attribute
@@ -415,6 +415,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         app.reset_output_directory_var = reset_output_directory_var
         app.move_up_var = move_up_var
         app.open_on_drop_var = open_on_drop_var
+        app.remove_duplicates_var = remove_duplicates_var
 
         # TODO Housekeeping
         # Create the "Move Text" checkbox with the initial state
@@ -442,6 +443,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         app.open_on_drop_switch = ctk.CTkSwitch(app.settings_top_frame, text="Open File on Drag and Drop",
                                                 variable=app.open_on_drop_var)
         app.open_on_drop_switch.grid(row=1, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable for duplicate removal
+        app.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
+        app.remove_duplicates_switch = ctk.CTkSwitch(app.settings_top_frame,
+                                                     text="Remove Duplicates",
+                                                     variable=app.remove_duplicates_var)
+        app.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
 
 if __name__ == "__main__":
