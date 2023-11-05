@@ -3,7 +3,6 @@ from tkinterdnd2 import DND_FILES, TkinterDnD
 import core
 import customtkinter as ctk
 from PIL import Image
-import configparser
 
 
 class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -39,7 +38,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.grid_columnconfigure(1, weight=1)
 
         # load images with light and dark mode image
-        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "test_images")
+        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
         self.logo_image = ctk.CTkImage(Image.open(os.path.join(image_path, "CustomTkinter_logo_single.png")),
                                        size=(26, 26))
         self.large_test_image = ctk.CTkImage(Image.open(os.path.join(image_path, "large_test_image.png")),
@@ -59,7 +58,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create navigation frame
         self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(4, weight=1)
+        self.navigation_frame.grid_rowconfigure(5, weight=1)
 
         self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="OCD File Renamer",
                                                    compound="left",
@@ -87,14 +86,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              hover_color=("gray70", "gray30"),
                                              image=self.add_user_image, anchor="w",
                                              command=self.settings_button_event)
-        self.settings_button.grid(row=3, column=0, sticky="ew")
+        self.settings_button.grid(row=4, column=0, sticky="ew")
 
-        self.home_window()  # Window 1
-        self.category_window()  # Window 2
-        self.settings_window()  # Window 3
+        # Windows
+        self.home_window()
+        self.category_window()
+        self.settings_window()
 
         # Set default value for scaling
-        self.scaling_optionemenu.set("90%")
+        self.scaling_optionemenu.set("100%")
 
         # Select default frame
         self.select_frame_by_name("home")
@@ -121,21 +121,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        self.categories = core.load_categories()  # Load categories from a configuration file
-        self.categories.sort(key=lambda x: x.lower())
-
-        self.buttons = []
-        row = 0
-        col = 0
-        for category in self.categories:
-            button = ctk.CTkButton(self.button_frame, text=category,
-                                   command=lambda c=category: self.add_to_queue(c))
-            button.grid(row=row, column=col, padx=5, pady=5)
-            self.buttons.append(button)
-            col += 1
-            if col == 6:
-                col = 0
-                row += 1
+        self.categories_buttons_initialize()
 
         # Create a frame to group the custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
@@ -248,20 +234,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        self.categories = core.load_categories()  # Load categories from a configuration file
-        self.categories.sort(key=lambda x: x.lower())
-
-        self.buttons = []
-        row = 0
-        col = 0
-        for category in self.categories:
-            button = ctk.CTkButton(self.button_frame, text=category, hover=False)
-            button.grid(row=row, column=col, padx=5, pady=5)
-            self.buttons.append(button)
-            col += 1
-            if col == 6:
-                col = 0
-                row += 1
+        self.categories_buttons_initialize()
 
         # Cat frame
         self.cat_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
@@ -292,6 +265,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Message Label
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
+
 
     def settings_window(self):
         # Create settings frame
@@ -394,6 +368,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_category(self):
         core.remove_category(self)
 
+    def categories_buttons_initialize(self):
+        core.categories_buttons_initialize(self)
+
     def refresh_category_buttons(self):
         core.refresh_category_buttons(self)
 
@@ -425,24 +402,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.show_message(self, message, error)
 
     def load_configuration(self):
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-
-        # Read the settings
-        move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
-        initial_directory = config.get('Settings', 'initial_directory')
-        categories_file = config.get('Settings', 'categories_file')
-        geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
-        reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
-        move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
-        open_on_drop_var = config.get("Settings", "open_on_drop_var", fallback=False)
-        remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
-
-        return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, move_up_var, open_on_drop_var, remove_duplicates_var
+        return core.load_configuration()
 
     def variables(self):
         # Read settings from the configuration file
-        move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, move_up_var, open_on_drop_var, remove_duplicates_var = app.load_configuration()
+        move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, move_up_var, open_on_drop_var = app.load_configuration()
 
         app.move_text_var = move_text_var  # Set the move_text_var attribute
         app.initial_directory = initial_directory  # Set the initial_directory attribute
@@ -451,7 +415,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         app.reset_output_directory_var = reset_output_directory_var
         app.move_up_var = move_up_var
         app.open_on_drop_var = open_on_drop_var
-        app.remove_duplicates_var = remove_duplicates_var
 
         # TODO Housekeeping
         # Create the "Move Text" checkbox with the initial state
@@ -479,13 +442,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         app.open_on_drop_switch = ctk.CTkSwitch(app.settings_top_frame, text="Open File on Drag and Drop",
                                                 variable=app.open_on_drop_var)
         app.open_on_drop_switch.grid(row=1, column=0, padx=10, pady=10)
-
-        # Checkbox to enable/disable for duplicate removal
-        app.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
-        app.remove_duplicates_switch = ctk.CTkSwitch(app.settings_top_frame,
-                                                     text="Remove Duplicates",
-                                                     variable=app.remove_duplicates_var)
-        app.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
 
 if __name__ == "__main__":
