@@ -11,19 +11,6 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
 
-# Read the settings
-initial_directory = config.get('Settings', 'initial_directory')
-categories_file = config.get('Settings', 'categories_file')
-
-
-def browse_output_directory(self):
-    output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-
-    if output_directory:
-        self.output_directory = output_directory
-        self.output_directory_entry.delete(0, ctk.END)
-        self.output_directory_entry.insert(0, self.output_directory)
-
 
 def move_to_trash(self):
     if self.selected_file:
@@ -129,6 +116,24 @@ def remove_category(self):
         self.show_message("Category removed: " + category_to_remove)
 
 
+def categories_buttons_initialize(self):
+    self.categories = load_categories()  # Load categories from a configuration file
+    self.categories.sort(key=lambda x: x.lower())
+
+    self.buttons = []
+    row = 0
+    col = 0
+    for category in self.categories:
+        button = ctk.CTkButton(self.button_frame, text=category,
+                               command=lambda c=category: self.add_to_queue(c))
+        button.grid(row=row, column=col, padx=5, pady=5)
+        self.buttons.append(button)
+        col += 1
+        if col == 7:
+            col = 0
+            row += 1
+
+
 def refresh_category_buttons(self):
     for button in self.buttons:
         button.destroy()
@@ -141,12 +146,13 @@ def refresh_category_buttons(self):
         button.grid(row=row, column=col, padx=5, pady=5)
         self.buttons.append(button)
         col += 1
-        if col == 6:
+        if col == 7:
             col = 0
             row += 1
 
 
 def load_categories():
+    categories_file = config.get("Settings", "categories_file")
     try:
         with open(categories_file, "r") as file:
             return json.load(file)
@@ -155,6 +161,7 @@ def load_categories():
 
 
 def save_categories(self):
+    categories_file = config.get("Settings", "categories_file")
     with open(categories_file, "w") as file:
         json.dump(self.categories, file)
 
@@ -184,8 +191,6 @@ def rename_files(self):
         try:
             os.rename(self.selected_file, new_path)
             self.handle_rename_success(new_path)
-            # TODO temporary directory bug workaround
-            self.output_directory = None
         except OSError as e:
             self.show_message("Error: " + str(e), error=True)
 
@@ -247,8 +252,34 @@ def browse_file(self):
         self.show_message("File selected: " + os.path.basename(self.selected_file))
 
 
+def browse_output_directory(self):
+    output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if output_directory:
+        self.output_directory = output_directory
+        self.output_directory_entry.delete(0, ctk.END)
+        self.output_directory_entry.insert(0, self.output_directory)
+
+
 def show_message(self, message, error=False):
     if error:
         self.message_label.configure(text=message, text_color="red")
     else:
         self.message_label.configure(text=message, text_color="white")
+
+
+def load_configuration():
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    # Read the settings
+    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
+    initial_directory = config.get('Settings', 'initial_directory')
+    categories_file = config.get('Settings', 'categories_file')
+    geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
+    reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
+    move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
+    open_on_drop_var = config.get("Settings", "open_on_drop_var", fallback=False)
+
+    return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, \
+        move_up_var, open_on_drop_var
