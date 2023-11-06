@@ -88,18 +88,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              command=self.settings_button_event)
         self.settings_button.grid(row=4, column=0, sticky="ew")
 
-        # Windows
-        self.home_window()
-        self.category_window()
-        self.settings_window()
-
-        # Set default value for scaling
-        self.scaling_optionemenu.set("100%")
-
-        # Select default frame
-        self.select_frame_by_name("home")
-
-    def home_window(self):
+        # home_window ###
         # Create home frame
         self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid_columnconfigure(0, weight=1)
@@ -216,7 +205,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
-    def category_window(self):
+        # category_window ###
         # Create add/remove categories frame
         self.category_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.category_frame.grid_columnconfigure(0, weight=1)
@@ -266,7 +255,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
-    def settings_window(self):
+        # settings_window ###
         # Create settings frame
         self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.settings_frame.grid_columnconfigure(0, weight=1)
@@ -299,6 +288,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      values=["80%", "90%", "100%", "110%", "120%"],
                                                      command=self.change_scaling_event)
         self.scaling_optionemenu.grid(row=3, column=1, padx=10, pady=10)
+
+        # Misc ###
+        # Set default value for scaling
+        self.scaling_optionemenu.set("100%")
+
+        # Select default frame
+        self.select_frame_by_name("home")
 
     def select_frame_by_name(self, name):
         # set button color for selected button
