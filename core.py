@@ -4,7 +4,6 @@ import json
 from tkinter import filedialog, messagebox
 import send2trash
 import subprocess
-import platform
 import customtkinter as ctk
 import configparser
 
@@ -12,17 +11,21 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
-def move_to_trash(self):
-    if self.selected_file:
-        confirmation = messagebox.askyesno("Confirm Action",
-                                           "Are you sure you want to move this file to the trash?")
-        if confirmation:
-            send2trash.send2trash(self.selected_file)
-            self.selected_file = ""
-            self.queue = []
-            self.file_display.configure(text="")
-            self.custom_text_entry.delete(0, ctk.END)
-            self.show_message("File moved to trash successfully")
+# File Operations ###
+def move_file_to_trash(self):
+    try:
+        if self.selected_file:
+            confirmation = messagebox.askyesno("Confirm Action",
+                                               "Are you sure you want to move this file to the trash?")
+            if confirmation:
+                send2trash.send2trash(self.selected_file)
+                self.selected_file = ""
+                self.queue = []
+                self.file_display.configure(text="")
+                self.custom_text_entry.delete(0, ctk.END)
+                self.show_message("File moved to trash successfully")
+    except OSError as e:
+        self.show_message("Error: " + str(e), error=True)
 
 
 def load_last_used_file(self):
@@ -34,23 +37,17 @@ def load_last_used_file(self):
         self.show_message("Last used file selected: " + os.path.basename(self.selected_file))
 
 
-def on_drop(self, event):
+def on_file_drop(self, event):
     self.selected_file = event.data.strip('{}')
     self.file_display.configure(text=os.path.basename(self.selected_file))  # Display only the filename
     self.queue = []
     self.update_file_display()
     self.show_message("File selected: " + os.path.basename(self.selected_file))  # Update the message
 
-    if self.open_on_drop_var.get():
-        if platform.system() == "Linux":
-            # Open the dropped file using xdg-open on Linux
-            subprocess.Popen(['xdg-open', self.selected_file])
-        elif platform.system() == "Windows":
-            # Open the dropped file using the Windows start command. shell=True
-            subprocess.Popen(['start', self.selected_file])
-        else:
-            # Use 'open' command on macOS, you can customize this as needed
-            subprocess.Popen(['open', self.selected_file])
+    try:
+        subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
+    except OSError as e:
+        self.show_message("Error: " + str(e), error=True)
 
 
 def add_to_queue(self, category):
@@ -95,6 +92,49 @@ def clear_selection(self):
     self.show_message("Selection cleared")
 
 
+def browse_file(self):
+    file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
+    if file_path:
+        self.selected_file = file_path
+        self.file_display.configure(text=self.selected_file)
+        self.queue = []  # Clear the queue when a new file is selected
+        self.update_file_display()
+        self.show_message("File selected: " + os.path.basename(self.selected_file))
+
+
+def browse_output_directory(self):
+    output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if output_directory:
+        self.output_directory = output_directory
+        self.output_directory_entry.delete(0, ctk.END)
+        self.output_directory_entry.insert(0, self.output_directory)
+
+
+def handle_rename_success(self, new_path):
+    self.selected_file = ""
+    self.queue = []
+    self.file_display.configure(text="")
+    self.custom_text_entry.delete(0, ctk.END)
+    self.last_used_file = new_path
+    self.last_used_display.configure(text=os.path.basename(new_path))
+    self.show_message("File renamed and saved successfully")
+
+    if self.move_up_var.get():
+        # Move the file up one folder
+        parent_directory = os.path.dirname(os.path.dirname(new_path))
+        new_location = os.path.join(parent_directory, os.path.basename(new_path))
+        os.rename(new_path, new_location)
+        self.selected_file = new_location
+
+    if self.reset_output_directory_var.get():
+        # Clear and reset the Output Directory to the current directory
+        self.output_directory = os.path.dirname(self.selected_file)
+        self.output_directory_entry.delete(0, ctk.END)
+        self.output_directory_entry.insert(0, self.output_directory)
+
+
+# Category Management ###
 def add_category(self):
     new_category = self.category_entry.get().strip()
     if new_category:
@@ -166,6 +206,7 @@ def save_categories(self):
         json.dump(self.categories, file)
 
 
+# File Renaming ###
 def rename_files(self):
     if self.selected_file and (self.queue or self.custom_text_entry.get().strip()):
         custom_text = self.custom_text_entry.get().strip()
@@ -219,48 +260,7 @@ def sanitize_file_name(name):
     return " ".join(name.split()).strip()
 
 
-def handle_rename_success(self, new_path):
-    self.selected_file = ""
-    self.queue = []
-    self.file_display.configure(text="")
-    self.custom_text_entry.delete(0, ctk.END)
-    self.last_used_file = new_path
-    self.last_used_display.configure(text=os.path.basename(new_path))
-    self.show_message("File renamed and saved successfully")
-
-    if self.move_up_var.get():
-        # Move the file up one folder
-        parent_directory = os.path.dirname(os.path.dirname(new_path))
-        new_location = os.path.join(parent_directory, os.path.basename(new_path))
-        os.rename(new_path, new_location)
-        self.selected_file = new_location
-
-    if self.reset_output_directory_var.get():
-        # Clear and reset the Output Directory to the current directory
-        self.output_directory = os.path.dirname(self.selected_file)
-        self.output_directory_entry.delete(0, ctk.END)
-        self.output_directory_entry.insert(0, self.output_directory)
-
-
-def browse_file(self):
-    file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
-    if file_path:
-        self.selected_file = file_path
-        self.file_display.configure(text=self.selected_file)
-        self.queue = []  # Clear the queue when a new file is selected
-        self.update_file_display()
-        self.show_message("File selected: " + os.path.basename(self.selected_file))
-
-
-def browse_output_directory(self):
-    output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-
-    if output_directory:
-        self.output_directory = output_directory
-        self.output_directory_entry.delete(0, ctk.END)
-        self.output_directory_entry.insert(0, self.output_directory)
-
-
+# Configuration and Initialization:
 def show_message(self, message, error=False):
     if error:
         self.message_label.configure(text=message, text_color="red")
@@ -279,8 +279,8 @@ def load_configuration():
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
-    open_on_drop_var = config.get("Settings", "open_on_drop_var", fallback=False)
+    open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
 
     return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, \
-        move_up_var, open_on_drop_var, remove_duplicates_var
+        move_up_var, open_on_file_drop_var, remove_duplicates_var
