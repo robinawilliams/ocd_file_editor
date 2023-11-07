@@ -377,9 +377,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def refresh_category_buttons(self):
         core.refresh_category_buttons(self)
 
-    def load_categories(self):
-        core.load_categories()
-
     def save_categories(self):
         core.save_categories(self)
 

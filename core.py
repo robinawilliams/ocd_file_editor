@@ -157,7 +157,15 @@ def remove_category(self):
 
 
 def categories_buttons_initialize(self):
-    self.categories = load_categories()  # Load categories from a configuration file
+    # Load categories from a configuration file
+    categories_file = config.get("Settings", "categories_file")
+    try:
+        with open(categories_file, "r") as file:
+            self.categories = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        self.categories = []
+
+    # Sort the alphabetically, case-insensitive
     self.categories.sort(key=lambda x: x.lower())
 
     self.buttons = []
@@ -189,15 +197,6 @@ def refresh_category_buttons(self):
         if col == 7:
             col = 0
             row += 1
-
-
-def load_categories():
-    categories_file = config.get("Settings", "categories_file")
-    try:
-        with open(categories_file, "r") as file:
-            return json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return []
 
 
 def save_categories(self):
