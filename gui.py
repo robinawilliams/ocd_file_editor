@@ -91,10 +91,31 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # home_window ###
         # Create home frame
         self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.home_frame.grid(row=0, column=1, sticky="nsew")
         self.home_frame.grid_columnconfigure(0, weight=1)
+        self.home_frame.grid_rowconfigure(0, weight=1)
+
+        # Create a canvas and a scrollbar
+        # TODO Include logic to adjust the background (bg) color depending on what mode is selected.
+        self.home_canvas = ctk.CTkCanvas(self.home_frame, bg='#2B2B2B', highlightthickness=0)
+        self.home_scrollbar = ctk.CTkScrollbar(self.home_frame, command=self.home_canvas.yview)
+        self.home_canvas.configure(yscrollcommand=self.home_scrollbar.set)
+
+        # Place the canvas and the scrollbar in the grid
+        self.home_canvas.grid(row=0, column=0, sticky="nsew")
+        self.home_scrollbar.grid(row=0, column=1, sticky="ns")
+
+        # Create a frame inside the canvas which will be scrolled
+        self.home_scrollable_frame = ctk.CTkFrame(self.home_canvas, corner_radius=0)
+        self.home_scrollable_frame_window = self.home_canvas.create_window((0, 0), window=self.home_scrollable_frame,
+                                                                           anchor="nw")
+
+        # Bind the canvas and frame to configure scroll region and canvas scrolling
+        self.home_canvas.bind('<Configure>', self.on_canvas_configure)
+        self.home_scrollable_frame.bind('<Configure>', self.on_frame_configure)
 
         # Top frame
-        self.home_top_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
+        self.home_top_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.home_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Browse Button
@@ -107,14 +128,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_display.grid(row=0, column=1, padx=5, pady=5)
 
         # Categories button frame
-        self.button_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
+        self.button_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
         self.categories_buttons_initialize()
 
+        # Create a frame for the category-related elements
+        self.category_frame = ctk.CTkFrame(self.home_scrollable_frame)
+        self.category_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Add Category Button
+        self.add_category_button = ctk.CTkButton(self.category_frame, text="Add Category", command=self.add_category)
+        self.add_category_button.grid(row=0, column=0, padx=5)
+
+        # Add Category Entry
+        self.category_entry = ctk.CTkEntry(self.category_frame, width=250)
+        self.category_entry.grid(row=0, column=1, padx=5)
+
+        # Remove Category Button
+        self.remove_category_button = ctk.CTkButton(self.category_frame, text="Remove Category",
+                                                    command=self.remove_category)
+        self.remove_category_button.grid(row=0, column=2, padx=5)
+
+        # Remove Category Entry
+        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=250)
+        self.remove_category_entry.grid(row=0, column=3, padx=5)
+
         # Create a frame to group the custom text entry and output directory
-        self.custom_text_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
-        self.custom_text_frame.grid(row=2, column=0, padx=10, pady=10)
+        self.custom_text_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.custom_text_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Output Directory Browse Button
         self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Output Directory",
@@ -131,7 +173,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.custom_text_label.grid(row=0, column=2, padx=5, pady=5)
 
         # Custom Text Entry
-        self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=150)
+        self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=350)
         self.custom_text_entry.grid(row=0, column=3, padx=10, pady=10)
 
         # Rename File Button
@@ -140,8 +182,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.rename_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Create a frame to group the folder operations frame
-        self.folder_operations_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
-        self.folder_operations_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.folder_operations_frame.grid(row=8, column=0, padx=10, pady=10)
 
         # Placement Label
         self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
@@ -164,8 +206,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suffix_radio.grid(row=0, column=5, padx=5, pady=5)
 
         # Create a frame to group the misc. buttons
-        self.button_group_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
-        self.button_group_frame.grid(row=5, column=0, padx=10, pady=10)
+        self.button_group_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.button_group_frame.grid(row=4, column=0, padx=10, pady=10)
 
         # Undo Button
         self.undo_button = ctk.CTkButton(self.button_group_frame, text="Undo", command=self.undo_last)
@@ -186,7 +228,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
         # Create a frame to display the last used file
-        self.last_used_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
+        self.last_used_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.last_used_frame.grid(row=6, column=0, padx=5, pady=5)
 
         # Last Used File Label
@@ -198,7 +240,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_display.grid(row=0, column=1, padx=5, pady=5)
 
         # Create a frame to display messages
-        self.message_label_frame = ctk.CTkFrame(self.home_frame, corner_radius=0, fg_color="transparent")
+        self.message_label_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.message_label_frame.grid(row=7, column=0, padx=10, pady=10)
 
         # Message Label
@@ -219,41 +261,42 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                        font=ctk.CTkFont(size=15, weight="bold"))
         self.file_label.grid(row=0, column=0, padx=5, pady=5)
 
-        # Categories button frame
-        self.button_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
-        self.button_frame.grid(row=1, column=0, padx=10, pady=10)
+        # TODO work on fix
+        # # Categories button frame
+        # self.button_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
+        # self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        self.categories_buttons_initialize()
+        # self.categories_buttons_initialize()
+        #
+        # # Cat frame
+        # self.cat_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
+        # self.cat_frame.grid(row=2, column=0, padx=10, pady=10)
 
-        # Cat frame
-        self.cat_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
-        self.cat_frame.grid(row=2, column=0, padx=10, pady=10)
+        # # Add Category Entry
+        # self.category_entry = ctk.CTkEntry(self.cat_frame, width=705)
+        # self.category_entry.grid(row=0, column=0, padx=20, pady=10)
+        #
+        # # Add Category Button
+        # self.add_category_button = ctk.CTkButton(self.cat_frame, text="Add Category",
+        #                                          command=self.add_category)
+        # self.add_category_button.grid(row=0, column=1, padx=20, pady=10)
+        #
+        # # Remove Category Entry
+        # self.remove_category_entry = ctk.CTkEntry(self.cat_frame, width=705)
+        # self.remove_category_entry.grid(row=1, column=0, padx=20, pady=10)
+        #
+        # # Remove Category Button
+        # self.remove_category_button = ctk.CTkButton(self.cat_frame, text="Remove Category",
+        #                                             command=self.remove_category)
+        # self.remove_category_button.grid(row=1, column=1, padx=20, pady=10)
 
-        # Add Category Entry
-        self.category_entry = ctk.CTkEntry(self.cat_frame, width=705)
-        self.category_entry.grid(row=0, column=0, padx=20, pady=10)
-
-        # Add Category Button
-        self.add_category_button = ctk.CTkButton(self.cat_frame, text="Add Category",
-                                                 command=self.add_category)
-        self.add_category_button.grid(row=0, column=1, padx=20, pady=10)
-
-        # Remove Category Entry
-        self.remove_category_entry = ctk.CTkEntry(self.cat_frame, width=705)
-        self.remove_category_entry.grid(row=1, column=0, padx=20, pady=10)
-
-        # Remove Category Button
-        self.remove_category_button = ctk.CTkButton(self.cat_frame, text="Remove Category",
-                                                    command=self.remove_category)
-        self.remove_category_button.grid(row=1, column=1, padx=20, pady=10)
-
-        # Create a frame to display messages
-        self.message_label_frame = ctk.CTkFrame(self.cat_frame, corner_radius=0, fg_color="transparent")
-        self.message_label_frame.grid(row=3, column=0, padx=10, pady=10)
-
-        # Message Label
-        self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
-        self.message_label.grid(row=0, column=0, padx=10, pady=10)
+        # # Create a frame to display messages
+        # self.message_label_frame = ctk.CTkFrame(self.cat_frame, corner_radius=0, fg_color="transparent")
+        # self.message_label_frame.grid(row=3, column=0, padx=10, pady=10)
+        #
+        # # Message Label
+        # self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
+        # self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
         # settings_window ###
         # Create settings frame
@@ -295,6 +338,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Select default frame
         self.select_frame_by_name("home")
+
+    def on_frame_configure(self, event=None):
+        # Reset the scroll region to encompass the inner frame
+        self.home_canvas.configure(scrollregion=self.home_canvas.bbox("all"))
+
+    def on_canvas_configure(self, event):
+        # Set the scrollable frame's width to match the canvas
+        canvas_width = event.width - self.home_scrollbar.winfo_width()
+        self.home_canvas.itemconfig(self.home_scrollable_frame_window, width=canvas_width)
 
     def select_frame_by_name(self, name):
         # set button color for selected button
