@@ -165,7 +165,7 @@ def categories_buttons_initialize(self):
     except (FileNotFoundError, json.JSONDecodeError):
         self.categories = []
 
-    # Sort the alphabetically, case-insensitive
+    # Sort the categories alphabetically, case-insensitive
     self.categories.sort(key=lambda x: x.lower())
 
     self.buttons = []
