@@ -11,6 +11,22 @@ config = configparser.ConfigParser()
 config.read('config.ini')
 
 
+# Configuration:
+def load_configuration():
+    # Read the settings
+    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
+    initial_directory = config.get('Settings', 'initial_directory')
+    categories_file = config.get('Settings', 'categories_file')
+    geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
+    reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
+    move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
+    open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
+    remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
+
+    return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, \
+        move_up_var, open_on_file_drop_var, remove_duplicates_var
+
+
 # File Operations ###
 def move_file_to_trash(self):
     try:
@@ -97,7 +113,7 @@ def browse_file(self):
     if file_path:
         self.selected_file = file_path
         self.file_display.configure(text=self.selected_file)
-        self.queue = []  # Clear the queue when a new file is selected
+        self.queue = []
         self.update_file_display()
         self.show_message("File selected: " + os.path.basename(self.selected_file))
 
@@ -257,29 +273,3 @@ def move_text(name):
 def sanitize_file_name(name):
     # Remove double spaces and trailing spaces
     return " ".join(name.split()).strip()
-
-
-# Configuration and Initialization:
-def show_message(self, message, error=False):
-    if error:
-        self.message_label.configure(text=message, text_color="red")
-    else:
-        self.message_label.configure(text=message, text_color="white")
-
-
-def load_configuration():
-    config = configparser.ConfigParser()
-    config.read('config.ini')
-
-    # Read the settings
-    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
-    initial_directory = config.get('Settings', 'initial_directory')
-    categories_file = config.get('Settings', 'categories_file')
-    geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
-    reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
-    move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
-    open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
-    remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
-
-    return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, \
-        move_up_var, open_on_file_drop_var, remove_duplicates_var
