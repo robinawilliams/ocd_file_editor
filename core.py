@@ -60,10 +60,11 @@ def on_file_drop(self, event):
     self.update_file_display()
     self.show_message("File selected: " + os.path.basename(self.selected_file))  # Update the message
 
-    try:
-        subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
-    except OSError as e:
-        self.show_message("Error: " + str(e), error=True)
+    if self.open_on_file_drop_var.get():
+        try:
+            subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
+        except OSError as e:
+            self.show_message("Error: " + str(e), error=True)
 
 
 def add_to_queue(self, category):
