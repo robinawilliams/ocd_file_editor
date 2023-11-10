@@ -17,14 +17,15 @@ def load_configuration():
     move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
     initial_directory = config.get('Settings', 'initial_directory')
     categories_file = config.get('Settings', 'categories_file')
+    weighted_categories_file = config.get('Settings', 'weighted_categories_file')
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
     open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
 
-    return move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, \
-        move_up_var, open_on_file_drop_var, remove_duplicates_var
+    return (move_text_var, initial_directory, categories_file, weighted_categories_file, geometry,
+            reset_output_directory_var, move_up_var, open_on_file_drop_var, remove_duplicates_var)
 
 
 # File Operations ###
@@ -171,6 +172,17 @@ def remove_category(self):
         self.refresh_category_buttons()
         self.remove_category_entry.delete(0, ctk.END)
         self.show_message("Category removed: " + category_to_remove)
+
+
+def load_weights():
+    weighted_categories_file = config.get("Settings", "weighted_categories_file")
+    try:
+        with open(weighted_categories_file, 'r') as f:
+            weights = json.load(f)
+        return weights
+    except FileNotFoundError:
+        print(f"Error: json file not found.")
+        return {}  # Return an empty dictionary if the file is not found
 
 
 def categories_buttons_initialize(self):

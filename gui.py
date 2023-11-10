@@ -1,8 +1,10 @@
 import os
-from tkinterdnd2 import DND_FILES, TkinterDnD
-import core
+
 import customtkinter as ctk
 from PIL import Image
+from tkinterdnd2 import DND_FILES, TkinterDnD
+
+import core
 
 
 class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -16,19 +18,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.selected_file = ""
         self.queue = []
 
-        # Define weights for categories
-        self.weights = {
-            "Lo-fi": 1,
-            "Acoustic": 2,
-            "Tropical": 3,
-        }
-
         # Initialize output directory
         self.output_directory = ""
 
         # Drag and drop
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
+
+        # Load weighted categories from json file
+        self.weights = self.load_weights()
 
         self.create_gui()
 
@@ -433,6 +431,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_category(self):
         core.remove_category(self)
 
+    def load_weights(self):
+        return core.load_weights()
+
     def categories_buttons_initialize(self):
         core.categories_buttons_initialize(self)
 
@@ -460,12 +461,13 @@ if __name__ == "__main__":
     app = OCDFileRenamer()
 
     # Read settings from the configuration file
-    move_text_var, initial_directory, categories_file, geometry, reset_output_directory_var, move_up_var, \
-        open_on_file_drop_var, remove_duplicates_var = app.load_configuration()
+    (move_text_var, initial_directory, categories_file, weighted_categories_file, geometry,
+     reset_output_directory_var, move_up_var, open_on_file_drop_var, remove_duplicates_var) = app.load_configuration()
 
     app.move_text_var = move_text_var  # Set the move_text_var attribute
     app.initial_directory = initial_directory  # Set the initial_directory attribute
     app.categories_file = categories_file  # Set the categories_file attribute
+    app.weighted_categories_file = weighted_categories_file  # Set the weighted_categories_file attribute
     app.geometry(geometry)
     app.reset_output_directory_var = reset_output_directory_var
     app.move_up_var = move_up_var
