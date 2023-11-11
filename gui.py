@@ -259,43 +259,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                        font=ctk.CTkFont(size=15, weight="bold"))
         self.file_label.grid(row=0, column=0, padx=5, pady=5)
 
-        # TODO work on fix
-        # # Categories button frame
-        # self.button_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
-        # self.button_frame.grid(row=1, column=0, padx=10, pady=10)
-
-        # self.categories_buttons_initialize()
-        #
-        # # Cat frame
-        # self.cat_frame = ctk.CTkFrame(self.cat_top_frame, corner_radius=0, fg_color="transparent")
-        # self.cat_frame.grid(row=2, column=0, padx=10, pady=10)
-
-        # # Add Category Entry
-        # self.category_entry = ctk.CTkEntry(self.cat_frame, width=705)
-        # self.category_entry.grid(row=0, column=0, padx=20, pady=10)
-        #
-        # # Add Category Button
-        # self.add_category_button = ctk.CTkButton(self.cat_frame, text="Add Category",
-        #                                          command=self.add_category)
-        # self.add_category_button.grid(row=0, column=1, padx=20, pady=10)
-        #
-        # # Remove Category Entry
-        # self.remove_category_entry = ctk.CTkEntry(self.cat_frame, width=705)
-        # self.remove_category_entry.grid(row=1, column=0, padx=20, pady=10)
-        #
-        # # Remove Category Button
-        # self.remove_category_button = ctk.CTkButton(self.cat_frame, text="Remove Category",
-        #                                             command=self.remove_category)
-        # self.remove_category_button.grid(row=1, column=1, padx=20, pady=10)
-
-        # # Create a frame to display messages
-        # self.message_label_frame = ctk.CTkFrame(self.cat_frame, corner_radius=0, fg_color="transparent")
-        # self.message_label_frame.grid(row=3, column=0, padx=10, pady=10)
-        #
-        # # Message Label
-        # self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
-        # self.message_label.grid(row=0, column=0, padx=10, pady=10)
-
         # settings_window ###
         # Create settings frame
         self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
@@ -498,7 +461,7 @@ if __name__ == "__main__":
     # Checkbox to enable/disable open on drop behavior
     app.open_on_file_drop_var = ctk.BooleanVar(value=open_on_file_drop_var)
     app.open_on_file_drop_switch = ctk.CTkSwitch(app.settings_top_frame, text="Open File on Drag and Drop",
-                                            variable=app.open_on_file_drop_var)
+                                                 variable=app.open_on_file_drop_var)
     app.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
     # Checkbox to enable/disable for duplicate removal
@@ -507,6 +470,5 @@ if __name__ == "__main__":
                                                  text="Remove Duplicates",
                                                  variable=app.remove_duplicates_var)
     app.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
-
 
     app.mainloop()
