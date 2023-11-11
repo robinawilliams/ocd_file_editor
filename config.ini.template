@@ -9,4 +9,8 @@ reset_output_directory_var = True
 move_up_var = False
 open_on_file_drop_var = False
 remove_duplicates_var = True
+default_placement_var = first_dash
 reset_var = True
+
+[Logs]
+name_normalizer_log = /path/to/folder/name_normalizer.log

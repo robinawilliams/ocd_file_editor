@@ -23,9 +23,11 @@ def load_configuration():
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
     open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
+    default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
 
     return (move_text_var, initial_directory, categories_file, weighted_categories_file, geometry,
-            reset_output_directory_var, move_up_var, open_on_file_drop_var, remove_duplicates_var)
+            reset_output_directory_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
+            default_placement_var)
 
 
 # File Operations ###
@@ -291,13 +293,27 @@ def rename_files(self):
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
-    # Construct the new name based on placement choice (prefix or suffix)
+    # Construct the new name based on placement choice (prefix, suffix, or first_dash)
+    categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
+    categories_text = ' '.join(categories).strip()
+
     if self.placement_choice.get() == "prefix":
-        categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
-        new_name = f"{custom_text} {base_name} {' '.join(categories)}".strip()
+        new_name = f"{custom_text} {categories_text} {base_name}".strip()
+    elif self.placement_choice.get() == "first_dash":
+        parts = base_name.split('-', 1)
+        if len(parts) == 2:
+            new_name = f"{parts[0].rstrip()} {categories_text} {custom_text} {parts[1].lstrip()}".strip()
+            try:
+                # Remove the tail __-__ if found
+                new_name = new_name.replace("__-__", "")
+            except OSError as e:
+                self.show_message("Error: " + str(e), error=True)
+        else:
+            # If there's no dash, default to suffix
+            new_name = f"{base_name} {categories_text} {custom_text}".strip()
     else:  # Default to suffix
-        categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
-        new_name = f"{base_name} {' '.join(categories)} {custom_text}".strip()
+        new_name = f"{base_name} {categories_text} {custom_text}".strip()
+
     return new_name + extension
 
 
