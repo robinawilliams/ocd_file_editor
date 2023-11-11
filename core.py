@@ -51,7 +51,12 @@ def load_last_used_file(self):
         self.file_display.configure(text=os.path.basename(self.selected_file))
         self.queue = []
         self.update_file_display()
-        self.show_message("Last used file selected: " + os.path.basename(self.selected_file))
+
+        message = os.path.basename(self.selected_file)
+        if len(message) > 127:
+            message = message[:127]
+
+        self.show_message("Last used file selected: " + message + "...")
 
 
 def on_file_drop(self, event):
@@ -59,7 +64,12 @@ def on_file_drop(self, event):
     self.file_display.configure(text=os.path.basename(self.selected_file))  # Display only the filename
     self.queue = []
     self.update_file_display()
-    self.show_message("File selected: " + os.path.basename(self.selected_file))  # Update the message
+    # Get the base file name and truncate if longer than 50 characters
+    message = os.path.basename(self.selected_file)
+    if len(message) > 127:
+        message = message[:127]
+
+    self.show_message("File selected: " + message + "...")
 
     if self.open_on_file_drop_var.get():
         try:
@@ -86,14 +96,24 @@ def add_to_queue(self, category):
 def update_file_display(self):
     if self.selected_file:
         custom_text = self.custom_text_entry.get().strip()
-        new_name = os.path.splitext(self.selected_file)[0] + " " + custom_text + " " + " ".join(self.queue) + \
-            os.path.splitext(self.selected_file)[1]
+
+        # Use only the base name of the file, not the full path
+        base_file_name = os.path.basename(self.selected_file)
+
+        # Construct the new name
+        new_name = os.path.splitext(base_file_name)[0] + " " + custom_text + " " + " ".join(self.queue) + \
+            os.path.splitext(base_file_name)[1]
 
         # Remove double spaces and trailing spaces
         new_name = " ".join(new_name.split())  # Remove double spaces
         new_name = new_name.strip()  # Remove trailing spaces
 
-        self.file_display.configure(text=os.path.basename(new_name))
+        # Truncate the text if it is over 50 characters
+        if len(new_name) > 120:
+            new_name = new_name[:120] + "..."
+
+        # Set the new name to the file display
+        self.file_display.configure(text=new_name)
 
 
 def undo_last(self):
@@ -117,7 +137,13 @@ def browse_file(self):
         self.file_display.configure(text=self.selected_file)
         self.queue = []
         self.update_file_display()
-        self.show_message("File selected: " + os.path.basename(self.selected_file))
+
+        # Get the base file name and truncate if longer than 50 characters
+        message = os.path.basename(self.selected_file)
+        if len(message) > 127:
+            message = message[:127]
+
+        self.show_message("File selected: " + message + "...")
 
 
 def browse_output_directory(self):

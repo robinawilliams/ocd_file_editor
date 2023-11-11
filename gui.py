@@ -1,9 +1,5 @@
-import os
-
 import customtkinter as ctk
-from PIL import Image
 from tkinterdnd2 import DND_FILES, TkinterDnD
-
 import core
 
 
@@ -35,46 +31,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # load images with light and dark mode image
-        image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
-        self.logo_image = ctk.CTkImage(Image.open(os.path.join(image_path, "CustomTkinter_logo_single.png")),
-                                       size=(26, 26))
-        self.large_test_image = ctk.CTkImage(Image.open(os.path.join(image_path, "large_test_image.png")),
-                                             size=(500, 150))
-        self.image_icon_image = ctk.CTkImage(Image.open(os.path.join(image_path, "image_icon_light.png")),
-                                             size=(20, 20))
-        self.home_image = ctk.CTkImage(light_image=Image.open(os.path.join(image_path, "home_dark.png")),
-                                       dark_image=Image.open(os.path.join(image_path, "home_light.png")),
-                                       size=(20, 20))
-        self.chat_image = ctk.CTkImage(light_image=Image.open(os.path.join(image_path, "chat_dark.png")),
-                                       dark_image=Image.open(os.path.join(image_path, "chat_light.png")),
-                                       size=(20, 20))
-        self.add_user_image = ctk.CTkImage(
-            light_image=Image.open(os.path.join(image_path, "add_user_dark.png")),
-            dark_image=Image.open(os.path.join(image_path, "add_user_light.png")), size=(20, 20))
-
         # Create navigation frame
         self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
-        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="OCD File Renamer",
+        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="OCD \nFile \nRenamer",
                                                    compound="left",
                                                    font=ctk.CTkFont(size=15, weight="bold"))
-        self.navigation_frame_label.grid(row=0, column=0, padx=20, pady=20)
+        self.navigation_frame_label.grid(row=0, column=0, padx=5, pady=5)
 
         self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
                                          text="Home",
                                          fg_color="transparent", text_color=("gray10", "gray90"),
                                          hover_color=("gray70", "gray30"),
-                                         image=self.home_image, anchor="w", command=self.home_button_event)
+                                         anchor="w", command=self.home_button_event)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
         self.add_remove_categories = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
                                                    border_spacing=10, text="Categories",
                                                    fg_color="transparent", text_color=("gray10", "gray90"),
                                                    hover_color=("gray70", "gray30"),
-                                                   image=self.chat_image, anchor="w",
+                                                   anchor="w",
                                                    command=self.add_remove_categories_event)
         self.add_remove_categories.grid(row=2, column=0, sticky="ew")
 
@@ -82,7 +60,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              text="Settings",
                                              fg_color="transparent", text_color=("gray10", "gray90"),
                                              hover_color=("gray70", "gray30"),
-                                             image=self.add_user_image, anchor="w",
+                                             anchor="w",
                                              command=self.settings_button_event)
         self.settings_button.grid(row=4, column=0, sticky="ew")
 
@@ -117,7 +95,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Browse Button
-        self.browse_button = ctk.CTkButton(self.home_top_frame, text="Browse", image=self.image_icon_image,
+        self.browse_button = ctk.CTkButton(self.home_top_frame, text="Browse",
                                            command=self.browse_file)
         self.browse_button.grid(row=0, column=0, padx=5, pady=5)
 
@@ -158,7 +136,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Output Directory Browse Button
         self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Output Directory",
-                                                            image=self.image_icon_image,
                                                             command=self.browse_output_directory)
         self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
@@ -339,10 +316,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def settings_button_event(self):
         self.select_frame_by_name("settings")
 
-    def change_appearance_mode_event(self, new_appearance_mode):
+    @staticmethod
+    def change_appearance_mode_event(new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
 
-    def change_scaling_event(self, new_scaling: str):
+    @staticmethod
+    def change_scaling_event(new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 
@@ -353,7 +332,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.message_label.configure(text=message, text_color="white")
 
     # Configuration and Initialization ###
-    def load_configuration(self):
+    @staticmethod
+    def load_configuration():
         return core.load_configuration()
 
     # FileOperations ###
@@ -394,7 +374,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_category(self):
         core.remove_category(self)
 
-    def load_weights(self):
+    @staticmethod
+    def load_weights():
         return core.load_weights()
 
     def categories_buttons_initialize(self):
@@ -413,10 +394,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
         return core.construct_new_name(self, base_name, weighted_categories, custom_text, extension)
 
-    def move_text(self, name):
+    @staticmethod
+    def move_text(name):
         return core.move_text(name)
 
-    def sanitize_file_name(self, name):
+    @staticmethod
+    def sanitize_file_name(name):
         return core.sanitize_file_name(name)
 
 
