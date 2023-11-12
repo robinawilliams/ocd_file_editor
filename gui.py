@@ -429,7 +429,7 @@ if __name__ == "__main__":
 
     # Variable to track the user's placement choice (prefix, suffix, or first_dash)
     app.placement_choice = ctk.StringVar()
-    app.placement_choice.set(app.default_placement_var)  # Default to suffix
+    app.placement_choice.set(app.default_placement_var)  # Default to first_dash
 
     # Radio button for prefix
     app.prefix_radio = ctk.CTkRadioButton(app.folder_operations_frame, text="Prefix",

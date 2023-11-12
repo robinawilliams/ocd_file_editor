@@ -110,7 +110,7 @@ def update_file_display(self):
         new_name = " ".join(new_name.split())  # Remove double spaces
         new_name = new_name.strip()  # Remove trailing spaces
 
-        # Truncate the text if it is over 50 characters
+        # Truncate the text if it is over 120 characters
         if len(new_name) > 120:
             new_name = new_name[:120] + "..."
 
@@ -140,7 +140,7 @@ def browse_file(self):
         self.queue = []
         self.update_file_display()
 
-        # Get the base file name and truncate if longer than 50 characters
+        # Get the base file name and truncate if longer than 127 characters
         message = os.path.basename(self.selected_file)
         if len(message) > 127:
             message = message[:127]
@@ -162,8 +162,13 @@ def handle_rename_success(self, new_path):
     self.queue = []
     self.file_display.configure(text="")
     self.custom_text_entry.delete(0, ctk.END)
-    self.last_used_file = new_path
-    self.last_used_display.configure(text=os.path.basename(new_path))
+
+    # Get the base name and truncate after 115 characters
+    last_used_name = os.path.basename(new_path)
+    if len(last_used_name) > 115:
+        last_used_name = last_used_name[:115]
+    self.last_used_display.configure(text=last_used_name)
+
     self.show_message("File renamed and saved successfully")
 
     if self.move_up_var.get():
