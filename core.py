@@ -15,9 +15,9 @@ config.read('config.ini')
 def load_configuration():
     # Read the settings
     move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
-    initial_directory = config.get('Settings', 'initial_directory')
-    categories_file = config.get('Settings', 'categories_file')
-    weighted_categories_file = config.get('Settings', 'weighted_categories_file')
+    initial_directory = config.get('Filepaths', 'initial_directory')
+    categories_file = config.get('Filepaths', 'categories_file')
+    weighted_categories_file = config.get('Filepaths', 'weighted_categories_file')
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
@@ -203,7 +203,7 @@ def remove_category(self):
 
 
 def load_weights():
-    weighted_categories_file = config.get("Settings", "weighted_categories_file")
+    weighted_categories_file = config.get("Filepaths", "weighted_categories_file")
     try:
         with open(weighted_categories_file, 'r') as f:
             weights = json.load(f)
@@ -215,7 +215,7 @@ def load_weights():
 
 def categories_buttons_initialize(self):
     # Load categories from a configuration file
-    categories_file = config.get("Settings", "categories_file")
+    categories_file = config.get("Filepaths", "categories_file")
     try:
         with open(categories_file, "r") as file:
             self.categories = json.load(file)
@@ -257,7 +257,7 @@ def refresh_category_buttons(self):
 
 
 def save_categories(self):
-    categories_file = config.get("Settings", "categories_file")
+    categories_file = config.get("Filepaths", "categories_file")
     with open(categories_file, "w") as file:
         json.dump(self.categories, file)
 
