@@ -174,7 +174,7 @@ def handle_rename_success(self, new_path):
     self.queue = []
     self.file_display.configure(text="")
     self.custom_text_entry.delete(0, ctk.END)
-
+    self.last_used_file = new_path
     # Get the base name and truncate after 115 characters
     last_used_name = os.path.basename(new_path)
     if len(last_used_name) > 115:
