@@ -118,8 +118,10 @@ def update_file_display(self):
         new_name = " ".join(new_name.split())  # Remove double spaces
         new_name = new_name.strip()  # Remove trailing spaces
 
-        # Truncate the text if it is over 120 characters
-        if len(new_name) > 120:
+        if len(new_name) > 250:
+            messagebox.showinfo("Length Exceeded", "The new file name exceeds 250 characters. Please shorten it.")
+            new_name = "..." + new_name[180:]
+        elif len(new_name) > 120:
             new_name = new_name[:120] + "..."
 
         # Set the new name to the file display
