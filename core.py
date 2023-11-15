@@ -44,7 +44,11 @@ def move_file_to_trash(self):
                 self.custom_text_entry.delete(0, ctk.END)
                 self.show_message("File moved to trash successfully")
     except OSError as e:
-        self.show_message("Error: " + str(e), error=True)
+        # Construct the error message and truncate after 50 characters
+        error_message = "Error: " + str(e)
+        if len(error_message) > 115:
+            error_message = error_message[:115]
+        self.show_message(error_message, error=True)
 
 
 def load_last_used_file(self):
@@ -77,7 +81,11 @@ def on_file_drop(self, event):
         try:
             subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
         except OSError as e:
-            self.show_message("Error: " + str(e), error=True)
+            # Construct the error message and truncate after 50 characters
+            error_message = "Error: " + str(e)
+            if len(error_message) > 115:
+                error_message = error_message[:115]
+            self.show_message(error_message, error=True)
 
 
 def add_to_queue(self, category):
@@ -130,6 +138,10 @@ def clear_selection(self):
     self.queue = []
     self.file_display.configure(text="")
     self.show_message("Selection cleared")
+
+    self.output_directory = os.path.dirname(self.selected_file)
+    self.output_directory_entry.delete(0, ctk.END)
+    self.output_directory_entry.insert(0, self.output_directory)
 
 
 def browse_file(self):
@@ -294,7 +306,11 @@ def rename_files(self):
             os.rename(self.selected_file, new_path)
             self.handle_rename_success(new_path)
         except OSError as e:
-            self.show_message("Error: " + str(e), error=True)
+            # Construct the error message and truncate after 50 characters
+            error_message = "Error: " + str(e)
+            if len(error_message) > 115:
+                error_message = error_message[:115]
+            self.show_message(error_message, error=True)
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
@@ -312,7 +328,11 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 # Remove the tail __-__ if found
                 new_name = new_name.replace("__-__", "")
             except OSError as e:
-                self.show_message("Error: " + str(e), error=True)
+                # Construct the error message and truncate after 50 characters
+                error_message = "Error: " + str(e)
+                if len(error_message) > 115:
+                    error_message = error_message[:115]
+                self.show_message(error_message, error=True)
         else:
             # If there's no dash, default to suffix
             new_name = f"{base_name} {categories_text} {custom_text}".strip()
