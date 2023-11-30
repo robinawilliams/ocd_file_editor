@@ -17,6 +17,55 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize output directory
         self.output_directory = ""
 
+        self.browse_button = None
+        self.custom_text_frame = None
+        self.scaling_optionemenu = None
+        self.message_label = None
+        self.undo_button = None
+        self.trash_button = None
+        self.rename_button = None
+        self.placement_label = None
+        self.custom_text_label = None
+        self.custom_text_entry = None
+        self.output_directory_entry = None
+        self.output_directory_browse_button = None
+        self.remove_category_button = None
+        self.remove_category_entry = None
+        self.button_frame = None
+        self.category_entry = None
+        self.add_category_button = None
+        self.add_category_button = None
+        self.file_display = None
+        self.file_display = None
+        self.last_used_display = None
+        self.last_used_display_label = None
+        self.last_used_file_button = None
+        self.clear_button = None
+        self.message_label_frame = None
+        self.last_used_frame = None
+        self.category_frame = None
+        self.cat_top_frame = None
+        self.settings_top_frame = None
+        self.file_label = None
+        self.settings_frame = None
+        self.settings_label = None
+        self.scaling_label = None
+        self.appearance_mode_menu = None
+        self.appearance_mode_label = None
+        self.button_group_frame = None
+        self.folder_operations_frame = None
+        self.home_top_frame = None
+        self.home_scrollable_frame_window = None
+        self.home_scrollable_frame = None
+        self.home_scrollbar = None
+        self.home_canvas = None
+        self.home_frame = None
+        self.settings_button = None
+        self.add_remove_categories = None
+        self.home_button = None
+        self.navigation_frame_label = None
+        self.navigation_frame = None
+
         # Drag and drop
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
