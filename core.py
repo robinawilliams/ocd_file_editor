@@ -10,8 +10,11 @@ import configparser
 config = configparser.ConfigParser()
 config.read('config.ini')
 
+"""
+Configuration
+"""
 
-# Configuration:
+
 def load_configuration():
     # Read the settings
     move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
@@ -30,7 +33,11 @@ def load_configuration():
             default_placement_var)
 
 
-# File Operations ###
+"""
+File Operations
+"""
+
+
 def move_file_to_trash(self):
     try:
         if self.selected_file:
@@ -112,7 +119,7 @@ def update_file_display(self):
 
         # Construct the new name
         new_name = os.path.splitext(base_file_name)[0] + " " + custom_text + " " + " ".join(self.queue) + \
-            os.path.splitext(base_file_name)[1]
+                   os.path.splitext(base_file_name)[1]
 
         # Remove double spaces and trailing spaces
         new_name = " ".join(new_name.split())  # Remove double spaces
@@ -199,7 +206,11 @@ def handle_rename_success(self, new_path):
         self.output_directory_entry.insert(0, self.output_directory)
 
 
-# Category Management ###
+"""
+Category Management
+"""
+
+
 def add_category(self):
     new_category = self.category_entry.get().strip()
     if new_category:
@@ -281,7 +292,11 @@ def save_categories(self):
         json.dump(self.categories, file)
 
 
-# File Renaming ###
+"""
+File Renaming
+"""
+
+
 def rename_files(self):
     if self.selected_file and (self.queue or self.custom_text_entry.get().strip()):
         custom_text = self.custom_text_entry.get().strip()

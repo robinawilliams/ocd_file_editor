@@ -64,7 +64,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              command=self.settings_button_event)
         self.settings_button.grid(row=4, column=0, sticky="ew")
 
-        # home_window ###
+        """
+        home_window
+        """
         # Create home frame
         self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.home_frame.grid(row=0, column=1, sticky="nsew")
@@ -206,7 +208,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # category_window ###
+        """
+        category_window
+        """
         # Create add/remove categories frame
         self.category_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.category_frame.grid_columnconfigure(0, weight=1)
@@ -220,7 +224,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                        font=ctk.CTkFont(size=15, weight="bold"))
         self.file_label.grid(row=0, column=0, padx=5, pady=5)
 
-        # settings_window ###
+        """
+        settings_window
+        """
         # Create settings frame
         self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.settings_frame.grid_columnconfigure(0, weight=1)
@@ -254,7 +260,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      command=self.change_scaling_event)
         self.scaling_optionemenu.grid(row=3, column=1, padx=10, pady=10)
 
-        # Misc ###
+        """
+        Misc
+        """
         # Set default value for scaling
         self.scaling_optionemenu.set("100%")
 
@@ -315,12 +323,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             self.message_label.configure(text=message, text_color="white")
 
-    # Configuration and Initialization ###
+    """
+    Configuration and Initialization
+    """
     @staticmethod
     def load_configuration():
         return core.load_configuration()
 
-    # FileOperations ###
+    """
+    FileOperations
+    """
     def move_file_to_trash(self):
         core.move_file_to_trash(self)
 
@@ -351,7 +363,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def handle_rename_success(self, new_path):
         core.handle_rename_success(self, new_path)
 
-    # CategoryManagement ###
+    """
+    CategoryManagement
+    """
     def add_category(self):
         core.add_category(self)
 
@@ -371,7 +385,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def save_categories(self):
         core.save_categories(self)
 
-    # File Renaming ###
+    """
+    File Renaming
+    """
     def rename_files(self):
         core.rename_files(self)
 
