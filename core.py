@@ -148,6 +148,7 @@ def clear_selection(self):
     self.file_display.configure(text="")
     self.show_message("Selection cleared")
 
+    self.custom_text_entry.delete(0, ctk.END)
     self.output_directory = os.path.dirname(self.selected_file)
     self.output_directory_entry.delete(0, ctk.END)
     self.output_directory_entry.insert(0, self.output_directory)
