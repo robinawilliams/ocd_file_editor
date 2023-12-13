@@ -20,6 +20,7 @@ def load_configuration():
     # Directories
     initial_directory = config.get('Filepaths', 'initial_directory', fallback='~')
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
+    double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='~')
     categories_file = config.get('Filepaths', 'categories_file', fallback='~')
     weighted_categories_file = config.get('Filepaths', 'weighted_categories_file', fallback='~')
 
@@ -31,11 +32,13 @@ def load_configuration():
     open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
+    double_check_var = config.get("Settings", "double_check_var", fallback=False)
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
 
-    return (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
+    return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
+            weighted_categories_file, geometry,
             reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
-            default_placement_var)
+            default_placement_var, double_check_var)
 
 
 """
@@ -216,6 +219,32 @@ def browse_output_directory(self):
 
 
 def handle_rename_success(self, new_path):
+    # Add double check tag here
+    if self.double_check_var.get():
+        try:
+            # Get the name of the folder immediately above the current location
+            folder_name = os.path.basename(os.path.dirname(new_path))
+
+            # Expand the user's home directory in the output directory path
+            double_check_directory = os.path.expanduser(self.double_check_directory)
+
+            # Ensure the output directory exists, create it if not
+            if not os.path.exists(double_check_directory):
+                os.makedirs(double_check_directory)
+
+            # Create an empty file with the specified naming scheme
+            file_name = f"Double check {folder_name}"
+            file_path = os.path.join(double_check_directory, file_name)
+
+            with open(file_path, 'w'):
+                pass
+
+            self.show_message(f"Empty file created successfully for {folder_name}")
+
+        except Exception as e:
+            # Handle any errors that may occur
+            self.show_message(f"Error creating empty file: {str(e)}")
+
     self.selected_file = ""
     self.queue = []
     self.file_display.configure(text="")
