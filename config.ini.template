@@ -2,6 +2,7 @@
 move_text_var = False
 geometry = 1280x750+0+0
 reset_output_directory_var = True
+suggest_output_var = False
 move_up_var = False
 open_on_file_drop_var = False
 remove_duplicates_var = True
@@ -10,9 +11,11 @@ reset_var = True
 
 [Filepaths]
 initial_directory = /path/to/folder
+artist_directory = /path/to/folder
 artist_file = list_of_artists.txt
 categories_file = categories.json
 weighted_categories_file = categories_weighted.json
 
 [Logs]
 name_normalizer_log = /path/to/folder/name_normalizer.log
+ocd_file_renamer_log = /path/to/folder/ocd_file_renamer.log
