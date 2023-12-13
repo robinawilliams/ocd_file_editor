@@ -16,20 +16,22 @@ Configuration
 
 
 def load_configuration():
-    # Read the settings
-    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
-    # TODO add a fallback option for the directories
-    initial_directory = config.get('Filepaths', 'initial_directory')
-    artist_directory = config.get('Filepaths', 'artist_directory')
-    categories_file = config.get('Filepaths', 'categories_file')
-    weighted_categories_file = config.get('Filepaths', 'weighted_categories_file')
-    geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
+    # Load the configuration from the config.ini file
+    # Directories
+    initial_directory = config.get('Filepaths', 'initial_directory', fallback='~')
+    artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
+    categories_file = config.get('Filepaths', 'categories_file', fallback='~')
+    weighted_categories_file = config.get('Filepaths', 'weighted_categories_file', fallback='~')
+
+    # Variables and window geometry
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_var = config.getboolean("Settings", "suggest_output_var", fallback=False)
+    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
     open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
+    geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
 
     return (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
             reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
@@ -54,7 +56,7 @@ def move_file_to_trash(self):
                 self.custom_text_entry.delete(0, ctk.END)
                 self.show_message("File moved to trash successfully")
     except OSError as e:
-        # Construct the error message and truncate after 50 characters
+        # Construct the error message and truncate after x characters
         error_message = "Error: " + str(e)
         if len(error_message) > 115:
             error_message = error_message[:115]
@@ -73,6 +75,8 @@ def load_last_used_file(self):
             message = message[:127]
 
         self.show_message("Last used file selected: " + message + "...")
+    else:
+        self.show_message("Error: No last used file found.", error=True)
 
 
 def on_file_drop(self, event):
@@ -80,7 +84,7 @@ def on_file_drop(self, event):
     self.file_display.configure(text=os.path.basename(self.selected_file))  # Display only the filename
     self.queue = []
     self.update_file_display()
-    # Get the base file name and truncate if longer than 50 characters
+    # Get the base file name and truncate after x characters
     message = os.path.basename(self.selected_file)
     if len(message) > 127:
         message = message[:127]
@@ -91,7 +95,7 @@ def on_file_drop(self, event):
         try:
             subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
         except OSError as e:
-            # Construct the error message and truncate after 50 characters
+            # Construct the error message and truncate after x characters
             error_message = "Error: " + str(e)
             if len(error_message) > 115:
                 error_message = error_message[:115]
@@ -122,7 +126,7 @@ def update_file_display(self):
 
         # Construct the new name
         new_name = os.path.splitext(base_file_name)[0] + " " + custom_text + " " + " ".join(self.queue) + \
-                   os.path.splitext(base_file_name)[1]
+            os.path.splitext(base_file_name)[1]
 
         # Remove double spaces and trailing spaces
         new_name = " ".join(new_name.split())  # Remove double spaces
@@ -165,7 +169,7 @@ def browse_file(self):
         self.queue = []
         self.update_file_display()
 
-        # Get the base file name and truncate if longer than 127 characters
+        # Get the base file name and truncate after x characters
         message = os.path.basename(self.selected_file)
         if len(message) > 127:
             message = message[:127] + "..."
@@ -218,15 +222,11 @@ def handle_rename_success(self, new_path):
     self.custom_text_entry.delete(0, ctk.END)
     self.last_used_file = new_path
 
-    # Get the base name and truncate after 115 characters
+    # Get the base name and truncate after x characters
     last_used_name = os.path.basename(new_path)
     if len(last_used_name) > 115:
         last_used_name = last_used_name[:115]
     self.last_used_display.configure(text=last_used_name)
-
-    # TODO put suggest_output_var logic here
-    # if self.suggest_output_var.get():
-    #     pass
 
     if self.reset_output_directory_var.get():
         # Clear and reset the Output Directory to the current directory
@@ -363,11 +363,15 @@ def rename_files(self):
         else:
             new_path = os.path.join(self.output_directory, os.path.basename(new_name))
 
+        # TODO put suggest_output_var logic here
+        # if self.suggest_output_var.get():
+        #     pass
+
         try:
             os.rename(self.selected_file, new_path)
             self.handle_rename_success(new_path)
         except OSError as e:
-            # Construct the error message and truncate after 50 characters
+            # Construct the error message and truncate after x characters
             error_message = "Error: " + str(e)
             if len(error_message) > 115:
                 error_message = error_message[:115]
@@ -389,7 +393,7 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 # Remove the tail __-__ if found
                 new_name = new_name.replace("__-__", "")
             except OSError as e:
-                # Construct the error message and truncate after 50 characters
+                # Construct the error message and truncate after x characters
                 error_message = "Error: " + str(e)
                 if len(error_message) > 115:
                     error_message = error_message[:115]

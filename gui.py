@@ -34,12 +34,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = None
         self.category_entry = None
         self.add_category_button = None
-        self.add_category_button = None
-        self.file_display = None
         self.file_display = None
         self.last_used_display = None
         self.last_used_display_label = None
         self.last_used_file_button = None
+        self.last_used_file = None
         self.clear_button = None
         self.message_label_frame = None
         self.last_used_frame = None
@@ -65,6 +64,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_button = None
         self.navigation_frame_label = None
         self.navigation_frame = None
+        self.open_on_file_drop_switch = None
+        self.suffix_radio = None
+        self.first_dash_radio = None
+        self.prefix_radio = None
+        self.placement_choice = None
+        self.move_text_checkbox = None
+        self.move_up_checkbox = None
+        self.suggest_output_checkbox = None
+        self.suggest_output_checkbox = None
+        self.reset_output_directory_checkbox = None
+        self.remove_duplicates_switch = None
 
         # Read settings from the configuration file
         (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
@@ -225,14 +235,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                            command=self.rename_files)
         self.rename_button.grid(row=0, column=4, padx=5, pady=5)
 
-        # Create a frame to group the folder operations frame
-        self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.folder_operations_frame.grid(row=8, column=0, padx=10, pady=10)
-
-        # Placement Label
-        self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
-        self.placement_label.grid(row=0, column=3, padx=10, pady=5)
-
         # Create a frame to group the misc. buttons
         self.button_group_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.button_group_frame.grid(row=4, column=0, padx=10, pady=10)
@@ -275,6 +277,62 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
+        # Create a frame to group the folder operations frame
+        self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.folder_operations_frame.grid(row=8, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable resetting the Output Directory
+        self.reset_output_directory_var = ctk.BooleanVar(value=self.reset_output_directory_var)  # Default not to reset
+        self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
+                                                               text="Reset Output Directory",
+                                                               variable=self.reset_output_directory_var)
+        self.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable moving the file up one folder
+        self.suggest_output_var = ctk.BooleanVar(value=self.suggest_output_var)
+        self.suggest_output_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Suggest output",
+                                                       variable=self.suggest_output_var)
+        self.suggest_output_checkbox.grid(row=0, column=1, padx=5, pady=5)
+
+        # Checkbox to enable/disable moving the file up one folder
+        self.move_up_var = ctk.BooleanVar(value=self.move_up_var)
+        self.move_up_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Up One Folder",
+                                                variable=self.move_up_var)
+        self.move_up_checkbox.grid(row=0, column=2, padx=5, pady=5)
+
+        # Create the "Move Text" checkbox with the initial state
+        self.move_text_var = ctk.BooleanVar(value=self.move_text_var)
+        self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
+                                                  variable=self.move_text_var,
+                                                  onvalue=True, offvalue=False)
+        self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
+
+        # Variable to track the user's placement choice (prefix, suffix, or first_dash)
+        self.placement_choice = ctk.StringVar()
+        self.placement_choice.set(self.default_placement_var)  # Default to first_dash
+
+        # Placement Label
+        self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
+        self.placement_label.grid(row=0, column=4, padx=5, pady=5)
+
+        # Radio button for prefix
+        self.prefix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Prefix",
+                                               variable=self.placement_choice,
+                                               value="prefix")
+        self.prefix_radio.grid(row=0, column=5, padx=5, pady=5)
+
+        # Radio button for first_dash
+        self.first_dash_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="First Dash",
+                                                   variable=self.placement_choice,
+                                                   value="first_dash")
+        self.first_dash_radio.grid(row=0, column=6, padx=5, pady=5)
+
+        # Radio button for suffix
+        self.suffix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Suffix",
+                                               variable=self.placement_choice,
+                                               value="suffix")
+        self.suffix_radio.grid(row=0, column=7, padx=5, pady=5)
+
         """
         category_window
         """
@@ -306,6 +364,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_label = ctk.CTkLabel(self.settings_top_frame, text="Settings",
                                            font=ctk.CTkFont(size=15, weight="bold"))
         self.settings_label.grid(row=0, column=0, padx=5, pady=5)
+
+        # Checkbox to enable/disable open on drop behavior
+        self.open_on_file_drop_var = ctk.BooleanVar(value=self.open_on_file_drop_var)
+        self.open_on_file_drop_switch = ctk.CTkSwitch(self.settings_top_frame, text="Open File on Drag and Drop",
+                                                      variable=self.open_on_file_drop_var)
+        self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable for duplicate removal
+        self.remove_duplicates_var = ctk.BooleanVar(value=self.remove_duplicates_var)
+        self.remove_duplicates_switch = ctk.CTkSwitch(self.settings_top_frame,
+                                                      text="Remove Duplicates",
+                                                      variable=self.remove_duplicates_var)
+        self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
         # Select light or dark label
         self.appearance_mode_label = ctk.CTkLabel(self.settings_top_frame, text="Appearance:")
@@ -475,69 +546,5 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
 
 if __name__ == "__main__":
-    self = OCDFileRenamer()
-    app = self
-
-    # TODO Housekeeping
-    # Create the "Move Text" checkbox with the initial state
-    app.move_text_var = ctk.BooleanVar(value=self.move_text_var)
-    app.move_text_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Move Text",
-                                             variable=app.move_text_var,
-                                             onvalue=True, offvalue=False)
-    app.move_text_checkbox.grid(row=0, column=2, padx=5, pady=5)
-
-    # Checkbox to enable/disable resetting the Output Directory
-    app.reset_output_directory_var = ctk.BooleanVar(value=self.reset_output_directory_var)  # Default not to reset
-    app.reset_output_directory_checkbox = ctk.CTkCheckBox(app.folder_operations_frame,
-                                                          text="Reset Output Directory",
-                                                          variable=app.reset_output_directory_var)
-    app.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
-
-    # Checkbox to enable/disable moving the file up one folder
-    app.suggest_output_var = ctk.BooleanVar(value=self.suggest_output_var)
-    app.suggest_output_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Suggest output",
-                                                  variable=app.suggest_output_var)
-    app.suggest_output_checkbox.grid(row=0, column=1, padx=5, pady=5)
-
-    # Checkbox to enable/disable moving the file up one folder
-    app.move_up_var = ctk.BooleanVar(value=self.move_up_var)
-    app.move_up_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Move Up One Folder",
-                                           variable=app.move_up_var)
-    app.move_up_checkbox.grid(row=0, column=2, padx=5, pady=5)
-
-    # Variable to track the user's placement choice (prefix, suffix, or first_dash)
-    app.placement_choice = ctk.StringVar()
-    app.placement_choice.set(app.default_placement_var)  # Default to first_dash
-
-    # Radio button for prefix
-    app.prefix_radio = ctk.CTkRadioButton(app.folder_operations_frame, text="Prefix",
-                                          variable=app.placement_choice,
-                                          value="prefix")
-    app.prefix_radio.grid(row=0, column=4, padx=5, pady=5)
-
-    # Radio button for first_dash
-    app.first_dash_radio = ctk.CTkRadioButton(app.folder_operations_frame, text="First Dash",
-                                              variable=app.placement_choice,
-                                              value="first_dash")
-    app.first_dash_radio.grid(row=0, column=5, padx=5, pady=5)
-
-    # Radio button for suffix
-    app.suffix_radio = ctk.CTkRadioButton(app.folder_operations_frame, text="Suffix",
-                                          variable=app.placement_choice,
-                                          value="suffix")
-    app.suffix_radio.grid(row=0, column=6, padx=5, pady=5)
-
-    # Checkbox to enable/disable open on drop behavior
-    app.open_on_file_drop_var = ctk.BooleanVar(value=self.open_on_file_drop_var)
-    app.open_on_file_drop_switch = ctk.CTkSwitch(app.settings_top_frame, text="Open File on Drag and Drop",
-                                                 variable=app.open_on_file_drop_var)
-    app.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
-
-    # Checkbox to enable/disable for duplicate removal
-    app.remove_duplicates_var = ctk.BooleanVar(value=self.remove_duplicates_var)
-    app.remove_duplicates_switch = ctk.CTkSwitch(app.settings_top_frame,
-                                                 text="Remove Duplicates",
-                                                 variable=app.remove_duplicates_var)
-    app.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
-
+    app = OCDFileRenamer()
     app.mainloop()
