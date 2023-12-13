@@ -5,10 +5,12 @@ from tkinter import filedialog, messagebox
 import send2trash
 import subprocess
 import customtkinter as ctk
+import logging
 import configparser
 
 config = configparser.ConfigParser()
 config.read('config.ini')
+
 
 """
 Configuration
@@ -34,11 +36,18 @@ def load_configuration():
     default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
     double_check_var = config.get("Settings", "double_check_var", fallback=False)
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
+    ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log')
 
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             weighted_categories_file, geometry,
             reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
-            default_placement_var, double_check_var)
+            default_placement_var, double_check_var, ocd_file_renamer_log)
+
+
+def logging_setup(self):
+    # Set up logging
+    logging.basicConfig(filename=self.ocd_file_renamer_log, level=logging.INFO, filemode='a',
+                        format='%(asctime)s - %(levelname)s: %(message)s')
 
 
 """
@@ -51,16 +60,22 @@ def move_file_to_trash(self):
         if self.selected_file:
             confirmation = messagebox.askyesno("Confirm Action",
                                                "Are you sure you want to move this file to the trash?")
+            logging.info(f"'{self.selected_file}' selected for deletion.")
             if confirmation:
                 send2trash.send2trash(self.selected_file)
                 self.selected_file = ""
                 self.queue = []
                 self.file_display.configure(text="")
                 self.custom_text_entry.delete(0, ctk.END)
+                logging.info(f"File moved to trash.")
                 self.show_message("File moved to trash successfully")
+        else:
+            logging.error("No file selected. Cannot move to trash.")
+            self.show_message("No file selected. Cannot move to trash.", error=True)
     except OSError as e:
         # Construct the error message and truncate after x characters
-        error_message = "Error: " + str(e)
+        error_message = f"Error: {str(e)}"
+        logging.error(error_message)
         if len(error_message) > 115:
             error_message = error_message[:115]
         self.show_message(error_message, error=True)
@@ -74,11 +89,13 @@ def load_last_used_file(self):
         self.update_file_display()
 
         message = os.path.basename(self.selected_file)
+        logging.info(f"Last used file selected: {message}")
         if len(message) > 127:
-            message = message[:127]
+            message = message[:127] + "..."
 
-        self.show_message("Last used file selected: " + message + "...")
+        self.show_message(f"Last used file selected: {message}")
     else:
+        logging.error("No last used file found.")
         self.show_message("Error: No last used file found.", error=True)
 
 
@@ -89,17 +106,20 @@ def on_file_drop(self, event):
     self.update_file_display()
     # Get the base file name and truncate after x characters
     message = os.path.basename(self.selected_file)
+    logging.info(f"File selected: {message}")
     if len(message) > 127:
-        message = message[:127]
+        message = message[:127] + "..."
 
-    self.show_message("File selected: " + message + "...")
+    self.show_message(f"File selected via drop: {message}")
 
     if self.open_on_file_drop_var.get():
         try:
             subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
+            logging.info(f"File opened: {self.selected_file}")
         except OSError as e:
             # Construct the error message and truncate after x characters
-            error_message = "Error: " + str(e)
+            error_message = f"Error: {str(e)}"
+            logging.error(error_message)
             if len(error_message) > 115:
                 error_message = error_message[:115]
             self.show_message(error_message, error=True)
@@ -117,7 +137,7 @@ def add_to_queue(self, category):
                 self.queue.append(category)
 
         self.update_file_display()
-        self.show_message("Word added: " + category)
+        self.show_message(f"Word added: {category}")
 
 
 def update_file_display(self):
@@ -150,6 +170,9 @@ def undo_last(self):
         self.queue.pop()
         self.update_file_display()
         self.show_message("Last category removed")
+    else:
+        logging.error("Nothing in the queue. Nothing to undo.")
+        self.show_message("Error: Nothing in the queue. Nothing to undo.", error=True)
 
 
 def clear_selection(self):
@@ -174,6 +197,7 @@ def browse_file(self):
 
         # Get the base file name and truncate after x characters
         message = os.path.basename(self.selected_file)
+        logging.info(f"File selected via Browse: {message}")
         if len(message) > 127:
             message = message[:127] + "..."
 
@@ -239,10 +263,12 @@ def handle_rename_success(self, new_path):
             with open(file_path, 'w'):
                 pass
 
+            logging.info(f"Empty file created successfully for {folder_name}")
             self.show_message(f"Empty file created successfully for {folder_name}")
 
         except Exception as e:
             # Handle any errors that may occur
+            logging.error(f"Error creating empty file: {str(e)}")
             self.show_message(f"Error creating empty file: {str(e)}")
 
     self.selected_file = ""
@@ -282,7 +308,7 @@ def add_category(self):
             self.save_categories()
             self.refresh_category_buttons()
             self.category_entry.delete(0, ctk.END)
-            self.show_message("Category added: " + new_category)
+            self.show_message(f"Category added: {new_category}")
         else:
             self.show_message(f"Error: '{new_category}' already exists. Skipping.", error=True)
             self.category_entry.delete(0, ctk.END)
@@ -295,7 +321,7 @@ def remove_category(self):
         self.save_categories()
         self.refresh_category_buttons()
         self.remove_category_entry.delete(0, ctk.END)
-        self.show_message("Category removed: " + category_to_remove)
+        self.show_message(f"Category removed: {category_to_remove}")
 
 
 def load_weights():
@@ -398,10 +424,12 @@ def rename_files(self):
 
         try:
             os.rename(self.selected_file, new_path)
+            logging.info(f"\nFile: '{os.path.basename(self.selected_file)}' renamed successfully. "
+                         f"\nSaved to: \n{new_path}")
             self.handle_rename_success(new_path)
         except OSError as e:
             # Construct the error message and truncate after x characters
-            error_message = "Error: " + str(e)
+            error_message = f"Error: {str(e)}"
             if len(error_message) > 115:
                 error_message = error_message[:115]
             self.show_message(error_message, error=True)
@@ -423,7 +451,7 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 new_name = new_name.replace("__-__", "")
             except OSError as e:
                 # Construct the error message and truncate after x characters
-                error_message = "Error: " + str(e)
+                error_message = f"Error: {str(e)}"
                 if len(error_message) > 115:
                     error_message = error_message[:115]
                 self.show_message(error_message, error=True)

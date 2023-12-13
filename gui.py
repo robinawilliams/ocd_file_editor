@@ -80,7 +80,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
          weighted_categories_file, geometry,
          reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
-         default_placement_var, double_check_var) = self.load_configuration()
+         default_placement_var, double_check_var, ocd_file_renamer_log) = self.load_configuration()
 
         self.move_text_var = move_text_var  # Set the move_text_var attribute
         self.initial_directory = initial_directory  # Set the initial_directory attribute
@@ -96,6 +96,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_var = remove_duplicates_var
         self.default_placement_var = default_placement_var
         self.double_check_var = double_check_var
+        self.ocd_file_renamer_log = ocd_file_renamer_log
 
         # Drag and drop
         self.drop_target_register(DND_FILES)
@@ -104,6 +105,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Load weighted categories from json file
         self.weights = self.load_weights()
 
+        # Initialize the logging
+        self.logging_setup()
         self.create_gui()
 
     def create_gui(self):
@@ -477,6 +480,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     @staticmethod
     def load_configuration():
         return core.load_configuration()
+
+    def logging_setup(self):
+        core.logging_setup(self)
 
     """
     FileOperations
