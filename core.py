@@ -18,18 +18,21 @@ Configuration
 def load_configuration():
     # Read the settings
     move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
+    # TODO add a fallback option for the directories
     initial_directory = config.get('Filepaths', 'initial_directory')
+    artist_directory = config.get('Filepaths', 'artist_directory')
     categories_file = config.get('Filepaths', 'categories_file')
     weighted_categories_file = config.get('Filepaths', 'weighted_categories_file')
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
+    suggest_output_var = config.getboolean("Settings", "suggest_output_var", fallback=False)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
     open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
 
-    return (move_text_var, initial_directory, categories_file, weighted_categories_file, geometry,
-            reset_output_directory_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
+    return (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
+            reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
             default_placement_var)
 
 
@@ -165,13 +168,42 @@ def browse_file(self):
         # Get the base file name and truncate if longer than 127 characters
         message = os.path.basename(self.selected_file)
         if len(message) > 127:
-            message = message[:127]
+            message = message[:127] + "..."
 
-        self.show_message("File selected: " + message + "...")
+        self.show_message(f"File selected: {message}")
 
 
 def browse_output_directory(self):
-    output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+    # Check if a file is selected
+    if self.selected_file:
+        if self.suggest_output_var.get():
+            base_name = os.path.basename(self.selected_file)
+
+            # Extract the artist from the filename (before the dash)
+            artist_match = re.match(r"^(.*?)\s*-\s*.*$", base_name)
+            if artist_match:
+                artist = artist_match.group(1).strip()
+
+                # Construct the artist folder path
+                artist_folder_path = os.path.join(self.artist_directory, artist)
+
+                # Check if the artist folder exists
+                if os.path.exists(artist_folder_path):
+                    initial_directory = artist_folder_path
+                else:
+                    # If the artist folder doesn't exist, use the default initial directory
+                    initial_directory = self.initial_directory
+            else:
+                # If the filename doesn't match the expected pattern, use the default initial directory
+                initial_directory = self.initial_directory
+        else:
+            initial_directory = self.initial_directory
+    else:
+        # If no file is selected, use the default initial directory
+        initial_directory = self.initial_directory
+
+    # Ask for the output directory
+    output_directory = filedialog.askdirectory(initialdir=initial_directory)
 
     if output_directory:
         self.output_directory = output_directory
@@ -185,13 +217,16 @@ def handle_rename_success(self, new_path):
     self.file_display.configure(text="")
     self.custom_text_entry.delete(0, ctk.END)
     self.last_used_file = new_path
+
     # Get the base name and truncate after 115 characters
     last_used_name = os.path.basename(new_path)
     if len(last_used_name) > 115:
         last_used_name = last_used_name[:115]
     self.last_used_display.configure(text=last_used_name)
 
-    self.show_message("File renamed and saved successfully")
+    if self.suggest_output_var.get():
+        # TODO put suggest_output_var logic here
+        pass
 
     if self.move_up_var.get():
         # Move the file up one folder
@@ -206,6 +241,8 @@ def handle_rename_success(self, new_path):
         self.output_directory_entry.delete(0, ctk.END)
         self.output_directory_entry.insert(0, self.output_directory)
 
+    self.show_message("File renamed and saved successfully")
+
 
 """
 Category Management
@@ -215,12 +252,18 @@ Category Management
 def add_category(self):
     new_category = self.category_entry.get().strip()
     if new_category:
-        self.categories.append(new_category)
-        self.categories.sort(key=lambda x: x.lower())
-        self.save_categories()
-        self.refresh_category_buttons()
-        self.category_entry.delete(0, ctk.END)
-        self.show_message("Category added: " + new_category)
+        new_category_lower = new_category.lower()  # Convert to lowercase for case-insensitive check
+        # Prevent duplicate entries in the json file
+        if new_category_lower not in map(str.lower, self.categories):
+            self.categories.append(new_category)
+            self.categories.sort(key=lambda x: x.lower())
+            self.save_categories()
+            self.refresh_category_buttons()
+            self.category_entry.delete(0, ctk.END)
+            self.show_message("Category added: " + new_category)
+        else:
+            self.show_message(f"Error: '{new_category}' already exists. Skipping.", error=True)
+            self.category_entry.delete(0, ctk.END)
 
 
 def remove_category(self):

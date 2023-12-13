@@ -456,16 +456,18 @@ if __name__ == "__main__":
     app = OCDFileRenamer()
 
     # Read settings from the configuration file
-    (move_text_var, initial_directory, categories_file, weighted_categories_file, geometry,
-     reset_output_directory_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
+    (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
+     reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
      default_placement_var) = app.load_configuration()
 
     app.move_text_var = move_text_var  # Set the move_text_var attribute
     app.initial_directory = initial_directory  # Set the initial_directory attribute
+    app.artist_directory = artist_directory  # Set the artist_directory attribute
     app.categories_file = categories_file  # Set the categories_file attribute
     app.weighted_categories_file = weighted_categories_file  # Set the weighted_categories_file attribute
     app.geometry(geometry)
     app.reset_output_directory_var = reset_output_directory_var
+    app.suggest_output_var = suggest_output_var
     app.move_up_var = move_up_var
     app.open_on_file_drop_var = open_on_file_drop_var
     app.remove_duplicates_var = remove_duplicates_var
@@ -487,10 +489,16 @@ if __name__ == "__main__":
     app.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
     # Checkbox to enable/disable moving the file up one folder
+    app.suggest_output_var = ctk.BooleanVar(value=suggest_output_var)
+    app.suggest_output_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Suggest output",
+                                           variable=app.suggest_output_var)
+    app.suggest_output_checkbox.grid(row=0, column=1, padx=5, pady=5)
+
+    # Checkbox to enable/disable moving the file up one folder
     app.move_up_var = ctk.BooleanVar(value=move_up_var)
     app.move_up_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Move Up One Folder",
                                            variable=app.move_up_var)
-    app.move_up_checkbox.grid(row=0, column=1, padx=5, pady=5)
+    app.move_up_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
     # Variable to track the user's placement choice (prefix, suffix, or first_dash)
     app.placement_choice = ctk.StringVar()
