@@ -66,6 +66,24 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.navigation_frame_label = None
         self.navigation_frame = None
 
+        # Read settings from the configuration file
+        (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
+         reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
+         default_placement_var) = self.load_configuration()
+
+        self.move_text_var = move_text_var  # Set the move_text_var attribute
+        self.initial_directory = initial_directory  # Set the initial_directory attribute
+        self.artist_directory = artist_directory  # Set the artist_directory attribute
+        self.categories_file = categories_file  # Set the categories_file attribute
+        self.weighted_categories_file = weighted_categories_file  # Set the weighted_categories_file attribute
+        self.geometry(geometry)
+        self.reset_output_directory_var = reset_output_directory_var
+        self.suggest_output_var = suggest_output_var
+        self.move_up_var = move_up_var
+        self.open_on_file_drop_var = open_on_file_drop_var
+        self.remove_duplicates_var = remove_duplicates_var
+        self.default_placement_var = default_placement_var
+
         # Drag and drop
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
@@ -375,6 +393,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
     Configuration and Initialization
     """
+
     @staticmethod
     def load_configuration():
         return core.load_configuration()
@@ -382,6 +401,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
     FileOperations
     """
+
     def move_file_to_trash(self):
         core.move_file_to_trash(self)
 
@@ -415,6 +435,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
     CategoryManagement
     """
+
     def add_category(self):
         core.add_category(self)
 
@@ -437,6 +458,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
     File Renaming
     """
+
     def rename_files(self):
         core.rename_files(self)
 
@@ -453,49 +475,32 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
 
 if __name__ == "__main__":
-    app = OCDFileRenamer()
-
-    # Read settings from the configuration file
-    (move_text_var, initial_directory, artist_directory, categories_file, weighted_categories_file, geometry,
-     reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
-     default_placement_var) = app.load_configuration()
-
-    app.move_text_var = move_text_var  # Set the move_text_var attribute
-    app.initial_directory = initial_directory  # Set the initial_directory attribute
-    app.artist_directory = artist_directory  # Set the artist_directory attribute
-    app.categories_file = categories_file  # Set the categories_file attribute
-    app.weighted_categories_file = weighted_categories_file  # Set the weighted_categories_file attribute
-    app.geometry(geometry)
-    app.reset_output_directory_var = reset_output_directory_var
-    app.suggest_output_var = suggest_output_var
-    app.move_up_var = move_up_var
-    app.open_on_file_drop_var = open_on_file_drop_var
-    app.remove_duplicates_var = remove_duplicates_var
-    app.default_placement_var = default_placement_var
+    self = OCDFileRenamer()
+    app = self
 
     # TODO Housekeeping
     # Create the "Move Text" checkbox with the initial state
-    app.move_text_var = ctk.BooleanVar(value=move_text_var)
+    app.move_text_var = ctk.BooleanVar(value=self.move_text_var)
     app.move_text_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Move Text",
                                              variable=app.move_text_var,
                                              onvalue=True, offvalue=False)
     app.move_text_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
     # Checkbox to enable/disable resetting the Output Directory
-    app.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)  # Default not to reset
+    app.reset_output_directory_var = ctk.BooleanVar(value=self.reset_output_directory_var)  # Default not to reset
     app.reset_output_directory_checkbox = ctk.CTkCheckBox(app.folder_operations_frame,
                                                           text="Reset Output Directory",
                                                           variable=app.reset_output_directory_var)
     app.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
     # Checkbox to enable/disable moving the file up one folder
-    app.suggest_output_var = ctk.BooleanVar(value=suggest_output_var)
+    app.suggest_output_var = ctk.BooleanVar(value=self.suggest_output_var)
     app.suggest_output_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Suggest output",
-                                           variable=app.suggest_output_var)
+                                                  variable=app.suggest_output_var)
     app.suggest_output_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
     # Checkbox to enable/disable moving the file up one folder
-    app.move_up_var = ctk.BooleanVar(value=move_up_var)
+    app.move_up_var = ctk.BooleanVar(value=self.move_up_var)
     app.move_up_checkbox = ctk.CTkCheckBox(app.folder_operations_frame, text="Move Up One Folder",
                                            variable=app.move_up_var)
     app.move_up_checkbox.grid(row=0, column=2, padx=5, pady=5)
@@ -523,13 +528,13 @@ if __name__ == "__main__":
     app.suffix_radio.grid(row=0, column=6, padx=5, pady=5)
 
     # Checkbox to enable/disable open on drop behavior
-    app.open_on_file_drop_var = ctk.BooleanVar(value=open_on_file_drop_var)
+    app.open_on_file_drop_var = ctk.BooleanVar(value=self.open_on_file_drop_var)
     app.open_on_file_drop_switch = ctk.CTkSwitch(app.settings_top_frame, text="Open File on Drag and Drop",
                                                  variable=app.open_on_file_drop_var)
     app.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
     # Checkbox to enable/disable for duplicate removal
-    app.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
+    app.remove_duplicates_var = ctk.BooleanVar(value=self.remove_duplicates_var)
     app.remove_duplicates_switch = ctk.CTkSwitch(app.settings_top_frame,
                                                  text="Remove Duplicates",
                                                  variable=app.remove_duplicates_var)

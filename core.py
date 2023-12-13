@@ -224,16 +224,9 @@ def handle_rename_success(self, new_path):
         last_used_name = last_used_name[:115]
     self.last_used_display.configure(text=last_used_name)
 
-    if self.suggest_output_var.get():
-        # TODO put suggest_output_var logic here
-        pass
-
-    if self.move_up_var.get():
-        # Move the file up one folder
-        parent_directory = os.path.dirname(os.path.dirname(new_path))
-        new_location = os.path.join(parent_directory, os.path.basename(new_path))
-        os.rename(new_path, new_location)
-        self.selected_file = new_location
+    # TODO put suggest_output_var logic here
+    # if self.suggest_output_var.get():
+    #     pass
 
     if self.reset_output_directory_var.get():
         # Clear and reset the Output Directory to the current directory
@@ -359,10 +352,17 @@ def rename_files(self):
 
         new_name = self.sanitize_file_name(new_name)
 
+        # If output directory is not explicitly set, then default to the same directory as the file
         if not self.output_directory:
             self.output_directory = os.path.dirname(self.selected_file)
 
-        new_path = os.path.join(self.output_directory, os.path.basename(new_name))
+        if self.move_up_var.get():
+            # Ignore the provided output directory and move the file up one folder
+            parent_directory = os.path.dirname(os.path.dirname(self.selected_file))
+            new_path = os.path.join(parent_directory, os.path.basename(new_name))
+        else:
+            new_path = os.path.join(self.output_directory, os.path.basename(new_name))
+
         try:
             os.rename(self.selected_file, new_path)
             self.handle_rename_success(new_path)
