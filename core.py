@@ -24,7 +24,6 @@ def load_configuration():
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
     double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='~')
     categories_file = config.get('Filepaths', 'categories_file', fallback='~')
-    weighted_categories_file = config.get('Filepaths', 'weighted_categories_file', fallback='~')
 
     # Variables and window geometry
     reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
@@ -39,7 +38,7 @@ def load_configuration():
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log')
 
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
-            weighted_categories_file, geometry,
+            geometry,
             reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
             default_placement_var, double_check_var, ocd_file_renamer_log)
 
@@ -127,14 +126,9 @@ def on_file_drop(self, event):
 
 def add_to_queue(self, category):
     if self.selected_file:
-        if category in self.weights:
-            # Check if the category is not already in the queue
-            if category not in self.queue:
-                self.queue.insert(self.weights[category] - 1, category)
-        else:
-            # Check if the category is not already in the queue
-            if category not in self.queue:
-                self.queue.append(category)
+        # Check if the category is not already in the queue
+        if category not in self.queue:
+            self.queue.append(category)
 
         self.update_file_display()
         self.show_message(f"Word added: {category}")
@@ -302,11 +296,11 @@ def add_category(self):
     if new_category:
         new_category_lower = new_category.lower()  # Convert to lowercase for case-insensitive check
         # Prevent duplicate entries in the json file
-        if new_category_lower not in map(str.lower, self.categories):
-            self.categories.append(new_category)
-            self.categories.sort(key=lambda x: x.lower())
+        if new_category_lower not in map(str.lower, self.categories.keys()):
+            self.categories[new_category] = None  # Assuming values don't matter for the purposes of the code
+            sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
             self.save_categories()
-            self.refresh_category_buttons()
+            self.refresh_category_buttons(sorted_categories)
             self.category_entry.delete(0, ctk.END)
             self.show_message(f"Category added: {new_category}")
         else:
@@ -317,19 +311,19 @@ def add_category(self):
 def remove_category(self):
     category_to_remove = self.remove_category_entry.get().strip()
     if category_to_remove in self.categories:
-        self.categories.remove(category_to_remove)
+        del self.categories[category_to_remove]
+        sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
         self.save_categories()
-        self.refresh_category_buttons()
+        self.refresh_category_buttons(sorted_categories)
         self.remove_category_entry.delete(0, ctk.END)
         self.show_message(f"Category removed: {category_to_remove}")
 
 
-def load_weights():
-    weighted_categories_file = config.get("Filepaths", "weighted_categories_file")
+def load_weights(self):
     try:
-        with open(weighted_categories_file, 'r') as f:
-            weights = json.load(f)
-        return weights
+        with open(self.categories_file, 'r') as f:
+            categories = json.load(f)
+        return categories
     except FileNotFoundError:
         print(f"Error: json file not found.")
         return {}  # Return an empty dictionary if the file is not found
@@ -337,20 +331,19 @@ def load_weights():
 
 def categories_buttons_initialize(self):
     # Load categories from a configuration file
-    categories_file = config.get("Filepaths", "categories_file")
     try:
-        with open(categories_file, "r") as file:
+        with open(self.categories_file, "r") as file:
             self.categories = json.load(file)
     except (FileNotFoundError, json.JSONDecodeError):
-        self.categories = []
+        self.categories = {}
 
-    # Sort the categories alphabetically, case-insensitive
-    self.categories.sort(key=lambda x: x.lower())
+    # Sort the category keys alphabetically, case-insensitive
+    sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
 
     self.buttons = []
     row = 0
     col = 0
-    for category in self.categories:
+    for category in sorted_categories:
         button = ctk.CTkButton(self.button_frame, text=category,
                                command=lambda c=category: self.add_to_queue(c))
         button.grid(row=row, column=col, padx=5, pady=5)
@@ -361,14 +354,17 @@ def categories_buttons_initialize(self):
             row += 1
 
 
-def refresh_category_buttons(self):
+def refresh_category_buttons(self, sorted_categories=None):
+    if sorted_categories is None:
+        sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
+
     for button in self.buttons:
         button.destroy()
 
     self.buttons = []
     row = 0
     col = 0
-    for category in self.categories:
+    for category in sorted_categories:
         button = ctk.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
         button.grid(row=row, column=col, padx=5, pady=5)
         self.buttons.append(button)
@@ -379,8 +375,7 @@ def refresh_category_buttons(self):
 
 
 def save_categories(self):
-    categories_file = config.get("Filepaths", "categories_file")
-    with open(categories_file, "w") as file:
+    with open(self.categories_file, "w") as file:
         json.dump(self.categories, file)
 
 

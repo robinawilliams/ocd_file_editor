@@ -78,7 +78,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Read settings from the configuration file
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
-         weighted_categories_file, geometry,
+         geometry,
          reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
          default_placement_var, double_check_var, ocd_file_renamer_log) = self.load_configuration()
 
@@ -87,7 +87,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_directory = artist_directory  # Set the artist_directory attribute
         self.double_check_directory = double_check_directory  # Set the double_check_directory attribute
         self.categories_file = categories_file  # Set the categories_file attribute
-        self.weighted_categories_file = weighted_categories_file  # Set the weighted_categories_file attribute
         self.geometry(geometry)
         self.reset_output_directory_var = reset_output_directory_var
         self.suggest_output_var = suggest_output_var
@@ -474,7 +473,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.message_label.configure(text=message, text_color="white")
 
     """
-    Configuration and Initialization
+    Configuration
     """
 
     @staticmethod
@@ -485,7 +484,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.logging_setup(self)
 
     """
-    FileOperations
+    File Operations
     """
 
     def move_file_to_trash(self):
@@ -519,7 +518,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.handle_rename_success(self, new_path)
 
     """
-    CategoryManagement
+    Category Management
     """
 
     def add_category(self):
@@ -528,14 +527,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_category(self):
         core.remove_category(self)
 
-    @staticmethod
-    def load_weights():
-        return core.load_weights()
+    def load_weights(self):
+        return core.load_weights(self)
 
     def categories_buttons_initialize(self):
         core.categories_buttons_initialize(self)
 
-    def refresh_category_buttons(self):
+    def refresh_category_buttons(self, sorted_categories=None):
         core.refresh_category_buttons(self)
 
     def save_categories(self):
