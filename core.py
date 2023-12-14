@@ -316,16 +316,6 @@ def remove_category(self):
         self.show_message(f"Category removed: {category_to_remove}")
 
 
-def load_weights(self):
-    try:
-        with open(self.categories_file, 'r') as f:
-            categories = json.load(f)
-        return categories
-    except FileNotFoundError as e:
-        logging.error(f"Error: json file not found. {str(e)}")
-        return {}  # Return an empty dictionary if the file is not found
-
-
 def categories_buttons_initialize(self):
     # Load categories from a configuration file
     try:
@@ -389,8 +379,8 @@ def rename_files(self):
         if self.remove_duplicates_var.get():
             self.queue = list(dict.fromkeys(self.queue))
 
-        weighted_categories = [category for category in self.queue if category in self.weights]
-        weighted_categories.sort(key=lambda category: self.weights[category])
+        weighted_categories = [category for category in self.queue if category in self.categories]
+        weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
         new_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
 

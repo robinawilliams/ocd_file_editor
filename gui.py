@@ -101,9 +101,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
 
-        # Load weighted categories from json file
-        self.weights = self.load_weights()
-
         self.create_gui()
 
     def create_gui(self):
@@ -521,9 +518,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def remove_category(self):
         core.remove_category(self)
-
-    def load_weights(self):
-        return core.load_weights(self)
 
     def categories_buttons_initialize(self):
         core.categories_buttons_initialize(self)
