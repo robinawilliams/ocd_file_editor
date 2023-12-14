@@ -363,7 +363,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Settings label
         self.settings_label = ctk.CTkLabel(self.settings_top_frame, text="Settings",
                                            font=ctk.CTkFont(size=15, weight="bold"))
-        self.settings_label.grid(row=0, column=0, padx=5, pady=5)
+        self.settings_label.grid(row=0, column=0, padx=5, pady=5, columnspan=5)
 
         # Checkbox to enable/disable open on drop behavior
         self.open_on_file_drop_var = ctk.BooleanVar(value=self.open_on_file_drop_var)

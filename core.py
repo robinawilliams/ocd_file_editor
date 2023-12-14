@@ -14,9 +14,15 @@ Configuration
 
 
 def load_configuration():
+    # Check if config.ini file exists
+    config_file_path = 'config.ini'
+    if not os.path.exists(config_file_path):
+        print(f"Error: {config_file_path} not found. Please create the config file and try again.")
+        quit()
+
     # Load the configuration from the config.ini file
     config = configparser.ConfigParser()
-    config.read('config.ini')
+    config.read(config_file_path)
 
     # Directories
     initial_directory = config.get('Filepaths', 'initial_directory', fallback='~')
@@ -140,12 +146,15 @@ def update_file_display(self):
         base_file_name = os.path.basename(self.selected_file)
 
         # Construct the new name
-        new_name = os.path.splitext(base_file_name)[0] + " " + custom_text + " " + " ".join(self.queue) + \
+        new_name_parts = [
+            os.path.splitext(base_file_name)[0],
+            custom_text,
+            " ".join(self.queue),
             os.path.splitext(base_file_name)[1]
+        ]
 
-        # Remove double spaces and trailing spaces
-        new_name = " ".join(new_name.split())  # Remove double spaces
-        new_name = new_name.strip()  # Remove trailing spaces
+        # Join the parts and remove double spaces and trailing spaces
+        new_name = " ".join(part for part in new_name_parts if part).strip()
 
         if len(new_name) > 250:
             messagebox.showinfo("Length Exceeded", "The new file name exceeds 250 characters. Please shorten it.")
