@@ -8,10 +8,6 @@ import customtkinter as ctk
 import logging
 import configparser
 
-config = configparser.ConfigParser()
-config.read('config.ini')
-
-
 """
 Configuration
 """
@@ -19,6 +15,9 @@ Configuration
 
 def load_configuration():
     # Load the configuration from the config.ini file
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
     # Directories
     initial_directory = config.get('Filepaths', 'initial_directory', fallback='~')
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
@@ -26,27 +25,25 @@ def load_configuration():
     categories_file = config.get('Filepaths', 'categories_file', fallback='~')
 
     # Variables and window geometry
-    reset_output_directory_var = config.get("Settings", "reset_output_directory_var", fallback=False)
+    reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_var = config.getboolean("Settings", "suggest_output_var", fallback=False)
     move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
     move_up_var = config.getboolean("Settings", "move_up_var", fallback=False)
-    open_on_file_drop_var = config.get("Settings", "open_on_file_drop_var", fallback=False)
+    open_on_file_drop_var = config.getboolean("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
-    default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
-    double_check_var = config.get("Settings", "double_check_var", fallback=False)
+    double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log')
+    default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
+
+    # Initialize logging
+    logging.basicConfig(filename=ocd_file_renamer_log, level=logging.INFO, filemode='a',
+                        format='%(asctime)s - %(levelname)s: %(message)s')
 
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry,
             reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
             default_placement_var, double_check_var, ocd_file_renamer_log)
-
-
-def logging_setup(self):
-    # Set up logging
-    logging.basicConfig(filename=self.ocd_file_renamer_log, level=logging.INFO, filemode='a',
-                        format='%(asctime)s - %(levelname)s: %(message)s')
 
 
 """
@@ -324,8 +321,8 @@ def load_weights(self):
         with open(self.categories_file, 'r') as f:
             categories = json.load(f)
         return categories
-    except FileNotFoundError:
-        print(f"Error: json file not found.")
+    except FileNotFoundError as e:
+        logging.error(f"Error: json file not found. {str(e)}")
         return {}  # Return an empty dictionary if the file is not found
 
 

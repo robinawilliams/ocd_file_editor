@@ -6,9 +6,9 @@ move_text_var = False
 move_up_var = False
 open_on_file_drop_var = False
 remove_duplicates_var = True
-default_placement_var = first_dash
 double_check_var = False
 reset_var = True
+default_placement_var = first_dash
 
 [Filepaths]
 initial_directory = /path/to/folder

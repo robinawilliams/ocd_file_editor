@@ -104,8 +104,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Load weighted categories from json file
         self.weights = self.load_weights()
 
-        # Initialize the logging
-        self.logging_setup()
         self.create_gui()
 
     def create_gui(self):
@@ -479,9 +477,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     @staticmethod
     def load_configuration():
         return core.load_configuration()
-
-    def logging_setup(self):
-        core.logging_setup(self)
 
     """
     File Operations
