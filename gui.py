@@ -75,12 +75,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.reset_output_directory_checkbox = None
         self.remove_duplicates_switch = None
         self.double_check_switch = None
+        self.activate_logging_switch = None
 
         # Read settings from the configuration file
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
          geometry,
          reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
-         default_placement_var, double_check_var, ocd_file_renamer_log) = self.load_configuration()
+         default_placement_var, double_check_var, activate_logging_var, ocd_file_renamer_log) = (
+            self.load_configuration())
 
         self.move_text_var = move_text_var  # Set the move_text_var attribute
         self.initial_directory = initial_directory  # Set the initial_directory attribute
@@ -95,6 +97,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_var = remove_duplicates_var
         self.default_placement_var = default_placement_var
         self.double_check_var = double_check_var
+        self.activate_logging_var = activate_logging_var
         self.ocd_file_renamer_log = ocd_file_renamer_log
 
         # Drag and drop
@@ -383,6 +386,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_switch = ctk.CTkSwitch(self.settings_top_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
         self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
+
+        # Create the "Double check" checkbox with the initial state
+        self.activate_logging_var = ctk.BooleanVar(value=self.activate_logging_var)
+        self.activate_logging_switch = ctk.CTkSwitch(self.settings_top_frame, text="Activate Logging",
+                                                 variable=self.activate_logging_var)
+        self.activate_logging_switch.grid(row=1, column=3, padx=10, pady=10)
 
         # Select light or dark label
         self.appearance_mode_label = ctk.CTkLabel(self.settings_top_frame, text="Appearance:")

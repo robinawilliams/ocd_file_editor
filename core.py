@@ -38,6 +38,7 @@ def load_configuration():
     open_on_file_drop_var = config.getboolean("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
+    activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
     geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log')
     default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
@@ -49,7 +50,7 @@ def load_configuration():
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry,
             reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
-            default_placement_var, double_check_var, ocd_file_renamer_log)
+            default_placement_var, double_check_var, activate_logging_var, ocd_file_renamer_log)
 
 
 """
@@ -62,22 +63,26 @@ def move_file_to_trash(self):
         if self.selected_file:
             confirmation = messagebox.askyesno("Confirm Action",
                                                "Are you sure you want to move this file to the trash?")
-            logging.info(f"'{self.selected_file}' selected for deletion.")
+            if self.activate_logging_var.get():
+                logging.info(f"'{self.selected_file}' selected for deletion.")
             if confirmation:
                 send2trash.send2trash(self.selected_file)
                 self.selected_file = ""
                 self.queue = []
                 self.file_display.configure(text="")
                 self.custom_text_entry.delete(0, ctk.END)
-                logging.info(f"File moved to trash.")
+                if self.activate_logging_var.get():
+                    logging.info(f"File moved to trash.")
                 self.show_message("File moved to trash successfully")
         else:
-            logging.error("No file selected. Cannot move to trash.")
+            if self.activate_logging_var.get():
+                logging.error("No file selected. Cannot move to trash.")
             self.show_message("No file selected. Cannot move to trash.", error=True)
     except OSError as e:
         # Construct the error message and truncate after x characters
         error_message = f"Error: {str(e)}"
-        logging.error(error_message)
+        if self.activate_logging_var.get():
+            logging.error(error_message)
         if len(error_message) > 115:
             error_message = error_message[:115]
         self.show_message(error_message, error=True)
@@ -91,13 +96,15 @@ def load_last_used_file(self):
         self.update_file_display()
 
         message = os.path.basename(self.selected_file)
-        logging.info(f"Last used file selected: {message}")
+        if self.activate_logging_var.get():
+            logging.info(f"Last used file selected: {message}")
         if len(message) > 127:
             message = message[:127] + "..."
 
         self.show_message(f"Last used file selected: {message}")
     else:
-        logging.error("No last used file found.")
+        if self.activate_logging_var.get():
+            logging.error("No last used file found.")
         self.show_message("Error: No last used file found.", error=True)
 
 
@@ -109,7 +116,8 @@ def on_file_drop(self, event):
 
     # Get the base file name and truncate after x characters
     message = os.path.basename(self.selected_file)
-    logging.info(f"File selected: {message}")
+    if self.activate_logging_var.get():
+        logging.info(f"File selected: {message}")
     if len(message) > 127:
         message = message[:127] + "..."
 
@@ -118,11 +126,13 @@ def on_file_drop(self, event):
     if self.open_on_file_drop_var.get():
         try:
             subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
-            logging.info(f"File opened: {self.selected_file}")
+            if self.activate_logging_var.get():
+                logging.info(f"File opened: {self.selected_file}")
         except OSError as e:
             # Construct the error message and truncate after x characters
             error_message = f"Error: {str(e)}"
-            logging.error(error_message)
+            if self.activate_logging_var.get():
+                logging.error(error_message)
             if len(error_message) > 115:
                 error_message = error_message[:115]
             self.show_message(error_message, error=True)
@@ -172,7 +182,8 @@ def undo_last(self):
         self.update_file_display()
         self.show_message("Last category removed")
     else:
-        logging.error("Nothing in the queue. Nothing to undo.")
+        if self.activate_logging_var.get():
+            logging.error("Nothing in the queue. Nothing to undo.")
         self.show_message("Error: Nothing in the queue. Nothing to undo.", error=True)
 
 
@@ -198,7 +209,8 @@ def browse_file(self):
 
         # Get the base file name and truncate after x characters
         message = os.path.basename(self.selected_file)
-        logging.info(f"File selected via Browse: {message}")
+        if self.activate_logging_var.get():
+            logging.info(f"File selected via Browse: {message}")
         if len(message) > 127:
             message = message[:127] + "..."
 
@@ -263,12 +275,14 @@ def handle_rename_success(self, new_path):
             with open(file_path, 'w'):
                 pass
 
-            logging.info(f"Empty file created successfully for {folder_name}")
+            if self.activate_logging_var.get():
+                logging.info(f"Empty file created successfully for {folder_name}")
             self.show_message(f"Empty file created successfully for {folder_name}")
 
         except Exception as e:
             # Handle any errors that may occur
-            logging.error(f"Error creating empty file: {str(e)}")
+            if self.activate_logging_var.get():
+                logging.error(f"Error creating empty file: {str(e)}")
             self.show_message(f"Error creating empty file: {str(e)}")
 
     self.selected_file = ""
@@ -415,8 +429,9 @@ def rename_files(self):
 
         try:
             os.rename(self.selected_file, new_path)
-            logging.info(f"\nFile: '{os.path.basename(self.selected_file)}' renamed successfully. "
-                         f"\nSaved to: \n{new_path}")
+            if self.activate_logging_var.get():
+                logging.info(f"\nFile: '{os.path.basename(self.selected_file)}' renamed successfully. "
+                             f"\nSaved to: \n{new_path}")
             self.handle_rename_success(new_path)
         except OSError as e:
             # Construct the error message and truncate after x characters
