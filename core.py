@@ -100,6 +100,7 @@ def on_file_drop(self, event):
     self.file_display.configure(text=os.path.basename(self.selected_file))  # Display only the filename
     self.queue = []
     self.update_file_display()
+
     # Get the base file name and truncate after x characters
     message = os.path.basename(self.selected_file)
     logging.info(f"File selected: {message}")
@@ -234,7 +235,6 @@ def browse_output_directory(self):
 
 
 def handle_rename_success(self, new_path):
-    # Add double check tag here
     if self.double_check_var.get():
         try:
             # Get the name of the folder immediately above the current location
@@ -294,7 +294,7 @@ def add_category(self):
         new_category_lower = new_category.lower()  # Convert to lowercase for case-insensitive check
         # Prevent duplicate entries in the json file
         if new_category_lower not in map(str.lower, self.categories.keys()):
-            self.categories[new_category] = None  # Assuming values don't matter for the purposes of the code
+            self.categories[new_category] = None
             sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
             self.save_categories()
             self.refresh_category_buttons(sorted_categories)
@@ -317,7 +317,7 @@ def remove_category(self):
 
 
 def categories_buttons_initialize(self):
-    # Load categories from a configuration file
+    # Load categories
     try:
         with open(self.categories_file, "r") as file:
             self.categories = json.load(file)
@@ -387,7 +387,7 @@ def rename_files(self):
         if self.move_text_var.get():
             new_name = self.move_text(new_name)
 
-        new_name = self.sanitize_file_name(new_name)
+        new_name = " ".join(new_name.split()).strip()
 
         # If output directory is not explicitly set, then default to the same directory as the file
         if not self.output_directory:
@@ -452,8 +452,3 @@ def move_text(name):
         prefix, moved_text, suffix, extension = match.groups()
         name = f"{prefix} {suffix} {moved_text}.{extension}"
     return name
-
-
-def sanitize_file_name(name):
-    # Remove double spaces and trailing spaces
-    return " ".join(name.split()).strip()

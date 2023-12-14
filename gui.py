@@ -542,10 +542,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def move_text(name):
         return core.move_text(name)
 
-    @staticmethod
-    def sanitize_file_name(name):
-        return core.sanitize_file_name(name)
-
 
 if __name__ == "__main__":
     app = OCDFileRenamer()
