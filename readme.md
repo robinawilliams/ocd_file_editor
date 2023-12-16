@@ -71,7 +71,7 @@ This project is a work in progress. Check the issues section for known problems.
 If you like this project, please share it.
 
 ## FAQ
-**Q: I get the error "import _tkinter # If this fails, your Python may not be configured for Tk". How do I resolve this?
+**Q: I get the error "import _tkinter # If this fails, your Python may not be configured for Tk". How do I resolve this?**
 
 A: Install tkinter.
    - Arch: `sudo pacman -S tk`
