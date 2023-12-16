@@ -1,22 +1,39 @@
 [Settings]
+; Starting size for window
 geometry = 1280x750+0+0
+; Reset the output directory on each run
 reset_output_directory_var = True
-suggest_output_var = False
+; Suggest an output directory
+suggest_output_directory_var = False
+; Set output directory to one folder above the current directory
+move_up_directory_var = False
+; Move text between - and __-__
 move_text_var = False
-move_up_var = False
+; Open file when drag and dropped into window
 open_on_file_drop_var = False
+; Remove duplicates in the queue
 remove_duplicates_var = True
+; Create a double check reminder file
 double_check_var = False
-reset_var = True
+; Activate logging
+activate_logging_var = False
+; Set the default placement for the words to be placed (prefix, first_dash, suffix)
 default_placement_var = first_dash
 
 [Filepaths]
+; Starting location for browse
 initial_directory = /path/to/folder
+; Directory with folders to use for suggestions
 artist_directory = /path/to/folder
+; Directory to save double check reminders
 double_check_directory = /path/to/folder
+; List of artists to search
 artist_file = list_of_artists.txt
+; JSON Dictionary containing the categories/genres and weights
 categories_file = categories.json
 
 [Logs]
+; Name Normalizer log
 name_normalizer_log = /path/to/folder/name_normalizer.log
+; OCD File Renamer log
 ocd_file_renamer_log = /path/to/folder/ocd_file_renamer.log

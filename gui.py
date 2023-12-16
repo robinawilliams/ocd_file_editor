@@ -1,23 +1,29 @@
-import customtkinter as ctk
-from tkinterdnd2 import DND_FILES, TkinterDnD
-import core
+import customtkinter as ctk  # Customtkinter for a modern gui
+from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
+import core  # Main logic for the program
 
 
 class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def __init__(self, *args, **kwargs):
+        # Call the __init__ method of the parent class (TkinterDnD) with the given arguments
         super().__init__(*args, **kwargs)
+
+        # Determine TkinterDnD version and store it in the TkdndVersion attribute
         self.TkdndVersion = TkinterDnD._require(self)
 
+        # Set the window title and geometry
         self.title("OCD File Renamer")
         self.geometry(f"{1280}x{750}")
 
+        # Initialize instance variables for selected file and queue
         self.selected_file = ""
+        self.output_directory = ""
         self.queue = []
 
-        # Initialize output directory
-        self.output_directory = ""
+        # Initialize GUI elements (buttons, labels, frames, etc.)
+        # Note: Some attributes are initialized as None and later assigned specific GUI elements
 
-        self.browse_button = None
+        self.browse_file_button = None
         self.custom_text_frame = None
         self.scaling_optionemenu = None
         self.message_label = None
@@ -46,6 +52,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.cat_top_frame = None
         self.settings_top_frame = None
         self.file_label = None
+        self.coming_soon_label = None  # TODO Remove once add/remove categories window is running
         self.settings_frame = None
         self.settings_label = None
         self.scaling_label = None
@@ -70,29 +77,31 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.prefix_radio = None
         self.placement_choice = None
         self.move_text_checkbox = None
-        self.move_up_checkbox = None
-        self.suggest_output_checkbox = None
+        self.move_up_directory_checkbox = None
+        self.suggest_output_directory_checkbox = None
         self.reset_output_directory_checkbox = None
         self.remove_duplicates_switch = None
         self.double_check_switch = None
         self.activate_logging_switch = None
 
-        # Read settings from the configuration file
+        # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
          geometry,
-         reset_output_directory_var, suggest_output_var, move_up_var, open_on_file_drop_var, remove_duplicates_var,
+         reset_output_directory_var, suggest_output_directory_var, move_up_directory_var, open_on_file_drop_var,
+         remove_duplicates_var,
          default_placement_var, double_check_var, activate_logging_var, ocd_file_renamer_log) = (
             self.load_configuration())
 
-        self.move_text_var = move_text_var  # Set the move_text_var attribute
-        self.initial_directory = initial_directory  # Set the initial_directory attribute
-        self.artist_directory = artist_directory  # Set the artist_directory attribute
-        self.double_check_directory = double_check_directory  # Set the double_check_directory attribute
-        self.categories_file = categories_file  # Set the categories_file attribute
+        # Set instance variables with the values from the configuration file
+        self.move_text_var = move_text_var
+        self.initial_directory = initial_directory
+        self.artist_directory = artist_directory
+        self.double_check_directory = double_check_directory
+        self.categories_file = categories_file
         self.geometry(geometry)
         self.reset_output_directory_var = reset_output_directory_var
-        self.suggest_output_var = suggest_output_var
-        self.move_up_var = move_up_var
+        self.suggest_output_directory_var = suggest_output_directory_var
+        self.move_up_directory_var = move_up_directory_var
         self.open_on_file_drop_var = open_on_file_drop_var
         self.remove_duplicates_var = remove_duplicates_var
         self.default_placement_var = default_placement_var
@@ -100,14 +109,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.activate_logging_var = activate_logging_var
         self.ocd_file_renamer_log = ocd_file_renamer_log
 
-        # Drag and drop
+        # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
 
+        # Create the GUI elements
         self.create_gui()
 
     def create_gui(self):
-        # set grid layout 1x2
+        # Set up grid layout with 1 row and 2 columns, configuring weights for resizing
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
@@ -116,11 +126,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
+        # Create label for the navigation frame
         self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="OCD \nFile \nRenamer",
                                                    compound="left",
                                                    font=ctk.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=5, pady=5)
 
+        # Create Home button with specific styling and command
         self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
                                          text="Home",
                                          fg_color="transparent", text_color=("gray10", "gray90"),
@@ -128,6 +140,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                          anchor="w", command=self.home_button_event)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
+        # Create button for adding/removing categories with specific styling and command
         self.add_remove_categories = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
                                                    border_spacing=10, text="Categories",
                                                    fg_color="transparent", text_color=("gray10", "gray90"),
@@ -136,6 +149,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                    command=self.add_remove_categories_event)
         self.add_remove_categories.grid(row=2, column=0, sticky="ew")
 
+        # Create Settings button with specific styling and command
         self.settings_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
                                              text="Settings",
                                              fg_color="transparent", text_color=("gray10", "gray90"),
@@ -163,23 +177,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_canvas.grid(row=0, column=0, sticky="nsew")
         self.home_scrollbar.grid(row=0, column=1, sticky="ns")
 
-        # Create a frame inside the canvas which will be scrolled
+        # Create a frame inside the canvas for scrollable content
         self.home_scrollable_frame = ctk.CTkFrame(self.home_canvas, corner_radius=0)
         self.home_scrollable_frame_window = self.home_canvas.create_window((0, 0), window=self.home_scrollable_frame,
                                                                            anchor="nw")
 
-        # Bind the canvas and frame to configure scroll region and canvas scrolling
+        # Bind canvas and frame for scrolling functionality
         self.home_canvas.bind('<Configure>', self.on_canvas_configure)
         self.home_scrollable_frame.bind('<Configure>', self.on_frame_configure)
 
-        # Top frame
+        # Top frame in the home window
         self.home_top_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.home_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
-        # Browse Button
-        self.browse_button = ctk.CTkButton(self.home_top_frame, text="Browse",
-                                           command=self.browse_file)
-        self.browse_button.grid(row=0, column=0, padx=5, pady=5)
+        # Browse file button
+        self.browse_file_button = ctk.CTkButton(self.home_top_frame, text="Browse File",
+                                                command=self.browse_file)
+        self.browse_file_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Selected File Display
         self.file_display = ctk.CTkLabel(self.home_top_frame, text="")
@@ -189,9 +203,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=10)
 
+        # Initialize category buttons
         self.categories_buttons_initialize()
 
-        # Create a frame for the category-related elements
+        # Frame for category-related elements
         self.category_frame = ctk.CTkFrame(self.home_scrollable_frame)
         self.category_frame.grid(row=2, column=0, padx=10, pady=10)
 
@@ -212,7 +227,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=250)
         self.remove_category_entry.grid(row=0, column=3, padx=5)
 
-        # Create a frame to group the custom text entry and output directory
+        # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.custom_text_frame.grid(row=3, column=0, padx=10, pady=10)
 
@@ -238,7 +253,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                            command=self.rename_files)
         self.rename_button.grid(row=0, column=4, padx=5, pady=5)
 
-        # Create a frame to group the misc. buttons
+        # Frame to group miscellaneous buttons
         self.button_group_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.button_group_frame.grid(row=4, column=0, padx=10, pady=10)
 
@@ -260,7 +275,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                    command=self.load_last_used_file)
         self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
-        # Create a frame to display the last used file
+        # Frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.last_used_frame.grid(row=6, column=0, padx=5, pady=5)
 
@@ -272,7 +287,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_display = ctk.CTkLabel(self.last_used_frame, text="")
         self.last_used_display.grid(row=0, column=1, padx=5, pady=5)
 
-        # Create a frame to display messages
+        # Frame to display messages
         self.message_label_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.message_label_frame.grid(row=7, column=0, padx=10, pady=10)
 
@@ -280,30 +295,31 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # Create a frame to group the folder operations frame
+        # Frame to group folder operations
         self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.folder_operations_frame.grid(row=8, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable resetting the Output Directory
-        self.reset_output_directory_var = ctk.BooleanVar(value=self.reset_output_directory_var)  # Default not to reset
+        self.reset_output_directory_var = ctk.BooleanVar(value=self.reset_output_directory_var)
         self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
-                                                               text="Reset Output Directory",
+                                                               text="Reset Output Dir.",
                                                                variable=self.reset_output_directory_var)
         self.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable moving the file up one folder
-        self.suggest_output_var = ctk.BooleanVar(value=self.suggest_output_var)
-        self.suggest_output_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Suggest output",
-                                                       variable=self.suggest_output_var)
-        self.suggest_output_checkbox.grid(row=0, column=1, padx=5, pady=5)
+        # Checkbox to enable/disable suggesting an output directory
+        self.suggest_output_directory_var = ctk.BooleanVar(value=self.suggest_output_directory_var)
+        self.suggest_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Suggest Output "
+                                                                                                    "Dir.",
+                                                                 variable=self.suggest_output_directory_var)
+        self.suggest_output_directory_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
         # Checkbox to enable/disable moving the file up one folder
-        self.move_up_var = ctk.BooleanVar(value=self.move_up_var)
-        self.move_up_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Up One Folder",
-                                                variable=self.move_up_var)
-        self.move_up_checkbox.grid(row=0, column=2, padx=5, pady=5)
+        self.move_up_directory_var = ctk.BooleanVar(value=self.move_up_directory_var)
+        self.move_up_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Up One Dir.",
+                                                          variable=self.move_up_directory_var)
+        self.move_up_directory_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
-        # Create the "Move Text" checkbox with the initial state
+        # "Move Text" checkbox with the initial state
         self.move_text_var = ctk.BooleanVar(value=self.move_text_var)
         self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var,
@@ -352,6 +368,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                        font=ctk.CTkFont(size=15, weight="bold"))
         self.file_label.grid(row=0, column=0, padx=5, pady=5)
 
+        self.coming_soon_label = ctk.CTkLabel(self.cat_top_frame, text="Coming Soon",
+                                              font=ctk.CTkFont(size=15, weight="bold"))
+        self.coming_soon_label.grid(row=1, column=0, padx=5, pady=5)
+
         """
         settings_window
         """
@@ -374,23 +394,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.open_on_file_drop_var)
         self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable for duplicate removal
+        # Checkbox to enable/disable duplicate removal
         self.remove_duplicates_var = ctk.BooleanVar(value=self.remove_duplicates_var)
         self.remove_duplicates_switch = ctk.CTkSwitch(self.settings_top_frame,
                                                       text="Remove Duplicates",
                                                       variable=self.remove_duplicates_var)
         self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
-        # Create the "Double check" checkbox with the initial state
+        # "Double check" checkbox with the initial state
         self.double_check_var = ctk.BooleanVar(value=self.double_check_var)
         self.double_check_switch = ctk.CTkSwitch(self.settings_top_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
         self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
 
-        # Create the "Double check" checkbox with the initial state
+        # "Activate Logging" checkbox with the initial state
         self.activate_logging_var = ctk.BooleanVar(value=self.activate_logging_var)
         self.activate_logging_switch = ctk.CTkSwitch(self.settings_top_frame, text="Activate Logging",
-                                                 variable=self.activate_logging_var)
+                                                     variable=self.activate_logging_var)
         self.activate_logging_switch.grid(row=1, column=3, padx=10, pady=10)
 
         # Select light or dark label
@@ -413,32 +433,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      command=self.change_scaling_event)
         self.scaling_optionemenu.grid(row=3, column=1, padx=10, pady=10)
 
-        """
-        Misc
-        """
         # Set default value for scaling
         self.scaling_optionemenu.set("100%")
 
+        """
+        Misc
+        """
         # Select default frame
         self.select_frame_by_name("home")
 
+    # Callback for updating the scroll region when the inner frame is configured
     def on_frame_configure(self, event=None):
         # Reset the scroll region to encompass the inner frame
         self.home_canvas.configure(scrollregion=self.home_canvas.bbox("all"))
 
+    # Callback for updating the scrollable frame's width when the canvas is configured
     def on_canvas_configure(self, event):
         # Set the scrollable frame's width to match the canvas
         canvas_width = event.width - self.home_scrollbar.winfo_width()
         self.home_canvas.itemconfig(self.home_scrollable_frame_window, width=canvas_width)
 
+    # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, name):
-        # set button color for selected button
+        # Set button color for the selected button
         self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
         self.add_remove_categories.configure(
             fg_color=("gray75", "gray25") if name == "add_remove_categories" else "transparent")
         self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings" else "transparent")
 
-        # show selected frame
+        # Show the selected frame and hide others
         if name == "home":
             self.home_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -452,6 +475,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             self.settings_frame.grid_forget()
 
+    """
+    Event handlers for button clicks to switch frames
+    """
+
     def home_button_event(self):
         self.select_frame_by_name("home")
 
@@ -461,6 +488,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def settings_button_event(self):
         self.select_frame_by_name("settings")
 
+    # Static methods for changing appearance mode and UI scaling
     @staticmethod
     def change_appearance_mode_event(new_appearance_mode):
         ctk.set_appearance_mode(new_appearance_mode)
@@ -470,6 +498,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 
+    # Method to display messages with optional error formatting
     def show_message(self, message, error=False):
         if error:
             self.message_label.configure(text=message, text_color="red")
@@ -482,6 +511,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     @staticmethod
     def load_configuration():
+        # Load configuration settings using the core module
         return core.load_configuration()
 
     """
@@ -489,33 +519,43 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def move_file_to_trash(self):
+        # Move the selected file to the trash
         core.move_file_to_trash(self)
 
     def load_last_used_file(self):
+        # Load the last used file and update the GUI
         core.load_last_used_file(self)
 
     def on_file_drop(self, event):
+        # Handle the event when a file is dropped onto the application
         core.on_file_drop(self, event)
 
     def add_to_queue(self, category):
+        # Add a category to the processing queue
         core.add_to_queue(self, category)
 
     def update_file_display(self):
+        # Update the display with the currently selected file
         core.update_file_display(self)
 
     def undo_last(self):
+        # Undo the last operation and update the GUI
         core.undo_last(self)
 
     def clear_selection(self):
+        # Clear the selected file and update the GUI
         core.clear_selection(self)
 
     def browse_file(self):
+        # Open a file dialog to browse and select a file
         core.browse_file(self)
 
     def browse_output_directory(self):
+        # Open a dialog to browse and select an output directory
         core.browse_output_directory(self)
 
     def handle_rename_success(self, new_path):
+        # Handle the success of the file renaming process
         core.handle_rename_success(self, new_path)
 
     """
@@ -523,18 +563,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def add_category(self):
+        # Add a new category to the list and update the GUI
         core.add_category(self)
 
     def remove_category(self):
+        # Remove a category from the list and update the GUI
         core.remove_category(self)
 
     def categories_buttons_initialize(self):
+        # Initialize category-related buttons in the GUI
         core.categories_buttons_initialize(self)
 
     def refresh_category_buttons(self, sorted_categories=None):
+        # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
 
     def save_categories(self):
+        # Save the current list of categories to the configuration
         core.save_categories(self)
 
     """
@@ -542,16 +587,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def rename_files(self):
+        # Rename the selected file(s) using the specified options and update the GUI
         core.rename_files(self)
 
     def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
+        # Construct a new file name based on provided parameters
         return core.construct_new_name(self, base_name, weighted_categories, custom_text, extension)
 
     @staticmethod
     def move_text(name):
+        # Move text within a name according to specified rules
         return core.move_text(name)
 
 
 if __name__ == "__main__":
+    # Create an instance of the OCDFileRenamer application and start the main loop
     app = OCDFileRenamer()
     app.mainloop()
