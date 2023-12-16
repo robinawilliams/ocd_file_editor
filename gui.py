@@ -85,10 +85,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
-         geometry,
-         reset_output_directory_var, suggest_output_directory_var, move_up_directory_var, open_on_file_drop_var,
-         remove_duplicates_var,
-         default_placement_var, double_check_var, activate_logging_var, ocd_file_renamer_log) = (
+         geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
+         open_on_file_drop_var, remove_duplicates_var, default_placement_var, double_check_var, activate_logging_var,
+         ocd_file_renamer_log, column_numbers, default_weight) = (
             self.load_configuration())
 
         # Set instance variables with the values from the configuration file
@@ -97,16 +96,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_directory = double_check_directory
         self.categories_file = categories_file
         self.geometry(geometry)
-        self.move_text_var = ctk.BooleanVar(value=move_text_var)
+        self.column_numbers = int(column_numbers)
+        self.default_weight = int(default_weight)
+        self.ocd_file_renamer_log = ocd_file_renamer_log
+        self.default_placement_var = default_placement_var
         self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)
         self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
         self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
+        self.move_text_var = ctk.BooleanVar(value=move_text_var)
         self.open_on_file_drop_var = ctk.BooleanVar(value=open_on_file_drop_var)
         self.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
         self.double_check_var = ctk.BooleanVar(value=double_check_var)
         self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
-        self.default_placement_var = default_placement_var
-        self.ocd_file_renamer_log = ocd_file_renamer_log
 
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
@@ -576,6 +577,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_category(self):
         # Remove a category from the list and update the GUI
         core.remove_category(self)
+
+    def create_category_button(self, category):
+        return core.create_category_button(self, category)
 
     def categories_buttons_initialize(self):
         # Initialize category-related buttons in the GUI

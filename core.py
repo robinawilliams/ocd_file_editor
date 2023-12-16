@@ -32,6 +32,10 @@ def load_configuration():
 
     # Variables and window geometry
     geometry = config.get('Settings', 'geometry', fallback='1280x800')
+    column_numbers = config.get('Settings', 'column_numbers', fallback=7)
+    default_weight = config.get('Settings', 'default_weight', fallback=9)
+    ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
+    default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
@@ -40,14 +44,12 @@ def load_configuration():
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
     activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
-    ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
-    default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
 
     # Return the loaded configuration values as a tuple
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
-            open_on_file_drop_var, remove_duplicates_var,
-            default_placement_var, double_check_var, activate_logging_var, ocd_file_renamer_log)
+            open_on_file_drop_var, remove_duplicates_var, default_placement_var, double_check_var,
+            activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight)
 
 
 def logging_setup(self):
@@ -365,8 +367,9 @@ def add_category(self):
         new_category_lower = new_category.lower()
         # Prevent duplicate entries in the json file
         if new_category_lower not in map(str.lower, self.categories.keys()):
-            # Add the new category to the dictionary
-            self.categories[new_category] = None
+            # Add the new category to the dictionary with a default weight
+            # TODO Add a dynamic prompt
+            self.categories[new_category] = self.default_weight
             # Sort categories alphabetically, case-insensitive
             sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
             # Save the updated categories to the file
@@ -402,6 +405,10 @@ def remove_category(self):
         self.show_message(f"Category removed: {category_to_remove}")
 
 
+def create_category_button(self, category):
+    return ctk.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
+
+
 def categories_buttons_initialize(self):
     # Load categories from the file or create an empty dictionary
     try:
@@ -413,20 +420,13 @@ def categories_buttons_initialize(self):
     # Sort the category keys alphabetically, case-insensitive
     sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
 
-    # Initialize category buttons in the GUI
-    self.buttons = []
-    row = 0
-    col = 0
-    for category in sorted_categories:
-        # Create a button for each category
-        button = ctk.CTkButton(self.button_frame, text=category,
-                               command=lambda c=category: self.add_to_queue(c))
-        button.grid(row=row, column=col, padx=5, pady=5)
-        self.buttons.append(button)
-        col += 1
-        if col == 7:
-            col = 0
-            row += 1
+    # Batch processing for button creation
+    buttons = [self.create_category_button(category) for category in sorted_categories]
+
+    for i, button in enumerate(buttons):
+        button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
+
+    self.buttons = buttons
 
 
 def refresh_category_buttons(self, sorted_categories=None):
@@ -438,19 +438,13 @@ def refresh_category_buttons(self, sorted_categories=None):
     for button in self.buttons:
         button.destroy()
 
-    # Reinitialize category buttons in the GUI
-    self.buttons = []
-    row = 0
-    col = 0
-    for category in sorted_categories:
-        # Create a button for each category
-        button = ctk.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
-        button.grid(row=row, column=col, padx=5, pady=5)
-        self.buttons.append(button)
-        col += 1
-        if col == 7:
-            col = 0
-            row += 1
+    # Batch processing for button creation
+    buttons = [self.create_category_button(category) for category in sorted_categories]
+
+    for i, button in enumerate(buttons):
+        button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
+
+    self.buttons = buttons
 
 
 def save_categories(self):
