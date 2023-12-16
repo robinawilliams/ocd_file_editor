@@ -13,7 +13,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Set the window title and geometry
         self.title("OCD File Renamer")
-        self.geometry(f"{1280}x{750}")
 
         # Initialize instance variables for selected file and queue
         self.selected_file = ""
@@ -112,9 +111,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
-
-        # Setup logging
-        self.logging_setup()
 
         # Create the GUI elements
         self.create_gui()
@@ -408,6 +404,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      variable=self.activate_logging_var)
         self.activate_logging_switch.grid(row=1, column=3, padx=10, pady=10)
 
+        # Bind the callback function to the variable
+        self.activate_logging_var.trace_add("write", self.handle_logging_activation)
+
         # Select light or dark label
         self.appearance_mode_label = ctk.CTkLabel(self.settings_top_frame, text="Appearance:")
         self.appearance_mode_label.grid(row=2, column=0, padx=10, pady=10)
@@ -447,6 +446,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set the scrollable frame's width to match the canvas
         canvas_width = event.width - self.home_scrollbar.winfo_width()
         self.home_canvas.itemconfig(self.home_scrollable_frame_window, width=canvas_width)
+
+    # Callback function to handle logging state
+    def handle_logging_activation(self, *args):
+        # If logging is true, call the logging_setup function
+        if self.activate_logging_var.get():
+            try:
+                self.logging_setup()
+            except OSError as e:
+                print(f"Logging failed. Error: {e}")
 
     # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, name):

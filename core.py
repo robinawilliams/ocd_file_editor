@@ -31,7 +31,7 @@ def load_configuration():
     categories_file = config.get('Filepaths', 'categories_file', fallback='~')
 
     # Variables and window geometry
-    geometry = config.get('Settings', 'geometry', fallback='1280x750+0+0')
+    geometry = config.get('Settings', 'geometry', fallback='1280x800+0+0')
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
@@ -53,13 +53,8 @@ def load_configuration():
 def logging_setup(self):
     # Create the log file if it doesn't exist
     if not os.path.exists(self.ocd_file_renamer_log):
-        try:
-            with open(self.ocd_file_renamer_log, 'w'):
-                pass
-        except OSError as e:
-            print(f"Error: {e}. \n{self.ocd_file_renamer_log} can't be created. Please create the log file manually "
-                  f"and try again.")
-            quit()
+        with open(self.ocd_file_renamer_log, 'w'):
+            pass
 
     # Initialize logging
     logging.basicConfig(filename=self.ocd_file_renamer_log, level=logging.INFO, filemode='a',
