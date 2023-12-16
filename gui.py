@@ -22,7 +22,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Initialize GUI elements (buttons, labels, frames, etc.)
         # Note: Some attributes are initialized as None and later assigned specific GUI elements
-
+        # TODO Housekeeping
         self.browse_file_button = None
         self.custom_text_frame = None
         self.scaling_optionemenu = None
@@ -93,25 +93,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.load_configuration())
 
         # Set instance variables with the values from the configuration file
-        self.move_text_var = move_text_var
         self.initial_directory = initial_directory
         self.artist_directory = artist_directory
         self.double_check_directory = double_check_directory
         self.categories_file = categories_file
         self.geometry(geometry)
-        self.reset_output_directory_var = reset_output_directory_var
-        self.suggest_output_directory_var = suggest_output_directory_var
-        self.move_up_directory_var = move_up_directory_var
-        self.open_on_file_drop_var = open_on_file_drop_var
-        self.remove_duplicates_var = remove_duplicates_var
+        self.move_text_var = ctk.BooleanVar(value=move_text_var)
+        self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)
+        self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
+        self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
+        self.open_on_file_drop_var = ctk.BooleanVar(value=open_on_file_drop_var)
+        self.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
+        self.double_check_var = ctk.BooleanVar(value=double_check_var)
+        self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
         self.default_placement_var = default_placement_var
-        self.double_check_var = double_check_var
-        self.activate_logging_var = activate_logging_var
         self.ocd_file_renamer_log = ocd_file_renamer_log
 
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
+
+        # Setup logging
+        self.logging_setup()
 
         # Create the GUI elements
         self.create_gui()
@@ -271,7 +274,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.trash_button.grid(row=0, column=2, padx=10, pady=10)
 
         # Select Last Used File Button
-        self.last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Select Last Used File",
+        self.last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Reload Last File",
                                                    command=self.load_last_used_file)
         self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
@@ -300,27 +303,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.folder_operations_frame.grid(row=8, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable resetting the Output Directory
-        self.reset_output_directory_var = ctk.BooleanVar(value=self.reset_output_directory_var)
         self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
                                                                text="Reset Output Dir.",
                                                                variable=self.reset_output_directory_var)
         self.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable suggesting an output directory
-        self.suggest_output_directory_var = ctk.BooleanVar(value=self.suggest_output_directory_var)
         self.suggest_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Suggest Output "
                                                                                                     "Dir.",
                                                                  variable=self.suggest_output_directory_var)
         self.suggest_output_directory_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
         # Checkbox to enable/disable moving the file up one folder
-        self.move_up_directory_var = ctk.BooleanVar(value=self.move_up_directory_var)
         self.move_up_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Up One Dir.",
                                                           variable=self.move_up_directory_var)
         self.move_up_directory_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
         # "Move Text" checkbox with the initial state
-        self.move_text_var = ctk.BooleanVar(value=self.move_text_var)
         self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var,
                                                   onvalue=True, offvalue=False)
@@ -389,26 +388,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_label.grid(row=0, column=0, padx=5, pady=5, columnspan=5)
 
         # Checkbox to enable/disable open on drop behavior
-        self.open_on_file_drop_var = ctk.BooleanVar(value=self.open_on_file_drop_var)
         self.open_on_file_drop_switch = ctk.CTkSwitch(self.settings_top_frame, text="Open File on Drag and Drop",
                                                       variable=self.open_on_file_drop_var)
         self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable duplicate removal
-        self.remove_duplicates_var = ctk.BooleanVar(value=self.remove_duplicates_var)
         self.remove_duplicates_switch = ctk.CTkSwitch(self.settings_top_frame,
                                                       text="Remove Duplicates",
                                                       variable=self.remove_duplicates_var)
         self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
         # "Double check" checkbox with the initial state
-        self.double_check_var = ctk.BooleanVar(value=self.double_check_var)
         self.double_check_switch = ctk.CTkSwitch(self.settings_top_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
         self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
 
         # "Activate Logging" checkbox with the initial state
-        self.activate_logging_var = ctk.BooleanVar(value=self.activate_logging_var)
         self.activate_logging_switch = ctk.CTkSwitch(self.settings_top_frame, text="Activate Logging",
                                                      variable=self.activate_logging_var)
         self.activate_logging_switch.grid(row=1, column=3, padx=10, pady=10)
@@ -513,6 +508,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def load_configuration():
         # Load configuration settings using the core module
         return core.load_configuration()
+
+    def logging_setup(self):
+        # Setup logging
+        core.logging_setup(self)
 
     """
     File Operations

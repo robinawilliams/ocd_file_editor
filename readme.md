@@ -35,10 +35,10 @@ O.C.D. File Renamer is a Python tool designed to dynamically rename files. This 
 3. Type in the custom text entry field to add custom words.
 4. Click "Rename Files" to confirm changes.
 5. Use "Undo" to revert the last category added.
-6. Use "Clear" to remove everything **including the selected file.
+6. Use "Clear" to remove everything.
 7. Manage categories with "Add Category" and "Remove Category" fields.
 8. "Move to Trash" sends the selected file to the trash.
-9. "Select Last Used File" reloads the last used file.
+9. "Reload Last File" reloads the last used file.
 
 ### Checkboxes/Radio Buttons
 - "Reset Output Dir." resets the output directory on each run.
@@ -59,7 +59,7 @@ O.C.D. File Renamer is a Python tool designed to dynamically rename files. This 
 - "Activate Logging" logs actions taken within the program.
 
 ### Configuration File
-- Use "config.ini.template" as a template for configuring the tool.
+- Use "config.ini.template" as a template for configuring the tool. Remove the .template extension to use.
 
 ## Bug Reports and Contributions
 If you encounter issues or want to contribute, use the "Issues" tab. For PRs, reference the related issue.

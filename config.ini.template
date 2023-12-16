@@ -34,6 +34,6 @@ categories_file = categories.json
 
 [Logs]
 ; Name Normalizer log
-name_normalizer_log = /path/to/folder/name_normalizer.log
+name_normalizer_log = name_normalizer.log
 ; OCD File Renamer log
-ocd_file_renamer_log = /path/to/folder/ocd_file_renamer.log
+ocd_file_renamer_log = ocd_file_renamer.log

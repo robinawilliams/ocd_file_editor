@@ -40,18 +40,32 @@ def load_configuration():
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
     activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
-    ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log')
+    ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
-
-    # Initialize logging
-    logging.basicConfig(filename=ocd_file_renamer_log, level=logging.INFO, filemode='a',
-                        format='%(asctime)s - %(levelname)s: %(message)s')
 
     # Return the loaded configuration values as a tuple
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
             open_on_file_drop_var, remove_duplicates_var,
             default_placement_var, double_check_var, activate_logging_var, ocd_file_renamer_log)
+
+
+def logging_setup(self):
+    # Create the log file if it doesn't exist
+    if not os.path.exists(self.ocd_file_renamer_log):
+        try:
+            with open(self.ocd_file_renamer_log, 'w'):
+                pass
+        except OSError as e:
+            print(f"Error: {e}. \n{self.ocd_file_renamer_log} can't be created. Please create the log file manually "
+                  f"and try again.")
+            quit()
+
+    # Initialize logging
+    logging.basicConfig(filename=self.ocd_file_renamer_log, level=logging.INFO, filemode='a',
+                        format='%(asctime)s - %(levelname)s: %(message)s')
+
+    logging.info("Logging started.")
 
 
 """
