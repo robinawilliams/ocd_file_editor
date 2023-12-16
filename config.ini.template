@@ -1,6 +1,6 @@
 [Settings]
 ; Starting size for window
-geometry = 1280x750+0+0
+geometry = 1280x800+0+0
 ; Reset the output directory on each run
 reset_output_directory_var = True
 ; Suggest an output directory

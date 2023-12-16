@@ -31,7 +31,7 @@ def load_configuration():
     categories_file = config.get('Filepaths', 'categories_file', fallback='~')
 
     # Variables and window geometry
-    geometry = config.get('Settings', 'geometry', fallback='1280x800+0+0')
+    geometry = config.get('Settings', 'geometry', fallback='1280x800')
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
