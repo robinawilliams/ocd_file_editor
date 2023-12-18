@@ -86,11 +86,11 @@ def move_file_to_trash(self):
                 # Reset selected file, queue, and clear display elements
                 self.selected_file = ""
                 self.queue = []
-                self.file_display.configure(text="")
+                self.file_display_text.set("")
                 self.custom_text_entry.delete(0, ctk.END)
                 if self.activate_logging_var.get():
                     # Log the action if logging is enabled
-                    logging.info(f"File moved to trash.")
+                    logging.info("File moved to trash.")
                 self.show_message("File moved to trash successfully")
         else:
             if self.activate_logging_var.get():
@@ -113,11 +113,15 @@ def load_last_used_file(self):
     if self.last_used_file:
         # Set the selected file to the last used file and update display
         self.selected_file = self.last_used_file
-        self.file_display.configure(text=os.path.basename(self.selected_file))
+        filename = os.path.basename(self.selected_file)
+
+        # Display only the filename in the file display widget
+        self.file_display_text.set(filename)
+
         self.queue = []
         self.update_file_display()
 
-        message = os.path.basename(self.selected_file)
+        message = filename
         if self.activate_logging_var.get():
             # Log the action if logging is enabled
             logging.info(f"Last used file selected: {message}")
@@ -135,12 +139,16 @@ def load_last_used_file(self):
 # Function to handle a file being dropped onto the application window
 def on_file_drop(self, event):
     self.selected_file = event.data.strip('{}')
-    self.file_display.configure(text=os.path.basename(self.selected_file))  # Display only the filename
+    filename = os.path.basename(self.selected_file)
+
+    # Display only the filename in the file display widget
+    self.file_display_text.set(filename)
+
     self.queue = []
     self.update_file_display()
 
-    # Get the base file name and truncate after x characters
-    message = os.path.basename(self.selected_file)
+    # Log the error, truncate after x characters and display the error in the gui
+    message = filename
     if self.activate_logging_var.get():
         # Log the action if logging is enabled
         logging.info(f"File selected: {message}")
@@ -200,13 +208,12 @@ def update_file_display(self):
 
         # Handle name length constraints
         if len(new_name) > 250:
-            messagebox.showinfo("Length Exceeded", "The new file name exceeds 250 characters. Please shorten it.")
+            messagebox.showinfo("Length Exceeded", "The proposed file name exceeds 250 characters. Please consider "
+                                                   "shortening it to comply with operating system limitations.")
             new_name = "..." + new_name[180:]
-        elif len(new_name) > 120:
-            new_name = new_name[:120] + "..."
 
         # Set the new name to the file display
-        self.file_display.configure(text=new_name)
+        self.file_display_text.set(new_name)
 
 
 # Function to undo the last category added to the queue
@@ -227,7 +234,7 @@ def undo_last(self):
 def clear_selection(self):
     self.selected_file = ""
     self.queue = []
-    self.file_display.configure(text="")
+    self.file_display_text.set("")
     self.show_message("Selection cleared")
 
     # Clear custom text entry and reset output directory
@@ -243,12 +250,16 @@ def browse_file(self):
     if file_path:
         # Set the selected file, update display, and log the action
         self.selected_file = file_path
-        self.file_display.configure(text=self.selected_file)
+        filename = os.path.basename(self.selected_file)
+
+        # Display only the filename in the file display widget
+        self.file_display_text.set(filename)
+
         self.queue = []
         self.update_file_display()
 
-        # Get the base file name and truncate after x characters
-        message = os.path.basename(self.selected_file)
+        # Log the error, truncate after x characters and display the error in the gui
+        message = filename
         if self.activate_logging_var.get():
             # Log the action if logging is enabled
             logging.info(f"File selected via Browse: {message}")
@@ -334,7 +345,7 @@ def handle_rename_success(self, new_path):
     # Reset selected file, queue, and update last used file
     self.selected_file = ""
     self.queue = []
-    self.file_display.configure(text="")
+    self.file_display_text.set("")
     self.custom_text_entry.delete(0, ctk.END)
     self.last_used_file = new_path
 

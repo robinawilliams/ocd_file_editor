@@ -39,7 +39,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = None
         self.category_entry = None
         self.add_category_button = None
-        self.file_display = None
+        self.file_display_text = None
+        self.file_display_entry = None
         self.last_used_display = None
         self.last_used_display_label = None
         self.last_used_file_button = None
@@ -112,6 +113,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
         self.dnd_bind('<<Drop>>', self.on_file_drop)
+
+        # Initial check for activate logging state prior to application launch
+        self.handle_logging_activation()
 
         # Create the GUI elements
         self.create_gui()
@@ -196,8 +200,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_file_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Selected File Display
-        self.file_display = ctk.CTkLabel(self.home_top_frame, text="")
-        self.file_display.grid(row=0, column=1, padx=5, pady=5)
+        self.file_display_text = ctk.StringVar()
+        self.file_display_entry = ctk.CTkEntry(self.home_top_frame, width=890, textvariable=self.file_display_text)
+        self.file_display_entry.grid(row=0, column=1, padx=5, pady=5)
 
         # Categories button frame
         self.button_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
