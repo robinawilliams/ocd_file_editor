@@ -30,7 +30,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.trash_button = None
         self.rename_button = None
         self.placement_label = None
-        self.custom_text_label = None
         self.custom_text_entry = None
         self.output_directory_entry = None
         self.output_directory_browse_button = None
@@ -201,6 +200,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Selected File Display
         self.file_display_text = ctk.StringVar()
+        self.file_display_text.set("Select a file using the 'Browse File' button or drag and drop it into the "
+                                   "program...")
         self.file_display_entry = ctk.CTkEntry(self.home_top_frame, width=890, textvariable=self.file_display_text)
         self.file_display_entry.grid(row=0, column=1, padx=5, pady=5)
 
@@ -220,7 +221,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_category_button.grid(row=0, column=0, padx=5)
 
         # Add Category Entry
-        self.category_entry = ctk.CTkEntry(self.category_frame, width=250)
+        self.category_entry = ctk.CTkEntry(self.category_frame, width=350)
         self.category_entry.grid(row=0, column=1, padx=5)
 
         # Remove Category Button
@@ -229,7 +230,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_button.grid(row=0, column=2, padx=5)
 
         # Remove Category Entry
-        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=250)
+        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=350)
         self.remove_category_entry.grid(row=0, column=3, padx=5)
 
         # Frame to group custom text entry and output directory
@@ -242,21 +243,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Output Directory Entry
-        self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=150)
+        self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=350)
         self.output_directory_entry.grid(row=0, column=1, padx=5, pady=5)
-
-        # Custom Text Entry Label
-        self.custom_text_label = ctk.CTkLabel(self.custom_text_frame, text="Custom text entry: ")
-        self.custom_text_label.grid(row=0, column=2, padx=5, pady=5)
 
         # Custom Text Entry
         self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=350)
-        self.custom_text_entry.grid(row=0, column=3, padx=10, pady=10)
+        self.custom_text_entry.insert(0, "Enter your custom text here...")
+        self.custom_text_entry.grid(row=0, column=2, padx=10, pady=10)
 
         # Rename File Button
         self.rename_button = ctk.CTkButton(self.custom_text_frame, text="Rename File",
                                            command=self.rename_files)
-        self.rename_button.grid(row=0, column=4, padx=5, pady=5)
+        self.rename_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Frame to group miscellaneous buttons
         self.button_group_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")

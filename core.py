@@ -88,6 +88,8 @@ def move_file_to_trash(self):
                 self.queue = []
                 self.file_display_text.set("")
                 self.custom_text_entry.delete(0, ctk.END)
+                self.output_directory = ""
+                self.output_directory_entry.delete(0, ctk.END)
                 if self.activate_logging_var.get():
                     # Log the action if logging is enabled
                     logging.info("File moved to trash.")
@@ -138,6 +140,9 @@ def load_last_used_file(self):
 
 # Function to handle a file being dropped onto the application window
 def on_file_drop(self, event):
+    # Remove the default custom text entry text
+    self.custom_text_entry.delete(0, ctk.END)
+
     self.selected_file = event.data.strip('{}')
     filename = os.path.basename(self.selected_file)
 
@@ -246,6 +251,9 @@ def clear_selection(self):
 
 # Function to browse and select a file
 def browse_file(self):
+    # Remove the default custom text entry text
+    self.custom_text_entry.delete(0, ctk.END)
+
     file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
     if file_path:
         # Set the selected file, update display, and log the action
