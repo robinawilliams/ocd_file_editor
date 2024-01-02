@@ -12,7 +12,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
         # Set the window title and geometry
-        self.title("OCD File Renamer")
+        self.title("O.C.D. File Renamer")
 
         # Initialize instance variables for selected file and queue
         self.selected_file = ""
@@ -130,7 +130,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
         # Create label for the navigation frame
-        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="OCD \nFile \nRenamer",
+        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="  O.C.D. \nFile Renamer",
                                                    compound="left",
                                                    font=ctk.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=5, pady=5)
@@ -319,37 +319,36 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                           variable=self.move_up_directory_var)
         self.move_up_directory_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
-        # "Move Text" checkbox with the initial state
+        # Checkbox to enable/disable move text between - and __-__
         self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
-                                                  variable=self.move_text_var,
-                                                  onvalue=True, offvalue=False)
+                                                  variable=self.move_text_var)
         self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
+
+        # Placement Label
+        self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
+        self.placement_label.grid(row=0, column=4, padx=10)
 
         # Variable to track the user's placement choice (prefix, suffix, or first_dash)
         self.placement_choice = ctk.StringVar()
         self.placement_choice.set(self.default_placement_var)  # Default to first_dash
 
-        # Placement Label
-        self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
-        self.placement_label.grid(row=0, column=4, padx=5, pady=5)
-
         # Radio button for prefix
         self.prefix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Prefix",
                                                variable=self.placement_choice,
                                                value="prefix")
-        self.prefix_radio.grid(row=0, column=5, padx=5, pady=5)
+        self.prefix_radio.grid(row=0, column=5)
 
         # Radio button for first_dash
         self.first_dash_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="First Dash",
                                                    variable=self.placement_choice,
                                                    value="first_dash")
-        self.first_dash_radio.grid(row=0, column=6, padx=5, pady=5)
+        self.first_dash_radio.grid(row=0, column=6)
 
         # Radio button for suffix
         self.suffix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Suffix",
                                                variable=self.placement_choice,
                                                value="suffix")
-        self.suffix_radio.grid(row=0, column=7, padx=5, pady=5)
+        self.suffix_radio.grid(row=0, column=7)
 
         """
         category_window
