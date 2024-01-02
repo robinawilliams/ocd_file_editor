@@ -196,18 +196,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse file button
         self.browse_file_button = ctk.CTkButton(self.home_top_frame, text="Browse File",
                                                 command=self.browse_file)
-        self.browse_file_button.grid(row=0, column=0, padx=5, pady=5)
+        self.browse_file_button.grid(row=0, column=0, padx=5)
 
         # Selected File Display
         self.file_display_text = ctk.StringVar()
         self.file_display_text.set("Select a file using the 'Browse File' button or drag and drop it into the "
                                    "program...")
         self.file_display_entry = ctk.CTkEntry(self.home_top_frame, width=890, textvariable=self.file_display_text)
-        self.file_display_entry.grid(row=0, column=1, padx=5, pady=5)
+        self.file_display_entry.grid(row=0, column=1, padx=5)
 
         # Categories button frame
         self.button_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.button_frame.grid(row=1, column=0, padx=10, pady=10)
+        self.button_frame.grid(row=1, column=0, padx=10, pady=5)
 
         # Initialize category buttons
         self.categories_buttons_initialize()
@@ -258,7 +258,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to group miscellaneous buttons
         self.button_group_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.button_group_frame.grid(row=4, column=0, padx=10, pady=10)
+        self.button_group_frame.grid(row=4, column=0, padx=10)
 
         # Undo Button
         self.undo_button = ctk.CTkButton(self.button_group_frame, text="Undo", command=self.undo_last)
@@ -280,7 +280,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.last_used_frame.grid(row=6, column=0, padx=5, pady=5)
+        self.last_used_frame.grid(row=6, column=0, padx=5)
 
         # Last Used File Label
         self.last_used_display_label = ctk.CTkLabel(self.last_used_frame, text="Last used file:")
@@ -292,7 +292,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to display messages
         self.message_label_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.message_label_frame.grid(row=7, column=0, padx=10, pady=10)
+        self.message_label_frame.grid(row=7, column=0, padx=10)
 
         # Message Label
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
@@ -300,7 +300,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to group folder operations
         self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.folder_operations_frame.grid(row=8, column=0, padx=10, pady=10)
+        self.folder_operations_frame.grid(row=8, column=0, padx=10)
 
         # Checkbox to enable/disable resetting the Output Directory
         self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
