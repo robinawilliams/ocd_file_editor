@@ -39,7 +39,7 @@ def load_configuration():
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
-    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=True)
+    move_text_var = config.getboolean('Settings', 'move_text_var', fallback=False)
     open_on_file_drop_var = config.getboolean("Settings", "open_on_file_drop_var", fallback=False)
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
