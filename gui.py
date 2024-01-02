@@ -235,7 +235,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.custom_text_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.custom_text_frame.grid(row=3, column=0, padx=10)
 
         # Output Directory Browse Button
         self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Output Directory",
@@ -421,13 +421,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       command=self.change_appearance_mode_event)
         self.appearance_mode_menu.grid(row=2, column=1, padx=10, pady=10)
 
+        # Set default value for appearance
+        self.appearance_mode_menu.set("System")
+
         # Select scaling label
         self.scaling_label = ctk.CTkLabel(self.settings_top_frame, text="UI Scaling:")
         self.scaling_label.grid(row=3, column=0, padx=10, pady=10)
 
         # Select scaling level
         self.scaling_optionemenu = ctk.CTkOptionMenu(self.settings_top_frame,
-                                                     values=["80%", "90%", "100%", "110%", "120%"],
+                                                     values=["70%", "80%", "90%", "100%", "110%", "120%"],
                                                      command=self.change_scaling_event)
         self.scaling_optionemenu.grid(row=3, column=1, padx=10, pady=10)
 
