@@ -212,8 +212,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize category buttons
         self.categories_buttons_initialize()
 
-        # Frame for category-related elements
-        self.category_frame = ctk.CTkFrame(self.home_scrollable_frame)
+        # Frame for add/remove category elements
+        self.category_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.category_frame.grid(row=2, column=0, padx=10, pady=10)
 
         # Add Category Button
