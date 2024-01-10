@@ -38,6 +38,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = None
         self.category_entry = None
         self.add_category_button = None
+        self.weight_label = None
+        self.weight_entry = None
         self.file_display_text = None
         self.file_display_entry = None
         self.last_used_display = None
@@ -221,17 +223,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_category_button.grid(row=0, column=0, padx=5)
 
         # Add Category Entry
-        self.category_entry = ctk.CTkEntry(self.category_frame, width=350)
+        self.category_entry = ctk.CTkEntry(self.category_frame, width=310)
         self.category_entry.grid(row=0, column=1, padx=5)
+
+        # Weight Label
+        self.weight_label = ctk.CTkLabel(self.category_frame, text="Weight:")
+        self.weight_label.grid(row=0, column=2, padx=5)
+
+        # Weight Entry
+        self.weight_entry = ctk.CTkEntry(self.category_frame, width=35)
+        self.weight_entry.insert(0, self.default_weight)
+        self.weight_entry.grid(row=0, column=3, padx=5)
 
         # Remove Category Button
         self.remove_category_button = ctk.CTkButton(self.category_frame, text="Remove Category",
                                                     command=self.remove_category)
-        self.remove_category_button.grid(row=0, column=2, padx=5)
+        self.remove_category_button.grid(row=0, column=4, padx=5)
 
         # Remove Category Entry
-        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=350)
-        self.remove_category_entry.grid(row=0, column=3, padx=5)
+        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
+        self.remove_category_entry.grid(row=0, column=5, padx=5)
 
         # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
@@ -243,11 +254,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Output Directory Entry
-        self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=350)
+        self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=360)
         self.output_directory_entry.grid(row=0, column=1, padx=5, pady=5)
 
         # Custom Text Entry
-        self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=350)
+        self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=360)
         self.custom_text_entry.insert(0, "Enter your custom text here...")
         self.custom_text_entry.grid(row=0, column=2, padx=10, pady=10)
 

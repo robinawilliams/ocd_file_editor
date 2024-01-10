@@ -247,6 +247,7 @@ def clear_selection(self):
     self.output_directory = os.path.dirname(self.selected_file)
     self.output_directory_entry.delete(0, ctk.END)
     self.output_directory_entry.insert(0, self.output_directory)
+    self.weight_entry.delete(0, ctk.END)
 
 
 # Function to browse and select a file
@@ -386,24 +387,38 @@ def add_category(self):
         new_category_lower = new_category.lower()
         # Prevent duplicate entries in the json file
         if new_category_lower not in map(lambda x: x.lower(), self.categories.keys()):
-            # Add the new category to the dictionary with a default weight
-            # TODO Add a dynamic prompt
-            self.categories[new_category] = self.default_weight
+            # Get the weight from the GUI entry field
+            weight_entry_value = self.weight_entry.get().strip()
+
+            try:
+                # Use the provided weight if it's an integer, otherwise use the default weight
+                weight = int(weight_entry_value) if weight_entry_value else self.default_weight
+            except ValueError:
+                # Handle the case where the provided weight is not an integer
+                self.show_message("Error: Weight must be an integer. Using default weight.", error=True)
+                weight = self.default_weight
+
+            # Add the new category to the dictionary with the specified weight
+            self.categories[new_category] = weight
             # Sort categories alphabetically, case-insensitive
             sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
             # Save the updated categories to the file
             self.save_categories()
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons(sorted_categories)
-            # Clear the category entry field
+            # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
+            self.weight_entry.delete(0, ctk.END)
+            self.weight_entry.insert(0, self.default_weight)  # Reset to default weight
             # Show a success message
-            self.show_message(f"Category added: {new_category}")
+            self.show_message(f"Category added: '{new_category}' with weight({weight})")
         else:
             # Show an error message if the category already exists
             self.show_message(f"Error: '{new_category}' already exists. Skipping.", error=True)
-            # Clear the category entry field
+            # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
+            self.weight_entry.delete(0, ctk.END)
+            self.weight_entry.insert(0, self.default_weight)  # Reset to default weight
 
 
 def remove_category(self):
