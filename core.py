@@ -385,7 +385,7 @@ def add_category(self):
         # Convert to lowercase for case-insensitive check
         new_category_lower = new_category.lower()
         # Prevent duplicate entries in the json file
-        if new_category_lower not in map(str.lower, self.categories.keys()):
+        if new_category_lower not in map(lambda x: x.lower(), self.categories.keys()):
             # Add the new category to the dictionary with a default weight
             # TODO Add a dynamic prompt
             self.categories[new_category] = self.default_weight
