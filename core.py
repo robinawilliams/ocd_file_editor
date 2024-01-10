@@ -409,6 +409,8 @@ def add_category(self):
 def remove_category(self):
     # Get the category to be removed from the remove category entry widget
     category_to_remove = self.remove_category_entry.get().strip()
+
+    # Check for a case-sensitive match
     if category_to_remove in self.categories:
         # Remove the category from the dictionary
         del self.categories[category_to_remove]
@@ -422,6 +424,25 @@ def remove_category(self):
         self.remove_category_entry.delete(0, ctk.END)
         # Show a success message
         self.show_message(f"Category removed: {category_to_remove}")
+    else:
+        # Check for a case-insensitive match
+        matching_category = next((key for key in self.categories if key.lower() == category_to_remove.lower()), None)
+        if matching_category:
+            # Remove the case-insensitive matched category from the dictionary
+            del self.categories[matching_category]
+            # Sort categories alphabetically, case-insensitive
+            sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
+            # Save the updated categories to the file
+            self.save_categories()
+            # Refresh the category buttons in the GUI
+            self.refresh_category_buttons(sorted_categories)
+            # Clear the remove category entry field
+            self.remove_category_entry.delete(0, ctk.END)
+            # Show a success message
+            self.show_message(f"Category removed: {matching_category}")
+        else:
+            # Show an error message if no matching category is found
+            self.show_message(f"Error: '{category_to_remove}' not found in dictionary. Skipping.", error=True)
 
 
 def create_category_button(self, category):
