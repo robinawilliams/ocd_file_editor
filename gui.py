@@ -353,13 +353,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.first_dash_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="First Dash",
                                                    variable=self.placement_choice,
                                                    value="first_dash")
-        self.first_dash_radio.grid(row=0, column=6)
+        self.first_dash_radio.grid(row=0, column=6, padx=5)
 
         # Radio button for suffix
         self.suffix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Suffix",
                                                variable=self.placement_choice,
                                                value="suffix")
-        self.suffix_radio.grid(row=0, column=7)
+        self.suffix_radio.grid(row=0, column=7, padx=5)
 
         """
         category_window

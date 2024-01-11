@@ -247,7 +247,6 @@ def clear_selection(self):
     self.output_directory = os.path.dirname(self.selected_file)
     self.output_directory_entry.delete(0, ctk.END)
     self.output_directory_entry.insert(0, self.output_directory)
-    self.weight_entry.delete(0, ctk.END)
 
 
 # Function to browse and select a file
