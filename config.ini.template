@@ -23,6 +23,8 @@ double_check_var = False
 activate_logging_var = False
 ; Set the default placement for the words to be placed (prefix, first_dash, suffix)
 default_placement_var = first_dash
+; Set the special character for the placement (alphanumeric character)
+special_character_var = -
 
 [Filepaths]
 ; Starting location for browse

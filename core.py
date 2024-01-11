@@ -35,7 +35,8 @@ def load_configuration():
     column_numbers = config.get('Settings', 'column_numbers', fallback=7)
     default_weight = config.get('Settings', 'default_weight', fallback=9)
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
-    default_placement_var = config.get("Settings", "default_placement_var", fallback="first_dash")
+    default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
+    special_character_var = config.get("Settings", "special_character_var", fallback="-")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
@@ -48,8 +49,8 @@ def load_configuration():
     # Return the loaded configuration values as a tuple
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
-            open_on_file_drop_var, remove_duplicates_var, default_placement_var, double_check_var,
-            activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight)
+            open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
+            double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight)
 
 
 def logging_setup(self):
@@ -573,14 +574,15 @@ def rename_files(self):
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
-    # Construct the new name based on placement choice (prefix, suffix, or first_dash)
+    # Construct the new name based on placement choice (prefix, suffix, or special_character)
     categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
     categories_text = ' '.join(categories).strip()
 
     if self.placement_choice.get() == "prefix":
         new_name = f"{custom_text} {categories_text} {base_name}".strip()
-    elif self.placement_choice.get() == "first_dash":
-        parts = base_name.split('-', 1)
+    # Place the queue at the first instance of the special character
+    elif self.placement_choice.get() == "special_character":
+        parts = base_name.split(self.special_character_var, 1)
         if len(parts) == 2:
             new_name = f"{parts[0].rstrip()} {categories_text} {custom_text} {parts[1].lstrip()}".strip()
             try:
@@ -593,7 +595,7 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                     error_message = error_message[:115]
                 self.show_message(error_message, error=True)
         else:
-            # If there's no dash, default to suffix
+            # If there's no special character found, default to suffix
             new_name = f"{base_name} {categories_text} {custom_text}".strip()
     else:  # Default to suffix
         new_name = f"{base_name} {categories_text} {custom_text}".strip()

@@ -74,7 +74,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.navigation_frame = None
         self.open_on_file_drop_switch = None
         self.suffix_radio = None
-        self.first_dash_radio = None
+        self.special_character_radio = None
         self.prefix_radio = None
         self.placement_choice = None
         self.move_text_checkbox = None
@@ -88,8 +88,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
-         open_on_file_drop_var, remove_duplicates_var, default_placement_var, double_check_var, activate_logging_var,
-         ocd_file_renamer_log, column_numbers, default_weight) = (
+         open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
+         double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight) = (
             self.load_configuration())
 
         # Set instance variables with the values from the configuration file
@@ -102,6 +102,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_weight = int(default_weight)
         self.ocd_file_renamer_log = ocd_file_renamer_log
         self.default_placement_var = default_placement_var
+        self.special_character_var = special_character_var
         self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)
         self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
         self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
@@ -341,9 +342,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
         self.placement_label.grid(row=0, column=4, padx=10)
 
-        # Variable to track the user's placement choice (prefix, suffix, or first_dash)
+        # Variable to track the user's placement choice (prefix, suffix, or special_character)
         self.placement_choice = ctk.StringVar()
-        self.placement_choice.set(self.default_placement_var)  # Default to first_dash
+        self.placement_choice.set(self.default_placement_var)  # Default to special_character
 
         # Radio button for prefix
         self.prefix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Prefix",
@@ -351,11 +352,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                value="prefix")
         self.prefix_radio.grid(row=0, column=5)
 
-        # Radio button for first_dash
-        self.first_dash_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="First Dash",
-                                                   variable=self.placement_choice,
-                                                   value="first_dash")
-        self.first_dash_radio.grid(row=0, column=6, padx=5)
+        # Radio button for special_character
+        self.special_character_radio = ctk.CTkRadioButton(self.folder_operations_frame,
+                                                          text=f"Special Character: {self.special_character_var}",
+                                                          variable=self.placement_choice,
+                                                          value="special_character")
+        self.special_character_radio.grid(row=0, column=6, padx=5)
 
         # Radio button for suffix
         self.suffix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Suffix",
