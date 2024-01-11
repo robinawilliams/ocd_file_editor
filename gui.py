@@ -173,17 +173,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_frame.grid_rowconfigure(0, weight=1)
 
         # Create a canvas and a scrollbar
-        # TODO Include logic to adjust the background (bg) color depending on what mode is selected.
-        self.home_canvas = ctk.CTkCanvas(self.home_frame, bg='#2B2B2B', highlightthickness=0)
+        self.home_canvas = ctk.CTkCanvas(self.home_frame, highlightthickness=0)
         self.home_scrollbar = ctk.CTkScrollbar(self.home_frame, command=self.home_canvas.yview)
         self.home_canvas.configure(yscrollcommand=self.home_scrollbar.set)
+
+        # Set default background color based on system mode
+        self.update_background_color()
 
         # Place the canvas and the scrollbar in the grid
         self.home_canvas.grid(row=0, column=0, sticky="nsew")
         self.home_scrollbar.grid(row=0, column=1, sticky="ns")
 
         # Create a frame inside the canvas for scrollable content
-        self.home_scrollable_frame = ctk.CTkFrame(self.home_canvas, corner_radius=0)
+        self.home_scrollable_frame = ctk.CTkFrame(self.home_canvas, corner_radius=0, bg_color="transparent")
         self.home_scrollable_frame_window = self.home_canvas.create_window((0, 0), window=self.home_scrollable_frame,
                                                                            anchor="nw")
 
@@ -427,12 +429,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Select light or dark mode
         self.appearance_mode_menu = ctk.CTkOptionMenu(self.settings_top_frame,
-                                                      values=["Light", "Dark", "System"],
+                                                      values=["Light", "Dark"],
                                                       command=self.change_appearance_mode_event)
         self.appearance_mode_menu.grid(row=2, column=1, padx=10, pady=10)
 
         # Set default value for appearance
-        self.appearance_mode_menu.set("System")
+        self.appearance_mode_menu.set("Dark")
 
         # Select scaling label
         self.scaling_label = ctk.CTkLabel(self.settings_top_frame, text="UI Scaling:")
@@ -508,22 +510,44 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def settings_button_event(self):
         self.select_frame_by_name("settings")
 
-    # Static methods for changing appearance mode and UI scaling
-    @staticmethod
-    def change_appearance_mode_event(new_appearance_mode):
-        ctk.set_appearance_mode(new_appearance_mode)
+    def update_background_color(self):
+        # Update canvas background color based on the current appearance mode
+        current_mode = ctk.get_appearance_mode()
+        if current_mode == "Light":
+            self.home_canvas.configure(bg='#dbdbdb')
+        elif current_mode == "Dark":
+            self.home_canvas.configure(bg='#2B2B2B')
 
+    # Static method for changing appearance mode (Light or Dark)
+    def change_appearance_mode_event(self, new_appearance_mode):
+        # Update background color when appearance mode changes
+        ctk.set_appearance_mode(new_appearance_mode)
+        self.update_background_color()
+
+    def update_text_color(self):
+        # Update text color based on the current appearance mode
+        current_mode = ctk.get_appearance_mode()
+        if current_mode == "Light":
+            self.message_label.configure(text_color="#000000")
+        elif current_mode == "Dark":
+            self.message_label.configure(text_color="#FFFFFF")
+
+    # Method to display messages with optional error formatting
+    def show_message(self, message, error=False):
+        # Update text color when displaying a message
+        self.update_text_color()
+
+        # Display the message with optional error formatting
+        if error:
+            self.message_label.configure(text=message, text_color="#FF0000")  # Red text for errors
+        else:
+            self.message_label.configure(text=message)
+
+    # Method for changing UI scaling
     @staticmethod
     def change_scaling_event(new_scaling: str):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
-
-    # Method to display messages with optional error formatting
-    def show_message(self, message, error=False):
-        if error:
-            self.message_label.configure(text=message, text_color="red")
-        else:
-            self.message_label.configure(text=message, text_color="white")
 
     """
     Configuration
