@@ -50,10 +50,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label_frame = None
         self.last_used_frame = None
         self.category_frame = None
-        self.cat_top_frame = None
+        self.name_normalizer_frame = None
+        self.name_normalizer_top_frame = None
         self.settings_top_frame = None
-        self.file_label = None
-        self.coming_soon_label = None  # TODO Remove once add/remove categories window is running
+        self.name_normalizer_label = None
         self.settings_frame = None
         self.settings_label = None
         self.scaling_label = None
@@ -68,7 +68,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_canvas = None
         self.home_frame = None
         self.settings_button = None
-        self.add_remove_categories = None
+        self.name_normalizer = None
         self.home_button = None
         self.navigation_frame_label = None
         self.navigation_frame = None
@@ -84,19 +84,57 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_switch = None
         self.double_check_switch = None
         self.activate_logging_switch = None
+        self.checkbox_frame1 = None  # Name Normalizer start
+        self.browse_folder_button = None
+        self.folder_path_entry = None
+        self.remove_all_symbols_checkbox = None
+        self.tail_checkbox = None
+        self.remove_parenthesis_checkbox = None
+        self.remove_hash_checkbox = None
+        self.checkbox_frame2 = None
+        self.remove_new_checkbox = None
+        self.remove_dash_checkbox = None
+        self.remove_endash_checkbox = None
+        self.remove_emdash_checkbox = None
+        self.checkbox_frame3 = None
+        self.remove_ampersand_checkbox = None
+        self.remove_at_checkbox = None
+        self.remove_underscore_checkbox = None
+        self.remove_comma_checkbox = None
+        self.checkbox_frame4 = None
+        self.remove_quote_checkbox = None
+        self.title_checkbox = None
+        self.reset_checkbox = None
+        self.output_directory_frame = None
+        self.browse_move_directory_button = None
+        self.move_directory_entry = None
+        self.artist_file_frame = None
+        self.browse_artist_file_button = None
+        self.artist_file_entry = None
+        self.normalize_folder_frame = None
+        self.normalize_folder_button = None
+        self.clear_name_normalizer_selection_button = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
-         double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight) = (
-            self.load_configuration())
+         double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
+         file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
+         remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
+         remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
+         initial_output_directory, artist_file, file_path_list_file) = (self.load_configuration())
 
-        # Set instance variables with the values from the configuration file
+        # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
+        self.initial_output_directory = initial_output_directory
         self.artist_directory = artist_directory
         self.double_check_directory = double_check_directory
+        self.artist_file = artist_file
+        self.file_path_list_file = file_path_list_file
         self.categories_file = categories_file
+
+        # Variables and window geometry - Set instance variables with the values from the configuration file
         self.geometry(geometry)
         self.column_numbers = int(column_numbers)
         self.default_weight = int(default_weight)
@@ -111,6 +149,24 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
         self.double_check_var = ctk.BooleanVar(value=double_check_var)
         self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
+        self.file_extensions_tuple = file_extensions_tuple
+
+        # Name Normalizer - Set instance variables with the values from the configuration file
+        self.remove_all_symbols_var = ctk.BooleanVar(value=remove_all_symbols_var)
+        self.tail_var = ctk.BooleanVar(value=tail_var)
+        self.remove_parenthesis_var = ctk.BooleanVar(value=remove_parenthesis_var)
+        self.remove_hash_var = ctk.BooleanVar(value=remove_hash_var)
+        self.remove_new_var = ctk.BooleanVar(value=remove_new_var)
+        self.remove_dash_var = ctk.BooleanVar(value=remove_dash_var)
+        self.remove_endash_var = ctk.BooleanVar(value=remove_endash_var)
+        self.remove_emdash_var = ctk.BooleanVar(value=remove_emdash_var)
+        self.remove_ampersand_var = ctk.BooleanVar(value=remove_ampersand_var)
+        self.remove_at_var = ctk.BooleanVar(value=remove_at_var)
+        self.remove_underscore_var = ctk.BooleanVar(value=remove_underscore_var)
+        self.remove_comma_var = ctk.BooleanVar(value=remove_comma_var)
+        self.remove_quote_var = ctk.BooleanVar(value=remove_quote_var)
+        self.title_var = ctk.BooleanVar(value=title_var)
+        self.reset_var = ctk.BooleanVar(value=reset_var)
 
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
@@ -146,14 +202,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                          anchor="w", command=self.home_button_event)
         self.home_button.grid(row=1, column=0, sticky="ew")
 
-        # Create button for adding/removing categories with specific styling and command
-        self.add_remove_categories = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
-                                                   border_spacing=10, text="Categories",
-                                                   fg_color="transparent", text_color=("gray10", "gray90"),
-                                                   hover_color=("gray70", "gray30"),
-                                                   anchor="w",
-                                                   command=self.add_remove_categories_event)
-        self.add_remove_categories.grid(row=2, column=0, sticky="ew")
+        # Create button for Name Normalizer with specific styling and command
+        self.name_normalizer = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
+                                             border_spacing=10, text="Name Normalizer",
+                                             fg_color="transparent", text_color=("gray10", "gray90"),
+                                             hover_color=("gray70", "gray30"),
+                                             anchor="w",
+                                             command=self.name_normalizer_event)
+        self.name_normalizer.grid(row=2, column=0, sticky="ew")
 
         # Create Settings button with specific styling and command
         self.settings_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
@@ -366,24 +422,188 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suffix_radio.grid(row=0, column=7, padx=5)
 
         """
-        category_window
+        name_normalizer_window
         """
-        # Create add/remove categories frame
-        self.category_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.category_frame.grid_columnconfigure(0, weight=1)
+        # Create Name Normalizer frame
+        self.name_normalizer_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.name_normalizer_frame.grid_columnconfigure(0, weight=1)
 
-        # Top frame
-        self.cat_top_frame = ctk.CTkFrame(self.category_frame, corner_radius=0, fg_color="transparent")
-        self.cat_top_frame.grid(row=0, column=0, padx=10, pady=10)
+        # Name Normalizer Label
+        self.name_normalizer_label = ctk.CTkLabel(self.name_normalizer_frame, text="Name Normalizer",
+                                                  font=ctk.CTkFont(size=15, weight="bold"))
+        self.name_normalizer_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # Add/Remove Categories Label
-        self.file_label = ctk.CTkLabel(self.cat_top_frame, text="Add/Remove Categories",
-                                       font=ctk.CTkFont(size=15, weight="bold"))
-        self.file_label.grid(row=0, column=0, padx=5, pady=5)
+        # Name Normalizer Top frame
+        self.name_normalizer_top_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                                      fg_color="transparent")
+        self.name_normalizer_top_frame.grid(row=1, column=0, padx=10, pady=5)
 
-        self.coming_soon_label = ctk.CTkLabel(self.cat_top_frame, text="Coming Soon",
-                                              font=ctk.CTkFont(size=15, weight="bold"))
-        self.coming_soon_label.grid(row=1, column=0, padx=5, pady=5)
+        # Browse Folder button
+        self.browse_folder_button = ctk.CTkButton(self.name_normalizer_top_frame, text="Browse Folder",
+                                                  command=self.browse_folder_path)
+        self.browse_folder_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Folder Path Entry
+        self.folder_path_entry = ctk.CTkEntry(self.name_normalizer_top_frame, width=890)
+        self.folder_path_entry.insert(0, "Select a folder to normalize files using the 'Browse Folder' button...")
+        self.folder_path_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Button Frame 1
+        self.checkbox_frame1 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame1.grid(row=2, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable Remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—
+        self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                           text="Remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—",
+                                                           variable=self.remove_all_symbols_var)
+        self.remove_all_symbols_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable Append '__-__ ' to the file name
+        self.tail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                             text="Append '__-__ '",
+                                             variable=self.tail_var)
+        self.tail_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove parenthesis
+        self.remove_parenthesis_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                           text="Remove text following the first '('",
+                                                           variable=self.remove_parenthesis_var)
+        self.remove_parenthesis_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove hashtag
+        self.remove_hash_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                    text="Remove text following the first '#'",
+                                                    variable=self.remove_hash_var)
+        self.remove_hash_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Button Frame 2
+        self.checkbox_frame2 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame2.grid(row=3, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable Remove New
+        self.remove_new_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
+                                                   text="Remove New",
+                                                   variable=self.remove_new_var)
+        self.remove_new_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove dashes
+        self.remove_dash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
+                                                    text="Remove dashes",
+                                                    variable=self.remove_dash_var)
+        self.remove_dash_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove endashes
+        self.remove_endash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
+                                                      text="Remove endashes",
+                                                      variable=self.remove_endash_var)
+        self.remove_endash_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove emdashes
+        self.remove_emdash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
+                                                      text="Remove emdashes",
+                                                      variable=self.remove_emdash_var)
+        self.remove_emdash_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Button Frame 3
+        self.checkbox_frame3 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame3.grid(row=4, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable Remove ampersands
+        self.remove_ampersand_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                         text="Remove ampersands",
+                                                         variable=self.remove_ampersand_var)
+        self.remove_ampersand_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove @
+        self.remove_at_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                  text="Remove @",
+                                                  variable=self.remove_at_var)
+        self.remove_at_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove underscores
+        self.remove_underscore_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                          text="Remove underscores",
+                                                          variable=self.remove_underscore_var)
+        self.remove_underscore_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove commas
+        self.remove_comma_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                     text="Remove commas",
+                                                     variable=self.remove_comma_var)
+        self.remove_comma_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Button Frame 4
+        self.checkbox_frame4 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame4.grid(row=5, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable Remove quotes
+        self.remove_quote_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                     text="Remove quotes",
+                                                     variable=self.remove_quote_var)
+        self.remove_quote_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable Titlefy the name
+        self.title_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                              text="Titlefy the name",
+                                              variable=self.title_var)
+        self.title_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable Reset entries
+        self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                              text="Reset entries",
+                                              variable=self.reset_var)
+        self.reset_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Output directory move frame
+        self.output_directory_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.output_directory_frame.grid(row=6, column=0, padx=10, pady=5)
+
+        # Browse move directory folder button
+        self.browse_move_directory_button = ctk.CTkButton(self.output_directory_frame, text="Output Directory",
+                                                          command=self.browse_move_directory)
+        self.browse_move_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Move directory entry
+        self.move_directory_entry = ctk.CTkEntry(self.output_directory_frame, width=890)
+        self.move_directory_entry.insert(0, "Select a folder to output normalized files using the 'Output Directory' "
+                                            "button...")
+        self.move_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Artist File Frame
+        self.artist_file_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                              fg_color="transparent")
+        self.artist_file_frame.grid(row=7, column=0, padx=10, pady=5)
+
+        # Browse Artist File button
+        self.browse_artist_file_button = ctk.CTkButton(self.artist_file_frame, text="Artist File",
+                                                       command=self.browse_artist_file)
+        self.browse_artist_file_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Artist File entry
+        self.artist_file_entry = ctk.CTkEntry(self.artist_file_frame, width=890)
+        self.artist_file_entry.insert(0, "Select a list of artists file...")
+        self.artist_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Normalize Folder frame
+        self.normalize_folder_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.normalize_folder_frame.grid(row=8, column=0, padx=10, pady=5)
+
+        # Normalize Folder button
+        self.normalize_folder_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize Folder",
+                                                     command=self.process_folder)
+        self.normalize_folder_button.grid(row=0, column=1, padx=5, pady=5)
+
+        # Clear Name Normalizer Selection Button
+        self.clear_name_normalizer_selection_button = ctk.CTkButton(self.normalize_folder_frame,
+                                                                    text="Clear",
+                                                                    command=self.clear_name_normalizer_selection)
+        self.clear_name_normalizer_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
         """
         settings_window
@@ -481,8 +701,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def select_frame_by_name(self, name):
         # Set button color for the selected button
         self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.add_remove_categories.configure(
-            fg_color=("gray75", "gray25") if name == "add_remove_categories" else "transparent")
+        self.name_normalizer.configure(
+            fg_color=("gray75", "gray25") if name == "name_normalizer" else "transparent")
         self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings" else "transparent")
 
         # Show the selected frame and hide others
@@ -490,10 +710,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.home_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.home_frame.grid_forget()
-        if name == "add_remove_categories":
-            self.category_frame.grid(row=0, column=1, sticky="nsew")
+        if name == "name_normalizer":
+            self.name_normalizer_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.category_frame.grid_forget()
+            self.name_normalizer_frame.grid_forget()
         if name == "settings":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -506,8 +726,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def home_button_event(self):
         self.select_frame_by_name("home")
 
-    def add_remove_categories_event(self):
-        self.select_frame_by_name("add_remove_categories")
+    def name_normalizer_event(self):
+        self.select_frame_by_name("name_normalizer")
 
     def settings_button_event(self):
         self.select_frame_by_name("settings")
@@ -520,7 +740,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         elif current_mode == "Dark":
             self.home_canvas.configure(bg='#2B2B2B')
 
-    # Static method for changing appearance mode (Light or Dark)
+    # Method for changing appearance mode (Light or Dark)
     def change_appearance_mode_event(self, new_appearance_mode):
         # Update background color when appearance mode changes
         ctk.set_appearance_mode(new_appearance_mode)
@@ -651,6 +871,53 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def move_text(name):
         # Move text within a name according to specified rules
         return core.move_text(name)
+
+    """
+    Name Normalizer
+    """
+
+    # TODO Add notes
+    # TODO confirm each function
+
+    @staticmethod
+    def remove_artist_duplicates_from_filename(file_name, artist_file):
+        core.remove_artist_duplicates_from_filename(file_name, artist_file)
+
+    def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
+                             remove_dash,
+                             remove_endash, remove_emdash, remove_ampersand, remove_at, remove_underscore,
+                             remove_comma, remove_quote, title, move_directory, artist_file):
+        core.rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
+                                  remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at,
+                                  remove_underscore, remove_comma, remove_quote, title, move_directory, artist_file)
+
+    @staticmethod
+    def get_folder_contents_and_save_to_file(folder_path, file_list_file):
+        core.get_folder_contents_and_save_to_file(folder_path, file_list_file)
+
+    def move_file_with_overwrite_check(self, source_path, destination_dir):
+        core.move_file_with_overwrite_check(self, source_path, destination_dir)
+
+    def remove_artist_duplicates_from_list(self, artist_file_path):
+        core.remove_artist_duplicates_from_list(self, artist_file_path)
+
+    def split_artist_names(self, artist_file_path):
+        core.split_artist_names(self, artist_file_path)
+
+    def process_folder(self):
+        core.process_folder(self)
+
+    def browse_folder_path(self):
+        core.browse_folder_path(self)
+
+    def browse_move_directory(self):
+        core.browse_move_directory(self)
+
+    def browse_artist_file(self):
+        core.browse_artist_file(self)
+
+    def clear_name_normalizer_selection(self):
+        core.clear_name_normalizer_selection(self)
 
 
 if __name__ == "__main__":

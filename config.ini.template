@@ -21,20 +21,56 @@ remove_duplicates_var = True
 double_check_var = False
 ; Activate logging
 activate_logging_var = False
-; Set the default placement for the words to be placed (prefix, first_dash, suffix)
-default_placement_var = first_dash
+; Remove all symbols
+remove_all_symbols_var = True
+; Append '__-__ ' to the file name
+tail_var = False
+; Remove text following the first '('
+remove_parenthesis_var = False
+; Remove text following the first '#'
+remove_hash_var = True
+; Remove New
+remove_new_var = False
+; Remove dashes
+remove_dash_var = False
+; Remove endashes
+remove_endash_var = False
+; Remove emdashes
+remove_emdash_var = False
+; Remove ampersands
+remove_ampersand_var = False
+; remove_at_var
+remove_at_var = False
+; Remove underscores
+remove_underscore_var = False
+; Remove commas
+remove_comma_var = False
+; Remove quotes
+remove_quote_var = False
+; Titlefy the name
+title_var = True
+; Reset entries
+reset_var = True
+; Set the default placement for the words to be placed (prefix, special_character, suffix)
+default_placement_var = special_character
 ; Set the special character for the placement (alphanumeric character)
 special_character_var = -
+; List of file extensions to process (Skip any not listed)
+file_extensions = .mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
 
 [Filepaths]
-; Starting location for browse
+; Starting directory for browse
 initial_directory = /path/to/folder
+; Starting directory for name normalizer files browse
+initial_output_directory = /path/to/folder
 ; Directory with folders to use for suggestions
 artist_directory = /path/to/folder
 ; Directory to save double check reminders
 double_check_directory = /path/to/folder
 ; List of artists to search
 artist_file = list_of_artists.txt
+; Temporary file for Name Normalizer file path list
+file_path_list_file = temp.txt
 ; JSON Dictionary containing the categories/genres and weights
 categories_file = categories.json
 
