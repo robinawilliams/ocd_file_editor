@@ -580,8 +580,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Move directory entry
         self.move_directory_entry = ctk.CTkEntry(self.output_directory_frame, width=890)
-        self.move_directory_entry.insert(0, "Select a folder to output normalized files using the 'Output Directory' "
-                                            "button...")
         self.move_directory_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Artist File Frame

@@ -801,16 +801,16 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
                 # Call the remove_artist_duplicates_from_filename function to modify new_name
                 new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
 
-        # Add the file extension back to the new name
-        new_name += ext
-
         # Add tail if add_tail is True
         if add_tail:
-            new_name += "__-__"
+            new_name += "__-__ "
 
             # Remove " -__-__" if present. Catchall for situations where only the artist name is left and -artist and
             # -tail are used.
             new_name = re.sub(r' -__-__', '', new_name).strip()
+
+        # Add the file extension back to the new name
+        new_name += ext
 
         # Skip renaming if the new name is the same as the original
         if new_name == filename:
@@ -903,7 +903,6 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
 
     # Perform the move now that we're sure it won't overwrite
     try:
-        # TODO include check if source and destination are the same. Handle the case if so
         shutil.move(str(source_path), str(destination_file))
 
         # Log the move operation if logging is activated
@@ -939,21 +938,21 @@ def process_folder(self):
 
     # Check if the specified folder path exists
     if not os.path.exists(folder_path):
-        messagebox.showerror("Error", "Folder path does not exist.")
+        messagebox.showerror("Error", "Folder path does not exist or was not specified.\nPlease try again.")
         return
 
     # Check if move_directory is specified and exists
     if move_directory and not os.path.exists(move_directory):
-        messagebox.showerror("Error", "Move directory does not exist.")
+        messagebox.showerror("Error", "Output directory does not exist or was not specified.\nPlease try again.")
         return
 
     # Check artist file conditions if artist_file_search_var is True
     if self.artist_file_search_var.get():
         if not artist_file:
-            messagebox.showerror("Error", "No artist file specified. Please add it and try again.")
+            messagebox.showerror("Error", "No artist file specified.\nPlease add it and try again.")
             return
         elif not os.path.exists(artist_file):
-            messagebox.showerror("Error", "Artist file does not exist.")
+            messagebox.showerror("Error", "Artist file does not exist.\nPlease create it and try again.")
             return
 
     # Set move_directory to None if not specified
