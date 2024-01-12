@@ -104,6 +104,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.checkbox_frame4 = None
         self.remove_quote_checkbox = None
         self.title_checkbox = None
+        self.artist_search_checkbox = None
         self.reset_checkbox = None
         self.output_directory_frame = None
         self.browse_move_directory_button = None
@@ -123,13 +124,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
          remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-         initial_output_directory, artist_file, file_path_list_file, default_frame) = (self.load_configuration())
+         initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var) = (
+            self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
         self.initial_output_directory = initial_output_directory
-        self.artist_directory = artist_directory
         self.double_check_directory = double_check_directory
+        self.artist_directory = artist_directory
         self.artist_file = artist_file
         self.file_path_list_file = file_path_list_file
         self.categories_file = categories_file
@@ -167,6 +169,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_comma_var = ctk.BooleanVar(value=remove_comma_var)
         self.remove_quote_var = ctk.BooleanVar(value=remove_quote_var)
         self.title_var = ctk.BooleanVar(value=title_var)
+        self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
         self.reset_var = ctk.BooleanVar(value=reset_var)
 
         # Enable drag-and-drop functionality for files
@@ -553,11 +556,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               variable=self.title_var)
         self.title_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
+        # Checkbox to enable/disable Artist Search
+        self.artist_search_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                      text="Artist Search",
+                                                      variable=self.artist_file_search_var)
+        self.artist_search_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
         # Checkbox to enable/disable Reset entries
         self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
                                               text="Reset entries",
                                               variable=self.reset_var)
-        self.reset_checkbox.grid(row=0, column=2, padx=10, pady=10)
+        self.reset_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
         # Output directory move frame
         self.output_directory_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -587,7 +596,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Artist File entry
         self.artist_file_entry = ctk.CTkEntry(self.artist_file_frame, width=890)
-        self.artist_file_entry.insert(0, "Select a list of artists file...")
+        self.artist_file_entry.insert(0, self.artist_file)
         self.artist_file_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Normalize Folder frame
@@ -898,12 +907,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def move_file_with_overwrite_check(self, source_path, destination_dir):
         core.move_file_with_overwrite_check(self, source_path, destination_dir)
-
-    def remove_artist_duplicates_from_list(self, artist_file_path):
-        core.remove_artist_duplicates_from_list(self, artist_file_path)
-
-    def split_artist_names(self, artist_file_path):
-        core.split_artist_names(self, artist_file_path)
 
     def process_folder(self):
         core.process_folder(self)

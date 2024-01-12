@@ -28,8 +28,8 @@ def load_configuration():
     # Filepaths/Directories
     initial_directory = config.get('Filepaths', 'initial_directory', fallback='~')
     initial_output_directory = config.get('Filepaths', 'initial_output_directory', fallback='~')
-    artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
     double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='~')
+    artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
     artist_file = config.get('Filepaths', 'artist_file', fallback='~')
     file_path_list_file = config.get('Filepaths', 'file_path_list_file', fallback='~')
     categories_file = config.get('Filepaths', 'categories_file', fallback='~')
@@ -66,6 +66,7 @@ def load_configuration():
     remove_comma_var = config.getboolean("Settings", "remove_comma_var", fallback=False)
     remove_quote_var = config.getboolean("Settings", "remove_quote_var", fallback=False)
     title_var = config.getboolean("Settings", "title_var", fallback=True)
+    artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
 
     # File extensions
@@ -82,7 +83,7 @@ def load_configuration():
             file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
             remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
             remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-            initial_output_directory, artist_file, file_path_list_file, default_frame)
+            initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var)
 
 
 def logging_setup(self):
@@ -770,7 +771,7 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
         # Sanitize file name. Remove double spaces.
         new_name = ' '.join(name.split())
 
-        if artist_file:
+        if self.artist_file_search_var.get():
             # Read the list of artists from the artist_file
             with open(artist_file, 'r') as artist_list_file:
                 artists = [artist.strip() for artist in artist_list_file]
@@ -789,8 +790,8 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
 
             new_name = f"{artist_prefix} - {new_name}" if artist_prefix else new_name
 
-        # Call the remove_artist_duplicates_from_filename function to modify new_name
-        new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
+            # Call the remove_artist_duplicates_from_filename function to modify new_name
+            new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
 
         # Add extension back to the new name
         new_name += ext
@@ -886,63 +887,6 @@ def move_file_with_overwrite_check(self, source_path, destination_dir):
 
 
 # TODO CONFIRM
-def remove_artist_duplicates_from_list(self, artist_file_path):
-    try:
-        # Read the list of artists from the file
-        with open(artist_file_path, 'r') as file:
-            artists = file.readlines()
-
-        # Normalize case to check for duplicates and strip whitespace
-        artists_normalized = [artist.strip().lower() for artist in artists]
-
-        # Remove duplicates and title-case the unique artists
-        artists_unique = [artist.title() for artist in list(dict.fromkeys(artists_normalized))]
-
-        # Write the unique artists back to the same file
-        with open(artist_file_path, 'w') as file:
-            file.writelines("\n".join(artists_unique))
-
-        if self.activate_logging_var.get():
-            logging.info(f"Duplicates removed and saved to {artist_file_path}")
-    except Exception as e:
-        if self.activate_logging_var.get():
-            logging.error(f"An error occurred: {str(e)}")
-
-
-# TODO CONFIRM
-def split_artist_names(self, artist_file_path):
-    try:
-        # Read the list of artists from the file
-        with open(artist_file_path, 'r') as file:
-            artists = file.readlines()
-
-        # Normalize case and strip whitespace
-        artists_normalized = [artist.strip() for artist in artists]
-
-        # Split into two lists, one for single names and one for full names
-        single_names = [artist.title() for artist in artists_normalized if ' ' not in artist]
-        full_names = [artist.title() for artist in artists_normalized if ' ' in artist]
-
-        # Write the single names to 'single_names.txt'
-        single_names_path = os.path.join(os.path.dirname(artist_file_path), 'single_names.txt')
-        with open(single_names_path, 'w') as file:
-            file.writelines("\n".join(single_names))
-
-        if self.activate_logging_var.get():
-            logging.info(f"Single names saved to {single_names_path}")
-
-        # Write the full names back to text file
-        with open(artist_file_path, 'w') as file:
-            file.writelines("\n".join(full_names))
-
-        if self.activate_logging_var.get():
-            logging.info(f"Full names saved back to {artist_file_path}")
-    except Exception as e:
-        if self.activate_logging_var.get():
-            logging.error(f"An error occurred: {str(e)}")
-
-
-# TODO CONFIRM
 def process_folder(self):
     folder_path = self.folder_path_entry.get()
     tail = self.tail_var.get()
@@ -971,11 +915,13 @@ def process_folder(self):
         messagebox.showerror("Error", "Move directory does not exist.")
         return
 
-    if not artist_file:
-        artist_file = None
-    elif not os.path.exists(artist_file):
-        messagebox.showerror("Error", "Artist file does not exist.")
-        return
+    if self.artist_file_search_var.get():
+        if not artist_file:
+            messagebox.showerror("Error", "No artist file specified. Please add it and try again.")
+            return
+        elif not os.path.exists(artist_file):
+            messagebox.showerror("Error", "Artist file does not exist.")
+            return
 
     if not move_directory:
         move_directory = None
@@ -1046,7 +992,6 @@ def browse_move_directory(self):
 
 
 # TODO CONFIRM
-# Rework the logic (gui and or core) so it pulls the artist_file from the configuration by default
 def browse_artist_file(self):
     artist_file = filedialog.askopenfilename(
         initialdir=self.initial_directory,
