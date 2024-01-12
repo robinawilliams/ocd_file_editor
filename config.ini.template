@@ -5,6 +5,8 @@ geometry = 1280x800
 column_numbers = 7
 ; Default weight for category
 default_weight = 9
+; Default frame to open with
+default_frame = home
 ; Reset the output directory on each run
 reset_output_directory_var = True
 ; Suggest an output directory

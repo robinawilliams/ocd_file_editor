@@ -123,7 +123,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
          remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-         initial_output_directory, artist_file, file_path_list_file) = (self.load_configuration())
+         initial_output_directory, artist_file, file_path_list_file, default_frame) = (self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
@@ -138,6 +138,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.geometry(geometry)
         self.column_numbers = int(column_numbers)
         self.default_weight = int(default_weight)
+        self.default_frame = default_frame
         self.ocd_file_renamer_log = ocd_file_renamer_log
         self.default_placement_var = default_placement_var
         self.special_character_var = special_character_var
@@ -675,7 +676,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Misc
         """
         # Select default frame
-        self.select_frame_by_name("home")
+        self.select_frame_by_name(self.default_frame)
 
     # Callback for updating the scroll region when the inner frame is configured
     def on_frame_configure(self, event=None):

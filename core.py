@@ -38,6 +38,7 @@ def load_configuration():
     geometry = config.get('Settings', 'geometry', fallback='1280x800')
     column_numbers = config.get('Settings', 'column_numbers', fallback=7)
     default_weight = config.get('Settings', 'default_weight', fallback=9)
+    default_frame = config.get('Settings', 'default_frame', fallback="home")
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
@@ -81,7 +82,7 @@ def load_configuration():
             file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
             remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
             remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-            initial_output_directory, artist_file, file_path_list_file)
+            initial_output_directory, artist_file, file_path_list_file, default_frame)
 
 
 def logging_setup(self):
