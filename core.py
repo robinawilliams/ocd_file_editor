@@ -790,8 +790,10 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
 
             new_name = f"{artist_prefix} - {new_name}" if artist_prefix else new_name
 
-            # Call the remove_artist_duplicates_from_filename function to modify new_name
-            new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
+            # Check if the remove_duplicates_var is set
+            if self.remove_duplicates_var.get():
+                # Call the remove_artist_duplicates_from_filename function to modify new_name
+                new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
 
         # Add extension back to the new name
         new_name += ext
