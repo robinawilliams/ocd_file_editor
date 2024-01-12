@@ -7,7 +7,7 @@ column_numbers = 7
 default_weight = 9
 ; Default frame to open with (home, name_normalizer, settings)
 default_frame = home
-; Reset the output directory on each run
+; Reset the output directory after each run
 reset_output_directory_var = True
 ; Suggest an output directory
 suggest_output_directory_var = False
@@ -53,13 +53,15 @@ remove_quote_var = False
 title_var = True
 ; Artist File Search
 artist_file_search_var = True
-; Reset entries
-reset_var = True
+; Reset entries after each run
+reset_var = False
+; Explore subdirectories when name normalizing files (False just normalizes files in the root directory)
+deep_walk_var = False
 ; Set the default placement for the words to be placed (prefix, special_character, suffix)
 default_placement_var = special_character
 ; Set the special character for the placement (alphanumeric character)
 special_character_var = -
-; List of file extensions to process (Skip any not listed)
+; List of file extensions to process (skip any not listed)
 file_extensions = .mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
 
 [Filepaths]

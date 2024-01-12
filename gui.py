@@ -105,6 +105,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_quote_checkbox = None
         self.title_checkbox = None
         self.artist_search_checkbox = None
+        self.deep_walk_checkbox = None
         self.reset_checkbox = None
         self.output_directory_frame = None
         self.browse_move_directory_button = None
@@ -124,7 +125,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
          remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-         initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var) = (
+         initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
+         deep_walk_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -171,6 +173,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.title_var = ctk.BooleanVar(value=title_var)
         self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
         self.reset_var = ctk.BooleanVar(value=reset_var)
+        self.deep_walk_var = ctk.BooleanVar(value=deep_walk_var)
 
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
@@ -563,10 +566,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_search_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
         # Checkbox to enable/disable Reset entries
+        self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                  text="Include subdirectories",
+                                                  variable=self.deep_walk_var)
+        self.deep_walk_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Checkbox to enable/disable Reset entries
         self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
                                               text="Reset entries",
                                               variable=self.reset_var)
-        self.reset_checkbox.grid(row=0, column=3, padx=10, pady=10)
+        self.reset_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Output directory move frame
         self.output_directory_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -897,11 +906,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                   remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at,
                                   remove_underscore, remove_comma, remove_quote, title, move_directory, artist_file)
 
-    @staticmethod
-    def get_folder_contents_and_save_to_file(folder_path, file_list_file):
+    def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
         # Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full
         # file paths to a specified file
-        core.get_folder_contents_and_save_to_file(folder_path, file_list_file)
+        core.get_folder_contents_and_save_to_file(self, folder_path, file_list_file)
 
     def move_file_with_overwrite_check(self, source_path, destination_directory):
         # Function to move a file from a source path to a destination directory with overwrite protection

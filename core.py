@@ -68,6 +68,7 @@ def load_configuration():
     title_var = config.getboolean("Settings", "title_var", fallback=True)
     artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
+    deep_walk_var = config.getboolean("Settings", "deep_walk_var", fallback=False)
 
     # File extensions
     file_extensions = config.get('Settings', 'file_extensions',
@@ -83,7 +84,8 @@ def load_configuration():
             file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
             remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
             remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-            initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var)
+            initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
+            deep_walk_var)
 
 
 def logging_setup(self):
@@ -693,14 +695,6 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
 
     # Check if the file has one of the video file extensions
     if ext.lower() in self.file_extensions_tuple:
-        # TODO Add test for pre and post name
-        # Initialize new_name to the original filename
-        new_name = filename
-
-        # Log initial filename if logging is activated
-        if self.activate_logging_var.get():
-            logging.info(f"Initial filename: {new_name}")
-
         # Remove specified characters from the filename if remove_all is True
         if remove_all:
             # Define the characters to be removed
@@ -821,9 +815,8 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
         # Construct the new file path
         new_path = os.path.join(dir_path, new_name)
 
-        # TODO Part 2 of test for pre and post name
         # Check if the new filename already exists
-        if os.path.exists(os.path.join(dir_path, new_name)):
+        if os.path.exists(new_path):
             if self.activate_logging_var.get():
                 logging.warning(f"Conflict detected on: \n{new_name}.")
 
@@ -871,15 +864,20 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
 
 # Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full file paths
 # to a specified file
-def get_folder_contents_and_save_to_file(folder_path, file_list_file):
+def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
     # Initialize an empty list to store file paths
     file_paths = []
 
     # Traverse through the folder using os.walk
     for root, dirs, files in os.walk(folder_path):
-        for file in files:
-            # Append the full file path to the list
-            file_paths.append(str(os.path.join(root, file)))
+        # Log the shallow os.walk operation if logging is activated
+        if self.activate_logging_var.get():
+            logging.info(f"Info: {self.deep_walk_var.get()} os.walk started on '{folder_path}'")
+        # Include subdirectories if the deep_walk_var is True or the foot folder is selected
+        if self.deep_walk_var.get() or root == folder_path:
+            for file in files:
+                # Append the full file path to the list
+                file_paths.append(str(os.path.join(root, file)))
 
     # Write the file paths to the specified file
     with open(file_list_file, 'w') as f:
@@ -961,7 +959,7 @@ def process_folder(self):
 
     try:
         # Get folder contents and save to a temporary file
-        get_folder_contents_and_save_to_file(folder_path, self.file_path_list_file)
+        get_folder_contents_and_save_to_file(self, folder_path, self.file_path_list_file)
         try:
             # Read file paths from the temporary file
             with open(self.file_path_list_file, 'r') as file:
