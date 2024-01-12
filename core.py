@@ -650,7 +650,7 @@ Name Normalizer
 """
 
 
-# TODO CONFIRM
+# Function to remove duplicate artists from the filename. Requires artist_file
 def remove_artist_duplicates_from_filename(file_name, artist_file):
     # Read the list of artists from the artist_file
     with open(artist_file, 'r') as artist_list_file:
@@ -683,22 +683,25 @@ def remove_artist_duplicates_from_filename(file_name, artist_file):
     return new_file_name
 
 
-# TODO CONFIRM
+# Function to process and rename files and moving files to a specified directory
 def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
-                         remove_dash,
-                         remove_endash, remove_emdash, remove_ampersand, remove_at, remove_underscore,
-                         remove_comma, remove_quote, title, move_directory, artist_file):
+                         remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at,
+                         remove_underscore, remove_comma, remove_quote, title, move_directory, artist_file):
+    # Split the file path into directory path and filename
     dir_path, filename = os.path.split(file_path)
     name, ext = os.path.splitext(filename)
 
     # Check if the file has one of the video file extensions
     if ext.lower() in self.file_extensions_tuple:
-        # Check if the new filename is the same as the original filename
-        new_name = filename  # Initialize new_name to the original filename
+        # TODO Add test for pre and post name
+        # Initialize new_name to the original filename
+        new_name = filename
 
+        # Log initial filename if logging is activated
         if self.activate_logging_var.get():
             logging.info(f"Initial filename: {new_name}")
 
+        # Remove specified characters from the filename if remove_all is True
         if remove_all:
             # Define the characters to be removed
             remove_chars = ",;:@$%^&*+={}[]|\\<>\"?-–—"
@@ -707,6 +710,7 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             for char in remove_chars:
                 name = name.replace(char, "")
 
+        # Remove new if remove_new is True
         if remove_new:
             if 'New_' in name:
                 # Replace underscore with a space if it immediately trails the word "New". Catchall
@@ -748,7 +752,7 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             name = re.sub(r'&', '', name)
 
         if remove_at:
-            # Remove at
+            # Remove at symbols
             name = re.sub(r'@', '', name)
 
         if remove_underscore:
@@ -768,9 +772,10 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             # Make file name a title
             name = name.title()
 
-        # Sanitize file name. Remove double spaces.
+        # Sanitize the filename by removing double spaces
         new_name = ' '.join(name.split())
 
+        # Process artist names if artist_file_search_var is True
         if self.artist_file_search_var.get():
             # Read the list of artists from the artist_file
             with open(artist_file, 'r') as artist_list_file:
@@ -784,20 +789,22 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
                 if regex.search(new_name):
                     artist_prefix += f"{artist} "
 
-            # Remove any extra spaces and dashes at the beginning and end
+            # Remove extra spaces and dashes at the beginning and end
             artist_prefix = artist_prefix.strip()
             new_name = new_name.strip("-")
 
+            # Add artist prefix to the filename if artist_prefix is not empty
             new_name = f"{artist_prefix} - {new_name}" if artist_prefix else new_name
 
-            # Check if the remove_duplicates_var is set
+            # Check if remove_duplicates_var is set
             if self.remove_duplicates_var.get():
                 # Call the remove_artist_duplicates_from_filename function to modify new_name
                 new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
 
-        # Add extension back to the new name
+        # Add the file extension back to the new name
         new_name += ext
 
+        # Add tail if add_tail is True
         if add_tail:
             new_name += "__-__"
 
@@ -805,21 +812,25 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             # -tail are used.
             new_name = re.sub(r' -__-__', '', new_name).strip()
 
+        # Skip renaming if the new name is the same as the original
         if new_name == filename:
             if self.activate_logging_var.get():
                 logging.info(f"Skipped renaming: {filename} (no changes needed)")
-            return  # If the new name is the same as the original, skip renaming
+            return
 
+        # Construct the new file path
         new_path = os.path.join(dir_path, new_name)
 
+        # TODO Part 2 of test for pre and post name
         # Check if the new filename already exists
         if os.path.exists(os.path.join(dir_path, new_name)):
             if self.activate_logging_var.get():
                 logging.warning(f"Conflict detected on: \n{new_name}.")
-            base_name, _ = os.path.splitext(new_name)  # Split to exclude extension from base_name
 
-            # Check if the filename already has a counter
+            # Extract the base name (excluding extension) and check for existing counter
+            base_name, _ = os.path.splitext(new_name)
             counter_match = re.search(r" \((\d+)\)$", base_name)
+
             if counter_match:
                 if self.activate_logging_var.get():
                     logging.info(f"Counter match on: \n{new_name}.")
@@ -838,58 +849,75 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
                 new_path = os.path.join(move_directory if move_directory else dir_path, new_name)
                 counter += 1
         try:
+            # Rename the file
             os.rename(file_path, new_path)
+
+            # Log the renaming operation if logging is activated
             if self.activate_logging_var.get():
                 logging.info(f"Renamed: {filename} -> {os.path.basename(new_path)}")
 
+            # Move the renamed file to the specified directory if move_directory is provided
             if move_directory:
-                # Move the renamed file to the specified directory
                 move_file_with_overwrite_check(self, new_path, move_directory)
         except OSError as e:
+            # Log an error if renaming fails
             if self.activate_logging_var.get():
                 logging.error(f"Error renaming {filename}: {e}")
     else:
+        # Log that the file is ignored if not on the file extensions list
         if self.activate_logging_var.get():
             logging.info(f"Ignored: {filename} (not on file extensions list)")
 
 
-# TODO CONFIRM
+# Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full file paths
+# to a specified file
 def get_folder_contents_and_save_to_file(folder_path, file_list_file):
+    # Initialize an empty list to store file paths
     file_paths = []
+
+    # Traverse through the folder using os.walk
     for root, dirs, files in os.walk(folder_path):
         for file in files:
+            # Append the full file path to the list
             file_paths.append(str(os.path.join(root, file)))
+
+    # Write the file paths to the specified file
     with open(file_list_file, 'w') as f:
         f.write('\n'.join(file_paths))
 
 
-# TODO CONFIRM
-def move_file_with_overwrite_check(self, source_path, destination_dir):
-    destination_file = os.path.join(destination_dir, os.path.basename(source_path))
+# Function to move a file from a source path to a destination directory with overwrite protection
+def move_file_with_overwrite_check(self, source_path, destination_directory):
+    # Create the destination file path by joining the destination directory and the source file name
+    destination_file = os.path.join(destination_directory, os.path.basename(source_path))
 
     # Check if the destination file already exists
     if os.path.exists(destination_file):
-        # Rename the source file to avoid overwriting
+        # Rename the source file to avoid overwriting by appending a counter
         name, ext = os.path.splitext(os.path.basename(source_path))
         counter = 1
         while os.path.exists(destination_file):
             new_name = f"{name} ({counter})"
-            destination_file = os.path.join(destination_dir, new_name + ext)
+            destination_file = os.path.join(destination_directory, new_name + ext)
             counter += 1
 
     # Perform the move now that we're sure it won't overwrite
     try:
-        # TODO include check if source and destination are the same. Handle case if so
+        # TODO include check if source and destination are the same. Handle the case if so
         shutil.move(str(source_path), str(destination_file))
+
+        # Log the move operation if logging is activated
         if self.activate_logging_var.get():
             logging.info(f"Moved: {os.path.basename(source_path)} -> {os.path.basename(destination_file)}")
     except OSError as e:
+        # Log error if logging is activated
         if self.activate_logging_var.get():
             logging.error(f"Error renaming {os.path.basename(source_path)}: {e}")
 
 
-# TODO CONFIRM
+# Function to performing various name normalization operations on certain files within a specified folder
 def process_folder(self):
+    # Retrieve values from GUI input fields
     folder_path = self.folder_path_entry.get()
     tail = self.tail_var.get()
     remove_all = self.remove_all_symbols_var.get()
@@ -909,14 +937,17 @@ def process_folder(self):
     artist_file = self.artist_file_entry.get()
     reset = self.reset_var.get()
 
+    # Check if the specified folder path exists
     if not os.path.exists(folder_path):
         messagebox.showerror("Error", "Folder path does not exist.")
         return
 
+    # Check if move_directory is specified and exists
     if move_directory and not os.path.exists(move_directory):
         messagebox.showerror("Error", "Move directory does not exist.")
         return
 
+    # Check artist file conditions if artist_file_search_var is True
     if self.artist_file_search_var.get():
         if not artist_file:
             messagebox.showerror("Error", "No artist file specified. Please add it and try again.")
@@ -925,15 +956,19 @@ def process_folder(self):
             messagebox.showerror("Error", "Artist file does not exist.")
             return
 
+    # Set move_directory to None if not specified
     if not move_directory:
         move_directory = None
 
     try:
+        # Get folder contents and save to a temporary file
         get_folder_contents_and_save_to_file(folder_path, self.file_path_list_file)
         try:
+            # Read file paths from the temporary file
             with open(self.file_path_list_file, 'r') as file:
                 file_paths = file.read().splitlines()
 
+            # Iterate through file paths and rename/move files
             for file_path in file_paths:
                 rename_and_move_file(
                     self,
@@ -956,44 +991,51 @@ def process_folder(self):
                     artist_file
                 )
         except OSError as e:
+            # Log error if logging is activated
             if self.activate_logging_var.get():
                 logging.error(f"Error: {str(e)}")
         try:
+            # Remove the temporary file
             os.remove(self.file_path_list_file)
+
+            # Log deletion of temp file if logging is activated
             if self.activate_logging_var.get():
                 logging.info("Deleting temp file.")
         except OSError as e:
+            # Log error if logging is activated
             if self.activate_logging_var.get():
                 logging.error(f"Error: {str(e)}")
 
+        # Reset GUI input fields if reset is True
         if reset:
             # Clear the entry fields
             self.folder_path_entry.delete(0, ctk.END)
             self.move_directory_entry.delete(0, ctk.END)
             self.artist_file_entry.delete(0, ctk.END)
 
+        # Display success message
         messagebox.showinfo("Success", "Files have been processed successfully.")
     except Exception as e:
+        # Display error message if an exception occurs
         messagebox.showerror("Error", f"An error occurred: {e}")
 
 
-# TODO CONFIRM
+# Open a dialog to browse and select a folder to normalize files
 def browse_folder_path(self):
-    # Remove the default folder path entry text
-    self.folder_path_entry.delete(0, ctk.END)
-
+    # Function to browse and select a folder to normalize files
     self.folder_path = filedialog.askdirectory(initialdir=self.initial_directory)
+    self.folder_path_entry.delete(0, ctk.END)
     self.folder_path_entry.insert(0, self.folder_path)
 
 
-# TODO CONFIRM
+# Function to browse and select a folder to move the normalized files
 def browse_move_directory(self):
     move_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
     self.move_directory_entry.delete(0, ctk.END)
     self.move_directory_entry.insert(0, move_directory)
 
 
-# TODO CONFIRM
+# Open a dialog to browse and select a file containing a line delimited list of artists
 def browse_artist_file(self):
     artist_file = filedialog.askopenfilename(
         initialdir=self.initial_directory,
@@ -1002,8 +1044,8 @@ def browse_artist_file(self):
     self.artist_file_entry.insert(0, artist_file)
 
 
+# Function to clear the selection and update the GUI
 def clear_name_normalizer_selection(self):
-    # Clear custom text entry and reset output directory
     self.folder_path_entry.delete(0, ctk.END)
     self.move_directory_entry.delete(0, ctk.END)
     self.artist_file_entry.delete(0, ctk.END)

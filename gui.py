@@ -886,41 +886,47 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Name Normalizer
     """
 
-    # TODO Add notes
-    # TODO confirm each function
-
     @staticmethod
     def remove_artist_duplicates_from_filename(file_name, artist_file):
+        # Function to remove duplicate artists from the filename. Requires artist_file
         core.remove_artist_duplicates_from_filename(file_name, artist_file)
 
     def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
-                             remove_dash,
-                             remove_endash, remove_emdash, remove_ampersand, remove_at, remove_underscore,
+                             remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at, remove_underscore,
                              remove_comma, remove_quote, title, move_directory, artist_file):
+        # Function to process and rename files and moving files to a specified directory
         core.rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
                                   remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at,
                                   remove_underscore, remove_comma, remove_quote, title, move_directory, artist_file)
 
     @staticmethod
     def get_folder_contents_and_save_to_file(folder_path, file_list_file):
+        # Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full
+        # file paths to a specified file
         core.get_folder_contents_and_save_to_file(folder_path, file_list_file)
 
-    def move_file_with_overwrite_check(self, source_path, destination_dir):
-        core.move_file_with_overwrite_check(self, source_path, destination_dir)
+    def move_file_with_overwrite_check(self, source_path, destination_directory):
+        # Function to move a file from a source path to a destination directory with overwrite protection
+        core.move_file_with_overwrite_check(self, source_path, destination_directory)
 
     def process_folder(self):
+        # Function to performing various name normalization operations on certain files within a specified folder
         core.process_folder(self)
 
     def browse_folder_path(self):
+        # Open a dialog to browse and select a folder to normalize files
         core.browse_folder_path(self)
 
     def browse_move_directory(self):
+        # Function to browse and select a folder to move the normalized files
         core.browse_move_directory(self)
 
     def browse_artist_file(self):
+        # Open a dialog to browse and select a file containing a line delimited list of artists
         core.browse_artist_file(self)
 
     def clear_name_normalizer_selection(self):
+        # Function to clear the selection and update the GUI
         core.clear_name_normalizer_selection(self)
 
 
