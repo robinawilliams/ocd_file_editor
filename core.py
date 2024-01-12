@@ -30,9 +30,9 @@ def load_configuration():
     initial_output_directory = config.get('Filepaths', 'initial_output_directory', fallback='~')
     double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='~')
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
-    artist_file = config.get('Filepaths', 'artist_file', fallback='~')
-    file_path_list_file = config.get('Filepaths', 'file_path_list_file', fallback='~')
-    categories_file = config.get('Filepaths', 'categories_file', fallback='~')
+    artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
+    file_path_list_file = config.get('Filepaths', 'file_path_list_file', fallback='temp.txt')
+    categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
     geometry = config.get('Settings', 'geometry', fallback='1280x800')
@@ -947,10 +947,14 @@ def process_folder(self):
     # Check artist file conditions if artist_file_search_var is True
     if self.artist_file_search_var.get():
         if not artist_file:
-            messagebox.showerror("Error", "No artist file specified.\nPlease add it and try again.")
-            return
+            # If artist file wasn't specified, try falling back to the default
+            artist_file = self.artist_file
+            # If fallback artist file doesn't exist return so elif portion fires
+            if not os.path.exists(artist_file):
+                return
         elif not os.path.exists(artist_file):
-            messagebox.showerror("Error", "Artist file does not exist.\nPlease create it and try again.")
+            messagebox.showerror("Error", "Artist file does not exist.\nPlease create it from the template and try "
+                                          "again\nor turn off Artist Search.\nSee FAQ")
             return
 
     # Set move_directory to None if not specified
