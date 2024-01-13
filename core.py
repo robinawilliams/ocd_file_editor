@@ -9,7 +9,7 @@ import logging
 import configparser
 import shutil
 from moviepy.editor import VideoFileClip
-from icecream import ic  # TODO Remove icecream ic when done testing, add if activate logging to remaining entries in video editor
+# from icecream import ic  # TODO Remove icecream ic when done testing, add if activate logging to remaining entries in video editor
 
 """
 Configuration
