@@ -9,7 +9,6 @@ import logging
 import configparser
 import shutil
 from moviepy.editor import VideoFileClip
-# from icecream import ic  # TODO Remove icecream ic when done testing, add if activate logging to remaining entries in video editor
 
 """
 Configuration
@@ -1075,36 +1074,38 @@ def get_non_conflicting_filename(path):
 
 # TODO CONFIRMED
 # TODO ADD NOTES
-def rotate_video(clip, rotation_angle):
+def rotate_video(self, clip, rotation_angle):
     try:
         rotated_clip = clip.rotate(rotation_angle)  # Rotate the video by the specified angle
         return rotated_clip
     except Exception as e:
-        logging.error(f"Error rotating video: {str(e)}")
-        ic(f"Error rotating video: {str(e)}")
+        if self.activate_logging_var.get():
+            logging.error(f"Error rotating video: {str(e)}")
+        messagebox.showerror("Error", f"Error rotating video: {str(e)}")
         return None
 
 
 # TODO CONFIRM AND ADD NOTES
-def increase_volume(clip, increase_db):
+def increase_volume(self, clip, increase_db):
     try:
-        ic(f"{clip}", increase_db)
         modified_clip = clip.volumex(10 ** (increase_db / 20.0))  # Convert dB to linear scale
         return modified_clip
     except Exception as e:
-        logging.error(f"Error increasing volume: {str(e)}")
-        ic(f"Error increasing volume: {str(e)}")
+        if self.activate_logging_var.get():
+            logging.error(f"Error increasing volume: {str(e)}")
+        messagebox.showerror("Error", f"Error increasing volume: {str(e)}")
         return None
 
 
 # TODO CONFIRM AND ADD NOTES
-def normalize_audio(clip, volume_multiplier):
+def normalize_audio(self, clip, volume_multiplier):
     try:
         normalized_clip = clip.volumex(volume_multiplier)  # Normalize the audio
         return normalized_clip
     except Exception as e:
-        logging.error(f"Error normalizing audio: {str(e)}")
-        ic(f"Error normalizing audio: {str(e)}")
+        if self.activate_logging_var.get():
+            logging.error(f"Error normalizing audio: {str(e)}")
+        messagebox.showerror("Error", f"Error normalizing audio: {str(e)}")
         return None
 
 
@@ -1145,22 +1146,26 @@ def process_video_edits(self):
             file.write('\n'.join(input_paths))
 
     if (input_video or input_file) and decibel is None and rotation is None and audio_normalization is None:
-        logging.error(
-            "Error: You need to specify an operation (audio increase, video rotation, audio normalization or"
-            "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
-        ic(
-            "Error: You need to specify an operation (audio increase, video rotation, audio normalization or"
-            "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
+        if self.activate_logging_var.get():
+            logging.error(
+                "Error: You need to specify an operation (audio increase, video rotation, audio normalization or"
+                "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
+        messagebox.showerror("Error",
+                             "Error: You need to specify an operation (audio increase, video rotation, "
+                             "audio normalization or"
+                             "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
         return
 
     if input_video and input_file:
-        logging.error("Error: Both input video and input file specified. Please choose one.")
-        ic("Error: Both input video and input file specified. Please choose one.")
+        if self.activate_logging_var.get():
+            logging.error("Error: Both input video and input file specified. Please choose one.")
+        messagebox.showerror("Error", "Error: Both input video and input file specified. Please choose one.")
         return
 
     if not input_video and not input_file:
-        logging.error("Error: Either input video or input file must be specified.")
-        ic("Error: Either input video or input file must be specified.")
+        if self.activate_logging_var.get():
+            logging.error("Error: Either input video or input file must be specified.")
+        messagebox.showerror("Error", "Error: Either input video or input file must be specified.")
         return
 
     if input_video:
@@ -1173,7 +1178,8 @@ def process_video_edits(self):
         try:
             # Check if the file name length exceeds 260 characters
             if len(input_path) > 260:
-                logging.warning(f"File over 260 warning!!! Fix: {input_path}")
+                if self.activate_logging_var.get():
+                    logging.warning(f"File over 260 warning!!! Fix: {input_path}")
                 temp_dir = os.path.dirname(input_path)
                 temp_copy_path = os.path.join(temp_dir, 'temp_EXCEPTION.mp4')
                 shutil.copyfile(input_path, temp_copy_path)
@@ -1227,21 +1233,21 @@ def process_video_edits(self):
 
                 # Apply the operations in sequence, checking if they are successful
                 if rotation and successful_operations:
-                    processed_clip = rotate_video(original_clip, rotation_angle)
+                    processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
                         successful_operations = False
 
                 if decibel and successful_operations:
-                    processed_clip = increase_volume(original_clip, decibel)
+                    processed_clip = increase_volume(self, original_clip, decibel)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
                         successful_operations = False
 
                 if audio_normalization and successful_operations:
-                    processed_clip = normalize_audio(original_clip, audio_normalization)
+                    processed_clip = normalize_audio(self, original_clip, audio_normalization)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
@@ -1250,15 +1256,17 @@ def process_video_edits(self):
                 # Only write the final modified clip to the output path if all operations were successful
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-                    logging.info(f"Video {operation_suffix.lower()} saved as {output_path}")
-                    ic(f"Video {operation_suffix.lower()} saved as {output_path}")
+                    if self.activate_logging_var.get():
+                        logging.info(f"Video {operation_suffix.lower()} saved as {output_path}")
+                    messagebox.showinfo("Success", f"Video {operation_suffix.lower()} saved as {output_path}")
 
                     # Remove the successfully processed line from the input file
                     if input_file:
                         remove_successful_line_from_file(input_file, input_path)
                 else:
-                    logging.error(f"Error: Operations failed for video {input_path}")
-                    ic(f"Error: Operations failed for video {input_path}")
+                    if self.activate_logging_var.get():
+                        logging.error(f"Error: Operations failed for video {input_path}")
+                    messagebox.showerror("Error", f"Error: Operations failed for video {input_path}")
 
                 # Close the original clip to free resources
                 original_clip.close()
@@ -1316,21 +1324,21 @@ def process_video_edits(self):
 
                 # Apply the operations in sequence, checking if they are successful
                 if rotation and successful_operations:
-                    processed_clip = rotate_video(original_clip, rotation_angle)
+                    processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
                         successful_operations = False
 
                 if decibel and successful_operations:
-                    processed_clip = increase_volume(original_clip, decibel)
+                    processed_clip = increase_volume(self, original_clip, decibel)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
                         successful_operations = False
 
                 if audio_normalization and successful_operations:
-                    processed_clip = normalize_audio(original_clip, audio_normalization)
+                    processed_clip = normalize_audio(self, original_clip, audio_normalization)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
@@ -1339,22 +1347,25 @@ def process_video_edits(self):
                 # Only write the final modified clip to the output path if all operations were successful
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-                    logging.info(f"Video {operation_suffix.lower()} saved as {output_path}")
-                    ic(f"Video {operation_suffix.lower()} saved as {output_path}")
+                    if self.activate_logging_var.get():
+                        logging.info(f"Video {operation_suffix.lower()} saved as {output_path}")
+                    messagebox.showinfo("Success", f"Video {operation_suffix.lower()} saved as {output_path}")
 
                     # Remove the successfully processed line from the input file
                     if input_file:
                         remove_successful_line_from_file(input_file, input_path)
                 else:
-                    logging.error(f"Error: Operations failed for video {input_path}")
-                    ic(f"Error: Operations failed for video {input_path}")
+                    if self.activate_logging_var.get():
+                        logging.error(f"Error: Operations failed for video {input_path}")
+                    messagebox.showerror("Error", f"Error: Operations failed for video {input_path}")
 
                 # Close the original clip to free resources
                 original_clip.close()
 
         except OSError as e:
-            logging.error(f"OSError: {str(e)} Skipping this file and moving to the next one.")
-            ic(f"OSError: {str(e)} Skipping this file and moving to the next one.")
+            if self.activate_logging_var.get():
+                logging.error(f"OSError: {str(e)} Skipping this file and moving to the next one.")
+            messagebox.showerror("Error", f"OSError: {str(e)} Skipping this file and moving to the next one.")
             continue
 
 

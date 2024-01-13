@@ -1129,19 +1129,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.get_non_conflicting_filename(path)
 
     # TODO CONFIRM AND ADD NOTES
-    @staticmethod
-    def rotate_video(clip, rotation_angle):
-        core.rotate_video(clip, rotation_angle)
+    def rotate_video(self, clip, rotation_angle):
+        core.rotate_video(self, clip, rotation_angle)
 
     # TODO CONFIRM AND ADD NOTES
-    @staticmethod
-    def increase_volume(clip, increase_db):
-        core.increase_volume(clip, increase_db)
+    def increase_volume(self, clip, increase_db):
+        core.increase_volume(self, clip, increase_db)
 
     # TODO CONFIRM AND ADD NOTES
-    @staticmethod
-    def normalize_audio(clip, volume_multiplier):
-        core.normalize_audio(clip, volume_multiplier)
+    def normalize_audio(self, clip, volume_multiplier):
+        core.normalize_audio(self, clip, volume_multiplier)
 
     # TODO CONFIRM AND ADD NOTES
     @staticmethod
