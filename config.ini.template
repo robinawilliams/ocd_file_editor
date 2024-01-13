@@ -5,8 +5,8 @@ geometry = 1280x800
 column_numbers = 7
 ; Default weight for category
 default_weight = 9
-; Default frame to open with (home, name_normalizer, settings)
-default_frame = home
+; Default frame to open with (home_window, name_normalizer_window, video_editor_window, settings_window)
+default_frame = home_window
 ; Reset the output directory after each run
 reset_output_directory_var = True
 ; Suggest an output directory

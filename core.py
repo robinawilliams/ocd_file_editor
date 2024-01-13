@@ -8,6 +8,8 @@ import customtkinter as ctk
 import logging
 import configparser
 import shutil
+from moviepy.editor import VideoFileClip
+from icecream import ic  # TODO Remove icecream ic when done testing, add if activate logging to remaining entries in video editor
 
 """
 Configuration
@@ -1050,3 +1052,354 @@ def clear_name_normalizer_selection(self):
     self.folder_path_entry.delete(0, ctk.END)
     self.move_directory_entry.delete(0, ctk.END)
     self.artist_file_entry.delete(0, ctk.END)
+
+
+"""
+Video Editor
+"""
+
+
+# TODO CONFIRMED
+# TODO ADD NOTES
+def get_non_conflicting_filename(path):
+    base, ext = os.path.splitext(path)
+    counter = 1
+    new_path = path
+
+    while os.path.exists(new_path):
+        new_path = f"{base}_{counter}{ext}"
+        counter += 1
+
+    return new_path
+
+
+# TODO CONFIRMED
+# TODO ADD NOTES
+def rotate_video(clip, rotation_angle):
+    try:
+        rotated_clip = clip.rotate(rotation_angle)  # Rotate the video by the specified angle
+        return rotated_clip
+    except Exception as e:
+        logging.error(f"Error rotating video: {str(e)}")
+        ic(f"Error rotating video: {str(e)}")
+        return None
+
+
+# TODO CONFIRM AND ADD NOTES
+def increase_volume(clip, increase_db):
+    try:
+        ic(f"{clip}", increase_db)
+        modified_clip = clip.volumex(10 ** (increase_db / 20.0))  # Convert dB to linear scale
+        return modified_clip
+    except Exception as e:
+        logging.error(f"Error increasing volume: {str(e)}")
+        ic(f"Error increasing volume: {str(e)}")
+        return None
+
+
+# TODO CONFIRM AND ADD NOTES
+def normalize_audio(clip, volume_multiplier):
+    try:
+        normalized_clip = clip.volumex(volume_multiplier)  # Normalize the audio
+        return normalized_clip
+    except Exception as e:
+        logging.error(f"Error normalizing audio: {str(e)}")
+        ic(f"Error normalizing audio: {str(e)}")
+        return None
+
+
+# TODO CONFIRMED
+# TODO ADD NOTES
+def remove_successful_line_from_file(file_path, line_to_remove):
+    # TODO Include variable to control whether to remove lines or not
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    with open(file_path, 'w') as file:
+        for line in lines:
+            if line.strip() != line_to_remove:
+                file.write(line)
+
+
+# TODO CONFIRM AND ADD NOTES
+def process_video_edits(self):
+    input_video = self.video_editor_display_entry.get()
+    input_file = self.input_file_entry.get()
+    video_output_directory = self.video_output_directory_entry.get()
+    rotation = str(self.rotation_var.get())
+    decibel = float(self.decibel_entry.get())
+    audio_normalization = float(self.audio_normalization_entry.get())
+
+    # TODO Put this in configuration file or json file
+    # Create a list of valid video extensions
+    valid_extensions = ['.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.mpeg', '.mpg', '.m4v']
+
+    # Check if an input file containing a list of video file paths is provided
+    if input_file:
+        # Read the input file and filter out lines with non-video extensions
+        with open(input_file, 'r') as file:
+            input_paths = [line.strip() for line in file if
+                           os.path.splitext(line.strip())[1].lower() in valid_extensions]
+
+        # Overwrite the input file with the filtered paths
+        with open(input_file, 'w') as file:
+            file.write('\n'.join(input_paths))
+
+    if (input_video or input_file) and decibel is None and rotation is None and audio_normalization is None:
+        logging.error(
+            "Error: You need to specify an operation (audio increase, video rotation, audio normalization or"
+            "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
+        ic(
+            "Error: You need to specify an operation (audio increase, video rotation, audio normalization or"
+            "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
+        return
+
+    if input_video and input_file:
+        logging.error("Error: Both input video and input file specified. Please choose one.")
+        ic("Error: Both input video and input file specified. Please choose one.")
+        return
+
+    if not input_video and not input_file:
+        logging.error("Error: Either input video or input file must be specified.")
+        ic("Error: Either input video or input file must be specified.")
+        return
+
+    if input_video:
+        input_paths = [input_video]
+    else:
+        with open(input_file, 'r') as file:
+            input_paths = [line.strip() for line in file]
+
+    for input_path in input_paths:
+        try:
+            # Check if the file name length exceeds 260 characters
+            if len(input_path) > 260:
+                logging.warning(f"File over 260 warning!!! Fix: {input_path}")
+                temp_dir = os.path.dirname(input_path)
+                temp_copy_path = os.path.join(temp_dir, 'temp_EXCEPTION.mp4')
+                shutil.copyfile(input_path, temp_copy_path)
+
+                filename, extension = os.path.splitext(os.path.basename(temp_copy_path))
+                output_dir = os.path.dirname(temp_copy_path)
+
+                operation_tags = []  # Initialize an empty list to keep track of operations
+
+                # Determine the rotation operation tag
+                rotation_angle = None  # Default rotation angle
+
+                if rotation:
+                    rotation_tag = "ROTATED_" + rotation.upper()
+                    operation_tags.append(rotation_tag)  # Add to the operations list
+
+                    if rotation == "left":
+                        rotation_angle = 90
+                    elif rotation == "right":
+                        rotation_angle = -90
+
+                    # "none" case handled separately to reset rotation
+                    elif rotation == "none":
+                        rotation = False
+
+                # Determine the volume increase operation tag
+                if decibel:
+                    volume_tag = f"INCREASED_{decibel}DB"
+                    operation_tags.append(volume_tag)  # Add to the operations list
+
+                # Determine the audio normalization operation tag
+                if audio_normalization:
+                    normalization_tag = f"NORMALIZED_{audio_normalization}"
+                    operation_tags.append(normalization_tag)  # Add to the operations list
+
+                # Join the operation tags with underscores to create a filename suffix
+                operation_suffix = "_".join(operation_tags)
+
+                # Create the output path with the operation suffix
+                output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
+
+                if video_output_directory:
+                    output_path = os.path.join(video_output_directory, os.path.basename(output_path))
+
+                # Check if the output path already exists and get a non-conflicting name
+                output_path = get_non_conflicting_filename(output_path)
+
+                # Load the original video clip
+                original_clip = VideoFileClip(temp_copy_path)
+                successful_operations = True
+
+                # Apply the operations in sequence, checking if they are successful
+                if rotation and successful_operations:
+                    processed_clip = rotate_video(original_clip, rotation_angle)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                if decibel and successful_operations:
+                    processed_clip = increase_volume(original_clip, decibel)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                if audio_normalization and successful_operations:
+                    processed_clip = normalize_audio(original_clip, audio_normalization)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                # Only write the final modified clip to the output path if all operations were successful
+                if successful_operations:
+                    original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+                    logging.info(f"Video {operation_suffix.lower()} saved as {output_path}")
+                    ic(f"Video {operation_suffix.lower()} saved as {output_path}")
+
+                    # Remove the successfully processed line from the input file
+                    if input_file:
+                        remove_successful_line_from_file(input_file, input_path)
+                else:
+                    logging.error(f"Error: Operations failed for video {input_path}")
+                    ic(f"Error: Operations failed for video {input_path}")
+
+                # Close the original clip to free resources
+                original_clip.close()
+
+                # Delete the temporary copy
+                os.remove(temp_copy_path)
+
+            else:
+                filename, extension = os.path.splitext(os.path.basename(input_path))
+                output_dir = os.path.dirname(input_path)
+
+                operation_tags = []  # Initialize an empty list to keep track of operations
+
+                # Determine the rotation operation tag
+                rotation_angle = None  # Default rotation angle
+
+                if rotation:
+                    rotation_tag = "ROTATED_" + rotation.upper()
+                    operation_tags.append(rotation_tag)  # Add to the operations list
+
+                    if rotation == "left":
+                        rotation_angle = 90
+                    elif rotation == "right":
+                        rotation_angle = -90
+
+                    # "none" case handled separately to reset rotation
+                    elif rotation == "none":
+                        rotation = False
+
+                # Determine the volume increase operation tag
+                if decibel:
+                    volume_tag = f"INCREASED_{decibel}DB"
+                    operation_tags.append(volume_tag)  # Add to the operations list
+
+                # Determine the audio normalization operation tag
+                if audio_normalization:
+                    normalization_tag = f"NORMALIZED_{audio_normalization}"
+                    operation_tags.append(normalization_tag)  # Add to the operations list
+
+                # Join the operation tags with underscores to create a filename suffix
+                operation_suffix = "_".join(operation_tags)
+
+                # Create the output path with the operation suffix
+                output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
+
+                if video_output_directory:
+                    output_path = os.path.join(video_output_directory, os.path.basename(output_path))
+
+                # Check if the output path already exists and get a non-conflicting name
+                output_path = get_non_conflicting_filename(output_path)
+
+                # Load the original video clip
+                original_clip = VideoFileClip(input_path)
+                successful_operations = True
+
+                # Apply the operations in sequence, checking if they are successful
+                if rotation and successful_operations:
+                    processed_clip = rotate_video(original_clip, rotation_angle)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                if decibel and successful_operations:
+                    processed_clip = increase_volume(original_clip, decibel)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                if audio_normalization and successful_operations:
+                    processed_clip = normalize_audio(original_clip, audio_normalization)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                # Only write the final modified clip to the output path if all operations were successful
+                if successful_operations:
+                    original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+                    logging.info(f"Video {operation_suffix.lower()} saved as {output_path}")
+                    ic(f"Video {operation_suffix.lower()} saved as {output_path}")
+
+                    # Remove the successfully processed line from the input file
+                    if input_file:
+                        remove_successful_line_from_file(input_file, input_path)
+                else:
+                    logging.error(f"Error: Operations failed for video {input_path}")
+                    ic(f"Error: Operations failed for video {input_path}")
+
+                # Close the original clip to free resources
+                original_clip.close()
+
+        except OSError as e:
+            logging.error(f"OSError: {str(e)} Skipping this file and moving to the next one.")
+            ic(f"OSError: {str(e)} Skipping this file and moving to the next one.")
+            continue
+
+
+# TODO CONFIRM LOGIC AND ADD NOTES
+# Open a dialog to browse and select a file to edit
+def browse_video_editor_file_path(self):
+    # Function to browse and select a file to edit
+    # TODO Use filetypes= on filedialog.askopenfilename to prevent selection of non-video files.
+    self.video_editor_folder_path = filedialog.askopenfilename(initialdir=self.initial_directory)
+    self.video_editor_display_text = self.video_editor_folder_path
+    self.video_editor_display_entry.delete(0, ctk.END)
+    self.video_editor_display_entry.insert(0, self.video_editor_display_text)
+
+
+# TODO CONFIRM LOGIC AND ADD NOTES
+# Open a dialog to browse and select a file containing a line delimited list of files to process
+def browse_list_of_files_to_edit_file(self):
+    input_file = filedialog.askopenfilename(
+        initialdir=self.initial_directory,
+        filetypes=[("Text Files", "*.txt")])
+    self.input_file_entry.delete(0, ctk.END)
+    self.input_file_entry.insert(0, input_file)
+
+
+# TODO CONFIRM LOGIC AND ADD NOTES
+# Function to browse and select a folder to move the processed files
+def browse_video_output_directory(self):
+    video_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
+    self.video_output_directory_entry.delete(0, ctk.END)
+    self.video_output_directory_entry.insert(0, video_output_directory)
+
+
+# TODO CONFIRM LOGIC AND ADD NOTES
+# Function to clear the selection and update the GUI
+def clear_video_editor_selection(self):
+    self.video_editor_display_entry.delete(0, ctk.END)
+    self.input_file_entry.delete(0, ctk.END)
+    self.video_output_directory_entry.delete(0, ctk.END)
+
+    # Clear decibel entry and set default value
+    self.decibel_entry.delete(0, ctk.END)
+    # TODO: Add default selection in configuration file
+    self.decibel_entry.insert(0, 0.0)
+
+    # Clear audio normalization entry and set default value
+    self.audio_normalization_entry.delete(0, ctk.END)
+    # TODO: Add default selection in configuration file
+    self.audio_normalization_entry.insert(0, 0.0)

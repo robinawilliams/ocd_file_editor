@@ -50,10 +50,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label_frame = None
         self.last_used_frame = None
         self.category_frame = None
-        self.name_normalizer_frame = None
-        self.name_normalizer_top_frame = None
         self.settings_top_frame = None
-        self.name_normalizer_label = None
         self.settings_frame = None
         self.settings_label = None
         self.scaling_label = None
@@ -67,9 +64,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_scrollbar = None
         self.home_canvas = None
         self.home_frame = None
-        self.settings_button = None
-        self.name_normalizer = None
         self.home_button = None
+        self.name_normalizer_button = None
+        self.video_editor_button = None
+        self.settings_button = None
         self.navigation_frame_label = None
         self.navigation_frame = None
         self.open_on_file_drop_switch = None
@@ -84,7 +82,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_switch = None
         self.double_check_switch = None
         self.activate_logging_switch = None
-        self.checkbox_frame1 = None  # Name Normalizer start
+
+        # Initialize Name Normalizer elements
+        self.name_normalizer_frame = None
+        self.name_normalizer_top_frame = None
+        self.name_normalizer_label = None
+        self.checkbox_frame1 = None
         self.browse_folder_button = None
         self.folder_path_entry = None
         self.remove_all_symbols_checkbox = None
@@ -116,6 +119,38 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.normalize_folder_frame = None
         self.normalize_folder_button = None
         self.clear_name_normalizer_selection_button = None
+
+        # Initialize Video Editor elements
+        self.video_editor_frame = None
+        self.video_editor_top_frame = None
+        self.video_editor_label = None
+        self.checkbox_frame1 = None
+        self.video_editor_browse_file_button = None
+        self.video_editor_display_text = None
+        self.video_editor_display_entry = None
+        self.input_file_frame = None
+        self.browse_input_file_button = None
+        self.input_file_entry = None
+        self.rotation_frame = None
+        self.rotation_label = None
+        self.rotation_var = None
+        self.left_radio = None
+        self.right_radio = None
+        self.no_rotation_radio = None
+        self.decibel_frame = None
+        self.decibel_label = None
+        self.decibel_var = None
+        self.decibel_entry = None
+        self.audio_normalization_frame = None
+        self.audio_normalization_label = None
+        self.audio_normalization_var = None
+        self.audio_normalization_entry = None
+        self.video_output_directory_frame = None
+        self.browse_video_output_directory_button = None
+        self.video_output_directory_entry = None
+        self.process_video_editor_frame = None
+        self.clear_video_editor_selection_button = None
+        self.process_video_edits_button = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
@@ -210,13 +245,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.home_button.grid(row=1, column=0, sticky="ew")
 
         # Create button for Name Normalizer with specific styling and command
-        self.name_normalizer = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
-                                             border_spacing=10, text="Name Normalizer",
-                                             fg_color="transparent", text_color=("gray10", "gray90"),
-                                             hover_color=("gray70", "gray30"),
-                                             anchor="w",
-                                             command=self.name_normalizer_event)
-        self.name_normalizer.grid(row=2, column=0, sticky="ew")
+        self.name_normalizer_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
+                                                    border_spacing=10, text="Name Normalizer",
+                                                    fg_color="transparent", text_color=("gray10", "gray90"),
+                                                    hover_color=("gray70", "gray30"),
+                                                    anchor="w",
+                                                    command=self.name_normalizer_button_event)
+        self.name_normalizer_button.grid(row=2, column=0, sticky="ew")
+
+        # Create button for Video Editor with specific styling and command
+        self.video_editor_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
+                                                 border_spacing=10, text="Video Editor",
+                                                 fg_color="transparent", text_color=("gray10", "gray90"),
+                                                 hover_color=("gray70", "gray30"),
+                                                 anchor="w",
+                                                 command=self.video_editor_button_event)
+        self.video_editor_button.grid(row=3, column=0, sticky="ew")
 
         # Create Settings button with specific styling and command
         self.settings_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
@@ -611,16 +655,147 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                    fg_color="transparent")
         self.normalize_folder_frame.grid(row=8, column=0, padx=10, pady=5)
 
-        # Normalize Folder button
-        self.normalize_folder_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize Folder",
-                                                     command=self.process_folder)
-        self.normalize_folder_button.grid(row=0, column=1, padx=5, pady=5)
-
         # Clear Name Normalizer Selection Button
         self.clear_name_normalizer_selection_button = ctk.CTkButton(self.normalize_folder_frame,
                                                                     text="Clear",
                                                                     command=self.clear_name_normalizer_selection)
         self.clear_name_normalizer_selection_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Normalize Folder button
+        self.normalize_folder_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize Folder",
+                                                     command=self.process_folder)
+        self.normalize_folder_button.grid(row=0, column=1, padx=5, pady=5)
+
+        """
+        video_editor_window
+        """
+        # Create Video Editor frame
+        self.video_editor_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.video_editor_frame.grid_columnconfigure(0, weight=1)
+
+        # Video Editor Label
+        self.video_editor_label = ctk.CTkLabel(self.video_editor_frame, text="Video Editor",
+                                               font=ctk.CTkFont(size=15, weight="bold"))
+        self.video_editor_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Video Editor Top frame
+        self.video_editor_top_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.video_editor_top_frame.grid(row=1, column=0, padx=10, pady=5)
+
+        # Video Editor Browse File button
+        self.video_editor_browse_file_button = ctk.CTkButton(self.video_editor_top_frame, text="Browse File",
+                                                             command=self.browse_video_editor_file_path)
+        self.video_editor_browse_file_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Selected Video Editor File Display
+        self.video_editor_display_text = ctk.StringVar()
+        self.video_editor_display_text.set("Select a file using the 'Browse File' button")
+        self.video_editor_display_entry = ctk.CTkEntry(self.video_editor_top_frame, width=890,
+                                                       textvariable=self.video_editor_display_text)
+        self.video_editor_display_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Input File Frame
+        self.input_file_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                             fg_color="transparent")
+        self.input_file_frame.grid(row=2, column=0, padx=10, pady=5)
+
+        # Browse Input File button
+        self.browse_input_file_button = ctk.CTkButton(self.input_file_frame, text="Input File",
+                                                      command=self.browse_list_of_files_to_edit_file)
+        self.browse_input_file_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Input File entry for a file containing a line delimited list of files to process
+        self.input_file_entry = ctk.CTkEntry(self.input_file_frame, width=890)
+        self.input_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Rotation frame
+        self.rotation_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                           fg_color="transparent")
+        self.rotation_frame.grid(row=3, column=0, padx=10, pady=5)
+
+        self.rotation_label = ctk.CTkLabel(self.rotation_frame, text="Rotate Video:")
+        self.rotation_label.grid(row=0, column=0, padx=10, pady=5)
+
+        self.rotation_var = ctk.StringVar()
+        # TODO Add default selection in configuration file
+        self.rotation_var.set("left")
+
+        self.left_radio = ctk.CTkRadioButton(self.rotation_frame, text="Left", variable=self.rotation_var, value="left")
+        self.left_radio.grid(row=0, column=1, padx=10, pady=5)
+
+        self.right_radio = ctk.CTkRadioButton(self.rotation_frame, text="Right", variable=self.rotation_var,
+                                              value="right")
+        self.right_radio.grid(row=0, column=2, padx=10, pady=5)
+
+        # TODO Implement this logic
+        self.no_rotation_radio = ctk.CTkRadioButton(self.rotation_frame, text="None", variable=self.rotation_var,
+                                                    value="none")
+        self.no_rotation_radio.grid(row=0, column=8, padx=10, pady=5)
+
+        # Decibel frame
+        self.decibel_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                          fg_color="transparent")
+        self.decibel_frame.grid(row=4, column=0, padx=10, pady=5)
+
+        self.decibel_label = ctk.CTkLabel(self.decibel_frame, text="Increase Audio (dB):")
+        self.decibel_label.grid(row=0, column=0, padx=10, pady=5)
+
+        self.decibel_var = ctk.DoubleVar()
+        # TODO Add default selection in configuration file
+        self.decibel_var.set(0.0)
+
+        # Decibel entry
+        self.decibel_entry = ctk.CTkEntry(self.decibel_frame, textvariable=self.decibel_var, width=50)
+        self.decibel_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Audio Normalization frame
+        self.audio_normalization_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                      fg_color="transparent")
+        self.audio_normalization_frame.grid(row=5, column=0, padx=10, pady=5)
+
+        self.audio_normalization_label = ctk.CTkLabel(self.audio_normalization_frame, text="Normalize Audio:")
+        self.audio_normalization_label.grid(row=0, column=0, padx=10, pady=5)
+
+        self.audio_normalization_var = ctk.DoubleVar()
+        # TODO Add default selection in configuration file
+        self.audio_normalization_var.set(0.0)
+
+        # Audio Normalization entry
+        self.audio_normalization_entry = ctk.CTkEntry(self.audio_normalization_frame,
+                                                      textvariable=self.audio_normalization_var, width=50)
+        self.audio_normalization_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Video Output directory frame
+        self.video_output_directory_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                         fg_color="transparent")
+        self.video_output_directory_frame.grid(row=8, column=0, padx=10, pady=5)
+
+        # Browse video output directory folder button
+        self.browse_video_output_directory_button = ctk.CTkButton(self.video_output_directory_frame,
+                                                                  text="Output Directory",
+                                                                  command=self.browse_video_output_directory)
+        self.browse_video_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Video output directory entry
+        self.video_output_directory_entry = ctk.CTkEntry(self.video_output_directory_frame, width=890)
+        self.video_output_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Process video editor frame
+        self.process_video_editor_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                       fg_color="transparent")
+        self.process_video_editor_frame.grid(row=9, column=0, padx=10, pady=5)
+
+        # Clear process video editor Button
+        self.clear_video_editor_selection_button = ctk.CTkButton(self.process_video_editor_frame,
+                                                                 text="Clear",
+                                                                 command=self.clear_video_editor_selection)
+        self.clear_video_editor_selection_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Process video button
+        self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
+                                                        command=self.process_video_edits)
+        self.process_video_edits_button.grid(row=0, column=1, padx=5, pady=5)
 
         """
         settings_window
@@ -717,21 +892,27 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, name):
         # Set button color for the selected button
-        self.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.name_normalizer.configure(
-            fg_color=("gray75", "gray25") if name == "name_normalizer" else "transparent")
-        self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings" else "transparent")
+        self.home_button.configure(fg_color=("gray75", "gray25") if name == "home_window" else "transparent")
+        self.name_normalizer_button.configure(
+            fg_color=("gray75", "gray25") if name == "name_normalizer_window" else "transparent")
+        self.video_editor_button.configure(
+            fg_color=("gray75", "gray25") if name == "video_editor_window" else "transparent")
+        self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings_window" else "transparent")
 
         # Show the selected frame and hide others
-        if name == "home":
+        if name == "home_window":
             self.home_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.home_frame.grid_forget()
-        if name == "name_normalizer":
+        if name == "name_normalizer_window":
             self.name_normalizer_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.name_normalizer_frame.grid_forget()
-        if name == "settings":
+        if name == "video_editor_window":
+            self.video_editor_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            self.video_editor_frame.grid_forget()
+        if name == "settings_window":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.settings_frame.grid_forget()
@@ -741,13 +922,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def home_button_event(self):
-        self.select_frame_by_name("home")
+        self.select_frame_by_name("home_window")
 
-    def name_normalizer_event(self):
-        self.select_frame_by_name("name_normalizer")
+    def name_normalizer_button_event(self):
+        self.select_frame_by_name("name_normalizer_window")
+
+    def video_editor_button_event(self):
+        self.select_frame_by_name("video_editor_window")
 
     def settings_button_event(self):
-        self.select_frame_by_name("settings")
+        self.select_frame_by_name("settings_window")
 
     def update_background_color(self):
         # Update canvas background color based on the current appearance mode
@@ -934,6 +1118,55 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def clear_name_normalizer_selection(self):
         # Function to clear the selection and update the GUI
         core.clear_name_normalizer_selection(self)
+
+    """
+    Video Editor
+    """
+
+    # TODO CONFIRM AND ADD NOTES
+    @staticmethod
+    def get_non_conflicting_filename(path):
+        core.get_non_conflicting_filename(path)
+
+    # TODO CONFIRM AND ADD NOTES
+    @staticmethod
+    def rotate_video(clip, rotation_angle):
+        core.rotate_video(clip, rotation_angle)
+
+    # TODO CONFIRM AND ADD NOTES
+    @staticmethod
+    def increase_volume(clip, increase_db):
+        core.increase_volume(clip, increase_db)
+
+    # TODO CONFIRM AND ADD NOTES
+    @staticmethod
+    def normalize_audio(clip, volume_multiplier):
+        core.normalize_audio(clip, volume_multiplier)
+
+    # TODO CONFIRM AND ADD NOTES
+    @staticmethod
+    def remove_successful_line_from_file(file_path, line_to_remove):
+        core.remove_successful_line_from_file(file_path, line_to_remove)
+
+    # TODO CONFIRM AND ADD NOTES
+    def process_video_edits(self):
+        core.process_video_edits(self)
+
+    # TODO CONFIRM LOGIC AND ADD NOTES
+    def browse_video_editor_file_path(self):
+        core.browse_video_editor_file_path(self)
+
+    # TODO CONFIRM LOGIC AND ADD NOTES
+    def browse_list_of_files_to_edit_file(self):
+        core.browse_list_of_files_to_edit_file(self)
+
+    # TODO CONFIRM LOGIC AND ADD NOTES
+    def browse_video_output_directory(self):
+        core.browse_video_output_directory(self)
+
+    # TODO CONFIRM LOGIC AND ADD NOTES
+    def clear_video_editor_selection(self):
+        core.clear_video_editor_selection(self)
 
 
 if __name__ == "__main__":
