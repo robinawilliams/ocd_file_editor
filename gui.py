@@ -1080,7 +1080,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     @staticmethod
     def remove_artist_duplicates_from_filename(file_name, artist_file):
         # Function to remove duplicate artists from the filename. Requires artist_file
-        core.remove_artist_duplicates_from_filename(file_name, artist_file)
+        return core.remove_artist_duplicates_from_filename(file_name, artist_file)
 
     def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
                              remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at, remove_underscore,
@@ -1126,19 +1126,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # TODO CONFIRM AND ADD NOTES
     @staticmethod
     def get_non_conflicting_filename(path):
-        core.get_non_conflicting_filename(path)
+        return core.get_non_conflicting_filename(path)
 
     # TODO CONFIRM AND ADD NOTES
     def rotate_video(self, clip, rotation_angle):
-        core.rotate_video(self, clip, rotation_angle)
+        return core.rotate_video(self, clip, rotation_angle)
 
     # TODO CONFIRM AND ADD NOTES
     def increase_volume(self, clip, increase_db):
-        core.increase_volume(self, clip, increase_db)
+        return core.increase_volume(self, clip, increase_db)
 
     # TODO CONFIRM AND ADD NOTES
     def normalize_audio(self, clip, volume_multiplier):
-        core.normalize_audio(self, clip, volume_multiplier)
+        return core.normalize_audio(self, clip, volume_multiplier)
 
     # TODO CONFIRM AND ADD NOTES
     @staticmethod
