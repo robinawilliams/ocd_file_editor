@@ -19,69 +19,58 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory = ""
         self.queue = []
 
-        # Initialize GUI elements (buttons, labels, frames, etc.)
-        # Note: Some attributes are initialized as None and later assigned specific GUI elements
-        # TODO Housekeeping
-        self.browse_file_button = None
-        self.custom_text_frame = None
-        self.scaling_optionemenu = None
-        self.message_label = None
-        self.undo_button = None
-        self.trash_button = None
-        self.rename_button = None
-        self.placement_label = None
-        self.custom_text_entry = None
-        self.output_directory_entry = None
-        self.output_directory_browse_button = None
-        self.remove_category_button = None
-        self.remove_category_entry = None
-        self.button_frame = None
-        self.category_entry = None
-        self.add_category_button = None
-        self.weight_label = None
-        self.weight_entry = None
-        self.file_display_text = None
-        self.file_display_entry = None
-        self.last_used_display = None
-        self.last_used_display_label = None
-        self.last_used_file_button = None
-        self.last_used_file = None
-        self.clear_button = None
-        self.message_label_frame = None
-        self.last_used_frame = None
-        self.category_frame = None
-        self.settings_top_frame = None
-        self.settings_frame = None
-        self.settings_label = None
-        self.scaling_label = None
-        self.appearance_mode_menu = None
-        self.appearance_mode_label = None
-        self.button_group_frame = None
-        self.folder_operations_frame = None
-        self.home_top_frame = None
-        self.home_scrollable_frame_window = None
-        self.home_scrollable_frame = None
-        self.home_scrollbar = None
-        self.home_canvas = None
-        self.home_frame = None
+        # Initialize GUI elements
+        # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
+        self.navigation_frame = None
+        self.navigation_frame_label = None
         self.home_button = None
         self.name_normalizer_button = None
         self.video_editor_button = None
         self.settings_button = None
-        self.navigation_frame_label = None
-        self.navigation_frame = None
-        self.open_on_file_drop_switch = None
-        self.suffix_radio = None
-        self.special_character_radio = None
-        self.prefix_radio = None
-        self.placement_choice = None
-        self.move_text_checkbox = None
-        self.move_up_directory_checkbox = None
-        self.suggest_output_directory_checkbox = None
+
+        # Initialize OCD File Renamer elements
+        self.home_frame = None
+        self.home_canvas = None
+        self.home_scrollbar = None
+        self.home_scrollable_frame = None
+        self.home_scrollable_frame_window = None
+        self.home_top_frame = None
+        self.browse_file_button = None
+        self.file_display_text = None
+        self.file_display_entry = None
+        self.button_frame = None
+        self.category_frame = None
+        self.add_category_button = None
+        self.category_entry = None
+        self.weight_label = None
+        self.weight_entry = None
+        self.remove_category_button = None
+        self.remove_category_entry = None
+        self.custom_text_frame = None
+        self.output_directory_browse_button = None
+        self.output_directory_entry = None
+        self.custom_text_entry = None
+        self.rename_button = None
+        self.button_group_frame = None
+        self.undo_button = None
+        self.clear_button = None
+        self.trash_button = None
+        self.last_used_file_button = None
+        self.last_used_frame = None
+        self.last_used_display_label = None
+        self.last_used_display = None
+        self.message_label_frame = None
+        self.message_label = None
+        self.folder_operations_frame = None
         self.reset_output_directory_checkbox = None
-        self.remove_duplicates_switch = None
-        self.double_check_switch = None
-        self.activate_logging_switch = None
+        self.suggest_output_directory_checkbox = None
+        self.move_up_directory_checkbox = None
+        self.move_text_checkbox = None
+        self.placement_label = None
+        self.placement_choice = None
+        self.prefix_radio = None
+        self.special_character_radio = None
+        self.suffix_radio = None
 
         # Initialize Name Normalizer elements
         self.name_normalizer_frame = None
@@ -151,6 +140,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_editor_frame = None
         self.clear_video_editor_selection_button = None
         self.process_video_edits_button = None
+
+        # Initialize Settings elements
+        self.settings_frame = None
+        self.settings_top_frame = None
+        self.settings_label = None
+        self.open_on_file_drop_switch = None
+        self.remove_duplicates_switch = None
+        self.double_check_switch = None
+        self.activate_logging_switch = None
+        self.appearance_mode_label = None
+        self.appearance_mode_menu = None
+        self.scaling_label = None
+        self.scaling_optionemenu = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
