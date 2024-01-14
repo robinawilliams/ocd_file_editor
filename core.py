@@ -913,6 +913,7 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
             logging.error(f"Error renaming {os.path.basename(source_path)}: {e}")
 
 
+# TODO Optimize this
 # Function to performing various name normalization operations on certain files within a specified folder
 def process_folder(self):
     # Retrieve values from GUI input fields
@@ -1058,71 +1059,108 @@ Video Editor
 """
 
 
-# TODO CONFIRMED
-# TODO ADD NOTES
+# Function to generate a non-conflicting filename
 def get_non_conflicting_filename(path):
+    # Split the given path into the base filename and its extension.
     base, ext = os.path.splitext(path)
+
+    # Initialize a counter to keep track of the uniqueness of the filename.
     counter = 1
+
+    # Initialize the new path with the original path.
     new_path = path
 
+    # Check if the file already exists at the given path.
     while os.path.exists(new_path):
+        # If the file exists, modify the new path by appending the counter and extension to the base filename.
         new_path = f"{base}_{counter}{ext}"
+
+        # Increment the counter for the next iteration.
         counter += 1
 
+    # Return the generated non-conflicting filename.
     return new_path
 
 
-# TODO CONFIRMED
-# TODO ADD NOTES
+# Method to rotate a video clip by a specified angle.
 def rotate_video(self, clip, rotation_angle):
     try:
-        rotated_clip = clip.rotate(rotation_angle)  # Rotate the video by the specified angle
+        # Rotate the video clip by the specified angle.
+        rotated_clip = clip.rotate(rotation_angle)
+
+        # Log rotation success if logging is activated.
+        if self.activate_logging_var.get():
+            logging.info(f"Rotation successful {clip} {rotation_angle}")
+
+        # Return the rotated video clip.
         return rotated_clip
     except Exception as e:
+        # Log error and display an error message if rotation fails.
         if self.activate_logging_var.get():
             logging.error(f"Error rotating video: {str(e)}")
         messagebox.showerror("Error", f"Error rotating video: {str(e)}")
+
+        # Return None in case of an error.
         return None
 
 
-# TODO CONFIRM AND ADD NOTES
+# Method to increase the volume of a video clip by a specified dB value.
 def increase_volume(self, clip, increase_db):
     try:
-        modified_clip = clip.volumex(10 ** (increase_db / 20.0))  # Convert dB to linear scale
+        # Modify the volume of the video clip by converting dB to linear scale.
+        modified_clip = clip.volumex(10 ** (increase_db / 20.0))
+
+        # Return the modified video clip.
         return modified_clip
+
     except Exception as e:
+        # Log error and display an error message if volume increase fails.
         if self.activate_logging_var.get():
             logging.error(f"Error increasing volume: {str(e)}")
         messagebox.showerror("Error", f"Error increasing volume: {str(e)}")
+
+        # Return None in case of an error.
         return None
 
 
-# TODO CONFIRM AND ADD NOTES
+# Method to normalize the audio of a video clip by applying a volume multiplier.
 def normalize_audio(self, clip, volume_multiplier):
     try:
-        normalized_clip = clip.volumex(volume_multiplier)  # Normalize the audio
+        # Normalize the audio of the video clip by applying the specified volume multiplier.
+        normalized_clip = clip.volumex(volume_multiplier)
+
+        # Return the normalized video clip.
         return normalized_clip
+
     except Exception as e:
+        # Log error and display an error message if audio normalization fails.
         if self.activate_logging_var.get():
             logging.error(f"Error normalizing audio: {str(e)}")
         messagebox.showerror("Error", f"Error normalizing audio: {str(e)}")
+
+        # Return None in case of an error.
         return None
 
 
-# TODO CONFIRMED
-# TODO ADD NOTES
+# Function to remove a successful line from a file.
 def remove_successful_line_from_file(file_path, line_to_remove):
     # TODO Include variable to control whether to remove lines or not
+    # Read all lines from the file.
     with open(file_path, 'r') as file:
         lines = file.readlines()
+
+    # Open the file in write mode to remove the specified line.
     with open(file_path, 'w') as file:
+        # Write lines back to the file, excluding the successful line to remove.
         for line in lines:
             if line.strip() != line_to_remove:
                 file.write(line)
 
 
-# TODO CONFIRM AND ADD NOTES
+# TODO Optimize this
+# Method to process video edits based on user inputs.
 def process_video_edits(self):
+    # Get input parameters from user interface.
     input_video = self.video_editor_display_entry.get()
     input_file = self.input_file_entry.get()
     video_output_directory = self.video_output_directory_entry.get()
@@ -1145,49 +1183,56 @@ def process_video_edits(self):
         with open(input_file, 'w') as file:
             file.write('\n'.join(input_paths))
 
+    # Check if the necessary parameters for video editing are provided
     if (input_video or input_file) and decibel is None and rotation is None and audio_normalization is None:
         if self.activate_logging_var.get():
-            logging.error(
-                "Error: You need to specify an operation (audio increase, video rotation, audio normalization or"
-                "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
-        messagebox.showerror("Error",
-                             "Error: You need to specify an operation (audio increase, video rotation, "
-                             "audio normalization or"
-                             "a combination of an audio edit and a video edit with -db, -r, -v, -db/-r or -db/-v")
+            logging.error("Error: You need to specify an operation (audio increase, video rotation, "
+                          "audio normalization, or a combination of them with -db, -r, -v, -db/-r, or -db/-v)")
+        messagebox.showerror("Error", "Error: You need to specify an operation (audio increase, video rotation, "
+                                      "audio normalization, or a combination of them with -db, -r, -v, -db/-r, "
+                                      "or -db/-v)")
         return
 
+    # Check for conflicting input parameters
     if input_video and input_file:
         if self.activate_logging_var.get():
             logging.error("Error: Both input video and input file specified. Please choose one.")
         messagebox.showerror("Error", "Error: Both input video and input file specified. Please choose one.")
         return
 
+    # Check if at least one input source (video or file) is provided
     if not input_video and not input_file:
         if self.activate_logging_var.get():
             logging.error("Error: Either input video or input file must be specified.")
         messagebox.showerror("Error", "Error: Either input video or input file must be specified.")
         return
 
+    # Define the list of input paths based on user input
     if input_video:
         input_paths = [input_video]
     else:
         with open(input_file, 'r') as file:
             input_paths = [line.strip() for line in file]
 
+    # Process each input path
     for input_path in input_paths:
         try:
             # Check if the file name length exceeds 260 characters
             if len(input_path) > 260:
                 if self.activate_logging_var.get():
                     logging.warning(f"File over 260 warning!!! Fix: {input_path}")
+
+                # Create a temporary copy of the file
                 temp_dir = os.path.dirname(input_path)
                 temp_copy_path = os.path.join(temp_dir, 'temp_EXCEPTION.mp4')
                 shutil.copyfile(input_path, temp_copy_path)
 
+                # Extract filename, extension, and output directory
                 filename, extension = os.path.splitext(os.path.basename(temp_copy_path))
                 output_dir = os.path.dirname(temp_copy_path)
 
-                operation_tags = []  # Initialize an empty list to keep track of operations
+                # Initialize a list to keep track of operations
+                operation_tags = []
 
                 # Determine the rotation operation tag
                 rotation_angle = None  # Default rotation angle
@@ -1215,23 +1260,24 @@ def process_video_edits(self):
                     normalization_tag = f"NORMALIZED_{audio_normalization}"
                     operation_tags.append(normalization_tag)  # Add to the operations list
 
-                # Join the operation tags with underscores to create a filename suffix
+                # Join operation tags to create a filename suffix
                 operation_suffix = "_".join(operation_tags)
 
                 # Create the output path with the operation suffix
                 output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
 
+                # Adjust output path if a video output directory is specified
                 if video_output_directory:
                     output_path = os.path.join(video_output_directory, os.path.basename(output_path))
 
-                # Check if the output path already exists and get a non-conflicting name
+                # Get a non-conflicting name for the output path
                 output_path = get_non_conflicting_filename(output_path)
 
                 # Load the original video clip
                 original_clip = VideoFileClip(temp_copy_path)
                 successful_operations = True
 
-                # Apply the operations in sequence, checking if they are successful
+                # Apply operations in sequence, checking for success
                 if rotation and successful_operations:
                     processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
@@ -1253,7 +1299,7 @@ def process_video_edits(self):
                     else:
                         successful_operations = False
 
-                # Only write the final modified clip to the output path if all operations were successful
+                # Write the final modified clip to the output path if all operations were successful
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
                     if self.activate_logging_var.get():
@@ -1275,10 +1321,12 @@ def process_video_edits(self):
                 os.remove(temp_copy_path)
 
             else:
+                # Extract filename, extension, and output directory
                 filename, extension = os.path.splitext(os.path.basename(input_path))
                 output_dir = os.path.dirname(input_path)
 
-                operation_tags = []  # Initialize an empty list to keep track of operations
+                # Initialize a list to keep track of operations
+                operation_tags = []
 
                 # Determine the rotation operation tag
                 rotation_angle = None  # Default rotation angle
@@ -1306,23 +1354,24 @@ def process_video_edits(self):
                     normalization_tag = f"NORMALIZED_{audio_normalization}"
                     operation_tags.append(normalization_tag)  # Add to the operations list
 
-                # Join the operation tags with underscores to create a filename suffix
+                # Join operation tags to create a filename suffix
                 operation_suffix = "_".join(operation_tags)
 
                 # Create the output path with the operation suffix
                 output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
 
+                # Adjust output path if a video output directory is specified
                 if video_output_directory:
                     output_path = os.path.join(video_output_directory, os.path.basename(output_path))
 
-                # Check if the output path already exists and get a non-conflicting name
+                # Get a non-conflicting name for the output path
                 output_path = get_non_conflicting_filename(output_path)
 
                 # Load the original video clip
                 original_clip = VideoFileClip(input_path)
                 successful_operations = True
 
-                # Apply the operations in sequence, checking if they are successful
+                # Apply operations in sequence, checking for success
                 if rotation and successful_operations:
                     processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
@@ -1344,7 +1393,7 @@ def process_video_edits(self):
                     else:
                         successful_operations = False
 
-                # Only write the final modified clip to the output path if all operations were successful
+                # Write the final modified clip to the output path if all operations were successful
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
                     if self.activate_logging_var.get():
@@ -1363,25 +1412,23 @@ def process_video_edits(self):
                 original_clip.close()
 
         except OSError as e:
+            # Log error and skip to the next file in case of OSError
             if self.activate_logging_var.get():
                 logging.error(f"OSError: {str(e)} Skipping this file and moving to the next one.")
             messagebox.showerror("Error", f"OSError: {str(e)} Skipping this file and moving to the next one.")
             continue
 
 
-# TODO CONFIRM LOGIC AND ADD NOTES
-# Open a dialog to browse and select a file to edit
+# Method to browse and select a file for video editing.
 def browse_video_editor_file_path(self):
-    # Function to browse and select a file to edit
-    # TODO Use filetypes= on filedialog.askopenfilename to prevent selection of non-video files.
+    # TODO: Use filetypes= parameter in filedialog.askopenfilename to restrict file selection to video files.
     self.video_editor_folder_path = filedialog.askopenfilename(initialdir=self.initial_directory)
     self.video_editor_display_text = self.video_editor_folder_path
     self.video_editor_display_entry.delete(0, ctk.END)
     self.video_editor_display_entry.insert(0, self.video_editor_display_text)
 
 
-# TODO CONFIRM LOGIC AND ADD NOTES
-# Open a dialog to browse and select a file containing a line delimited list of files to process
+# Method to browse and select a file containing a line delimited list of files to process
 def browse_list_of_files_to_edit_file(self):
     input_file = filedialog.askopenfilename(
         initialdir=self.initial_directory,
@@ -1390,15 +1437,13 @@ def browse_list_of_files_to_edit_file(self):
     self.input_file_entry.insert(0, input_file)
 
 
-# TODO CONFIRM LOGIC AND ADD NOTES
-# Function to browse and select a folder to move the processed files
+# Method to browse and select a folder to move the processed files
 def browse_video_output_directory(self):
     video_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
     self.video_output_directory_entry.delete(0, ctk.END)
     self.video_output_directory_entry.insert(0, video_output_directory)
 
 
-# TODO CONFIRM LOGIC AND ADD NOTES
 # Function to clear the selection and update the GUI
 def clear_video_editor_selection(self):
     self.video_editor_display_entry.delete(0, ctk.END)

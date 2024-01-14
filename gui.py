@@ -1123,46 +1123,46 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Video Editor
     """
 
-    # TODO CONFIRM AND ADD NOTES
     @staticmethod
     def get_non_conflicting_filename(path):
+        # Function to generate a non-conflicting filename
         return core.get_non_conflicting_filename(path)
 
-    # TODO CONFIRM AND ADD NOTES
     def rotate_video(self, clip, rotation_angle):
+        # Method to rotate a video clip by a specified angle.
         return core.rotate_video(self, clip, rotation_angle)
 
-    # TODO CONFIRM AND ADD NOTES
     def increase_volume(self, clip, increase_db):
+        # Method to increase the volume of a video clip by a specified dB value.
         return core.increase_volume(self, clip, increase_db)
 
-    # TODO CONFIRM AND ADD NOTES
     def normalize_audio(self, clip, volume_multiplier):
+        # Method to normalize the audio of a video clip by applying a volume multiplier.
         return core.normalize_audio(self, clip, volume_multiplier)
 
-    # TODO CONFIRM AND ADD NOTES
     @staticmethod
     def remove_successful_line_from_file(file_path, line_to_remove):
+        # Function to remove a successful line from a file.
         core.remove_successful_line_from_file(file_path, line_to_remove)
 
-    # TODO CONFIRM AND ADD NOTES
     def process_video_edits(self):
+        # Method to process video edits based on user inputs.
         core.process_video_edits(self)
 
-    # TODO CONFIRM LOGIC AND ADD NOTES
     def browse_video_editor_file_path(self):
+        # Method to browse and select a file for video editing.
         core.browse_video_editor_file_path(self)
 
-    # TODO CONFIRM LOGIC AND ADD NOTES
     def browse_list_of_files_to_edit_file(self):
+        # Method to browse and select a file containing a line delimited list of files to process
         core.browse_list_of_files_to_edit_file(self)
 
-    # TODO CONFIRM LOGIC AND ADD NOTES
     def browse_video_output_directory(self):
+        # Method to browse and select a folder to move the processed files
         core.browse_video_output_directory(self)
 
-    # TODO CONFIRM LOGIC AND ADD NOTES
     def clear_video_editor_selection(self):
+        # Function to clear the selection and update the GUI
         core.clear_video_editor_selection(self)
 
 
