@@ -1084,13 +1084,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Function to remove duplicate artists from the filename. Requires artist_file
         return core.remove_artist_duplicates_from_filename(file_name, artist_file)
 
-    def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
-                             remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at, remove_underscore,
-                             remove_comma, remove_quote, title, move_directory, artist_file):
+    def rename_and_move_file(self, file_path, move_directory, artist_file):
         # Function to process and rename files and moving files to a specified directory
-        core.rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
-                                  remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at,
-                                  remove_underscore, remove_comma, remove_quote, title, move_directory, artist_file)
+        core.rename_and_move_file(self, file_path, move_directory, artist_file)
 
     def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
         # Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full

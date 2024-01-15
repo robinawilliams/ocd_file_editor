@@ -687,17 +687,15 @@ def remove_artist_duplicates_from_filename(file_name, artist_file):
 
 
 # Function to process and rename files and moving files to a specified directory
-def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remove_parenthesis, remove_hash,
-                         remove_dash, remove_endash, remove_emdash, remove_ampersand, remove_at,
-                         remove_underscore, remove_comma, remove_quote, title, move_directory, artist_file):
+def rename_and_move_file(self, file_path, move_directory, artist_file):
     # Split the file path into directory path and filename
     dir_path, filename = os.path.split(file_path)
     name, ext = os.path.splitext(filename)
 
     # Check if the file has one of the video file extensions
     if ext.lower() in self.file_extensions_tuple:
-        # Remove specified characters from the filename if remove_all is True
-        if remove_all:
+        # Remove specified characters from the filename if remove_all_symbols_var is True
+        if self.remove_all_symbols_var.get():
             # Define the characters to be removed
             remove_chars = ",;:@$%^&*+={}[]|\\<>\"?-–—"
 
@@ -705,8 +703,8 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             for char in remove_chars:
                 name = name.replace(char, "")
 
-        # Remove new if remove_new is True
-        if remove_new:
+        # Remove new if remove_new_var is True
+        if self.remove_new_var.get():
             if 'New_' in name:
                 # Replace underscore with a space if it immediately trails the word "New". Catchall
                 name = name.replace('New_', '', 1)
@@ -714,7 +712,7 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
                 # Remove the first occurrence of "New "
                 name = name.replace('New ', '', 1)
 
-        if remove_hash:
+        if self.remove_hash_var.get():
             # Find the first occurrence of '#'
             index = name.find('#')
 
@@ -722,7 +720,7 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             if index != -1:
                 name = name[:index].strip()
 
-        if remove_parenthesis:
+        if self.remove_parenthesis_var.get():
             # Find the first occurrence of beginning parenthesis
             index = name.find('(')
 
@@ -730,40 +728,40 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
             if index != -1:
                 name = name[:index].strip()
 
-        if remove_dash:
+        if self.remove_dash_var.get():
             # Remove dashes
             name = re.sub(r'-', '', name)
 
-        if remove_endash:
+        if self.remove_endash_var.get():
             # Remove endashes
             name = re.sub(r'–', '', name)
 
-        if remove_emdash:
+        if self.remove_emdash_var.get():
             # Remove emdashes
             name = re.sub(r'—', '', name)
 
-        if remove_ampersand:
+        if self.remove_ampersand_var.get():
             # Remove ampersands
             name = re.sub(r'&', '', name)
 
-        if remove_at:
+        if self.remove_at_var.get():
             # Remove at symbols
             name = re.sub(r'@', '', name)
 
-        if remove_underscore:
+        if self.remove_underscore_var.get():
             # Remove underscores
             name = name.replace('_', ' ')
 
-        if remove_comma:
+        if self.remove_comma_var.get():
             # Remove commas
             name = name.replace(',', '')
 
-        if remove_quote:
+        if self.remove_quote_var.get():
             # Remove quotes
             name = name.replace('\'', '')
             name = name.replace('\"', '')
 
-        if title:
+        if self.title_var.get():
             # Make file name a title
             name = name.title()
 
@@ -796,8 +794,8 @@ def rename_and_move_file(self, file_path, add_tail, remove_all, remove_new, remo
                 # Call the remove_artist_duplicates_from_filename function to modify new_name
                 new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
 
-        # Add tail if add_tail is True
-        if add_tail:
+        # Add tail if tail_var is True
+        if self.tail_var.get():
             new_name += "__-__ "
 
             # Remove " -__-__" if present. Catchall for situations where only the artist name is left and -artist and
@@ -918,23 +916,8 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
 def process_folder(self):
     # Retrieve values from GUI input fields
     folder_path = self.folder_path_entry.get()
-    tail = self.tail_var.get()
-    remove_all = self.remove_all_symbols_var.get()
-    remove_new = self.remove_new_var.get()
-    remove_parenthesis = self.remove_parenthesis_var.get()
-    remove_hash = self.remove_hash_var.get()
-    remove_dash = self.remove_dash_var.get()
-    remove_endash = self.remove_endash_var.get()
-    remove_emdash = self.remove_emdash_var.get()
-    remove_ampersand = self.remove_ampersand_var.get()
-    remove_at = self.remove_at_var.get()
-    remove_underscore = self.remove_underscore_var.get()
-    remove_comma = self.remove_comma_var.get()
-    remove_quote = self.remove_quote_var.get()
-    title = self.title_var.get()
     move_directory = self.move_directory_entry.get()
     artist_file = self.artist_file_entry.get()
-    reset = self.reset_var.get()
 
     # Check if the specified folder path exists
     if not os.path.exists(folder_path):
@@ -976,20 +959,6 @@ def process_folder(self):
                 rename_and_move_file(
                     self,
                     file_path,
-                    tail,
-                    remove_all,
-                    remove_new,
-                    remove_parenthesis,
-                    remove_hash,
-                    remove_dash,
-                    remove_endash,
-                    remove_emdash,
-                    remove_ampersand,
-                    remove_at,
-                    remove_underscore,
-                    remove_comma,
-                    remove_quote,
-                    title,
                     move_directory,
                     artist_file
                 )
@@ -1010,7 +979,7 @@ def process_folder(self):
                 logging.error(f"Error: {str(e)}")
 
         # Reset GUI input fields if reset is True
-        if reset:
+        if self.reset_var.get():
             # Clear the entry fields
             self.folder_path_entry.delete(0, ctk.END)
             self.move_directory_entry.delete(0, ctk.END)
@@ -1421,7 +1390,6 @@ def process_video_edits(self):
 
 # Method to browse and select a file for video editing.
 def browse_video_editor_file_path(self):
-    # TODO: Use filetypes= parameter in filedialog.askopenfilename to restrict file selection to video files.
     self.video_editor_folder_path = filedialog.askopenfilename(initialdir=self.initial_directory)
     self.video_editor_display_text = self.video_editor_folder_path
     self.video_editor_display_entry.delete(0, ctk.END)
