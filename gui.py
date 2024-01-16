@@ -130,11 +130,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.no_rotation_radio = None
         self.decibel_frame = None
         self.decibel_label = None
-        self.decibel_var = None
         self.decibel_entry = None
         self.audio_normalization_frame = None
         self.audio_normalization_label = None
-        self.audio_normalization_var = None
         self.audio_normalization_entry = None
         self.video_output_directory_frame = None
         self.browse_video_output_directory_button = None
@@ -769,12 +767,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.decibel_label = ctk.CTkLabel(self.decibel_frame, text="Increase Audio (dB):")
         self.decibel_label.grid(row=0, column=0, padx=10, pady=5)
 
-        # Variable to store decibel value
-        self.decibel_var = ctk.DoubleVar()
-        self.decibel_var.set(self.default_decibel)
-
         # Decibel entry
-        self.decibel_entry = ctk.CTkEntry(self.decibel_frame, textvariable=self.decibel_var, width=50)
+        self.decibel_entry = ctk.CTkEntry(self.decibel_frame, width=50)
+        self.decibel_entry.insert(0, self.default_decibel)
         self.decibel_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Audio Normalization frame
@@ -786,13 +781,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.audio_normalization_label = ctk.CTkLabel(self.audio_normalization_frame, text="Normalize Audio:")
         self.audio_normalization_label.grid(row=0, column=0, padx=10, pady=5)
 
-        # Variable to store audio normalization value
-        self.audio_normalization_var = ctk.DoubleVar()
-        self.audio_normalization_var.set(self.default_audio_normalization)
-
         # Audio Normalization entry
-        self.audio_normalization_entry = ctk.CTkEntry(self.audio_normalization_frame,
-                                                      textvariable=self.audio_normalization_var, width=50)
+        self.audio_normalization_entry = ctk.CTkEntry(self.audio_normalization_frame, width=50)
+        self.audio_normalization_entry.insert(0, self.default_audio_normalization)
         self.audio_normalization_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Video Output directory frame
