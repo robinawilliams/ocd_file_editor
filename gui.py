@@ -140,6 +140,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_editor_frame = None
         self.clear_video_editor_selection_button = None
         self.process_video_edits_button = None
+        self.checkbox_frame5 = None
+        self.remove_successful_lines_checkbox = None
 
         # Initialize Settings elements
         self.settings_frame = None
@@ -163,8 +165,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
          remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
          initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
-         deep_walk_var) = (
-            self.load_configuration())
+         deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
+         default_rotation_var) = (self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
@@ -179,6 +181,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.geometry(geometry)
         self.column_numbers = int(column_numbers)
         self.default_weight = int(default_weight)
+        self.default_decibel = float(default_decibel)
+        self.default_audio_normalization = float(default_audio_normalization)
         self.default_frame = default_frame
         self.ocd_file_renamer_log = ocd_file_renamer_log
         self.default_placement_var = default_placement_var
@@ -211,6 +215,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
         self.reset_var = ctk.BooleanVar(value=reset_var)
         self.deep_walk_var = ctk.BooleanVar(value=deep_walk_var)
+
+        # Video Editor - Set instance variables with the values from the configuration file
+        self.remove_successful_lines_var = ctk.BooleanVar(value=remove_successful_lines_var)
+        self.default_rotation_var = default_rotation_var
 
         # Enable drag-and-drop functionality for files
         self.drop_target_register(DND_FILES)
@@ -692,7 +700,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Selected Video Editor File Display
         self.video_editor_display_text = ctk.StringVar()
-        self.video_editor_display_text.set("Select a file using the 'Browse File' button")
+        self.video_editor_display_text.set("")
         self.video_editor_display_entry = ctk.CTkEntry(self.video_editor_top_frame, width=890,
                                                        textvariable=self.video_editor_display_text)
         self.video_editor_display_entry.grid(row=0, column=1, padx=10, pady=10)
@@ -716,21 +724,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                            fg_color="transparent")
         self.rotation_frame.grid(row=3, column=0, padx=10, pady=5)
 
+        # Rotate Video label
         self.rotation_label = ctk.CTkLabel(self.rotation_frame, text="Rotate Video:")
         self.rotation_label.grid(row=0, column=0, padx=10, pady=5)
 
+        # Variable to store rotation option
         self.rotation_var = ctk.StringVar()
-        # TODO Add default selection in configuration file
-        self.rotation_var.set("left")
+        self.rotation_var.set(self.default_rotation_var)
 
+        # Left rotation radio button
         self.left_radio = ctk.CTkRadioButton(self.rotation_frame, text="Left", variable=self.rotation_var, value="left")
         self.left_radio.grid(row=0, column=1, padx=10, pady=5)
 
+        # Right rotation radio button
         self.right_radio = ctk.CTkRadioButton(self.rotation_frame, text="Right", variable=self.rotation_var,
                                               value="right")
         self.right_radio.grid(row=0, column=2, padx=10, pady=5)
 
-        # TODO Implement this logic
+        # None rotation radio button
+        # TODO: Implement this logic
         self.no_rotation_radio = ctk.CTkRadioButton(self.rotation_frame, text="None", variable=self.rotation_var,
                                                     value="none")
         self.no_rotation_radio.grid(row=0, column=8, padx=10, pady=5)
@@ -740,12 +752,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                           fg_color="transparent")
         self.decibel_frame.grid(row=4, column=0, padx=10, pady=5)
 
+        # Increase Audio (dB) label
         self.decibel_label = ctk.CTkLabel(self.decibel_frame, text="Increase Audio (dB):")
         self.decibel_label.grid(row=0, column=0, padx=10, pady=5)
 
+        # Variable to store decibel value
         self.decibel_var = ctk.DoubleVar()
-        # TODO Add default selection in configuration file
-        self.decibel_var.set(0.0)
+        self.decibel_var.set(self.default_decibel)
 
         # Decibel entry
         self.decibel_entry = ctk.CTkEntry(self.decibel_frame, textvariable=self.decibel_var, width=50)
@@ -756,12 +769,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       fg_color="transparent")
         self.audio_normalization_frame.grid(row=5, column=0, padx=10, pady=5)
 
+        # Normalize Audio label
         self.audio_normalization_label = ctk.CTkLabel(self.audio_normalization_frame, text="Normalize Audio:")
         self.audio_normalization_label.grid(row=0, column=0, padx=10, pady=5)
 
+        # Variable to store audio normalization value
         self.audio_normalization_var = ctk.DoubleVar()
-        # TODO Add default selection in configuration file
-        self.audio_normalization_var.set(0.0)
+        self.audio_normalization_var.set(self.default_audio_normalization)
 
         # Audio Normalization entry
         self.audio_normalization_entry = ctk.CTkEntry(self.audio_normalization_frame,
@@ -798,6 +812,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
                                                         command=self.process_video_edits)
         self.process_video_edits_button.grid(row=0, column=1, padx=5, pady=5)
+
+        # Checkbox frame
+        self.checkbox_frame5 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame5.grid(row=10, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable remove successful lines
+        self.remove_successful_lines_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+                                                                text="Remove successful lines",
+                                                                variable=self.remove_successful_lines_var)
+        self.remove_successful_lines_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         """
         settings_window
@@ -1138,10 +1163,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Method to normalize the audio of a video clip by applying a volume multiplier.
         return core.normalize_audio(self, clip, volume_multiplier)
 
-    @staticmethod
-    def remove_successful_line_from_file(file_path, line_to_remove):
+    def remove_successful_line_from_file(self, file_path, line_to_remove):
         # Function to remove a successful line from a file.
-        core.remove_successful_line_from_file(file_path, line_to_remove)
+        core.remove_successful_line_from_file(self, file_path, line_to_remove)
 
     def process_video_edits(self):
         # Method to process video edits based on user inputs.

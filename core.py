@@ -39,6 +39,8 @@ def load_configuration():
     geometry = config.get('Settings', 'geometry', fallback='1280x800')
     column_numbers = config.get('Settings', 'column_numbers', fallback=7)
     default_weight = config.get('Settings', 'default_weight', fallback=9)
+    default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
+    default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
     default_frame = config.get('Settings', 'default_frame', fallback="home")
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
@@ -71,6 +73,10 @@ def load_configuration():
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
     deep_walk_var = config.getboolean("Settings", "deep_walk_var", fallback=False)
 
+    # Video Editor
+    remove_successful_lines_var = config.getboolean("Settings", "remove_successful_lines_var", fallback=False)
+    default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
+
     # File extensions
     file_extensions = config.get('Settings', 'file_extensions',
                                  fallback='.mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, '
@@ -86,7 +92,8 @@ def load_configuration():
             remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
             remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
             initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
-            deep_walk_var)
+            deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
+            default_rotation_var)
 
 
 def logging_setup(self):
@@ -1112,18 +1119,18 @@ def normalize_audio(self, clip, volume_multiplier):
 
 
 # Function to remove a successful line from a file.
-def remove_successful_line_from_file(file_path, line_to_remove):
-    # TODO Include variable to control whether to remove lines or not
-    # Read all lines from the file.
-    with open(file_path, 'r') as file:
-        lines = file.readlines()
+def remove_successful_line_from_file(self, file_path, line_to_remove):
+    if self.remove_successful_lines_var.get():
+        # Read all lines from the file.
+        with open(file_path, 'r') as file:
+            lines = file.readlines()
 
-    # Open the file in write mode to remove the specified line.
-    with open(file_path, 'w') as file:
-        # Write lines back to the file, excluding the successful line to remove.
-        for line in lines:
-            if line.strip() != line_to_remove:
-                file.write(line)
+        # Open the file in write mode to remove the specified line.
+        with open(file_path, 'w') as file:
+            # Write lines back to the file, excluding the successful line to remove.
+            for line in lines:
+                if line.strip() != line_to_remove:
+                    file.write(line)
 
 
 # TODO Optimize this
@@ -1277,7 +1284,7 @@ def process_video_edits(self):
 
                     # Remove the successfully processed line from the input file
                     if input_file:
-                        remove_successful_line_from_file(input_file, input_path)
+                        remove_successful_line_from_file(self, input_file, input_path)
                 else:
                     if self.activate_logging_var.get():
                         logging.error(f"Error: Operations failed for video {input_path}")
@@ -1371,7 +1378,7 @@ def process_video_edits(self):
 
                     # Remove the successfully processed line from the input file
                     if input_file:
-                        remove_successful_line_from_file(input_file, input_path)
+                        remove_successful_line_from_file(self, input_file, input_path)
                 else:
                     if self.activate_logging_var.get():
                         logging.error(f"Error: Operations failed for video {input_path}")
@@ -1420,10 +1427,8 @@ def clear_video_editor_selection(self):
 
     # Clear decibel entry and set default value
     self.decibel_entry.delete(0, ctk.END)
-    # TODO: Add default selection in configuration file
-    self.decibel_entry.insert(0, 0.0)
+    self.decibel_entry.insert(0, self.default_decibel)
 
     # Clear audio normalization entry and set default value
     self.audio_normalization_entry.delete(0, ctk.END)
-    # TODO: Add default selection in configuration file
-    self.audio_normalization_entry.insert(0, 0.0)
+    self.audio_normalization_entry.insert(0, self.default_audio_normalization)
