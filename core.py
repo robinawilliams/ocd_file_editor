@@ -173,7 +173,7 @@ def load_last_used_file(self):
             # Log the action if logging is enabled
             logging.info(f"Last used file selected: {message}")
         if len(message) > 127:
-            message = message[:127] + "..."
+            message = f"{message[:127]}..."
 
         self.show_message(f"Last used file selected: {message}")
     else:
@@ -203,7 +203,7 @@ def on_file_drop(self, event):
         # Log the action if logging is enabled
         logging.info(f"File selected: {message}")
     if len(message) > 127:
-        message = message[:127] + "..."
+        message = f"{message[:127]}..."
 
     self.show_message(f"File selected via drop: {message}")
 
@@ -245,7 +245,7 @@ def update_file_display(self):
         # Use only the base name of the file, not the full path
         base_file_name = os.path.basename(self.selected_file)
 
-        # Construct the new name
+        # Construct the name
         new_name_parts = [
             os.path.splitext(base_file_name)[0],
             custom_text,
@@ -262,7 +262,7 @@ def update_file_display(self):
                                                    "shortening it to comply with operating system limitations.")
             name = f"...{name[180:]}"
 
-        # Set the new name to the file display
+        # Set the name to the file display
         self.file_display_text.set(name)
 
 
@@ -317,7 +317,7 @@ def browse_file(self):
             # Log the action if logging is enabled
             logging.info(f"File selected via Browse: {message}")
         if len(message) > 127:
-            message = message[:127] + "..."
+            message = f"{message[:127]}..."
 
         self.show_message(f"File selected: {message}")
 
@@ -574,14 +574,14 @@ def rename_files(self):
         weighted_categories = [category for category in self.queue if category in self.categories]
         weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
-        # Construct a new name using base name, weighted categories, custom text, and extension
+        # Construct a name using base name, weighted categories, custom text, and extension
         name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
 
         # If move_text_var is set, move the text between - and __-__
         if self.move_text_var.get():
             name = self.move_text(name)
 
-        # Remove extra whitespaces from the new name
+        # Remove extra whitespaces from the name
         name = " ".join(name.split()).strip()
 
         # If output directory is not explicitly set, default to the same directory as the file
@@ -618,7 +618,7 @@ def rename_files(self):
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
-    # Construct the new name based on placement choice (prefix, suffix, or special_character)
+    # Construct the name based on placement choice (prefix, suffix, or special_character)
     categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
     categories_text = ' '.join(categories).strip()
 
@@ -685,7 +685,7 @@ def remove_artist_duplicates_from_filename(file_name, artist_file):
             temp_name = regex.sub('', temp_name)
 
         # Reattach the dash and any remaining text
-        new_file_name = file_name[:index + 1] + ' ' + str(temp_name.strip())
+        new_file_name = f"{file_name[:index + 1]} {temp_name.strip()}"
     else:
         new_file_name = file_name
 
@@ -811,10 +811,10 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
             # -tail are used.
             name = re.sub(r' -__-__', '', name).strip()
 
-        # Add the file extension back to the new name
+        # Add the file extension back to the name
         name += ext
 
-        # Skip renaming if the new name is the same as the original
+        # Skip renaming if the name is the same as the original
         if name == filename:
             if self.activate_logging_var.get():
                 logging.info(f"Skipped renaming: {filename} (no changes needed)")
@@ -842,7 +842,7 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
                     logging.info(f"No counter match on: \n{name}.")
                 counter = 1
 
-            # Generate new names with incremented counter until a unique name is found
+            # Generate name with incremented counter until a unique name is found
             new_path = os.path.join(move_directory if move_directory else dir_path, name)
             while os.path.exists(new_path):
                 new_name_with_counter = f"{base_name} ({counter}){ext}"
