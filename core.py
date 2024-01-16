@@ -1146,6 +1146,15 @@ def process_video_edits(self):
     decibel = float(self.decibel_entry.get())
     audio_normalization = float(self.audio_normalization_entry.get())
 
+    if rotation == "none":
+        rotation = None
+
+    if decibel == 0.0:
+        decibel = None
+
+    if audio_normalization == 0.0:
+        audio_normalization = None
+
     # TODO Put this in configuration file or json file
     # Create a list of valid video extensions
     valid_extensions = ['.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.mpeg', '.mpg', '.m4v']
@@ -1165,10 +1174,9 @@ def process_video_edits(self):
     if (input_video or input_file) and decibel is None and rotation is None and audio_normalization is None:
         if self.activate_logging_var.get():
             logging.error("Error: You need to specify an operation (audio increase, video rotation, "
-                          "audio normalization, or a combination of them with -db, -r, -v, -db/-r, or -db/-v)")
+                          "audio normalization, or a combination of them")
         messagebox.showerror("Error", "Error: You need to specify an operation (audio increase, video rotation, "
-                                      "audio normalization, or a combination of them with -db, -r, -v, -db/-r, "
-                                      "or -db/-v)")
+                                      "audio normalization, or a combination of them")
         return
 
     # Check for conflicting input parameters
@@ -1216,17 +1224,18 @@ def process_video_edits(self):
                 rotation_angle = None  # Default rotation angle
 
                 if rotation:
-                    rotation_tag = "ROTATED_" + rotation.upper()
-                    operation_tags.append(rotation_tag)  # Add to the operations list
+                    if rotation is not None:  # Check if rotation is not set to "none"
+                        rotation_tag = "ROTATED_" + rotation.upper()
+                        operation_tags.append(rotation_tag)  # Add to the operations list
 
-                    if rotation == "left":
-                        rotation_angle = 90
-                    elif rotation == "right":
-                        rotation_angle = -90
-
-                    # "none" case handled separately to reset rotation
-                    elif rotation == "none":
-                        rotation = False
+                        if rotation == "left":
+                            rotation_angle = 90
+                        elif rotation == "right":
+                            rotation_angle = -90
+                        elif rotation == "flip":
+                            rotation_angle = -180
+                else:
+                    rotation_angle = None  # Reset rotation angle
 
                 # Determine the volume increase operation tag
                 if decibel:
@@ -1256,7 +1265,7 @@ def process_video_edits(self):
                 successful_operations = True
 
                 # Apply operations in sequence, checking for success
-                if rotation and successful_operations:
+                if rotation is not None and successful_operations:
                     processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
                         original_clip = processed_clip
@@ -1310,17 +1319,18 @@ def process_video_edits(self):
                 rotation_angle = None  # Default rotation angle
 
                 if rotation:
-                    rotation_tag = "ROTATED_" + rotation.upper()
-                    operation_tags.append(rotation_tag)  # Add to the operations list
+                    if rotation is not None:  # Check if rotation is not set to "none"
+                        rotation_tag = "ROTATED_" + rotation.upper()
+                        operation_tags.append(rotation_tag)  # Add to the operations list
 
-                    if rotation == "left":
-                        rotation_angle = 90
-                    elif rotation == "right":
-                        rotation_angle = -90
-
-                    # "none" case handled separately to reset rotation
-                    elif rotation == "none":
-                        rotation = False
+                        if rotation == "left":
+                            rotation_angle = 90
+                        elif rotation == "right":
+                            rotation_angle = -90
+                        elif rotation == "flip":
+                            rotation_angle = -180
+                else:
+                    rotation_angle = None  # Reset rotation angle
 
                 # Determine the volume increase operation tag
                 if decibel:
@@ -1350,7 +1360,7 @@ def process_video_edits(self):
                 successful_operations = True
 
                 # Apply operations in sequence, checking for success
-                if rotation and successful_operations:
+                if rotation is not None and successful_operations:
                     processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
                         original_clip = processed_clip

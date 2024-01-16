@@ -126,6 +126,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.rotation_var = None
         self.left_radio = None
         self.right_radio = None
+        self.flip_radio = None
         self.no_rotation_radio = None
         self.decibel_frame = None
         self.decibel_label = None
@@ -749,11 +750,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               value="right")
         self.right_radio.grid(row=0, column=2, padx=10, pady=5)
 
+        # Flip rotation radio button
+        self.flip_radio = ctk.CTkRadioButton(self.rotation_frame, text="Flip", variable=self.rotation_var,
+                                             value="flip")
+        self.flip_radio.grid(row=0, column=3, padx=10, pady=5)
+
         # None rotation radio button
-        # TODO: Implement this logic
         self.no_rotation_radio = ctk.CTkRadioButton(self.rotation_frame, text="None", variable=self.rotation_var,
                                                     value="none")
-        self.no_rotation_radio.grid(row=0, column=8, padx=10, pady=5)
+        self.no_rotation_radio.grid(row=0, column=4, padx=10, pady=5)
 
         # Decibel frame
         self.decibel_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,

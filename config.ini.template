@@ -69,7 +69,7 @@ remove_successful_lines_var = False
 default_placement_var = special_character
 ; Set the special character for the placement (alphanumeric character)
 special_character_var = -
-; Set the default rotation for video editor (left, right, none)
+; Set the default rotation for video editor (left, right, flip, none)
 default_rotation_var = none
 ; List of file extensions to process (skip any not listed)
 file_extensions = .mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
