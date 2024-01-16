@@ -81,22 +81,42 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.folder_path_entry = None
         self.remove_all_symbols_checkbox = None
         self.tail_checkbox = None
-        self.remove_parenthesis_checkbox = None
-        self.remove_hash_checkbox = None
+        self.remove_parenthesis_trail_checkbox = None
+        self.remove_hashtag_trail_checkbox = None
         self.checkbox_frame2 = None
         self.remove_new_checkbox = None
         self.remove_dash_checkbox = None
         self.remove_endash_checkbox = None
         self.remove_emdash_checkbox = None
+        self.remove_hashtag_checkbox = None
         self.checkbox_frame3 = None
         self.remove_ampersand_checkbox = None
         self.remove_at_checkbox = None
         self.remove_underscore_checkbox = None
         self.remove_comma_checkbox = None
-        self.remove_double_space_checkbox = None
+        self.remove_dollar_checkbox = None
         self.checkbox_frame4 = None
-        self.remove_quote_checkbox = None
         self.title_checkbox = None
+        self.remove_single_quote_checkbox = None
+        self.remove_double_quote_checkbox = None
+        self.remove_colon_checkbox = None
+        self.remove_semicolon_checkbox = None
+        self.remove_percent_checkbox = None
+        self.remove_caret_checkbox = None
+        self.checkbox_frame5 = None
+        self.remove_asterisk_checkbox = None
+        self.remove_parenthesis_checkbox = None
+        self.remove_plus_checkbox = None
+        self.remove_equal_checkbox = None
+        self.remove_curly_brace_checkbox = None
+        self.remove_square_bracket_checkbox = None
+        self.checkbox_frame6 = None
+        self.remove_pipe_checkbox = None
+        self.remove_backslash_checkbox = None
+        self.remove_angle_bracket_checkbox = None
+        self.remove_question_mark_checkbox = None
+        self.checkbox_frame7 = None
+        self.remove_double_space_checkbox = None
         self.artist_search_checkbox = None
         self.deep_walk_checkbox = None
         self.reset_checkbox = None
@@ -114,7 +134,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_frame = None
         self.video_editor_top_frame = None
         self.video_editor_label = None
-        self.checkbox_frame1 = None
         self.video_editor_browse_file_button = None
         self.video_editor_display_text = None
         self.video_editor_display_entry = None
@@ -140,7 +159,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_editor_frame = None
         self.clear_video_editor_selection_button = None
         self.process_video_edits_button = None
-        self.checkbox_frame5 = None
+        self.video_editor_checkbox_frame = None
         self.remove_successful_lines_checkbox = None
 
         # Initialize Settings elements
@@ -161,12 +180,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
          double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
-         file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
+         file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
+         remove_hashtag_trail_var,
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
-         remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
+         remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var, remove_double_quote_var,
+         title_var, reset_var,
          initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
          deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
-         default_rotation_var, remove_double_space_var) = (self.load_configuration())
+         default_rotation_var, remove_double_space_var, remove_colon_var, remove_semicolon_var, remove_percent_var,
+         remove_caret_var, remove_dollar_var, remove_asterisk_var, remove_plus_var, remove_equal_var,
+         remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var, remove_backslash_var,
+         remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var, remove_hashtag_var) = (
+            self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
@@ -200,8 +225,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Name Normalizer - Set instance variables with the values from the configuration file
         self.remove_all_symbols_var = ctk.BooleanVar(value=remove_all_symbols_var)
         self.tail_var = ctk.BooleanVar(value=tail_var)
+        self.remove_parenthesis_trail_var = ctk.BooleanVar(value=remove_parenthesis_trail_var)
         self.remove_parenthesis_var = ctk.BooleanVar(value=remove_parenthesis_var)
-        self.remove_hash_var = ctk.BooleanVar(value=remove_hash_var)
+        self.remove_hashtag_trail_var = ctk.BooleanVar(value=remove_hashtag_trail_var)
+        self.remove_hashtag_var = ctk.BooleanVar(value=remove_hashtag_var)
         self.remove_new_var = ctk.BooleanVar(value=remove_new_var)
         self.remove_dash_var = ctk.BooleanVar(value=remove_dash_var)
         self.remove_endash_var = ctk.BooleanVar(value=remove_endash_var)
@@ -210,7 +237,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_at_var = ctk.BooleanVar(value=remove_at_var)
         self.remove_underscore_var = ctk.BooleanVar(value=remove_underscore_var)
         self.remove_comma_var = ctk.BooleanVar(value=remove_comma_var)
-        self.remove_quote_var = ctk.BooleanVar(value=remove_quote_var)
+        self.remove_single_quote_var = ctk.BooleanVar(value=remove_single_quote_var)
+        self.remove_double_quote_var = ctk.BooleanVar(value=remove_double_quote_var)
+        self.remove_colon_var = ctk.BooleanVar(value=remove_colon_var)
+        self.remove_semicolon_var = ctk.BooleanVar(value=remove_semicolon_var)
+        self.remove_percent_var = ctk.BooleanVar(value=remove_percent_var)
+        self.remove_caret_var = ctk.BooleanVar(value=remove_caret_var)
+        self.remove_dollar_var = ctk.BooleanVar(value=remove_dollar_var)
+        self.remove_asterisk_var = ctk.BooleanVar(value=remove_asterisk_var)
+        self.remove_plus_var = ctk.BooleanVar(value=remove_plus_var)
+        self.remove_equal_var = ctk.BooleanVar(value=remove_equal_var)
+        self.remove_curly_brace_var = ctk.BooleanVar(value=remove_curly_brace_var)
+        self.remove_square_bracket_var = ctk.BooleanVar(value=remove_square_bracket_var)
+        self.remove_pipe_var = ctk.BooleanVar(value=remove_pipe_var)
+        self.remove_backslash_var = ctk.BooleanVar(value=remove_backslash_var)
+        self.remove_angle_bracket_var = ctk.BooleanVar(value=remove_angle_bracket_var)
+        self.remove_question_mark_var = ctk.BooleanVar(value=remove_question_mark_var)
         self.remove_double_space_var = ctk.BooleanVar(value=remove_double_space_var)
         self.title_var = ctk.BooleanVar(value=title_var)
         self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
@@ -515,7 +557,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame1.grid(row=2, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable Remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—
+        # Checkbox to enable/disable remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—
         self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                                            text="Remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—",
                                                            variable=self.remove_all_symbols_var)
@@ -527,26 +569,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              variable=self.tail_var)
         self.tail_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
-        # Checkbox to enable/disable remove parenthesis
-        self.remove_parenthesis_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                                           text="Remove text following the first '('",
-                                                           variable=self.remove_parenthesis_var)
-        self.remove_parenthesis_checkbox.grid(row=0, column=2, padx=10, pady=10)
+        # Checkbox to enable/disable remove parenthesis and trailing text
+        self.remove_parenthesis_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                                 text="Remove text following the first '('",
+                                                                 variable=self.remove_parenthesis_trail_var)
+        self.remove_parenthesis_trail_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
-        # Checkbox to enable/disable remove hashtag
-        self.remove_hash_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                                    text="Remove text following the first '#'",
-                                                    variable=self.remove_hash_var)
-        self.remove_hash_checkbox.grid(row=0, column=3, padx=10, pady=10)
+        # Checkbox to enable/disable remove hashtag and trailing text
+        self.remove_hashtag_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                             text="Remove text following the first '#'",
+                                                             variable=self.remove_hashtag_trail_var)
+        self.remove_hashtag_trail_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
         # Button Frame 2
         self.checkbox_frame2 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                             fg_color="transparent")
         self.checkbox_frame2.grid(row=3, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable Remove New
+        # Checkbox to enable/disable remove new
         self.remove_new_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
-                                                   text="Remove New",
+                                                   text="Remove new",
                                                    variable=self.remove_new_var)
         self.remove_new_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
@@ -556,84 +598,201 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                     variable=self.remove_dash_var)
         self.remove_dash_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove endashes
+        # Checkbox to enable/disable remove endashes
         self.remove_endash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                       text="Remove endashes",
                                                       variable=self.remove_endash_var)
         self.remove_endash_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove emdashes
+        # Checkbox to enable/disable remove emdashes
         self.remove_emdash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                       text="Remove emdashes",
                                                       variable=self.remove_emdash_var)
         self.remove_emdash_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove hashtags
+        self.remove_hashtag_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
+                                                       text="Remove hashtags",
+                                                       variable=self.remove_hashtag_var)
+        self.remove_hashtag_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove commas
+        self.remove_comma_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
+                                                     text="Remove commas",
+                                                     variable=self.remove_comma_var)
+        self.remove_comma_checkbox.grid(row=0, column=5, padx=10, pady=10)
 
         # Button Frame 3
         self.checkbox_frame3 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                             fg_color="transparent")
         self.checkbox_frame3.grid(row=4, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable Remove ampersands
+        # Checkbox to enable/disable remove ampersands
         self.remove_ampersand_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
                                                          text="Remove ampersands",
                                                          variable=self.remove_ampersand_var)
         self.remove_ampersand_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove @
+        # Checkbox to enable/disable remove @
         self.remove_at_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
                                                   text="Remove @",
                                                   variable=self.remove_at_var)
         self.remove_at_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove underscores
+        # Checkbox to enable/disable remove underscores
         self.remove_underscore_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
                                                           text="Remove underscores",
                                                           variable=self.remove_underscore_var)
         self.remove_underscore_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove commas
-        self.remove_comma_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
-                                                     text="Remove commas",
-                                                     variable=self.remove_comma_var)
-        self.remove_comma_checkbox.grid(row=0, column=3, padx=10, pady=10)
+        # Checkbox to enable/disable remove single quotes
+        self.remove_single_quote_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                            text="Remove single quotes",
+                                                            variable=self.remove_single_quote_var)
+        self.remove_single_quote_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove commas
-        self.remove_double_space_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
-                                                            text="Remove double spaces",
-                                                            variable=self.remove_double_space_var)
-        self.remove_double_space_checkbox.grid(row=0, column=4, padx=10, pady=10)
+        # Checkbox to enable/disable remove double quotes
+        self.remove_double_quote_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                            text="Remove double quotes",
+                                                            variable=self.remove_double_quote_var)
+        self.remove_double_quote_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Button Frame 4
         self.checkbox_frame4 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                             fg_color="transparent")
         self.checkbox_frame4.grid(row=5, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable Remove quotes
-        self.remove_quote_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
-                                                     text="Remove quotes",
-                                                     variable=self.remove_quote_var)
-        self.remove_quote_checkbox.grid(row=0, column=0, padx=10, pady=10)
+        # Checkbox to enable/disable remove dollars
+        self.remove_dollar_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                      text="Remove dollars",
+                                                      variable=self.remove_dollar_var)
+        self.remove_dollar_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove colons
+        self.remove_colon_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                     text="Remove colons",
+                                                     variable=self.remove_colon_var)
+        self.remove_colon_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable semicolons
+        self.remove_semicolon_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                         text="Remove semicolons",
+                                                         variable=self.remove_semicolon_var)
+        self.remove_semicolon_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove percents
+        self.remove_percent_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                       text="Remove percents",
+                                                       variable=self.remove_percent_var)
+        self.remove_percent_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove carets
+        self.remove_caret_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                     text="Remove carets",
+                                                     variable=self.remove_caret_var)
+        self.remove_caret_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove plus signs
+        self.remove_plus_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+                                                    text="Remove plus signs",
+                                                    variable=self.remove_plus_var)
+        self.remove_plus_checkbox.grid(row=0, column=5, padx=10, pady=10)
+
+        # Button Frame 5
+        self.checkbox_frame5 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame5.grid(row=6, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable remove asterisks
+        self.remove_asterisk_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+                                                        text="Remove asterisks",
+                                                        variable=self.remove_asterisk_var)
+        self.remove_asterisk_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove parenthesis
+        self.remove_parenthesis_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+                                                           text="Remove parenthesis",
+                                                           variable=self.remove_parenthesis_var)
+        self.remove_parenthesis_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove angle brackets
+        self.remove_angle_bracket_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+                                                             text="Remove angle brackets",
+                                                             variable=self.remove_angle_bracket_var)
+        self.remove_angle_bracket_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove curly braces
+        self.remove_curly_brace_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+                                                           text="Remove curly braces",
+                                                           variable=self.remove_curly_brace_var)
+        self.remove_curly_brace_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove square brackets
+        self.remove_square_bracket_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+                                                              text="Remove square brackets",
+                                                              variable=self.remove_square_bracket_var)
+        self.remove_square_bracket_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Button Frame 6
+        self.checkbox_frame6 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame6.grid(row=7, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable remove pipes
+        self.remove_pipe_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
+                                                    text="Remove pipes",
+                                                    variable=self.remove_pipe_var)
+        self.remove_pipe_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove backslashes
+        self.remove_backslash_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
+                                                         text="Remove backslashes",
+                                                         variable=self.remove_backslash_var)
+        self.remove_backslash_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove equal signs
+        self.remove_equal_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
+                                                     text="Remove equal signs",
+                                                     variable=self.remove_equal_var)
+        self.remove_equal_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove question marks
+        self.remove_question_mark_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
+                                                             text="Remove question marks",
+                                                             variable=self.remove_question_mark_var)
+        self.remove_question_mark_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Button Frame 7
+        self.checkbox_frame7 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame7.grid(row=8, column=0, padx=10, pady=5)
+
+        # Checkbox to enable/disable remove double spaces
+        self.remove_double_space_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+                                                            text="Remove double spaces",
+                                                            variable=self.remove_double_space_var)
+        self.remove_double_space_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable Titlefy the name
-        self.title_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+        self.title_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                               text="Titlefy the name",
                                               variable=self.title_var)
         self.title_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
         # Checkbox to enable/disable Artist Search
-        self.artist_search_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+        self.artist_search_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                                       text="Artist Search",
                                                       variable=self.artist_file_search_var)
         self.artist_search_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
         # Checkbox to enable/disable Reset entries
-        self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+        self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                                   text="Include subdirectories",
                                                   variable=self.deep_walk_var)
         self.deep_walk_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
         # Checkbox to enable/disable Reset entries
-        self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
+        self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                               text="Reset entries",
                                               variable=self.reset_var)
         self.reset_checkbox.grid(row=0, column=4, padx=10, pady=10)
@@ -641,7 +800,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Output directory move frame
         self.output_directory_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                                    fg_color="transparent")
-        self.output_directory_frame.grid(row=6, column=0, padx=10, pady=5)
+        self.output_directory_frame.grid(row=9, column=0, padx=10, pady=5)
 
         # Browse move directory folder button
         self.browse_move_directory_button = ctk.CTkButton(self.output_directory_frame, text="Output Directory",
@@ -655,7 +814,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Artist File Frame
         self.artist_file_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                               fg_color="transparent")
-        self.artist_file_frame.grid(row=7, column=0, padx=10, pady=5)
+        self.artist_file_frame.grid(row=10, column=0, padx=10, pady=5)
 
         # Browse Artist File button
         self.browse_artist_file_button = ctk.CTkButton(self.artist_file_frame, text="Artist File",
@@ -670,7 +829,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Normalize Folder frame
         self.normalize_folder_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                                    fg_color="transparent")
-        self.normalize_folder_frame.grid(row=8, column=0, padx=10, pady=5)
+        self.normalize_folder_frame.grid(row=11, column=0, padx=10, pady=5)
 
         # Clear Name Normalizer Selection Button
         self.clear_name_normalizer_selection_button = ctk.CTkButton(self.normalize_folder_frame,
@@ -817,13 +976,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                         command=self.process_video_edits)
         self.process_video_edits_button.grid(row=0, column=1, padx=5, pady=5)
 
-        # Checkbox frame
-        self.checkbox_frame5 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
-                                            fg_color="transparent")
-        self.checkbox_frame5.grid(row=10, column=0, padx=10, pady=5)
+        # Video editor checkbox frame
+        self.video_editor_checkbox_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                        fg_color="transparent")
+        self.video_editor_checkbox_frame.grid(row=10, column=0, padx=10, pady=5)
 
         # Checkbox to enable/disable remove successful lines
-        self.remove_successful_lines_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
+        self.remove_successful_lines_checkbox = ctk.CTkCheckBox(self.video_editor_checkbox_frame,
                                                                 text="Remove successful lines",
                                                                 variable=self.remove_successful_lines_var)
         self.remove_successful_lines_checkbox.grid(row=0, column=0, padx=10, pady=10)

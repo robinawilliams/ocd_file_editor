@@ -40,8 +40,9 @@ Introducing the O.C.D. File Renamer, a powerful Python tool crafted for dynamic 
     ```
     python gui.py
     ```
-
-### Quick Start
+## Modules
+### File Renamer
+Quick Start
 - Drag and drop a file into the window or choose "Browse File" to select one.
 - Use category buttons to add words to the renaming queue.
 - Manage categories with "Add Category" and "Remove Category" fields. Add a weight to the category to influence position. The lower weight, the highter the precedence.
@@ -53,7 +54,7 @@ Introducing the O.C.D. File Renamer, a powerful Python tool crafted for dynamic 
 - "Move to Trash" sends the selected file to the trash.
 - "Reload Last File" reloads the last used file.
 
-### Checkboxes/Radio Buttons
+Checkboxes/Radio Buttons
 - "Reset Output Dir." resets the output directory on each run.
 - "Suggest Output Dir." attempts to find an artist match in a provided directory.
 - "Move Up One Dir." moves the file up one directory.
@@ -65,27 +66,38 @@ Introducing the O.C.D. File Renamer, a powerful Python tool crafted for dynamic 
      - Special Character is set to - by default. See special_character_var in config.ini to change.
    - Suffix: At the end of the file name.
 
-### Detailed Features
-- Weight categories in the gui or "categories.json" file.
-- "Open File on Drag and Drop" (Linux only).
-- "Remove Duplicates" removes duplicate entries in the file name.
-- "Create Double Check Reminder" creates an empty file for double-checking.
-- "Activate Logging" logs actions taken within the program.
-- Name Normalizer 
-  - Name Normalize a folder containing files. You can include certain file types by changing file_extensions in the config.ini file.
-  - "Remove symbols"
+### Name Normalizer 
+Name Normalize a folder containing files. You can include certain file types by changing file_extensions in the config.ini file.
+  - "Remove all symbols"
   - "Append "\_\_-\_\_ " to the file name"
   - "Remove text following the first '('"
   - "Remove text following the first '#'"
-  - "Remove New"
+  - "Remove new"
   - "Remove dashes"
   - "Remove endashes"
   - "Remove emdashes"
+  - "Remove hashtags"
   - "Remove ampersands"
   - "Remove @"
   - "Remove underscores"
   - "Remove commas"
+  - "Remove dollars"
   - "Remove quotes"
+  - "Remove colons"
+  - "Remove semicolons"
+  - "Remove percents"
+  - "Remove carets"
+  - "Remove plus signs"
+  - "Remove asterisks"
+  - "Remove parenthesis"
+  - "Remove angle brackets"
+  - "Remove curly braces"
+  - "Remove square brackets"
+  - "Remove pipes"
+  - "Remove backslashes"
+  - "Remove equal signs"
+  - "Remove question marks"
+  - "Remove double spaces"
   - "Titlefy the name"
   - "Artist Search"
   - "Include subdirectories"
@@ -94,6 +106,21 @@ Introducing the O.C.D. File Renamer, a powerful Python tool crafted for dynamic 
   - "Artist File"
   - "Clear"
   - "Normalize Folder"
+
+### Video Editor
+- "Open File on Drag and Drop" (Linux only).
+- "Remove Duplicates" removes duplicate entries in the file name.
+- "Create Double Check Reminder" creates an empty file for double-checking.
+- "Activate Logging" logs actions taken within the program.
+
+### Settings
+- "Open File on Drag and Drop" (Linux only).
+- "Remove Duplicates" removes duplicate entries in the file name.
+- "Create Double Check Reminder" creates an empty file for double-checking.
+- "Activate Logging" logs actions taken within the program.
+- "Appearance" switches between light and dark mode. 
+- "UI Scaling" switches between different scaling sizes for the user interface. 
+
 
 ### Files
 - Use "config.ini.template" as a template for configuring the tool. Remove the .template extension to use.

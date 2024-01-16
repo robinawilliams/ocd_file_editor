@@ -55,10 +55,12 @@ def load_configuration():
     activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
 
     # Name Normalizer
-    remove_all_symbols_var = config.getboolean("Settings", "remove_all_symbols_var", fallback=True)
+    remove_all_symbols_var = config.getboolean("Settings", "remove_all_symbols_var", fallback=False)
     tail_var = config.getboolean("Settings", "tail_var", fallback=False)
+    remove_parenthesis_trail_var = config.getboolean("Settings", "remove_parenthesis_trail_var", fallback=False)
     remove_parenthesis_var = config.getboolean("Settings", "remove_parenthesis_var", fallback=False)
-    remove_hash_var = config.getboolean("Settings", "remove_hash_var", fallback=True)
+    remove_hashtag_trail_var = config.getboolean("Settings", "remove_hashtag_trail_var", fallback=False)
+    remove_hashtag_var = config.getboolean("Settings", "remove_hashtag_var", fallback=False)
     remove_new_var = config.getboolean("Settings", "remove_new_var", fallback=False)
     remove_dash_var = config.getboolean("Settings", "remove_dash_var", fallback=False)
     remove_endash_var = config.getboolean("Settings", "remove_endash_var", fallback=False)
@@ -67,9 +69,24 @@ def load_configuration():
     remove_at_var = config.getboolean("Settings", "remove_at_var", fallback=False)
     remove_underscore_var = config.getboolean("Settings", "remove_underscore_var", fallback=False)
     remove_comma_var = config.getboolean("Settings", "remove_comma_var", fallback=False)
-    remove_quote_var = config.getboolean("Settings", "remove_quote_var", fallback=False)
+    remove_single_quote_var = config.getboolean("Settings", "remove_single_quote_var", fallback=False)
+    remove_double_quote_var = config.getboolean("Settings", "remove_double_quote_var", fallback=False)
+    remove_colon_var = config.getboolean("Settings", "remove_colon_var", fallback=False)
+    remove_semicolon_var = config.getboolean("Settings", "remove_semicolon_var", fallback=False)
+    remove_percent_var = config.getboolean("Settings", "remove_percent_var", fallback=False)
+    remove_caret_var = config.getboolean("Settings", "remove_caret_var", fallback=False)
+    remove_dollar_var = config.getboolean("Settings", "remove_dollar_var", fallback=False)
+    remove_asterisk_var = config.getboolean("Settings", "remove_asterisk_var", fallback=False)
+    remove_plus_var = config.getboolean("Settings", "remove_plus_var", fallback=False)
+    remove_equal_var = config.getboolean("Settings", "remove_equal_var", fallback=False)
+    remove_curly_brace_var = config.getboolean("Settings", "remove_curly_brace_var", fallback=False)
+    remove_square_bracket_var = config.getboolean("Settings", "remove_square_bracket_var", fallback=False)
+    remove_pipe_var = config.getboolean("Settings", "remove_pipe_var", fallback=False)
+    remove_backslash_var = config.getboolean("Settings", "remove_backslash_var", fallback=False)
+    remove_angle_bracket_var = config.getboolean("Settings", "remove_angle_bracket_var", fallback=False)
+    remove_question_mark_var = config.getboolean("Settings", "remove_question_mark_var", fallback=False)
     remove_double_space_var = config.getboolean("Settings", "remove_double_space_var", fallback=False)
-    title_var = config.getboolean("Settings", "title_var", fallback=True)
+    title_var = config.getboolean("Settings", "title_var", fallback=False)
     artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
     deep_walk_var = config.getboolean("Settings", "deep_walk_var", fallback=False)
@@ -89,12 +106,17 @@ def load_configuration():
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
             open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
             double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
-            file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_var, remove_hash_var,
-            remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
-            remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
-            initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
-            deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
-            default_rotation_var, remove_double_space_var)
+            file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
+            remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
+            remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
+            remove_double_quote_var,
+            title_var, reset_var, initial_output_directory, artist_file, file_path_list_file, default_frame,
+            artist_file_search_var, deep_walk_var, default_decibel, default_audio_normalization,
+            remove_successful_lines_var, default_rotation_var, remove_double_space_var, remove_colon_var,
+            remove_semicolon_var, remove_percent_var, remove_caret_var, remove_dollar_var, remove_asterisk_var,
+            remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
+            remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
+            remove_hashtag_var)
 
 
 def logging_setup(self):
@@ -720,7 +742,7 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
                 # Remove the first occurrence of "New "
                 name = name.replace('New ', '', 1)
 
-        if self.remove_hash_var.get():
+        if self.remove_hashtag_trail_var.get():
             # Find the first occurrence of '#'
             index = name.find('#')
 
@@ -728,7 +750,7 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
             if index != -1:
                 name = name[:index].strip()
 
-        if self.remove_parenthesis_var.get():
+        if self.remove_parenthesis_trail_var.get():
             # Find the first occurrence of beginning parenthesis
             index = name.find('(')
 
@@ -764,15 +786,82 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
             # Remove commas
             name = name.replace(',', '')
 
-        if self.remove_quote_var.get():
-            # Remove quotes
+        if self.remove_single_quote_var.get():
+            # Remove single quotes
             name = name.replace('\'', '')
+
+        if self.remove_double_quote_var.get():
+            # Remove double quotes
             name = name.replace('\"', '')
+
+        if self.remove_colon_var.get():
+            # Remove colons
+            name = name.replace(':', '')
+
+        if self.remove_semicolon_var.get():
+            # Remove semicolons
+            name = name.replace(';', '')
+
+        if self.remove_percent_var.get():
+            # Remove percents
+            name = name.replace('%', '')
+
+        if self.remove_caret_var.get():
+            # Remove carets
+            name = name.replace('^', '')
+
+        if self.remove_parenthesis_var.get():
+            # Remove parenthesis
+            name = name.replace('(', '').replace(')', '')
+
+        if self.remove_hashtag_var.get():
+            # Remove hashtags
+            name = name.replace('#', '')
+
+        if self.remove_dollar_var.get():
+            # Remove dollars
+            name = name.replace('$', '')
+
+        if self.remove_asterisk_var.get():
+            # Remove asterisks
+            name = name.replace('*', '')
+
+        if self.remove_plus_var.get():
+            # Remove plus signs
+            name = name.replace('+', '')
+
+        if self.remove_equal_var.get():
+            # Remove equal signs
+            name = name.replace('=', '')
+
+        if self.remove_curly_brace_var.get():
+            # Remove curly braces
+            name = name.replace('{', '').replace('}', '')
+
+        if self.remove_square_bracket_var.get():
+            # Remove square brackets
+            name = name.replace('[', '').replace(']', '')
+
+        if self.remove_pipe_var.get():
+            # Remove pipes
+            name = name.replace('|', '')
+
+        if self.remove_backslash_var.get():
+            # Remove backslashes
+            name = name.replace('\\', '')
+
+        if self.remove_angle_bracket_var.get():
+            # Remove angle brackets
+            name = name.replace('<', '').replace('>', '')
+
+        if self.remove_question_mark_var.get():
+            # Remove question marks
+            name = name.replace('?', '')
 
         if self.title_var.get():
             # Make file name a title
             name = name.title()
-
+            
         if self.remove_double_space_var.get():
             # Sanitize the filename by removing double spaces
             name = ' '.join(name.split())
