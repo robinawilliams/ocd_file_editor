@@ -20,17 +20,17 @@ Introducing the O.C.D. File Renamer, a powerful Python tool crafted for dynamic 
        ./install.sh
        ```
    
-2. **Install Method (Manual Install):**
+4. **Install Method (Manual Install):**
    1. **Install Dependencies:**
        ```
        pip install -r requirements.txt
        ``` 
-   3. **Install Tkinter:**
+   2. **Install Tkinter:**
       - Arch: `sudo pacman -S tk`
       - Debian: `sudo apt-get install tk`
       - Fedora: `sudo dnf install tk`
 
-   4. **Configure the template files:**
+   3. **Configure the template files:**
       - Customize the configuration file "config.ini.template" as needed and remove the .template extension.
       - Customize the list of artists file "list_of_artists.txt.template" as needed and remove the .template extension.
 
