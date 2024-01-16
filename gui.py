@@ -93,6 +93,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_at_checkbox = None
         self.remove_underscore_checkbox = None
         self.remove_comma_checkbox = None
+        self.remove_double_space_checkbox = None
         self.checkbox_frame4 = None
         self.remove_quote_checkbox = None
         self.title_checkbox = None
@@ -166,7 +167,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
          initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
          deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
-         default_rotation_var) = (self.load_configuration())
+         default_rotation_var, remove_double_space_var) = (self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
@@ -211,6 +212,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_underscore_var = ctk.BooleanVar(value=remove_underscore_var)
         self.remove_comma_var = ctk.BooleanVar(value=remove_comma_var)
         self.remove_quote_var = ctk.BooleanVar(value=remove_quote_var)
+        self.remove_double_space_var = ctk.BooleanVar(value=remove_double_space_var)
         self.title_var = ctk.BooleanVar(value=title_var)
         self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
         self.reset_var = ctk.BooleanVar(value=reset_var)
@@ -595,6 +597,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      text="Remove commas",
                                                      variable=self.remove_comma_var)
         self.remove_comma_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Checkbox to enable/disable Remove commas
+        self.remove_double_space_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
+                                                            text="Remove double spaces",
+                                                            variable=self.remove_double_space_var)
+        self.remove_double_space_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Button Frame 4
         self.checkbox_frame4 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,

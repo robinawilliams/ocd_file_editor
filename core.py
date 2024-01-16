@@ -68,6 +68,7 @@ def load_configuration():
     remove_underscore_var = config.getboolean("Settings", "remove_underscore_var", fallback=False)
     remove_comma_var = config.getboolean("Settings", "remove_comma_var", fallback=False)
     remove_quote_var = config.getboolean("Settings", "remove_quote_var", fallback=False)
+    remove_double_space_var = config.getboolean("Settings", "remove_double_space_var", fallback=False)
     title_var = config.getboolean("Settings", "title_var", fallback=True)
     artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
@@ -93,7 +94,7 @@ def load_configuration():
             remove_at_var, remove_underscore_var, remove_comma_var, remove_quote_var, title_var, reset_var,
             initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
             deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
-            default_rotation_var)
+            default_rotation_var, remove_double_space_var)
 
 
 def logging_setup(self):
@@ -253,16 +254,16 @@ def update_file_display(self):
         ]
 
         # Join the parts and remove double spaces and trailing spaces
-        new_name = " ".join(part for part in new_name_parts if part).strip()
+        name = " ".join(part for part in new_name_parts if part).strip()
 
         # Handle name length constraints
-        if len(new_name) > 250:
+        if len(name) > 250:
             messagebox.showinfo("Length Exceeded", "The proposed file name exceeds 250 characters. Please consider "
                                                    "shortening it to comply with operating system limitations.")
-            new_name = "..." + new_name[180:]
+            name = f"...{name[180:]}"
 
         # Set the new name to the file display
-        self.file_display_text.set(new_name)
+        self.file_display_text.set(name)
 
 
 # Function to undo the last category added to the queue
@@ -574,14 +575,14 @@ def rename_files(self):
         weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
         # Construct a new name using base name, weighted categories, custom text, and extension
-        new_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
+        name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
 
         # If move_text_var is set, move the text between - and __-__
         if self.move_text_var.get():
-            new_name = self.move_text(new_name)
+            name = self.move_text(name)
 
         # Remove extra whitespaces from the new name
-        new_name = " ".join(new_name.split()).strip()
+        name = " ".join(name.split()).strip()
 
         # If output directory is not explicitly set, default to the same directory as the file
         if not self.output_directory:
@@ -591,10 +592,10 @@ def rename_files(self):
         if self.move_up_directory_var.get():
             # Ignore the provided output directory and move the file up one folder
             parent_directory = os.path.dirname(os.path.dirname(self.selected_file))
-            new_path = os.path.join(parent_directory, os.path.basename(new_name))
+            new_path = os.path.join(parent_directory, os.path.basename(name))
         else:
             # Use the specified output directory
-            new_path = os.path.join(self.output_directory, os.path.basename(new_name))
+            new_path = os.path.join(self.output_directory, os.path.basename(name))
 
         # TODO: Include logic for suggest_output_directory_var here
         # if self.suggest_output_directory_var.get():
@@ -622,15 +623,15 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
     categories_text = ' '.join(categories).strip()
 
     if self.placement_choice.get() == "prefix":
-        new_name = f"{custom_text} {categories_text} {base_name}".strip()
+        name = f"{custom_text} {categories_text} {base_name}".strip()
     # Place the queue at the first instance of the special character
     elif self.placement_choice.get() == "special_character":
         parts = base_name.split(self.special_character_var, 1)
         if len(parts) == 2:
-            new_name = f"{parts[0].rstrip()} {categories_text} {custom_text} {parts[1].lstrip()}".strip()
+            name = f"{parts[0].rstrip()} {categories_text} {custom_text} {parts[1].lstrip()}".strip()
             try:
                 # Remove the tail __-__ if found
-                new_name = new_name.replace("__-__", "")
+                name = name.replace("__-__", "")
             except OSError as e:
                 # Construct the error message and truncate after x characters
                 error_message = f"Error: {str(e)}"
@@ -639,11 +640,11 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 self.show_message(error_message, error=True)
         else:
             # If there's no special character found, default to suffix
-            new_name = f"{base_name} {categories_text} {custom_text}".strip()
+            name = f"{base_name} {categories_text} {custom_text}".strip()
     else:  # Default to suffix
-        new_name = f"{base_name} {categories_text} {custom_text}".strip()
+        name = f"{base_name} {categories_text} {custom_text}".strip()
 
-    return new_name + extension
+    return name + extension
 
 
 def move_text(name):
@@ -772,8 +773,9 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
             # Make file name a title
             name = name.title()
 
-        # Sanitize the filename by removing double spaces
-        new_name = ' '.join(name.split())
+        if self.remove_double_space_var.get():
+            # Sanitize the filename by removing double spaces
+            name = ' '.join(name.split())
 
         # Process artist names if artist_file_search_var is True
         if self.artist_file_search_var.get():
@@ -786,66 +788,66 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
             for artist in artists:
                 # Make the search case-insensitive
                 regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
-                if regex.search(new_name):
+                if regex.search(name):
                     artist_prefix += f"{artist} "
 
             # Remove extra spaces and dashes at the beginning and end
             artist_prefix = artist_prefix.strip()
-            new_name = new_name.strip("-")
+            name = name.strip("-")
 
             # Add artist prefix to the filename if artist_prefix is not empty
-            new_name = f"{artist_prefix} - {new_name}" if artist_prefix else new_name
+            name = f"{artist_prefix} - {name}" if artist_prefix else name
 
             # Check if remove_duplicates_var is set
             if self.remove_duplicates_var.get():
-                # Call the remove_artist_duplicates_from_filename function to modify new_name
-                new_name = remove_artist_duplicates_from_filename(new_name, artist_file)
+                # Call the remove_artist_duplicates_from_filename function to modify name
+                name = remove_artist_duplicates_from_filename(name, artist_file)
 
         # Add tail if tail_var is True
         if self.tail_var.get():
-            new_name += "__-__ "
+            name += "__-__ "
 
             # Remove " -__-__" if present. Catchall for situations where only the artist name is left and -artist and
             # -tail are used.
-            new_name = re.sub(r' -__-__', '', new_name).strip()
+            name = re.sub(r' -__-__', '', name).strip()
 
         # Add the file extension back to the new name
-        new_name += ext
+        name += ext
 
         # Skip renaming if the new name is the same as the original
-        if new_name == filename:
+        if name == filename:
             if self.activate_logging_var.get():
                 logging.info(f"Skipped renaming: {filename} (no changes needed)")
             return
 
         # Construct the new file path
-        new_path = os.path.join(dir_path, new_name)
+        new_path = os.path.join(dir_path, name)
 
         # Check if the new filename already exists
         if os.path.exists(new_path):
             if self.activate_logging_var.get():
-                logging.warning(f"Conflict detected on: \n{new_name}.")
+                logging.warning(f"Conflict detected on: \n{name}.")
 
             # Extract the base name (excluding extension) and check for existing counter
-            base_name, _ = os.path.splitext(new_name)
+            base_name, _ = os.path.splitext(name)
             counter_match = re.search(r" \((\d+)\)$", base_name)
 
             if counter_match:
                 if self.activate_logging_var.get():
-                    logging.info(f"Counter match on: \n{new_name}.")
+                    logging.info(f"Counter match on: \n{name}.")
                 counter = int(counter_match.group(1)) + 1
                 base_name = re.sub(r" \(\d+\)$", "", base_name)  # Remove existing counter
             else:
                 if self.activate_logging_var.get():
-                    logging.info(f"No counter match on: \n{new_name}.")
+                    logging.info(f"No counter match on: \n{name}.")
                 counter = 1
 
             # Generate new names with incremented counter until a unique name is found
-            new_path = os.path.join(move_directory if move_directory else dir_path, new_name)
+            new_path = os.path.join(move_directory if move_directory else dir_path, name)
             while os.path.exists(new_path):
                 new_name_with_counter = f"{base_name} ({counter}){ext}"
-                new_name = new_name_with_counter
-                new_path = os.path.join(move_directory if move_directory else dir_path, new_name)
+                name = new_name_with_counter
+                new_path = os.path.join(move_directory if move_directory else dir_path, name)
                 counter += 1
         try:
             # Rename the file
@@ -901,8 +903,8 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
         name, ext = os.path.splitext(os.path.basename(source_path))
         counter = 1
         while os.path.exists(destination_file):
-            new_name = f"{name} ({counter})"
-            destination_file = os.path.join(destination_directory, new_name + ext)
+            name = f"{name} ({counter})"
+            destination_file = os.path.join(destination_directory, name + ext)
             counter += 1
 
     # Perform the move now that we're sure it won't overwrite
