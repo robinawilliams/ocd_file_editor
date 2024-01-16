@@ -53,6 +53,8 @@ remove_underscore_var = False
 remove_comma_var = False
 ; Remove quotes
 remove_quote_var = False
+; Remove double spaces
+remove_double_space_var = True
 ; Titlefy the name
 title_var = True
 ; Artist File Search
