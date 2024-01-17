@@ -12,7 +12,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.TkdndVersion = TkinterDnD._require(self)
 
         # Set the window title and geometry
-        self.title("O.C.D. File Renamer")
+        self.title("O.C.D. File Editor")
 
         # Initialize instance variables for selected file and queue
         self.selected_file = ""
@@ -23,18 +23,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
         self.navigation_frame_label = None
-        self.home_button = None
+        self.file_renamer_button = None
         self.name_normalizer_button = None
         self.video_editor_button = None
         self.settings_button = None
 
         # Initialize OCD File Renamer elements
-        self.home_frame = None
-        self.home_canvas = None
-        self.home_scrollbar = None
-        self.home_scrollable_frame = None
-        self.home_scrollable_frame_window = None
-        self.home_top_frame = None
+        self.file_renamer_frame = None
+        self.file_renamer_canvas = None
+        self.file_renamer_scrollbar = None
+        self.file_renamer_scrollable_frame = None
+        self.file_renamer_scrollable_frame_window = None
+        self.file_renamer_top_frame = None
         self.browse_file_button = None
         self.file_display_text = None
         self.file_display_entry = None
@@ -66,6 +66,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suggest_output_directory_checkbox = None
         self.move_up_directory_checkbox = None
         self.move_text_checkbox = None
+        self.placement_frame = None
         self.placement_label = None
         self.placement_choice = None
         self.prefix_radio = None
@@ -284,18 +285,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.navigation_frame.grid_rowconfigure(5, weight=1)
 
         # Create label for the navigation frame
-        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="  O.C.D. \nFile Renamer",
+        self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="  O.C.D. \nFile Editor",
                                                    compound="left",
                                                    font=ctk.CTkFont(size=15, weight="bold"))
         self.navigation_frame_label.grid(row=0, column=0, padx=5, pady=5)
 
-        # Create Home button with specific styling and command
-        self.home_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
-                                         text="Home",
-                                         fg_color="transparent", text_color=("gray10", "gray90"),
-                                         hover_color=("gray70", "gray30"),
-                                         anchor="w", command=self.home_button_event)
-        self.home_button.grid(row=1, column=0, sticky="ew")
+        # Create file renamer button with specific styling and command
+        self.file_renamer_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                                 text="File Renamer",
+                                                 fg_color="transparent", text_color=("gray10", "gray90"),
+                                                 hover_color=("gray70", "gray30"),
+                                                 anchor="w", command=self.file_renamer_button_event)
+        self.file_renamer_button.grid(row=1, column=0, sticky="ew")
 
         # Create button for Name Normalizer with specific styling and command
         self.name_normalizer_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40,
@@ -325,41 +326,45 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_button.grid(row=4, column=0, sticky="ew")
 
         """
-        home_window
+        file_renamer_window
         """
-        # Create home frame
-        self.home_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.home_frame.grid(row=0, column=1, sticky="nsew")
-        self.home_frame.grid_columnconfigure(0, weight=1)
-        self.home_frame.grid_rowconfigure(0, weight=1)
+        # Create file renamer frame
+        self.file_renamer_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.file_renamer_frame.grid(row=0, column=1, sticky="nsew")
+        self.file_renamer_frame.grid_columnconfigure(0, weight=1)
+        self.file_renamer_frame.grid_rowconfigure(0, weight=1)
 
         # Create a canvas and a scrollbar
-        self.home_canvas = ctk.CTkCanvas(self.home_frame, highlightthickness=0)
-        self.home_scrollbar = ctk.CTkScrollbar(self.home_frame, command=self.home_canvas.yview)
-        self.home_canvas.configure(yscrollcommand=self.home_scrollbar.set)
+        self.file_renamer_canvas = ctk.CTkCanvas(self.file_renamer_frame, highlightthickness=0)
+        self.file_renamer_scrollbar = ctk.CTkScrollbar(self.file_renamer_frame, command=self.file_renamer_canvas.yview)
+        self.file_renamer_canvas.configure(yscrollcommand=self.file_renamer_scrollbar.set)
 
         # Set default background color based on system mode
         self.update_background_color()
 
         # Place the canvas and the scrollbar in the grid
-        self.home_canvas.grid(row=0, column=0, sticky="nsew")
-        self.home_scrollbar.grid(row=0, column=1, sticky="ns")
+        self.file_renamer_canvas.grid(row=0, column=0, sticky="nsew")
+        self.file_renamer_scrollbar.grid(row=0, column=1, sticky="ns")
 
         # Create a frame inside the canvas for scrollable content
-        self.home_scrollable_frame = ctk.CTkFrame(self.home_canvas, corner_radius=0, bg_color="transparent")
-        self.home_scrollable_frame_window = self.home_canvas.create_window((0, 0), window=self.home_scrollable_frame,
-                                                                           anchor="nw")
+        self.file_renamer_scrollable_frame = ctk.CTkFrame(self.file_renamer_canvas, corner_radius=0,
+                                                          bg_color="transparent")
+        self.file_renamer_scrollable_frame_window = (self.file_renamer_canvas.create_window(
+            (0, 0),
+            window=self.file_renamer_scrollable_frame,
+            anchor="nw"))
 
         # Bind canvas and frame for scrolling functionality
-        self.home_canvas.bind('<Configure>', self.on_canvas_configure)
-        self.home_scrollable_frame.bind('<Configure>', self.on_frame_configure)
+        self.file_renamer_canvas.bind('<Configure>', self.on_canvas_configure)
+        self.file_renamer_scrollable_frame.bind('<Configure>', self.on_frame_configure)
 
-        # Top frame in the home window
-        self.home_top_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.home_top_frame.grid(row=0, column=0, padx=10, pady=10)
+        # Top frame in the file renamer window
+        self.file_renamer_top_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.file_renamer_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Browse file button
-        self.browse_file_button = ctk.CTkButton(self.home_top_frame, text="Browse File",
+        self.browse_file_button = ctk.CTkButton(self.file_renamer_top_frame, text="Browse File",
                                                 command=self.browse_file)
         self.browse_file_button.grid(row=0, column=0, padx=5)
 
@@ -367,18 +372,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_display_text = ctk.StringVar()
         self.file_display_text.set("Select a file using the 'Browse File' button or drag and drop it into the "
                                    "program...")
-        self.file_display_entry = ctk.CTkEntry(self.home_top_frame, width=890, textvariable=self.file_display_text)
+        self.file_display_entry = ctk.CTkEntry(self.file_renamer_top_frame, width=890,
+                                               textvariable=self.file_display_text)
         self.file_display_entry.grid(row=0, column=1, padx=5)
 
         # Categories button frame
-        self.button_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=5)
 
         # Initialize category buttons
         self.categories_buttons_initialize()
 
         # Frame for add/remove category elements
-        self.category_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.category_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.category_frame.grid(row=2, column=0, padx=10, pady=10)
 
         # Add Category Button
@@ -408,7 +414,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_entry.grid(row=0, column=5, padx=5)
 
         # Frame to group custom text entry and output directory
-        self.custom_text_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.custom_text_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
+                                              fg_color="transparent")
         self.custom_text_frame.grid(row=3, column=0, padx=10)
 
         # Output Directory Browse Button
@@ -431,7 +438,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.rename_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Frame to group miscellaneous buttons
-        self.button_group_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.button_group_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
+                                               fg_color="transparent")
         self.button_group_frame.grid(row=4, column=0, padx=10)
 
         # Undo Button
@@ -453,7 +461,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
         # Frame to display the last used file
-        self.last_used_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.last_used_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.last_used_frame.grid(row=6, column=0, padx=5)
 
         # Last Used File Label
@@ -465,7 +473,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_display.grid(row=0, column=1, padx=5, pady=5)
 
         # Frame to display messages
-        self.message_label_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.message_label_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
+                                                fg_color="transparent")
         self.message_label_frame.grid(row=7, column=0, padx=10)
 
         # Message Label
@@ -473,7 +482,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
         # Frame to group placement frame
-        self.placement_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.placement_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.placement_frame.grid(row=8, column=0, padx=10, pady=10)
 
         # Placement Label
@@ -504,7 +513,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suffix_radio.grid(row=0, column=3, padx=10)
 
         # Frame to group folder operations
-        self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.folder_operations_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
+                                                    fg_color="transparent")
         self.folder_operations_frame.grid(row=9, column=0, padx=10)
 
         # Checkbox to enable/disable resetting the Output Directory
@@ -1066,13 +1076,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Callback for updating the scroll region when the inner frame is configured
     def on_frame_configure(self, event=None):
         # Reset the scroll region to encompass the inner frame
-        self.home_canvas.configure(scrollregion=self.home_canvas.bbox("all"))
+        self.file_renamer_canvas.configure(scrollregion=self.file_renamer_canvas.bbox("all"))
 
     # Callback for updating the scrollable frame's width when the canvas is configured
     def on_canvas_configure(self, event):
         # Set the scrollable frame's width to match the canvas
-        canvas_width = event.width - self.home_scrollbar.winfo_width()
-        self.home_canvas.itemconfig(self.home_scrollable_frame_window, width=canvas_width)
+        canvas_width = event.width - self.file_renamer_scrollbar.winfo_width()
+        self.file_renamer_canvas.itemconfig(self.file_renamer_scrollable_frame_window, width=canvas_width)
 
     # Callback function to handle logging state
     def handle_logging_activation(self, *args):
@@ -1086,7 +1096,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, name):
         # Set button color for the selected button
-        self.home_button.configure(fg_color=("gray75", "gray25") if name == "home_window" else "transparent")
+        self.file_renamer_button.configure(
+            fg_color=("gray75", "gray25") if name == "file_renamer_window" else "transparent")
         self.name_normalizer_button.configure(
             fg_color=("gray75", "gray25") if name == "name_normalizer_window" else "transparent")
         self.video_editor_button.configure(
@@ -1094,10 +1105,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings_window" else "transparent")
 
         # Show the selected frame and hide others
-        if name == "home_window":
-            self.home_frame.grid(row=0, column=1, sticky="nsew")
+        if name == "file_renamer_window":
+            self.file_renamer_frame.grid(row=0, column=1, sticky="nsew")
         else:
-            self.home_frame.grid_forget()
+            self.file_renamer_frame.grid_forget()
         if name == "name_normalizer_window":
             self.name_normalizer_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -1115,8 +1126,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Event handlers for button clicks to switch frames
     """
 
-    def home_button_event(self):
-        self.select_frame_by_name("home_window")
+    def file_renamer_button_event(self):
+        self.select_frame_by_name("file_renamer_window")
 
     def name_normalizer_button_event(self):
         self.select_frame_by_name("name_normalizer_window")
@@ -1131,9 +1142,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Update canvas background color based on the current appearance mode
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Light":
-            self.home_canvas.configure(bg='#dbdbdb')
+            self.file_renamer_canvas.configure(bg='#dbdbdb')
         elif current_mode == "Dark":
-            self.home_canvas.configure(bg='#2B2B2B')
+            self.file_renamer_canvas.configure(bg='#2B2B2B')
 
     # Method for changing appearance mode (Light or Dark)
     def change_appearance_mode_event(self, new_appearance_mode):

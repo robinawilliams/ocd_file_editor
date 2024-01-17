@@ -41,7 +41,7 @@ def load_configuration():
     default_weight = config.get('Settings', 'default_weight', fallback=9)
     default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
     default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
-    default_frame = config.get('Settings', 'default_frame', fallback="home_window")
+    default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
     ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")

@@ -1,7 +1,7 @@
-# O.C.D. File Renamer
+# O.C.D. File Editor
 
 ## Overview
-Introducing the O.C.D. File Renamer, a powerful Python tool crafted for dynamic file renaming. Boasting a user-friendly graphical interface (GUI), this tool simplifies file manipulation and renaming, making the process effortless and efficient.
+Introducing the O.C.D. File Editor, a powerful Python tool crafted for dynamic file editing. Boasting a user-friendly graphical interface (GUI), this tool simplifies file manipulation and renaming, making the process effortless and efficient.
 
 ## Installation
 1. **Clone the Repository:**

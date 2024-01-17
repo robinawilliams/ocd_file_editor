@@ -1,6 +1,6 @@
 [Settings]
 ; Starting size for window
-geometry = 1280x800
+geometry = 1280x850
 ; Column size for the gui
 column_numbers = 7
 ; Default weight for category
@@ -9,8 +9,8 @@ default_weight = 9
 default_decibel = 0.0
 ; Default audio normalization for video editor
 default_audio_normalization = 0.0
-; Default frame to open with (home_window, name_normalizer_window, video_editor_window, settings_window)
-default_frame = home_window
+; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, settings_window)
+default_frame = file_renamer_window
 ; Reset the output directory after each run
 reset_output_directory_var = True
 ; Suggest an output directory
