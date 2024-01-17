@@ -6,12 +6,12 @@ Introducing the O.C.D. File Editor, a powerful Python tool crafted for dynamic f
 ## Installation
 1. **Clone the Repository:**
     ```
-    git clone https://github.com/robinawilliams/ocd_file_renamer.git
+    git clone https://github.com/robinawilliams/ocd_file_editor.git
     ```
 
 2. **Change Directories:**
     ```
-    cd ocd_file_renamer
+    cd ocd_file_editor
     ```
    
 3. **Install Method (Automatic Install):**
