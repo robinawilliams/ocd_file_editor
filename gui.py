@@ -472,9 +472,40 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
         self.message_label.grid(row=0, column=0, padx=10, pady=10)
 
+        # Frame to group placement frame
+        self.placement_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.placement_frame.grid(row=8, column=0, padx=10, pady=10)
+
+        # Placement Label
+        self.placement_label = ctk.CTkLabel(self.placement_frame, text="Placement:")
+        self.placement_label.grid(row=0, column=0, padx=10)
+
+        # Variable to track the user's placement choice (prefix, suffix, or special_character)
+        self.placement_choice = ctk.StringVar()
+        self.placement_choice.set(self.default_placement_var)  # Default to special_character
+
+        # Radio button for prefix
+        self.prefix_radio = ctk.CTkRadioButton(self.placement_frame, text="Prefix",
+                                               variable=self.placement_choice,
+                                               value="prefix")
+        self.prefix_radio.grid(row=0, column=1, padx=10)
+
+        # Radio button for special_character
+        self.special_character_radio = ctk.CTkRadioButton(self.placement_frame,
+                                                          text=f"Special Character: {self.special_character_var}",
+                                                          variable=self.placement_choice,
+                                                          value="special_character")
+        self.special_character_radio.grid(row=0, column=2, padx=10)
+
+        # Radio button for suffix
+        self.suffix_radio = ctk.CTkRadioButton(self.placement_frame, text="Suffix",
+                                               variable=self.placement_choice,
+                                               value="suffix")
+        self.suffix_radio.grid(row=0, column=3, padx=10)
+
         # Frame to group folder operations
         self.folder_operations_frame = ctk.CTkFrame(self.home_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.folder_operations_frame.grid(row=8, column=0, padx=10)
+        self.folder_operations_frame.grid(row=9, column=0, padx=10)
 
         # Checkbox to enable/disable resetting the Output Directory
         self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
@@ -497,33 +528,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var)
         self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
-
-        # Placement Label
-        self.placement_label = ctk.CTkLabel(self.folder_operations_frame, text="Placement:")
-        self.placement_label.grid(row=0, column=4, padx=10)
-
-        # Variable to track the user's placement choice (prefix, suffix, or special_character)
-        self.placement_choice = ctk.StringVar()
-        self.placement_choice.set(self.default_placement_var)  # Default to special_character
-
-        # Radio button for prefix
-        self.prefix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Prefix",
-                                               variable=self.placement_choice,
-                                               value="prefix")
-        self.prefix_radio.grid(row=0, column=5)
-
-        # Radio button for special_character
-        self.special_character_radio = ctk.CTkRadioButton(self.folder_operations_frame,
-                                                          text=f"Special Character: {self.special_character_var}",
-                                                          variable=self.placement_choice,
-                                                          value="special_character")
-        self.special_character_radio.grid(row=0, column=6, padx=5)
-
-        # Radio button for suffix
-        self.suffix_radio = ctk.CTkRadioButton(self.folder_operations_frame, text="Suffix",
-                                               variable=self.placement_choice,
-                                               value="suffix")
-        self.suffix_radio.grid(row=0, column=7, padx=5)
 
         """
         name_normalizer_window
@@ -983,7 +987,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Checkbox to enable/disable remove successful lines
         self.remove_successful_lines_checkbox = ctk.CTkCheckBox(self.video_editor_checkbox_frame,
-                                                                text="Remove successful lines",
+                                                                text="Remove successful lines from input file",
                                                                 variable=self.remove_successful_lines_var)
         self.remove_successful_lines_checkbox.grid(row=0, column=0, padx=10, pady=10)
 

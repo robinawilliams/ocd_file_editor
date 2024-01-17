@@ -36,7 +36,7 @@ def load_configuration():
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
-    geometry = config.get('Settings', 'geometry', fallback='1280x800')
+    geometry = config.get('Settings', 'geometry', fallback='1280x850')
     column_numbers = config.get('Settings', 'column_numbers', fallback=7)
     default_weight = config.get('Settings', 'default_weight', fallback=9)
     default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
