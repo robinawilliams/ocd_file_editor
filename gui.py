@@ -59,8 +59,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_frame = None
         self.last_used_display_label = None
         self.last_used_display = None
-        self.message_label_frame = None
-        self.message_label = None
+        self.file_renamer_message_label_frame = None
+        self.file_renamer_message_label = None
         self.folder_operations_frame = None
         self.reset_output_directory_checkbox = None
         self.suggest_output_directory_checkbox = None
@@ -130,6 +130,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.normalize_folder_frame = None
         self.normalize_folder_button = None
         self.clear_name_normalizer_selection_button = None
+        self.name_normalizer_message_label_frame = None
+        self.name_normalizer_message_label = None
 
         # Initialize Video Editor elements
         self.video_editor_frame = None
@@ -162,6 +164,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_edits_button = None
         self.video_editor_checkbox_frame = None
         self.remove_successful_lines_checkbox = None
+        self.video_editor_message_label_frame = None
+        self.video_editor_message_label = None
 
         # Initialize Settings elements
         self.settings_frame = None
@@ -473,13 +477,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_display.grid(row=0, column=1, padx=5, pady=5)
 
         # Frame to display messages
-        self.message_label_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
-                                                fg_color="transparent")
-        self.message_label_frame.grid(row=7, column=0, padx=10)
+        self.file_renamer_message_label_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
+                                                             fg_color="transparent")
+        self.file_renamer_message_label_frame.grid(row=7, column=0, padx=10)
 
         # Message Label
-        self.message_label = ctk.CTkLabel(self.message_label_frame, text="")
-        self.message_label.grid(row=0, column=0, padx=10, pady=10)
+        self.file_renamer_message_label = ctk.CTkLabel(self.file_renamer_message_label_frame, text="")
+        self.file_renamer_message_label.grid(row=0, column=0, padx=10, pady=10)
 
         # Frame to group placement frame
         self.placement_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
@@ -856,6 +860,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      command=self.process_folder)
         self.normalize_folder_button.grid(row=0, column=1, padx=5, pady=5)
 
+        # Frame to display messages on the Name Normalizer frame
+        self.name_normalizer_message_label_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                                                fg_color="transparent")
+        self.name_normalizer_message_label_frame.grid(row=12, column=0, padx=10)
+
+        # Name Normalizer message Label
+        self.name_normalizer_message_label = ctk.CTkLabel(self.name_normalizer_message_label_frame, text="")
+        self.name_normalizer_message_label.grid(row=0, column=0, padx=10, pady=10)
+
         """
         video_editor_window
         """
@@ -1000,6 +1013,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                 text="Remove successful lines from input file",
                                                                 variable=self.remove_successful_lines_var)
         self.remove_successful_lines_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Frame to display messages on the video editor frame
+        self.video_editor_message_label_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                             fg_color="transparent")
+        self.video_editor_message_label_frame.grid(row=11, column=0, padx=10)
+
+        # Video editor message Label
+        self.video_editor_message_label = ctk.CTkLabel(self.video_editor_message_label_frame, text="")
+        self.video_editor_message_label.grid(row=0, column=0, padx=10, pady=10)
 
         """
         settings_window
@@ -1156,20 +1178,36 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Update text color based on the current appearance mode
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Light":
-            self.message_label.configure(text_color="#000000")
+            self.file_renamer_message_label.configure(text_color="#000000")
+            self.name_normalizer_message_label.configure(text_color="#000000")
+            self.video_editor_message_label.configure(text_color="#000000")
         elif current_mode == "Dark":
-            self.message_label.configure(text_color="#FFFFFF")
+            self.file_renamer_message_label.configure(text_color="#FFFFFF")
+            self.name_normalizer_message_label.configure(text_color="#FFFFFF")
+            self.video_editor_message_label.configure(text_color="#FFFFFF")
 
     # Method to display messages with optional error formatting
-    def show_message(self, message, error=False):
+    def show_message(self, message, error=False, frame_name=None):
         # Update text color when displaying a message
         self.update_text_color()
 
-        # Display the message with optional error formatting
-        if error:
-            self.message_label.configure(text=message, text_color="#FF0000")  # Red text for errors
+        # Display the message with optional error formatting on the actively selected frame
+        if frame_name == "file_renamer_window":
+            label = self.file_renamer_message_label
+        elif frame_name == "name_normalizer_window":
+            label = self.name_normalizer_message_label
+        elif frame_name == "video_editor_window":
+            label = self.video_editor_message_label
         else:
-            self.message_label.configure(text=message)
+            label = self.file_renamer_message_label  # Default to the main frame label
+
+        # Truncate the message after x characters for GUI friendly formatting.
+        truncated_message = f"{message[:115]}..." if len(message) > 115 else message
+
+        if error:
+            label.configure(text=truncated_message, text_color="#FF0000")  # Red text for errors
+        else:
+            label.configure(text=truncated_message)
 
     # Method for changing UI scaling
     @staticmethod
@@ -1324,10 +1362,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Video Editor
     """
 
-    @staticmethod
-    def get_non_conflicting_filename(path):
+    def get_non_conflicting_filename(self, path):
         # Function to generate a non-conflicting filename
-        return core.get_non_conflicting_filename(path)
+        return core.get_non_conflicting_filename(self, path)
 
     def rotate_video(self, clip, rotation_angle):
         # Method to rotate a video clip by a specified angle.
