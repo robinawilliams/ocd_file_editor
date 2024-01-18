@@ -11,10 +11,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Determine TkinterDnD version and store it in the TkdndVersion attribute
         self.TkdndVersion = TkinterDnD._require(self)
 
-        # Set the window title and geometry
+        # Set the window title
         self.title("O.C.D. File Editor")
 
-        # Initialize instance variables for selected file and queue
+        # Initialize instance variables for selected file, output directory and queue
         self.selected_file = ""
         self.output_directory = ""
         self.queue = []
@@ -571,9 +571,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame1.grid(row=2, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—
+        # Checkbox to enable/disable remove all symbols
         self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                                           text="Remove all symbols: ,;:@$%^&*+={}[]|\\<>?-–—",
+                                                           text="Remove all symbols",
                                                            variable=self.remove_all_symbols_var)
         self.remove_all_symbols_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
@@ -606,7 +606,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                    variable=self.remove_new_var)
         self.remove_new_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable Remove dashes
+        # Checkbox to enable/disable remove dashes
         self.remove_dash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                     text="Remove dashes",
                                                     variable=self.remove_dash_var)
@@ -799,13 +799,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.artist_file_search_var)
         self.artist_search_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
-        # Checkbox to enable/disable Reset entries
+        # Checkbox to enable/disable include subdirectories
         self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                                   text="Include subdirectories",
                                                   variable=self.deep_walk_var)
         self.deep_walk_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
-        # Checkbox to enable/disable Reset entries
+        # Checkbox to enable/disable reset entries
         self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                               text="Reset entries",
                                               variable=self.reset_var)
@@ -1008,7 +1008,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.settings_frame.grid_columnconfigure(0, weight=1)
 
-        # Top frame
+        # Settings top frame
         self.settings_top_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
         self.settings_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
@@ -1022,23 +1022,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.open_on_file_drop_var)
         self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable duplicate removal
+        # Checkbox to enable/disable remove duplicates
         self.remove_duplicates_switch = ctk.CTkSwitch(self.settings_top_frame,
                                                       text="Remove Duplicates",
                                                       variable=self.remove_duplicates_var)
         self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
-        # "Double check" checkbox with the initial state
+        # Checkbox to enable/disable create double check reminder
         self.double_check_switch = ctk.CTkSwitch(self.settings_top_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
         self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
 
-        # "Activate Logging" checkbox with the initial state
+        # Checkbox to enable/disable activate logging
         self.activate_logging_switch = ctk.CTkSwitch(self.settings_top_frame, text="Activate Logging",
                                                      variable=self.activate_logging_var)
         self.activate_logging_switch.grid(row=1, column=3, padx=10, pady=10)
 
-        # Bind the callback function to the variable
+        # Bind the callback function to the activate logging variable
         self.activate_logging_var.trace_add("write", self.handle_logging_activation)
 
         # Select light or dark label
