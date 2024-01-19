@@ -390,7 +390,7 @@ def suggest_output_directory(self):
         else:
             if self.activate_logging_var.get():
                 logging.info("User did not choose a new output location. Falling back to default location.")
-            return self.initial_directory
+            return self.output_directory
 
     # If no file is selected, use the default initial directory
     return self.initial_directory
