@@ -68,56 +68,60 @@ Checkboxes/Radio Buttons
 
 ### Name Normalizer 
 Name Normalize a folder containing files. You can include certain file types by changing file_extensions in the config.ini file.
-  - "Remove all symbols"
   - "Append "\_\_-\_\_ " to the file name"
-  - "Remove text following the first '('"
-  - "Remove text following the first '#'"
-  - "Remove new"
-  - "Remove dashes"
-  - "Remove endashes"
-  - "Remove emdashes"
-  - "Remove hashtags"
-  - "Remove ampersands"
-  - "Remove @"
-  - "Remove underscores"
-  - "Remove commas"
-  - "Remove dollars"
-  - "Remove quotes"
-  - "Remove colons"
-  - "Remove semicolons"
-  - "Remove percents"
-  - "Remove carets"
-  - "Remove plus signs"
-  - "Remove asterisks"
-  - "Remove parenthesis"
-  - "Remove angle brackets"
-  - "Remove curly braces"
-  - "Remove square brackets"
-  - "Remove pipes"
-  - "Remove backslashes"
-  - "Remove equal signs"
-  - "Remove question marks"
-  - "Remove double spaces"
-  - "Titlefy the name"
   - "Artist Search"
   - "Include subdirectories"
+  - "Remove @"
+  - "Remove all symbols"
+  - "Remove ampersands"
+  - "Remove angle brackets"
+  - "Remove asterisks"
+  - "Remove backslashes"
+  - "Remove carets"
+  - "Remove colons"
+  - "Remove commas"
+  - "Remove curly braces"
+  - "Remove dashes"
+  - "Remove dollars"
+  - "Remove double spaces"
+  - "Remove emdashes"
+  - "Remove endashes"
+  - "Remove equal signs"
+  - "Remove hashtags"
+  - "Remove new"
+  - "Remove parenthesis"
+  - "Remove percents"
+  - "Remove pipes"
+  - "Remove plus signs"
+  - "Remove question marks"
+  - "Remove quotes"
+  - "Remove semicolons"
+  - "Remove square brackets"
+  - "Remove text following the first '#'"
+  - "Remove text following the first '('"
+  - "Remove underscores"
   - "Reset entries"
+  - "Titlefy the name"
   - "Output Directory"
   - "Artist File"
   - "Clear"
   - "Normalize Folder"
 
 ### Video Editor
-- "Open File on Drag and Drop" (Linux only).
-- "Remove Duplicates" removes duplicate entries in the file name.
-- "Create Double Check Reminder" creates an empty file for double-checking.
-- "Activate Logging" logs actions taken within the program.
+- Choose "Browse" to select an input method (video file, .txt file containing file paths, or a directory with video files to edit.)
+- "Rotate Video" determines how much to rotate the video ("Left", "Right", "Flip"). Use "None" to disable rotation.
+- "Increase Audio (dB)" determines how much to amplify the audio, e.g. "5.0" for 5 decibels.
+- "Normalize Audio" determines how much normalize the audio, e.g. "0.9" for 0.9 audio normaliztion.
+- "Output Directory" to select the output directory for the file(s). Default is the initial directory of the file if none is explicitly provided.
+- "Clear" to clear all entries in the frame.
+- "Process video(s)" to process video files in the provided input method.
 
 ### Settings
 - "Open File on Drag and Drop" (Linux only).
 - "Remove Duplicates" removes duplicate entries in the file name.
 - "Create Double Check Reminder" creates an empty file for double-checking.
 - "Activate Logging" logs actions taken within the program.
+- "Show Messageboxes" displays messagebox notifications. False defaults to standard messaging in the frame. Confirmation messageboxes will always be displayed.
 - "Appearance" switches between light and dark mode. 
 - "UI Scaling" switches between different scaling sizes for the user interface. 
 

@@ -137,12 +137,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_frame = None
         self.video_editor_top_frame = None
         self.video_editor_label = None
-        self.video_editor_browse_file_button = None
-        self.video_editor_display_text = None
-        self.video_editor_display_entry = None
-        self.input_file_frame = None
-        self.browse_input_file_button = None
-        self.input_file_entry = None
+        self.browse_input_method_button = None
+        self.input_method_entry = None
         self.rotation_frame = None
         self.rotation_label = None
         self.rotation_var = None
@@ -174,7 +170,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.open_on_file_drop_switch = None
         self.remove_duplicates_switch = None
         self.double_check_switch = None
+        self.switch_frame = None
         self.activate_logging_switch = None
+        self.show_messageboxes_switch = None
+        self.gui_settings_frame = None
         self.appearance_mode_label = None
         self.appearance_mode_menu = None
         self.scaling_label = None
@@ -195,7 +194,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          default_rotation_var, remove_double_space_var, remove_colon_var, remove_semicolon_var, remove_percent_var,
          remove_caret_var, remove_dollar_var, remove_asterisk_var, remove_plus_var, remove_equal_var,
          remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var, remove_backslash_var,
-         remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var, remove_hashtag_var) = (
+         remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var, remove_hashtag_var,
+         show_messageboxes_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -225,6 +225,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
         self.double_check_var = ctk.BooleanVar(value=double_check_var)
         self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
+        self.show_messageboxes_var = ctk.BooleanVar(value=show_messageboxes_var)
         self.file_extensions_tuple = file_extensions_tuple
 
         # Name Normalizer - Set instance variables with the values from the configuration file
@@ -857,7 +858,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Normalize Folder button
         self.normalize_folder_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize Folder",
-                                                     command=self.process_folder)
+                                                     command=self.process_name_normalizer_folder)
         self.normalize_folder_button.grid(row=0, column=1, padx=5, pady=5)
 
         # Frame to display messages on the Name Normalizer frame
@@ -886,31 +887,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                    fg_color="transparent")
         self.video_editor_top_frame.grid(row=1, column=0, padx=10, pady=5)
 
-        # Video Editor Browse File button
-        self.video_editor_browse_file_button = ctk.CTkButton(self.video_editor_top_frame, text="Browse File",
-                                                             command=self.browse_video_editor_file_path)
-        self.video_editor_browse_file_button.grid(row=0, column=0, padx=5, pady=5)
+        # Video Editor browse input method button
+        self.browse_input_method_button = ctk.CTkButton(self.video_editor_top_frame, text="Browse",
+                                                        command=self.browse_input_method)
+        self.browse_input_method_button.grid(row=0, column=0, padx=5, pady=5)
 
-        # Selected Video Editor File Display
-        self.video_editor_display_text = ctk.StringVar()
-        self.video_editor_display_text.set("")
-        self.video_editor_display_entry = ctk.CTkEntry(self.video_editor_top_frame, width=890,
-                                                       textvariable=self.video_editor_display_text)
-        self.video_editor_display_entry.grid(row=0, column=1, padx=10, pady=10)
-
-        # Input File Frame
-        self.input_file_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
-                                             fg_color="transparent")
-        self.input_file_frame.grid(row=2, column=0, padx=10, pady=5)
-
-        # Browse Input File button
-        self.browse_input_file_button = ctk.CTkButton(self.input_file_frame, text="Input File",
-                                                      command=self.browse_list_of_files_to_edit_file)
-        self.browse_input_file_button.grid(row=0, column=0, padx=5, pady=5)
-
-        # Input File entry for a file containing a line delimited list of files to process
-        self.input_file_entry = ctk.CTkEntry(self.input_file_frame, width=890)
-        self.input_file_entry.grid(row=0, column=1, padx=10, pady=10)
+        # Input method entry for a file, directory, or .txt containing a line delimited list of files to process
+        self.input_method_entry = ctk.CTkEntry(self.video_editor_top_frame, width=890)
+        self.input_method_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Rotation frame
         self.rotation_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -1039,52 +1023,65 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                            font=ctk.CTkFont(size=15, weight="bold"))
         self.settings_label.grid(row=0, column=0, padx=5, pady=5, columnspan=5)
 
+        # Switch frame
+        self.switch_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
+        self.switch_frame.grid(row=1, column=0, padx=10, pady=10)
+
         # Checkbox to enable/disable open on drop behavior
-        self.open_on_file_drop_switch = ctk.CTkSwitch(self.settings_top_frame, text="Open File on Drag and Drop",
+        self.open_on_file_drop_switch = ctk.CTkSwitch(self.switch_frame, text="Open File on Drag and Drop",
                                                       variable=self.open_on_file_drop_var)
         self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable remove duplicates
-        self.remove_duplicates_switch = ctk.CTkSwitch(self.settings_top_frame,
+        self.remove_duplicates_switch = ctk.CTkSwitch(self.switch_frame,
                                                       text="Remove Duplicates",
                                                       variable=self.remove_duplicates_var)
         self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
         # Checkbox to enable/disable create double check reminder
-        self.double_check_switch = ctk.CTkSwitch(self.settings_top_frame, text="Create Double Check Reminder",
+        self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
         self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
 
         # Checkbox to enable/disable activate logging
-        self.activate_logging_switch = ctk.CTkSwitch(self.settings_top_frame, text="Activate Logging",
+        self.activate_logging_switch = ctk.CTkSwitch(self.switch_frame, text="Activate Logging",
                                                      variable=self.activate_logging_var)
-        self.activate_logging_switch.grid(row=1, column=3, padx=10, pady=10)
+        self.activate_logging_switch.grid(row=2, column=0, padx=10, pady=10)
 
         # Bind the callback function to the activate logging variable
         self.activate_logging_var.trace_add("write", self.handle_logging_activation)
 
+        # Checkbox to enable/disable show messageboxes
+        self.show_messageboxes_switch = ctk.CTkSwitch(self.switch_frame, text="Show Messageboxes",
+                                                      variable=self.show_messageboxes_var)
+        self.show_messageboxes_switch.grid(row=2, column=1, padx=10, pady=10)
+
+        # GUI settings frame
+        self.gui_settings_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
+        self.gui_settings_frame.grid(row=2, column=0, padx=10, pady=10)
+
         # Select light or dark label
-        self.appearance_mode_label = ctk.CTkLabel(self.settings_top_frame, text="Appearance:")
-        self.appearance_mode_label.grid(row=2, column=0, padx=10, pady=10)
+        self.appearance_mode_label = ctk.CTkLabel(self.gui_settings_frame, text="Appearance:")
+        self.appearance_mode_label.grid(row=0, column=0, padx=10, pady=10)
 
         # Select light or dark mode
-        self.appearance_mode_menu = ctk.CTkOptionMenu(self.settings_top_frame,
+        self.appearance_mode_menu = ctk.CTkOptionMenu(self.gui_settings_frame,
                                                       values=["Light", "Dark"],
                                                       command=self.change_appearance_mode_event)
-        self.appearance_mode_menu.grid(row=2, column=1, padx=10, pady=10)
+        self.appearance_mode_menu.grid(row=0, column=1, padx=10, pady=10)
 
         # Set default value for appearance
         self.appearance_mode_menu.set("Dark")
 
         # Select scaling label
-        self.scaling_label = ctk.CTkLabel(self.settings_top_frame, text="UI Scaling:")
-        self.scaling_label.grid(row=3, column=0, padx=10, pady=10)
+        self.scaling_label = ctk.CTkLabel(self.gui_settings_frame, text="UI Scaling:")
+        self.scaling_label.grid(row=1, column=0, padx=10, pady=10)
 
         # Select scaling level
-        self.scaling_optionemenu = ctk.CTkOptionMenu(self.settings_top_frame,
+        self.scaling_optionemenu = ctk.CTkOptionMenu(self.gui_settings_frame,
                                                      values=["70%", "80%", "90%", "100%", "110%", "120%"],
                                                      command=self.change_scaling_event)
-        self.scaling_optionemenu.grid(row=3, column=1, padx=10, pady=10)
+        self.scaling_optionemenu.grid(row=1, column=1, padx=10, pady=10)
 
         # Set default value for scaling
         self.scaling_optionemenu.set("100%")
@@ -1268,6 +1265,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Open a dialog to browse and select an output directory
         core.browse_output_directory(self)
 
+    def suggest_output_directory(self):
+        # Function to suggest an output directory matching an artist name
+        return core.suggest_output_directory(self)
+
     def handle_rename_success(self, new_path):
         # Handle the success of the file renaming process
         core.handle_rename_success(self, new_path)
@@ -1338,9 +1339,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Function to move a file from a source path to a destination directory with overwrite protection
         core.move_file_with_overwrite_check(self, source_path, destination_directory)
 
-    def process_folder(self):
+    def process_name_normalizer_folder(self):
         # Function to performing various name normalization operations on certain files within a specified folder
-        core.process_folder(self)
+        core.process_name_normalizer_folder(self)
 
     def browse_folder_path(self):
         # Open a dialog to browse and select a folder to normalize files
@@ -1386,13 +1387,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Method to process video edits based on user inputs.
         core.process_video_edits(self)
 
-    def browse_video_editor_file_path(self):
-        # Method to browse and select a file for video editing.
-        core.browse_video_editor_file_path(self)
+    def log_and_show_error(self, error_message, frame_name_var):
+        # Method to check logging state, log if applicable, and show a messagebox error.
+        core.log_and_show_error(self, error_message, frame_name_var)
 
-    def browse_list_of_files_to_edit_file(self):
-        # Method to browse and select a file containing a line delimited list of files to process
-        core.browse_list_of_files_to_edit_file(self)
+    def browse_input_method(self):
+        # Method to browse and select a file, directory, or .txt to process
+        core.browse_input_method(self)
 
     def browse_video_output_directory(self):
         # Method to browse and select a folder to move the processed files

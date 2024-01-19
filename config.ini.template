@@ -27,6 +27,8 @@ remove_duplicates_var = False
 double_check_var = False
 ; Activate logging
 activate_logging_var = False
+; Show messageboxes
+show_messageboxes_var = True
 ; Remove all symbols
 remove_all_symbols_var = False
 ; Append '__-__ ' to the file name

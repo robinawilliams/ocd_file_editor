@@ -53,6 +53,7 @@ def load_configuration():
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
     activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
+    show_messageboxes_var = config.getboolean("Settings", "show_messageboxes_var", fallback=True)
 
     # Name Normalizer
     remove_all_symbols_var = config.getboolean("Settings", "remove_all_symbols_var", fallback=False)
@@ -116,7 +117,7 @@ def load_configuration():
             remove_semicolon_var, remove_percent_var, remove_caret_var, remove_dollar_var, remove_asterisk_var,
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
-            remove_hashtag_var)
+            remove_hashtag_var, show_messageboxes_var)
 
 
 def logging_setup(self):
@@ -272,8 +273,9 @@ def update_file_display(self):
 
         # Handle name length constraints
         if len(name) > 250:
-            messagebox.showerror("Length Exceeded", "The proposed file name exceeds 250 characters. Please consider "
-                                                    "shortening it to comply with operating system limitations.")
+            self.log_and_show_error("The proposed file name exceeds 250 characters. Please consider "
+                                    "shortening it to comply with operating system limitations.",
+                                    frame_name_var="file_renamer_window")
             # Truncate the name
             name = f"...{name[180:]}"
 
@@ -340,27 +342,7 @@ def browse_output_directory(self):
     # Check if a file is selected
     if self.selected_file:
         # Determine the initial directory based on options
-        if self.suggest_output_directory_var.get():
-            base_name = os.path.basename(self.selected_file)
-
-            # Extract the artist from the filename (before the dash)
-            artist_match = re.match(r"^(.*?)\s*-\s*.*$", base_name)
-            if artist_match:
-                artist = artist_match.group(1).strip()
-
-                # Construct the artist folder path
-                artist_folder_path = os.path.join(self.artist_directory, artist)
-
-                # Use artist folder if it exists, otherwise use default initial directory
-                if os.path.exists(artist_folder_path):
-                    initial_directory = artist_folder_path
-                else:
-                    initial_directory = self.initial_directory
-            else:
-                # If the filename doesn't match the expected pattern, use the default initial directory
-                initial_directory = self.initial_directory
-        else:
-            initial_directory = self.initial_directory
+        initial_directory = self.suggest_output_directory()
     else:
         # If no file is selected, use the default initial directory
         initial_directory = self.initial_directory
@@ -373,6 +355,45 @@ def browse_output_directory(self):
         self.output_directory = output_directory
         self.output_directory_entry.delete(0, ctk.END)
         self.output_directory_entry.insert(0, self.output_directory)
+
+
+def suggest_output_directory(self):
+    # Check if a file is selected
+    if self.selected_file:
+        # Check if the suggest_output_directory_var is True
+        if self.suggest_output_directory_var.get():
+            # Extract the base name from the selected file
+            base_name = os.path.basename(self.selected_file)
+
+            # Extract the artist from the filename (before the dash)
+            artist_match = re.match(r"^(.*?)\s*-\s*.*$", base_name)
+            if artist_match:
+                artist = artist_match.group(1).strip()
+
+                # Construct the artist folder path
+                artist_folder_path = os.path.join(self.artist_directory, artist)
+
+                # Use artist folder if it exists, otherwise use default initial directory
+                if os.path.exists(artist_folder_path):
+                    return artist_folder_path
+        # If the filename doesn't match the expected pattern or suggest_output_directory is False,
+        # use the default initial directory
+        # Ask for confirmation new output location if no match found
+        confirmation = messagebox.askyesno("Confirm Action",
+                                           "No match found for an artist. Do you want to select a new output location?")
+        if confirmation:
+            new_output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+            if new_output_directory:
+                if self.activate_logging_var.get():
+                    logging.info(f"User chose a new output location: {new_output_directory}")
+                return new_output_directory
+        else:
+            if self.activate_logging_var.get():
+                logging.info("User did not choose a new output location. Falling back to default location.")
+            return self.initial_directory
+
+    # If no file is selected, use the default initial directory
+    return self.initial_directory
 
 
 # Function to handle actions after successful file renaming
@@ -457,7 +478,7 @@ def add_category(self):
             except ValueError:
                 if self.activate_logging_var.get():
                     # Log the action if logging is enabled
-                    logging.error("Error: Weight must be an integer. Using default weight.")
+                    logging.error("Weight must be an integer. Using default weight.")
                 # Handle the case where the provided weight is not an integer
                 self.show_message("Error: Weight must be an integer. Using default weight.", error=True,
                                   frame_name="file_renamer_window")
@@ -637,11 +658,15 @@ def rename_files(self):
             new_path = os.path.join(parent_directory, os.path.basename(name))
         else:
             # Use the specified output directory
-            new_path = os.path.join(self.output_directory, os.path.basename(name))
-
-        # TODO: Include logic for suggest_output_directory_var here
-        # if self.suggest_output_directory_var.get():
-        #     pass
+            if self.suggest_output_directory_var.get():
+                self.output_directory = self.suggest_output_directory()
+                new_path = os.path.join(self.output_directory, os.path.basename(name))
+                if self.activate_logging_var.get():
+                    logging.info(f"Suggested output directory: {self.output_directory}")
+                self.show_message(f"Suggested output directory: {self.output_directory}",
+                                  frame_name="video_editor_window")
+            else:
+                new_path = os.path.join(self.output_directory, os.path.basename(name))
 
         # Attempt to rename the file and handle success or errors
         try:
@@ -1031,9 +1056,8 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
             logging.error(f"Error renaming {os.path.basename(source_path)}: {e}")
 
 
-# TODO Optimize this
 # Function to performing various name normalization operations on certain files within a specified folder
-def process_folder(self):
+def process_name_normalizer_folder(self):
     # Retrieve values from GUI input fields
     folder_path = self.folder_path_entry.get()
     move_directory = self.move_directory_entry.get()
@@ -1041,12 +1065,14 @@ def process_folder(self):
 
     # Check if the specified folder path exists
     if not os.path.exists(folder_path):
-        messagebox.showerror("Error", "Folder path does not exist or was not specified.\nPlease try again.")
+        self.log_and_show_error("Folder path does not exist or was not specified.\nPlease try again.",
+                                frame_name_var="name_normalizer_window")
         return
 
     # Check if move_directory is specified and exists
     if move_directory and not os.path.exists(move_directory):
-        messagebox.showerror("Error", "Output directory does not exist or was not specified.\nPlease try again.")
+        self.log_and_show_error("Output directory does not exist or was not specified.\nPlease try again.",
+                                frame_name_var="name_normalizer_window")
         return
 
     # Check artist file conditions if artist_file_search_var is True
@@ -1058,13 +1084,26 @@ def process_folder(self):
             if not os.path.exists(artist_file):
                 return
         elif not os.path.exists(artist_file):
-            messagebox.showerror("Error", "Artist file does not exist.\nPlease create it from the template and try "
-                                          "again\nor turn off Artist Search.\nSee FAQ")
+            self.log_and_show_error("Artist file does not exist.\nPlease create it from the template and try "
+                                    "again\nor turn off Artist Search.\nSee FAQ",
+                                    frame_name_var="name_normalizer_window")
             return
 
     # Set move_directory to None if not specified
     if not move_directory:
         move_directory = None
+
+    # Ask for confirmation before normalizing files
+    confirmation = messagebox.askyesno("Confirm Action",
+                                       "Are you sure you want normalize these files? This cannot be undone.")
+    if confirmation:
+        if self.activate_logging_var.get():
+            logging.info(f"User confirmed the name normalization process for {folder_path}.")
+        pass
+    else:
+        if self.activate_logging_var.get():
+            logging.info(f"User cancelled the name normalization process for {folder_path}.")
+        return
 
     try:
         # Get folder contents and save to a temporary file
@@ -1113,7 +1152,7 @@ def process_folder(self):
         self.show_message("Files have been processed successfully.", frame_name="name_normalizer_window")
     except Exception as e:
         # Display error message if an exception occurs
-        messagebox.showerror("Error", f"An error occurred: {e}")
+        self.log_and_show_error(f"An error occurred: {e}", frame_name_var="name_normalizer_window")
 
 
 # Open a dialog to browse and select a folder to normalize files
@@ -1176,9 +1215,8 @@ def get_non_conflicting_filename(self, path):
         return new_path
     except Exception as e:
         # Log error and display an error message when get non-conflicting file name fails.
-        if self.activate_logging_var.get():
-            logging.error(f"Error getting non-conflicting file name: {str(e)}")
-        messagebox.showerror("Error", f"Error getting non-conflicting file name: {str(e)}")
+        self.log_and_show_error(f"Error getting non-conflicting file name: {str(e)}",
+                                frame_name_var="video_editor_window")
 
         # Return None in case of an error.
         return None
@@ -1198,9 +1236,7 @@ def rotate_video(self, clip, rotation_angle):
         return rotated_clip
     except Exception as e:
         # Log error and display an error message if rotation fails.
-        if self.activate_logging_var.get():
-            logging.error(f"Error rotating video: {str(e)}")
-        messagebox.showerror("Error", f"Error rotating video: {str(e)}")
+        self.log_and_show_error(f"Error rotating video: {str(e)}", frame_name_var="video_editor_window")
 
         # Return None in case of an error.
         return None
@@ -1217,9 +1253,7 @@ def increase_volume(self, clip, increase_db):
 
     except Exception as e:
         # Log error and display an error message if volume increase fails.
-        if self.activate_logging_var.get():
-            logging.error(f"Error increasing volume: {str(e)}")
-        messagebox.showerror("Error", f"Error increasing volume: {str(e)}")
+        self.log_and_show_error(f"Error increasing volume: {str(e)}", frame_name_var="video_editor_window")
 
         # Return None in case of an error.
         return None
@@ -1236,9 +1270,7 @@ def normalize_audio(self, clip, volume_multiplier):
 
     except Exception as e:
         # Log error and display an error message if audio normalization fails.
-        if self.activate_logging_var.get():
-            logging.error(f"Error normalizing audio: {str(e)}")
-        messagebox.showerror("Error", f"Error normalizing audio: {str(e)}")
+        self.log_and_show_error(f"Error normalizing audio: {str(e)}", frame_name_var="video_editor_window")
 
         # Return None in case of an error.
         return None
@@ -1268,66 +1300,91 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
 # Method to process video edits based on user inputs.
 def process_video_edits(self):
     # Get input parameters from user interface.
-    input_video = self.video_editor_display_entry.get()
-    input_file = self.input_file_entry.get()
+    input_method = self.input_method_entry.get()
     video_output_directory = self.video_output_directory_entry.get()
     rotation = str(self.rotation_var.get())
     decibel = float(self.decibel_entry.get())
     audio_normalization = float(self.audio_normalization_entry.get())
 
-    if rotation == "none":
-        rotation = None
-
-    if decibel == 0.0:
-        decibel = None
-
-    if audio_normalization == 0.0:
-        audio_normalization = None
-
     # TODO Put this in configuration file or json file
     # Create a list of valid video extensions
     valid_extensions = ['.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.mpeg', '.mpg', '.m4v']
 
-    # Check if an input file containing a list of video file paths is provided
-    if input_file:
-        # Read the input file and filter out lines with non-video extensions
-        with open(input_file, 'r') as file:
-            input_paths = [line.strip() for line in file if
-                           os.path.splitext(line.strip())[1].lower() in valid_extensions]
+    # Check if rotation is none and set to variable to None
+    if rotation == "none":
+        rotation = None
 
-        # Overwrite the input file with the filtered paths
-        with open(input_file, 'w') as file:
-            file.write('\n'.join(input_paths))
+    # Check if decibel is 0.0 and set to variable to None
+    if decibel == 0.0:
+        decibel = None
+
+    # Check if rotation is none and set variable to None
+    if audio_normalization == 0.0:
+        audio_normalization = None
+
+    # Check if an input source is provided
+    if not input_method:
+        self.log_and_show_error("Input must be specified (video file, line separated txt, or directory.",
+                                frame_name_var="video_editor_window")
+        return
+
+    # Check if the provided input exists
+    if input_method and not os.path.exists(input_method):
+        self.log_and_show_error("The input does not exist or cannot be found. Please try again.",
+                                frame_name_var="video_editor_window")
+        return
 
     # Check if the necessary parameters for video editing are provided
-    if (input_video or input_file) and decibel is None and rotation is None and audio_normalization is None:
-        if self.activate_logging_var.get():
-            logging.error("Error: You need to specify an operation (audio increase, video rotation, "
-                          "audio normalization, or a combination of them")
-        messagebox.showerror("Error", "Error: You need to specify an operation (audio increase, video rotation, "
-                                      "audio normalization, or a combination of them")
+    if input_method and decibel is None and rotation is None and audio_normalization is None:
+        self.log_and_show_error("You need to specify an operation (audio increase, video rotation, "
+                                "audio normalization, or a combination of them",
+                                frame_name_var="video_editor_window")
         return
 
-    # Check for conflicting input parameters
-    if input_video and input_file:
-        if self.activate_logging_var.get():
-            logging.error("Error: Both input video and input file specified. Please choose one.")
-        messagebox.showerror("Error", "Error: Both input video and input file specified. Please choose one.")
+    # Check if the provided output directory exists
+    if video_output_directory and not os.path.exists(video_output_directory):
+        self.log_and_show_error("The output directory does not exist or cannot be found. Please try again.",
+                                frame_name_var="video_editor_window")
         return
 
-    # Check if at least one input source (video or file) is provided
-    if not input_video and not input_file:
-        if self.activate_logging_var.get():
-            logging.error("Error: Either input video or input file must be specified.")
-        messagebox.showerror("Error", "Error: Either input video or input file must be specified.")
-        return
+    # Define which input paths based on user input (Video file, .txt file, or directory)
+    try:
+        # Video file
+        if os.path.isfile(input_method) and any(input_method.lower().endswith(ext) for ext in valid_extensions):
+            input_paths = [input_method]
+        # .txt file
+        elif os.path.isfile(input_method) and input_method.lower().endswith('.txt'):
+            with open(input_method, 'r') as file:
+                input_paths = [line.strip() for line in file if
+                               os.path.splitext(line.strip())[1].lower() in valid_extensions]
+        # Directory
+        elif os.path.isdir(input_method):
+            # Ask for confirmation before normalizing files
+            confirmation = messagebox.askyesno("Confirm Action",
+                                               "Are you sure you want edit ALL video files in the provided directory?"
+                                               "\nThis option may be computer intensive.")
+            if confirmation:
+                if self.activate_logging_var.get():
+                    logging.info(f"User confirmed the directory for {input_method}.")
 
-    # Define the list of input paths based on user input
-    if input_video:
-        input_paths = [input_video]
-    else:
-        with open(input_file, 'r') as file:
-            input_paths = [line.strip() for line in file]
+                # Get the absolute file paths of all files within the directory with valid extensions
+                input_paths = []
+                for root, dirs, files in os.walk(input_method):
+                    for file in files:
+                        file_path = os.path.join(root, file)
+                        if os.path.splitext(file_path)[1].lower() in valid_extensions:
+                            input_paths.append(file_path)
+            else:
+                if self.activate_logging_var.get():
+                    logging.info(f"User cancelled the name normalization process for {input_method}.")
+                return
+
+        else:
+            raise ValueError("Invalid input detected. Please select a video file, .txt file with video file paths, "
+                             "or a directory with video files")
+    except Exception as e:
+        self.log_and_show_error(f"Error processing input: {str(e)}", frame_name_var="video_editor_window")
+        return
 
     # Process each input path
     for input_path in input_paths:
@@ -1424,12 +1481,11 @@ def process_video_edits(self):
                                       frame_name="video_editor_window")
 
                     # Remove the successfully processed line from the input file
-                    if input_file:
-                        remove_successful_line_from_file(self, input_file, input_path)
+                    if input_method:
+                        remove_successful_line_from_file(self, input_method, input_path)
                 else:
-                    if self.activate_logging_var.get():
-                        logging.error(f"Error: Operations failed for video {input_path}")
-                    messagebox.showerror("Error", f"Error: Operations failed for video {input_path}")
+                    self.log_and_show_error(f"Operations failed for video {input_path}",
+                                            frame_name_var="video_editor_window")
 
                 # Close the original clip to free resources
                 original_clip.close()
@@ -1520,39 +1576,49 @@ def process_video_edits(self):
                                       frame_name="video_editor_window")
 
                     # Remove the successfully processed line from the input file
-                    if input_file:
-                        remove_successful_line_from_file(self, input_file, input_path)
+                    if input_method:
+                        remove_successful_line_from_file(self, input_method, input_path)
                 else:
-                    if self.activate_logging_var.get():
-                        logging.error(f"Error: Operations failed for video {input_path}")
-                    messagebox.showerror("Error", f"Error: Operations failed for video {input_path}")
+                    self.log_and_show_error(f"Operations failed for video {input_path}",
+                                            frame_name_var="video_editor_window")
 
                 # Close the original clip to free resources
                 original_clip.close()
 
         except OSError as e:
             # Log error and skip to the next file in case of OSError
-            if self.activate_logging_var.get():
-                logging.error(f"OSError: {str(e)} Skipping this file and moving to the next one.")
-            messagebox.showerror("Error", f"OSError: {str(e)} Skipping this file and moving to the next one.")
+            self.log_and_show_error(f"OSError: {str(e)} Skipping this file and moving to the next one.",
+                                    frame_name_var="video_editor_window")
             continue
 
 
-# Method to browse and select a file for video editing.
-def browse_video_editor_file_path(self):
-    video_editor_folder_path = filedialog.askopenfilename(initialdir=self.initial_directory)
-    self.video_editor_display_text = video_editor_folder_path
-    self.video_editor_display_entry.delete(0, ctk.END)
-    self.video_editor_display_entry.insert(0, self.video_editor_display_text)
+# Method to check logging state, log if applicable, and show a messagebox error.
+# Confirmation messageboxes will always be displayed
+def log_and_show_error(self, error_message, frame_name_var):
+    # Check logging state and log error message if applicable
+    if self.activate_logging_var.get():
+        logging.error(error_message)
+    # Check messagebox state and display messageboxes if applicable
+    if self.show_messageboxes_var.get():
+        messagebox.showerror("Error", error_message)
+    else:
+        # Display the error message on the applicable frame if messageboxes are disabled
+        self.show_message(error_message, error=True, frame_name=frame_name_var)
 
 
-# Method to browse and select a file containing a line delimited list of files to process
-def browse_list_of_files_to_edit_file(self):
-    input_file = filedialog.askopenfilename(
+# Method to browse and select a file, directory, or .txt to process
+def browse_input_method(self):
+    input_method = filedialog.askopenfilename(
         initialdir=self.initial_directory,
-        filetypes=[("Text Files", "*.txt")])
-    self.input_file_entry.delete(0, ctk.END)
-    self.input_file_entry.insert(0, input_file)
+        title="Browse a file. Close to select a directory instead",
+        filetypes=[("All Files", "*.*")],
+    )
+    if not input_method:
+        # If no file is selected, try to get a directory
+        input_method = filedialog.askdirectory(initialdir=self.initial_directory, title="Browse a directory")
+
+    self.input_method_entry.delete(0, ctk.END)
+    self.input_method_entry.insert(0, input_method)
 
 
 # Method to browse and select a folder to move the processed files
@@ -1565,7 +1631,7 @@ def browse_video_output_directory(self):
 # Function to clear the selection and update the GUI
 def clear_video_editor_selection(self):
     self.video_editor_display_entry.delete(0, ctk.END)
-    self.input_file_entry.delete(0, ctk.END)
+    self.input_method_entry.delete(0, ctk.END)
     self.video_output_directory_entry.delete(0, ctk.END)
 
     # Clear decibel entry and set default value
