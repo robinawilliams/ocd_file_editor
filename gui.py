@@ -1171,6 +1171,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         ctk.set_appearance_mode(new_appearance_mode)
         self.update_background_color()
 
+    # Method for changing UI scaling
+    @staticmethod
+    def change_scaling_event(new_scaling: str):
+        new_scaling_float = int(new_scaling.replace("%", "")) / 100
+        ctk.set_widget_scaling(new_scaling_float)
+
+    """
+    Messaging
+    """
+
     def update_text_color(self):
         # Update text color based on the current appearance mode
         current_mode = ctk.get_appearance_mode()
@@ -1206,11 +1216,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             label.configure(text=truncated_message)
 
-    # Method for changing UI scaling
-    @staticmethod
-    def change_scaling_event(new_scaling: str):
-        new_scaling_float = int(new_scaling.replace("%", "")) / 100
-        ctk.set_widget_scaling(new_scaling_float)
+    def log_and_show_message(self, message, frame_name, create_messagebox):
+        # Method to check logging state, log if applicable, and show a message
+        core.log_and_show_message(self, message, frame_name, create_messagebox)
+
+    def log_and_show_error(self, error_message, frame_name, create_messagebox, not_logging):
+        # Method to check logging state, log if applicable, and show a messagebox error.
+        core.log_and_show_error(self, error_message, frame_name, create_messagebox, not_logging)
 
     """
     Configuration
@@ -1386,10 +1398,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def process_video_edits(self):
         # Method to process video edits based on user inputs.
         core.process_video_edits(self)
-
-    def log_and_show_error(self, error_message, frame_name_var):
-        # Method to check logging state, log if applicable, and show a messagebox error.
-        core.log_and_show_error(self, error_message, frame_name_var)
 
     def browse_input_method(self):
         # Method to browse and select a file, directory, or .txt to process
