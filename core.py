@@ -479,39 +479,45 @@ def suggest_output_directory(self):
         if self.suggest_output_directory_var.get():
             # Extract the base name from the selected file
             base_name = os.path.basename(self.selected_file)
+            base_name_lower = base_name.lower()  # Case insensitive comparison
 
-            # Extract the artist from the filename (before the dash)
-            artist_match = re.match(r"^(.*?)\s*-\s*.*$", base_name)
-            if artist_match:
-                artist = artist_match.group(1).strip()
+            # Extract the artist from the filename
+            for artist_folder in os.listdir(self.artist_directory):
+                if artist_folder.lower() in base_name_lower:
+                    # Construct the artist folder path
+                    artist_folder_path = os.path.join(self.artist_directory, artist_folder)
 
-                # Construct the artist folder path
-                artist_folder_path = os.path.join(self.artist_directory, artist)
+                    # Verify the folder exists
+                    if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
+                        # Ask for confirmation of new output directory if match found
+                        confirmation = messagebox.askyesno("Suggest Output Directory",
+                                                           f"Suggested output directory found. Do you want to use: "
+                                                           f"{artist_folder_path}?")
+                        if confirmation:
+                            self.log_and_show(f"User chose the suggested output directory: {artist_folder_path}",
+                                              frame_name="file_renamer_window",
+                                              create_messagebox=False,
+                                              error=False,
+                                              not_logging=False)
+                            return artist_folder_path
+                        else:
+                            self.log_and_show(
+                                "User did not choose the suggested output directory. Falling back to default location.",
+                                frame_name="file_renamer_window",
+                                create_messagebox=False,
+                                error=False,
+                                not_logging=False)
+                            return self.initial_directory
 
-                # Use artist folder if it exists, otherwise use default initial directory
-                if os.path.exists(artist_folder_path):
-                    return artist_folder_path
         # If the filename doesn't match the expected pattern or suggest_output_directory is False,
         # use the default initial directory
-        # Ask for confirmation new output location if no match found
-        confirmation = messagebox.askyesno("Confirm Action",
-                                           "No match found for an artist. Do you want to select a new output location?")
-        if confirmation:
-            new_output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-            if new_output_directory:
-                self.log_and_show(f"User chose a new output location: {new_output_directory}",
-                                  frame_name="file_renamer_window",
-                                  create_messagebox=False,
-                                  error=False,
-                                  not_logging=False)
-                return new_output_directory
-        else:
-            self.log_and_show("User did not choose a new output location. Falling back to default location.",
-                              frame_name="file_renamer_window",
-                              create_messagebox=False,
-                              error=False,
-                              not_logging=False)
-            return self.output_directory
+        self.log_and_show("Cannot suggest output directory. Falling back to default output directory.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+        # TODO Double check this logic. Should be saved to same folder as the file is currently in
+        return self.initial_directory
 
     # If no file is selected, use the default initial directory
     return self.initial_directory
