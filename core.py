@@ -223,7 +223,8 @@ def move_file_to_trash(self):
 
 # Function to load the last used file
 def load_last_used_file(self):
-    if self.last_used_file:
+    # Check if the last_used_file variable is provided and the file exists
+    if self.last_used_file and os.path.exists(self.last_used_file):
         # Set the selected file to the last used file and update display
         self.selected_file = self.last_used_file
         filename = os.path.basename(self.selected_file)
@@ -587,6 +588,16 @@ Category Management
 def add_category(self):
     # Get the new category from the add category entry widget
     new_category = self.category_entry.get().strip()
+
+    if not new_category:
+        # If the new category is an empty string, log an error message and return
+        self.log_and_show("Error: Add Category cannot be empty.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
+        return
+
     if new_category:
         # Convert to lowercase for case-insensitive check
         new_category_lower = new_category.lower()
@@ -641,6 +652,15 @@ def add_category(self):
 def remove_category(self):
     # Get the category to be removed from the remove category entry widget
     category_to_remove = self.remove_category_entry.get().strip()
+
+    if not category_to_remove:
+        # If the category to be removed is an empty string, log an error message and return
+        self.log_and_show("Error: Remove Category cannot be empty.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
+        return
 
     # Check for a case-sensitive match
     if category_to_remove in self.categories:
