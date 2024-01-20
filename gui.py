@@ -184,7 +184,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
          double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
-         file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
+         file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
          remove_hashtag_trail_var,
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
          remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var, remove_double_quote_var,
@@ -195,7 +195,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_caret_var, remove_dollar_var, remove_asterisk_var, remove_plus_var, remove_equal_var,
          remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var, remove_backslash_var,
          remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var, remove_hashtag_var,
-         show_messageboxes_var) = (
+         show_messageboxes_var, valid_extensions) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -226,7 +226,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_var = ctk.BooleanVar(value=double_check_var)
         self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
         self.show_messageboxes_var = ctk.BooleanVar(value=show_messageboxes_var)
-        self.file_extensions_tuple = file_extensions_tuple
+        self.file_extensions = file_extensions
+        self.valid_extensions = valid_extensions
 
         # Name Normalizer - Set instance variables with the values from the configuration file
         self.remove_all_symbols_var = ctk.BooleanVar(value=remove_all_symbols_var)

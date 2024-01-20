@@ -132,17 +132,21 @@ def load_configuration():
     default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
 
     # File extensions
-    file_extensions = config.get('Settings', 'file_extensions',
-                                 fallback='.mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, '
-                                          '.mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v')
-    file_extensions_tuple = tuple(ext.strip() for ext in file_extensions.split(','))
+    file_extensions_str = config.get('Settings', 'file_extensions',
+                                     fallback='.mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, '
+                                              '.mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v')
+    file_extensions = tuple(ext.strip() for ext in file_extensions_str.split(','))
+
+    valid_extensions_str = config.get('Settings', 'valid_extensions',
+                                      fallback='.mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v')
+    valid_extensions = [ext.strip() for ext in valid_extensions_str.split(',')]
 
     # Return the loaded configuration values as a tuple
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
             open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
             double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
-            file_extensions_tuple, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
+            file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
             remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
             remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
             remove_double_quote_var,
@@ -152,7 +156,7 @@ def load_configuration():
             remove_semicolon_var, remove_percent_var, remove_caret_var, remove_dollar_var, remove_asterisk_var,
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
-            remove_hashtag_var, show_messageboxes_var)
+            remove_hashtag_var, show_messageboxes_var, valid_extensions)
 
 
 def logging_setup(self):
@@ -809,7 +813,7 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
     name, ext = os.path.splitext(filename)
 
     # Check if the file has one of the video file extensions
-    if ext.lower() in self.file_extensions_tuple:
+    if ext.lower() in self.file_extensions:
         # Remove specified characters from the filename if remove_all_symbols_var is True
         if self.remove_all_symbols_var.get():
             # Define the characters to be removed
@@ -1363,10 +1367,6 @@ def process_video_edits(self):
     decibel = float(self.decibel_entry.get())
     audio_normalization = float(self.audio_normalization_entry.get())
 
-    # TODO Put this in configuration file or json file
-    # Create a list of valid video extensions
-    valid_extensions = ['.mp4', '.mkv', '.flv', '.avi', '.mov', '.wmv', '.mpeg', '.mpg', '.m4v']
-
     # Check if rotation is none and set to variable to None
     if rotation == "none":
         rotation = None
@@ -1415,13 +1415,13 @@ def process_video_edits(self):
     # Define which input paths based on user input (Video file, .txt file, or directory)
     try:
         # Video file
-        if os.path.isfile(input_method) and any(input_method.lower().endswith(ext) for ext in valid_extensions):
+        if os.path.isfile(input_method) and any(input_method.lower().endswith(ext) for ext in self.valid_extensions):
             input_paths = [input_method]
         # .txt file
         elif os.path.isfile(input_method) and input_method.lower().endswith('.txt'):
             with open(input_method, 'r') as file:
                 input_paths = [line.strip() for line in file if
-                               os.path.splitext(line.strip())[1].lower() in valid_extensions]
+                               os.path.splitext(line.strip())[1].lower() in self.valid_extensions]
         # Directory
         elif os.path.isdir(input_method):
             # Ask for confirmation before normalizing files
@@ -1437,7 +1437,7 @@ def process_video_edits(self):
                 for root, dirs, files in os.walk(input_method):
                     for file in files:
                         file_path = os.path.join(root, file)
-                        if os.path.splitext(file_path)[1].lower() in valid_extensions:
+                        if os.path.splitext(file_path)[1].lower() in self.valid_extensions:
                             input_paths.append(file_path)
             else:
                 if self.activate_logging_var.get():
