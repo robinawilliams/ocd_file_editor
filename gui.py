@@ -14,11 +14,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set the window title
         self.title("O.C.D. File Editor")
 
-        # Initialize instance variables for selected file, output directory and queue
+        # Initialize instance variables for selected file, output directory, queue, and last used file
         self.selected_file = ""
         self.output_directory = ""
         self.queue = []
-
         self.last_used_file = ""
 
         # Initialize GUI elements
