@@ -264,9 +264,7 @@ def on_file_drop(self, event):
     self.update_file_display()
 
     # Log the error and display the error in the gui
-    message = filename
-    # Log the action if logging is enabled
-    self.log_and_show(f"File selected via drop: {message}",
+    self.log_and_show(f"File selected via drop: {filename}",
                       frame_name="file_renamer_window",
                       create_messagebox=False,
                       error=False,
@@ -360,68 +358,117 @@ def undo_last(self):
 
 
 # Function to clear the selection and reset related elements
-def clear_selection(self):
-    self.selected_file = ""
-    self.queue = []
-    self.file_display_text.set("")
-    self.log_and_show("Selection cleared",
-                      frame_name="file_renamer_window",
-                      create_messagebox=False,
-                      error=False,
-                      not_logging=True)
-
-    # Clear custom text entry and reset output directory
-    self.custom_text_entry.delete(0, ctk.END)
-    self.output_directory = os.path.dirname(self.selected_file)
-    self.output_directory_entry.delete(0, ctk.END)
-    self.output_directory_entry.insert(0, self.output_directory)
-
-
-# Function to browse and select a file
-def browse_file(self):
-    # Remove the default custom text entry text
-    self.custom_text_entry.delete(0, ctk.END)
-
-    file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
-    if file_path:
-        # Set the selected file, update display, and log the action
-        self.selected_file = file_path
-        filename = os.path.basename(self.selected_file)
-
-        # Display only the filename in the file display widget
-        self.file_display_text.set(filename)
-
+def clear_selection(self, frame_name):
+    if frame_name == "file_renamer_window":
+        self.selected_file = ""
         self.queue = []
-        self.update_file_display()
-
-        # Log the error and display the error in the gui
-        message = filename
-        # Log the action if logging is enabled
-        self.log_and_show(f"File selected via Browse: {message}",
+        self.file_display_text.set("")
+        self.log_and_show("Selection cleared",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=False,
-                          not_logging=False)
+                          not_logging=True)
+
+        # Clear custom text entry and reset output directory
+        self.custom_text_entry.delete(0, ctk.END)
+        self.output_directory = os.path.dirname(self.selected_file)
+        self.output_directory_entry.delete(0, ctk.END)
+        self.output_directory_entry.insert(0, self.output_directory)
+
+    if frame_name == "name_normalizer_window":
+        self.folder_path_entry.delete(0, ctk.END)
+        self.move_directory_entry.delete(0, ctk.END)
+        self.artist_file_entry.delete(0, ctk.END)
+
+    if frame_name == "video_editor_window":
+        self.input_method_entry.delete(0, ctk.END)
+        self.video_output_directory_entry.delete(0, ctk.END)
+
+        # Clear decibel entry and set default value
+        self.decibel_entry.delete(0, ctk.END)
+        self.decibel_entry.insert(0, self.default_decibel)
+
+        # Clear audio normalization entry and set default value
+        self.audio_normalization_entry.delete(0, ctk.END)
+        self.audio_normalization_entry.insert(0, self.default_audio_normalization)
+
+
+# Function to browse and select an input
+def browse_input(self, frame_name):
+    if frame_name == "file_renamer_window":
+        # Remove the default custom text entry text
+        self.custom_text_entry.delete(0, ctk.END)
+
+        file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
+        if file_path:
+            # Set the selected file, update display, and log the action
+            self.selected_file = file_path
+            filename = os.path.basename(self.selected_file)
+
+            # Display only the filename in the file display widget
+            self.file_display_text.set(filename)
+
+            self.queue = []
+            self.update_file_display()
+
+            # Log the error and display the error in the gui
+            message = filename
+            # Log the action if logging is enabled
+            self.log_and_show(f"File selected via Browse: {message}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+
+    if frame_name == "name_normalizer_window":
+        # Function to browse and select a folder to normalize files
+        folder_path = filedialog.askdirectory(initialdir=self.initial_directory)
+        self.folder_path_entry.delete(0, ctk.END)
+        self.folder_path_entry.insert(0, folder_path)
+
+    if frame_name == "video_editor_window":
+        input_method = filedialog.askopenfilename(
+            initialdir=self.initial_directory,
+            title="Browse a file. Close to select a directory instead",
+            filetypes=[("All Files", "*.*")],
+        )
+        if not input_method:
+            # If no file is selected, try to get a directory
+            input_method = filedialog.askdirectory(initialdir=self.initial_directory, title="Browse a directory")
+
+        self.input_method_entry.delete(0, ctk.END)
+        self.input_method_entry.insert(0, input_method)
 
 
 # Function to browse and select an output directory
-def browse_output_directory(self):
-    # Check if a file is selected
-    if self.selected_file:
-        # Determine the initial directory based on options
-        initial_directory = self.suggest_output_directory()
-    else:
-        # If no file is selected, use the default initial directory
-        initial_directory = self.initial_directory
+def browse_output_directory(self, frame_name):
+    if frame_name == "file_renamer_window":
+        # Check if a file is selected
+        if self.selected_file:
+            # Determine the initial directory based on options
+            initial_directory = self.suggest_output_directory()
+        else:
+            # If no file is selected, use the default initial directory
+            initial_directory = self.initial_directory
 
-    # Ask for the output directory
-    output_directory = filedialog.askdirectory(initialdir=initial_directory)
+        # Ask for the output directory
+        output_directory = filedialog.askdirectory(initialdir=initial_directory)
 
-    if output_directory:
-        # Set the output directory and update the entry field
-        self.output_directory = output_directory
-        self.output_directory_entry.delete(0, ctk.END)
-        self.output_directory_entry.insert(0, self.output_directory)
+        if output_directory:
+            # Set the output directory and update the entry field
+            self.output_directory = output_directory
+            self.output_directory_entry.delete(0, ctk.END)
+            self.output_directory_entry.insert(0, self.output_directory)
+
+    if frame_name == "name_normalizer_window":
+        move_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
+        self.move_directory_entry.delete(0, ctk.END)
+        self.move_directory_entry.insert(0, move_directory)
+
+    if frame_name == "video_editor_window":
+        video_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
+        self.video_output_directory_entry.delete(0, ctk.END)
+        self.video_output_directory_entry.insert(0, video_output_directory)
 
 
 def suggest_output_directory(self):
@@ -1298,21 +1345,6 @@ def process_name_normalizer_folder(self):
                           not_logging=False)
 
 
-# Open a dialog to browse and select a folder to normalize files
-def browse_folder_path(self):
-    # Function to browse and select a folder to normalize files
-    self.folder_path = filedialog.askdirectory(initialdir=self.initial_directory)
-    self.folder_path_entry.delete(0, ctk.END)
-    self.folder_path_entry.insert(0, self.folder_path)
-
-
-# Function to browse and select a folder to move the normalized files
-def browse_move_directory(self):
-    move_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
-    self.move_directory_entry.delete(0, ctk.END)
-    self.move_directory_entry.insert(0, move_directory)
-
-
 # Open a dialog to browse and select a file containing a line delimited list of artists
 def browse_artist_file(self):
     artist_file = filedialog.askopenfilename(
@@ -1320,13 +1352,6 @@ def browse_artist_file(self):
         filetypes=[("Text Files", "*.txt")])
     self.artist_file_entry.delete(0, ctk.END)
     self.artist_file_entry.insert(0, artist_file)
-
-
-# Function to clear the selection and update the GUI
-def clear_name_normalizer_selection(self):
-    self.folder_path_entry.delete(0, ctk.END)
-    self.move_directory_entry.delete(0, ctk.END)
-    self.artist_file_entry.delete(0, ctk.END)
 
 
 """
@@ -1460,7 +1485,6 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
                           not_logging=False)
 
 
-# TODO Optimize this
 # Method to process video edits based on user inputs.
 def process_video_edits(self):
     # Get input parameters from user interface.
@@ -1784,39 +1808,3 @@ def process_video_edits(self):
                               error=True,
                               not_logging=False)
             continue
-
-
-# Method to browse and select a file, directory, or .txt to process
-def browse_input_method(self):
-    input_method = filedialog.askopenfilename(
-        initialdir=self.initial_directory,
-        title="Browse a file. Close to select a directory instead",
-        filetypes=[("All Files", "*.*")],
-    )
-    if not input_method:
-        # If no file is selected, try to get a directory
-        input_method = filedialog.askdirectory(initialdir=self.initial_directory, title="Browse a directory")
-
-    self.input_method_entry.delete(0, ctk.END)
-    self.input_method_entry.insert(0, input_method)
-
-
-# Method to browse and select a folder to move the processed files
-def browse_video_output_directory(self):
-    video_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
-    self.video_output_directory_entry.delete(0, ctk.END)
-    self.video_output_directory_entry.insert(0, video_output_directory)
-
-
-# Function to clear the selection and update the GUI
-def clear_video_editor_selection(self):
-    self.input_method_entry.delete(0, ctk.END)
-    self.video_output_directory_entry.delete(0, ctk.END)
-
-    # Clear decibel entry and set default value
-    self.decibel_entry.delete(0, ctk.END)
-    self.decibel_entry.insert(0, self.default_decibel)
-
-    # Clear audio normalization entry and set default value
-    self.audio_normalization_entry.delete(0, ctk.END)
-    self.audio_normalization_entry.insert(0, self.default_audio_normalization)

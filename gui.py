@@ -372,7 +372,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse file button
         self.browse_file_button = ctk.CTkButton(self.file_renamer_top_frame, text="Browse File",
-                                                command=self.browse_file)
+                                                command=lambda: self.browse_input("file_renamer_window"))
         self.browse_file_button.grid(row=0, column=0, padx=5)
 
         # Selected File Display
@@ -427,7 +427,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Output Directory Browse Button
         self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Output Directory",
-                                                            command=self.browse_output_directory)
+                                                            command=lambda: self.browse_output_directory(
+                                                                "file_renamer_window"))
         self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Output Directory Entry
@@ -454,7 +455,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.undo_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Clear Button
-        self.clear_button = ctk.CTkButton(self.button_group_frame, text="Clear", command=self.clear_selection)
+        self.clear_button = ctk.CTkButton(self.button_group_frame, text="Clear",
+                                          command=lambda: self.clear_selection("file_renamer_window"))
         self.clear_button.grid(row=0, column=1, padx=10, pady=10)
 
         # Move to Trash Button
@@ -565,7 +567,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse Folder button
         self.browse_folder_button = ctk.CTkButton(self.name_normalizer_top_frame, text="Browse Folder",
-                                                  command=self.browse_folder_path)
+                                                  command=lambda: self.browse_input(
+                                                                     frame_name="name_normalizer_window"))
         self.browse_folder_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Folder Path Entry
@@ -825,7 +828,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse move directory folder button
         self.browse_move_directory_button = ctk.CTkButton(self.output_directory_frame, text="Output Directory",
-                                                          command=self.browse_move_directory)
+                                                          command=lambda: self.browse_output_directory(
+                                                                     frame_name="name_normalizer_window"))
         self.browse_move_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Move directory entry
@@ -855,7 +859,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Clear Name Normalizer Selection Button
         self.clear_name_normalizer_selection_button = ctk.CTkButton(self.normalize_folder_frame,
                                                                     text="Clear",
-                                                                    command=self.clear_name_normalizer_selection)
+                                                                    command=lambda: self.clear_selection(
+                                                                        frame_name="name_normalizer_window"))
         self.clear_name_normalizer_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Normalize Folder button
@@ -891,7 +896,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Video Editor browse input method button
         self.browse_input_method_button = ctk.CTkButton(self.video_editor_top_frame, text="Browse",
-                                                        command=self.browse_input_method)
+                                                        command=lambda: self.browse_input(
+                                                                     frame_name="video_editor_window"))
         self.browse_input_method_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Input method entry for a file, directory, or .txt containing a line delimited list of files to process
@@ -966,7 +972,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse video output directory folder button
         self.browse_video_output_directory_button = ctk.CTkButton(self.video_output_directory_frame,
                                                                   text="Output Directory",
-                                                                  command=self.browse_video_output_directory)
+                                                                  command=lambda: self.browse_output_directory(
+                                                                     frame_name="video_editor_window"))
         self.browse_video_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Video output directory entry
@@ -981,7 +988,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Clear process video editor Button
         self.clear_video_editor_selection_button = ctk.CTkButton(self.process_video_editor_frame,
                                                                  text="Clear",
-                                                                 command=self.clear_video_editor_selection)
+                                                                 command=lambda: self.clear_selection(
+                                                                     frame_name="video_editor_window"))
         self.clear_video_editor_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Process video button
@@ -1263,17 +1271,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Undo the last operation and update the GUI
         core.undo_last(self)
 
-    def clear_selection(self):
+    def clear_selection(self, frame_name):
         # Clear the selected file and update the GUI
-        core.clear_selection(self)
+        core.clear_selection(self, frame_name)
 
-    def browse_file(self):
+    def browse_input(self, frame_name):
         # Open a file dialog to browse and select a file
-        core.browse_file(self)
+        core.browse_input(self, frame_name)
 
-    def browse_output_directory(self):
+    def browse_output_directory(self, frame_name):
         # Open a dialog to browse and select an output directory
-        core.browse_output_directory(self)
+        core.browse_output_directory(self, frame_name)
 
     def suggest_output_directory(self):
         # Function to suggest an output directory matching an artist name
@@ -1353,21 +1361,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Function to performing various name normalization operations on certain files within a specified folder
         core.process_name_normalizer_folder(self)
 
-    def browse_folder_path(self):
-        # Open a dialog to browse and select a folder to normalize files
-        core.browse_folder_path(self)
-
-    def browse_move_directory(self):
-        # Function to browse and select a folder to move the normalized files
-        core.browse_move_directory(self)
-
     def browse_artist_file(self):
         # Open a dialog to browse and select a file containing a line delimited list of artists
         core.browse_artist_file(self)
-
-    def clear_name_normalizer_selection(self):
-        # Function to clear the selection and update the GUI
-        core.clear_name_normalizer_selection(self)
 
     """
     Video Editor
@@ -1396,18 +1392,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def process_video_edits(self):
         # Method to process video edits based on user inputs.
         core.process_video_edits(self)
-
-    def browse_input_method(self):
-        # Method to browse and select a file, directory, or .txt to process
-        core.browse_input_method(self)
-
-    def browse_video_output_directory(self):
-        # Method to browse and select a folder to move the processed files
-        core.browse_video_output_directory(self)
-
-    def clear_video_editor_selection(self):
-        # Function to clear the selection and update the GUI
-        core.clear_video_editor_selection(self)
 
 
 if __name__ == "__main__":
