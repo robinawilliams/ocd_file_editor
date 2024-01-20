@@ -15,34 +15,33 @@ Messaging
 """
 
 
-# TODO Optimize these two functions
-# Method to check logging state, log if applicable, and show a messagebox.
-def log_and_show_message(self, message, frame_name, create_messagebox):
+def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
+    """
+    Method to check logging state, log if applicable, and show a messagebox.
+
+    Parameters:
+    - message: The message to be logged and displayed.
+    - frame_name: The name of the frame where the message should be displayed.
+    - create_messagebox: Boolean indicating whether to create and display a messagebox.
+    - error: Boolean indicating whether the message is an error message (default is False).
+    - not_logging: Boolean indicating whether to skip logging (default is False).
+    """
     # Check logging state and log message if applicable
-    if self.activate_logging_var.get():
-        logging.info(message)
+    if not not_logging and self.activate_logging_var.get():
+        logging_function = logging.error if error else logging.info
+        logging_function(message)
+
     # Check messagebox state and display messageboxes if applicable
     if self.show_messageboxes_var.get():
+        messagebox_function = messagebox.showerror if error else messagebox.showinfo
         if create_messagebox:
-            messagebox.showinfo("Info", message)
-    # Display the message on the applicable frame
-    self.show_message(message, error=False, frame_name=frame_name)
-
-
-# Method to check logging state, log if applicable, and show a messagebox error.
-# Confirmation messageboxes will always be displayed
-def log_and_show_error(self, error_message, frame_name, create_messagebox, not_logging):
-    # Check logging state and log error message if applicable
-    if self.activate_logging_var.get():
-        if not not_logging:
-            logging.error(error_message)
-    # Check messagebox state and display messageboxes if applicable
-    if self.show_messageboxes_var.get():
-        if create_messagebox:
-            messagebox.showerror("Error", error_message)
+            messagebox_function("Error" if error else "Info", message)
+        else:
+            # Display the message on the applicable frame if messageboxes are enabled but none were created
+            self.show_message(message, error=error, frame_name=frame_name)
     else:
-        # Display the error message on the applicable frame if messageboxes are disabled
-        self.show_message(error_message, error=True, frame_name=frame_name)
+        # Display the message on the applicable frame if messageboxes are disabled
+        self.show_message(message, error=error, frame_name=frame_name)
 
 
 """
@@ -185,9 +184,11 @@ def move_file_to_trash(self):
             confirmation = messagebox.askyesno("Confirm Action",
                                                "Are you sure you want to move this file to the trash?")
             # Log the action if logging is enabled
-            self.log_and_show_message(f"'{self.selected_file}' selected for deletion.",
-                                      frame_name="file_renamer_window",
-                                      create_messagebox=False)
+            self.log_and_show(f"'{self.selected_file}' selected for deletion.",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
 
             if confirmation:
                 # Move the file to trash using send2trash library
@@ -200,22 +201,24 @@ def move_file_to_trash(self):
                 self.output_directory = ""
                 self.output_directory_entry.delete(0, ctk.END)
                 # Log the action if logging is enabled
-                self.log_and_show_message("File moved to trash successfully",
-                                          frame_name="file_renamer_window",
-                                          create_messagebox=False)
+                self.log_and_show("File moved to trash successfully",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
         else:
             # Log the action if logging is enabled
-            self.log_and_show_error("No file selected. Cannot move to trash.", error=True,
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    not_logging=False)
+            self.log_and_show("No file selected. Cannot move to trash.",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
     except OSError as e:
-        # Construct the error message
-        error_message = f"Error: {str(e)}"
-        self.log_and_show_error(error_message, error=True,
-                                frame_name="file_renamer_window",
-                                create_messagebox=False,
-                                not_logging=False)
+        self.log_and_show(f"Error: {str(e)}",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
 
 
 # Function to load the last used file
@@ -233,14 +236,17 @@ def load_last_used_file(self):
 
         message = filename
         # Log the action if logging is enabled
-        self.log_and_show_message(f"Last used file selected: {message}",
-                                  frame_name="file_renamer_window",
-                                  create_messagebox=False)
+        self.log_and_show(f"Last used file selected: {message}",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
     else:
-        self.log_and_show_error("Error: No last used file found.", error=True,
-                                frame_name="file_renamer_window",
-                                create_messagebox=False,
-                                not_logging=False)
+        self.log_and_show("Error: No last used file found.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
 
 
 # Function to handle a file being dropped onto the application window
@@ -260,24 +266,27 @@ def on_file_drop(self, event):
     # Log the error and display the error in the gui
     message = filename
     # Log the action if logging is enabled
-    self.log_and_show_message(f"File selected via drop: {message}",
-                              frame_name="file_renamer_window",
-                              create_messagebox=False)
+    self.log_and_show(f"File selected via drop: {message}",
+                      frame_name="file_renamer_window",
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=False)
 
     # Open the file if the corresponding option is set
     if self.open_on_file_drop_var.get():
         try:
             subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
-            if self.activate_logging_var.get():
-                # Log the action if logging is enabled
-                logging.info(f"File opened: {self.selected_file}")
+            self.log_and_show(f"File opened: {self.selected_file}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
         except OSError as e:
-            # Construct the error message
-            error_message = f"Error: {str(e)}"
-            self.log_and_show_error(error_message, error=True,
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    not_logging=False)
+            self.log_and_show(f"Error: {str(e)}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
 
 
 # Function to add a category to the queue
@@ -289,10 +298,11 @@ def add_to_queue(self, category):
 
         # Update file display and show a message
         self.update_file_display()
-        self.log_and_show_error(f"Word added: {category}",
-                                frame_name="file_renamer_window",
-                                create_messagebox=False,
-                                not_logging=True)
+        self.log_and_show(f"Word added: {category}",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=True)
 
 
 # Function to update the file display based on selected options
@@ -316,11 +326,12 @@ def update_file_display(self):
 
         # Handle name length constraints
         if len(name) > 250:
-            self.log_and_show_error("The proposed file name exceeds 250 characters. Please consider "
-                                    "shortening it to comply with operating system limitations.",
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=True,
-                                    not_logging=False)
+            self.log_and_show("The proposed file name exceeds 250 characters. Please consider "
+                              "shortening it to comply with operating system limitations.",
+                              frame_name="file_renamer_window",
+                              create_messagebox=True,
+                              error=False,
+                              not_logging=False)
             # Truncate the name
             name = f"...{name[180:]}"
 
@@ -334,16 +345,18 @@ def undo_last(self):
         # Remove the last category from the queue and update display
         self.queue.pop()
         self.update_file_display()
-        self.log_and_show_error("Last category removed",
-                                frame_name="file_renamer_window",
-                                create_messagebox=False,
-                                not_logging=True)
+        self.log_and_show("Last category removed",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=True)
     else:
         # Log the action if logging is enabled
-        self.log_and_show_error("Error: Nothing in the queue. Nothing to undo.", error=True,
-                                frame_name="file_renamer_window",
-                                create_messagebox=False,
-                                not_logging=False)
+        self.log_and_show("Error: Nothing in the queue. Nothing to undo.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
 
 
 # Function to clear the selection and reset related elements
@@ -351,10 +364,11 @@ def clear_selection(self):
     self.selected_file = ""
     self.queue = []
     self.file_display_text.set("")
-    self.log_and_show_error("Selection cleared",
-                            frame_name="file_renamer_window",
-                            create_messagebox=False,
-                            not_logging=True)
+    self.log_and_show("Selection cleared",
+                      frame_name="file_renamer_window",
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=True)
 
     # Clear custom text entry and reset output directory
     self.custom_text_entry.delete(0, ctk.END)
@@ -383,9 +397,11 @@ def browse_file(self):
         # Log the error and display the error in the gui
         message = filename
         # Log the action if logging is enabled
-        self.log_and_show_message(f"File selected via Browse: {message}",
-                                  frame_name="file_renamer_window",
-                                  create_messagebox=False)
+        self.log_and_show(f"File selected via Browse: {message}",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
 
 
 # Function to browse and select an output directory
@@ -435,12 +451,18 @@ def suggest_output_directory(self):
         if confirmation:
             new_output_directory = filedialog.askdirectory(initialdir=self.initial_directory)
             if new_output_directory:
-                if self.activate_logging_var.get():
-                    logging.info(f"User chose a new output location: {new_output_directory}")
+                self.log_and_show(f"User chose a new output location: {new_output_directory}",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
                 return new_output_directory
         else:
-            if self.activate_logging_var.get():
-                logging.info("User did not choose a new output location. Falling back to default location.")
+            self.log_and_show("User did not choose a new output location. Falling back to default location.",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
             return self.output_directory
 
     # If no file is selected, use the default initial directory
@@ -469,16 +491,19 @@ def handle_rename_success(self, new_path):
                 pass
 
             # Log the action if logging is enabled
-            self.log_and_show_message(f"Empty file created successfully for {folder_name}",
-                                      frame_name="file_renamer_window",
-                                      create_messagebox=False)
+            self.log_and_show(f"Empty file created successfully for {folder_name}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
 
         except Exception as e:
             # Handle any errors that may occur
-            self.log_and_show_error(f"Error creating empty file: {str(e)}",
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    not_logging=False)
+            self.log_and_show(f"Error creating empty file: {str(e)}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
 
     # Reset selected file, queue, and update last used file
     self.selected_file = ""
@@ -500,9 +525,11 @@ def handle_rename_success(self, new_path):
         self.output_directory_entry.insert(0, self.output_directory)
 
     # Log the action if logging is enabled
-    self.log_and_show_message("File renamed and saved successfully",
-                              frame_name="file_renamer_window",
-                              create_messagebox=False)
+    self.log_and_show("File renamed and saved successfully",
+                      frame_name="file_renamer_window",
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=False)
 
 
 """
@@ -525,10 +552,11 @@ def add_category(self):
                 # Use the provided weight if it's an integer, otherwise use the default weight
                 weight = int(weight_entry_value) if weight_entry_value else self.default_weight
             except ValueError:
-                self.log_and_show_error("Error: Weight must be an integer. Using default weight.", error=True,
-                                        frame_name="file_renamer_window",
-                                        create_messagebox=False,
-                                        not_logging=False)
+                self.log_and_show("Error: Weight must be an integer. Using default weight.",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=True,
+                                  not_logging=False)
                 weight = self.default_weight
 
             # Add the new category to the dictionary with the specified weight
@@ -545,15 +573,18 @@ def add_category(self):
             self.weight_entry.insert(0, self.default_weight)  # Reset to default weight
 
             # Log the action if logging is enabled
-            self.log_and_show_message(f"Category added: '{new_category}' with weight({weight})",
-                                      frame_name="file_renamer_window",
-                                      create_messagebox=False)
+            self.log_and_show(f"Category added: '{new_category}' with weight({weight})",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
         else:
             # Log the action if logging is enabled
-            self.log_and_show_error(f"Error: '{new_category}' already exists. Skipping.", error=True,
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    not_logging=False)
+            self.log_and_show(f"Error: '{new_category}' already exists. Skipping.",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
             # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
             self.weight_entry.delete(0, ctk.END)
@@ -578,9 +609,11 @@ def remove_category(self):
         self.remove_category_entry.delete(0, ctk.END)
 
         # Log the action if logging is enabled
-        self.log_and_show_message(f"Category removed: {category_to_remove}",
-                                  frame_name="file_renamer_window",
-                                  create_messagebox=False)
+        self.log_and_show(f"Category removed: {category_to_remove}",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
     else:
         # Check for a case-insensitive match
         matching_category = next((key for key in self.categories if key.lower() == category_to_remove.lower()), None)
@@ -597,15 +630,18 @@ def remove_category(self):
             self.remove_category_entry.delete(0, ctk.END)
 
             # Log the action if logging is enabled
-            self.log_and_show_message(f"Category removed: {matching_category}",
-                                      frame_name="file_renamer_window",
-                                      create_messagebox=False)
+            self.log_and_show(f"Category removed: {matching_category}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
         else:
             # Log the action if logging is enabled
-            self.log_and_show_error(f"Error: '{category_to_remove}' not found in dictionary. Skipping.", error=True,
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    not_logging=False)
+            self.log_and_show(f"Error: '{category_to_remove}' not found in dictionary. Skipping.",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
 
 
 def create_category_button(self, category):
@@ -703,28 +739,31 @@ def rename_files(self):
                 self.output_directory = self.suggest_output_directory()
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
                 # Log the action if logging is enabled
-                self.log_and_show_message(f"Suggested output directory: {self.output_directory}",
-                                          frame_name="video_editor_window",
-                                          create_messagebox=False)
+                self.log_and_show(f"Suggested output directory: {self.output_directory}",
+                                  frame_name="video_editor_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
             else:
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
 
         # Attempt to rename the file and handle success or errors
         try:
             os.rename(self.selected_file, new_path)
-            if self.activate_logging_var.get():
-                # Log the renaming action if logging is enabled
-                logging.info(f"\nFile: '{os.path.basename(self.selected_file)}' renamed successfully. "
-                             f"\nSaved to: \n{new_path}")
+            self.log_and_show(f"\nFile: '{os.path.basename(self.selected_file)}' renamed successfully. "
+                              f"\nSaved to: \n{new_path}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
             self.handle_rename_success(new_path)
         except OSError as e:
-            # Construct the error message
-            error_message = f"Error: {str(e)}"
             # Log the action if logging is enabled
-            self.log_and_show_error(error_message, error=True,
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    not_logging=False)
+            self.log_and_show(f"Error: {str(e)}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
@@ -743,13 +782,12 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 # Remove the tail __-__ if found
                 name = name.replace("__-__", "")
             except OSError as e:
-                # Construct the error message
-                error_message = f"Error: {str(e)}"
                 # Log the action if logging is enabled
-                self.log_and_show_error(error_message, error=True,
-                                        frame_name="file_renamer_window",
-                                        create_messagebox=False,
-                                        not_logging=False)
+                self.log_and_show(f"Error: {str(e)}",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=True,
+                                  not_logging=False)
         else:
             # If there's no special character found, default to suffix
             name = f"{base_name} {categories_text} {custom_text}".strip()
@@ -995,8 +1033,11 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
 
         # Skip renaming if the name is the same as the original
         if name == filename:
-            if self.activate_logging_var.get():
-                logging.info(f"Skipped renaming: {filename} (no changes needed)")
+            self.log_and_show(f"Skipped renaming: {filename} (no changes needed)",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
             return
 
         # Construct the new file path
@@ -1004,21 +1045,30 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
 
         # Check if the new filename already exists
         if os.path.exists(new_path):
-            if self.activate_logging_var.get():
-                logging.warning(f"Conflict detected on: \n{name}.")
+            self.log_and_show(f"Conflict detected on: \n{name}.",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
 
             # Extract the base name (excluding extension) and check for existing counter
             base_name, _ = os.path.splitext(name)
             counter_match = re.search(r" \((\d+)\)$", base_name)
 
             if counter_match:
-                if self.activate_logging_var.get():
-                    logging.info(f"Counter match on: \n{name}.")
+                self.log_and_show(f"Counter match on: \n{name}.",
+                                  frame_name="name_normalizer_window",
+                                  create_messagebox=False,
+                                  error=True,
+                                  not_logging=False)
                 counter = int(counter_match.group(1)) + 1
                 base_name = re.sub(r" \(\d+\)$", "", base_name)  # Remove existing counter
             else:
-                if self.activate_logging_var.get():
-                    logging.info(f"No counter match on: \n{name}.")
+                self.log_and_show(f"No counter match on: \n{name}.",
+                                  frame_name="name_normalizer_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
                 counter = 1
 
             # Generate name with incremented counter until a unique name is found
@@ -1033,20 +1083,29 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
             os.rename(file_path, new_path)
 
             # Log the renaming operation if logging is activated
-            if self.activate_logging_var.get():
-                logging.info(f"Renamed: {filename} -> {os.path.basename(new_path)}")
+            self.log_and_show(f"Renamed: {filename} -> {os.path.basename(new_path)}",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
 
             # Move the renamed file to the specified directory if move_directory is provided
             if move_directory:
                 move_file_with_overwrite_check(self, new_path, move_directory)
         except OSError as e:
             # Log an error if renaming fails
-            if self.activate_logging_var.get():
-                logging.error(f"Error renaming {filename}: {e}")
+            self.log_and_show(f"Error renaming {filename}: {e}",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
     else:
         # Log that the file is ignored if not on the file extensions list
-        if self.activate_logging_var.get():
-            logging.info(f"Ignored: {filename} (not on file extensions list)")
+        self.log_and_show(f"Ignored: {filename} (not on file extensions list)",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
 
 
 # Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full file paths
@@ -1057,9 +1116,16 @@ def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
 
     # Traverse through the folder using os.walk
     for root, dirs, files in os.walk(folder_path):
-        # Log the shallow os.walk operation if logging is activated
-        if self.activate_logging_var.get():
-            logging.info(f"Info: {self.deep_walk_var.get()} os.walk started on '{folder_path}'")
+        if self.deep_walk_var.get():
+            deep_walk_status = "including subdirectories"
+        else:
+            deep_walk_status = "excluding subdirectories"
+
+        self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
         # Include subdirectories if the deep_walk_var is True or the foot folder is selected
         if self.deep_walk_var.get() or root == folder_path:
             for file in files:
@@ -1091,12 +1157,18 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
         shutil.move(str(source_path), str(destination_file))
 
         # Log the move operation if logging is activated
-        if self.activate_logging_var.get():
-            logging.info(f"Moved: {os.path.basename(source_path)} -> {os.path.basename(destination_file)}")
+        self.log_and_show(f"Moved: {os.path.basename(source_path)} -> {os.path.basename(destination_file)}",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
     except OSError as e:
         # Log error if logging is activated
-        if self.activate_logging_var.get():
-            logging.error(f"Error renaming {os.path.basename(source_path)}: {e}")
+        self.log_and_show(f"Error renaming {os.path.basename(source_path)}: {e}",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
 
 
 # Function to performing various name normalization operations on certain files within a specified folder
@@ -1108,18 +1180,20 @@ def process_name_normalizer_folder(self):
 
     # Check if the specified folder path exists
     if not os.path.exists(folder_path):
-        self.log_and_show_error("Folder path does not exist or was not specified.\nPlease try again.",
-                                frame_name="name_normalizer_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show("Folder path does not exist or was not specified.\nPlease try again.",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Check if move_directory is specified and exists
     if move_directory and not os.path.exists(move_directory):
-        self.log_and_show_error("Output directory does not exist or was not specified.\nPlease try again.",
-                                frame_name="name_normalizer_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show("Output directory does not exist or was not specified.\nPlease try again.",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Check artist file conditions if artist_file_search_var is True
@@ -1131,11 +1205,12 @@ def process_name_normalizer_folder(self):
             if not os.path.exists(artist_file):
                 return
         elif not os.path.exists(artist_file):
-            self.log_and_show_error("Artist file does not exist.\nPlease create it from the template and try "
-                                    "again\nor turn off Artist Search.\nSee FAQ",
-                                    frame_name="name_normalizer_window",
-                                    create_messagebox=True,
-                                    not_logging=False)
+            self.log_and_show("Artist file does not exist.\nPlease create it from the template and try "
+                              "again\nor turn off Artist Search.\nSee FAQ",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
             return
 
     # Set move_directory to None if not specified
@@ -1146,12 +1221,18 @@ def process_name_normalizer_folder(self):
     confirmation = messagebox.askyesno("Confirm Action",
                                        "Are you sure you want normalize these files? This cannot be undone.")
     if confirmation:
-        if self.activate_logging_var.get():
-            logging.info(f"User confirmed the name normalization process for {folder_path}.")
+        self.log_and_show(f"User confirmed the name normalization process for {folder_path}.",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
         pass
     else:
-        if self.activate_logging_var.get():
-            logging.info(f"User cancelled the name normalization process for {folder_path}.")
+        self.log_and_show(f"User cancelled the name normalization process for {folder_path}.",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
         return
 
     try:
@@ -1172,19 +1253,28 @@ def process_name_normalizer_folder(self):
                 )
         except OSError as e:
             # Log error if logging is activated
-            if self.activate_logging_var.get():
-                logging.error(f"Error: {str(e)}")
+            self.log_and_show(f"Error: {str(e)}",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
         try:
             # Remove the temporary file
             os.remove(self.file_path_list_file)
 
             # Log deletion of temp file if logging is activated
-            if self.activate_logging_var.get():
-                logging.info("Deleting temp file.")
+            self.log_and_show("Deleting temp file.",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
         except OSError as e:
             # Log error if logging is activated
-            if self.activate_logging_var.get():
-                logging.error(f"Error: {str(e)}")
+            self.log_and_show(f"Error: {str(e)}",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=True,
+                              not_logging=False)
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
@@ -1194,15 +1284,18 @@ def process_name_normalizer_folder(self):
             self.artist_file_entry.delete(0, ctk.END)
 
         # Log the action if logging is enabled
-        self.log_and_show_message("Files have been processed successfully.",
-                                  frame_name="name_normalizer_window",
-                                  create_messagebox=False)
+        self.log_and_show("Files have been processed successfully.",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
     except Exception as e:
         # Display error message if an exception occurs
-        self.log_and_show_error(f"An error occurred: {e}",
-                                frame_name="name_normalizer_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show(f"An error occurred: {e}",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
 
 # Open a dialog to browse and select a folder to normalize files
@@ -1265,10 +1358,11 @@ def get_non_conflicting_filename(self, path):
         return new_path
     except Exception as e:
         # Log error and display an error message when get non-conflicting file name fails.
-        self.log_and_show_error(f"Error getting non-conflicting file name: {str(e)}",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show(f"Error getting non-conflicting file name: {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
         # Return None in case of an error.
         return None
@@ -1281,17 +1375,21 @@ def rotate_video(self, clip, rotation_angle):
         rotated_clip = clip.rotate(rotation_angle)
 
         # Log rotation success if logging is activated.
-        if self.activate_logging_var.get():
-            logging.info(f"Rotation successful {clip} {rotation_angle}")
+        self.log_and_show(f"Rotation successful {clip} {rotation_angle}",
+                          frame_name="video_editor_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
 
         # Return the rotated video clip.
         return rotated_clip
     except Exception as e:
         # Log error and display an error message if rotation fails.
-        self.log_and_show_error(f"Error rotating video: {str(e)}",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show(f"Error rotating video: {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
         # Return None in case of an error.
         return None
@@ -1308,10 +1406,11 @@ def increase_volume(self, clip, increase_db):
 
     except Exception as e:
         # Log error and display an error message if volume increase fails.
-        self.log_and_show_error(f"Error increasing volume: {str(e)}",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show(f"Error increasing volume: {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
         # Return None in case of an error.
         return None
@@ -1328,10 +1427,11 @@ def normalize_audio(self, clip, volume_multiplier):
 
     except Exception as e:
         # Log error and display an error message if audio normalization fails.
-        self.log_and_show_error(f"Error normalizing audio: {str(e)}",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show(f"Error normalizing audio: {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
         # Return None in case of an error.
         return None
@@ -1353,8 +1453,11 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
                         file.write(line)
     except Exception as e:
         # Log the exception using the logging module.
-        if self.activate_logging_var.get():
-            logging.error(f"An error occurred while removing line from file: {e}")
+        self.log_and_show(f"An error occurred while removing line from file: {e}",
+                          frame_name="video_editor_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
 
 
 # TODO Optimize this
@@ -1381,35 +1484,39 @@ def process_video_edits(self):
 
     # Check if an input source is provided
     if not input_method:
-        self.log_and_show_error("Input must be specified (video file, line separated txt, or directory.",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show("Input must be specified (video file, line separated txt, or directory.",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Check if the provided input exists
     if input_method and not os.path.exists(input_method):
-        self.log_and_show_error("The input does not exist or cannot be found. Please try again.",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show("The input does not exist or cannot be found. Please try again.",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Check if the necessary parameters for video editing are provided
     if input_method and decibel is None and rotation is None and audio_normalization is None:
-        self.log_and_show_error("You need to specify an operation (audio increase, video rotation, "
-                                "audio normalization, or a combination of them",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show("You need to specify an operation (audio increase, video rotation, "
+                          "audio normalization, or a combination of them",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Check if the provided output directory exists
     if video_output_directory and not os.path.exists(video_output_directory):
-        self.log_and_show_error("The output directory does not exist or cannot be found. Please try again.",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show("The output directory does not exist or cannot be found. Please try again.",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Define which input paths based on user input (Video file, .txt file, or directory)
@@ -1429,8 +1536,11 @@ def process_video_edits(self):
                                                "Are you sure you want edit ALL video files in the provided directory?"
                                                "\nThis option may be computer intensive.")
             if confirmation:
-                if self.activate_logging_var.get():
-                    logging.info(f"User confirmed the directory for {input_method}.")
+                self.log_and_show(f"User confirmed the directory for {input_method}.",
+                                  frame_name="video_editor_window",
+                                  create_messagebox=True,
+                                  error=True,
+                                  not_logging=False)
 
                 # Get the absolute file paths of all files within the directory with valid extensions
                 input_paths = []
@@ -1440,18 +1550,18 @@ def process_video_edits(self):
                         if os.path.splitext(file_path)[1].lower() in self.valid_extensions:
                             input_paths.append(file_path)
             else:
-                if self.activate_logging_var.get():
-                    logging.info(f"User cancelled the name normalization process for {input_method}.")
+                # If the user does not confirm the directory, return
                 return
 
         else:
             raise ValueError("Invalid input detected. Please select a video file, .txt file with video file paths, "
                              "or a directory with video files")
     except Exception as e:
-        self.log_and_show_error(f"Error processing input: {str(e)}",
-                                frame_name="video_editor_window",
-                                create_messagebox=True,
-                                not_logging=False)
+        self.log_and_show(f"Error processing input: {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
         return
 
     # Process each input path
@@ -1459,8 +1569,11 @@ def process_video_edits(self):
         try:
             # Check if the file name length exceeds 260 characters
             if len(input_path) > 260:
-                if self.activate_logging_var.get():
-                    logging.warning(f"File over 260 warning!!! Fix: {input_path}")
+                self.log_and_show(f"File over 260 warning!!! Fix: {input_path}",
+                                  frame_name="name_normalizer_window",
+                                  create_messagebox=False,
+                                  error=True,
+                                  not_logging=False)
 
                 # Create a temporary copy of the file
                 temp_dir = os.path.dirname(input_path)
@@ -1544,18 +1657,21 @@ def process_video_edits(self):
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
                     # Log the action if logging is enabled
-                    self.log_and_show_message(f"Video {operation_suffix.lower()} saved as {output_path}",
-                                              frame_name="video_editor_window",
-                                              create_messagebox=False)
+                    self.log_and_show(f"Video {operation_suffix.lower()} saved as {output_path}",
+                                      frame_name="video_editor_window",
+                                      create_messagebox=False,
+                                      error=False,
+                                      not_logging=False)
 
                     # Remove the successfully processed line from the input file
                     if input_method:
                         remove_successful_line_from_file(self, input_method, input_path)
                 else:
-                    self.log_and_show_error(f"Operations failed for video {input_path}",
-                                            frame_name="video_editor_window",
-                                            create_messagebox=True,
-                                            not_logging=False)
+                    self.log_and_show(f"Operations failed for video {input_path}",
+                                      frame_name="video_editor_window",
+                                      create_messagebox=True,
+                                      error=True,
+                                      not_logging=False)
 
                 # Close the original clip to free resources
                 original_clip.close()
@@ -1641,28 +1757,32 @@ def process_video_edits(self):
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
                     # Log the action if logging is enabled
-                    self.log_and_show_message(f"Video {operation_suffix.lower()} saved as {output_path}",
-                                              frame_name="video_editor_window",
-                                              create_messagebox=False)
+                    self.log_and_show(f"Video {operation_suffix.lower()} saved as {output_path}",
+                                      frame_name="video_editor_window",
+                                      create_messagebox=False,
+                                      error=False,
+                                      not_logging=False)
 
                     # Remove the successfully processed line from the input file
                     if input_method:
                         remove_successful_line_from_file(self, input_method, input_path)
                 else:
-                    self.log_and_show_error(f"Operations failed for video {input_path}",
-                                            frame_name="video_editor_window",
-                                            create_messagebox=True,
-                                            not_logging=False)
+                    self.log_and_show(f"Operations failed for video {input_path}",
+                                      frame_name="video_editor_window",
+                                      create_messagebox=True,
+                                      error=True,
+                                      not_logging=False)
 
                 # Close the original clip to free resources
                 original_clip.close()
 
         except OSError as e:
             # Log error and skip to the next file in case of OSError
-            self.log_and_show_error(f"OSError: {str(e)} Skipping this file and moving to the next one.",
-                                    frame_name="video_editor_window",
-                                    create_messagebox=True,
-                                    not_logging=False)
+            self.log_and_show(f"OSError: {str(e)} Skipping this file and moving to the next one.",
+                              frame_name="video_editor_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
             continue
 
 
@@ -1690,7 +1810,6 @@ def browse_video_output_directory(self):
 
 # Function to clear the selection and update the GUI
 def clear_video_editor_selection(self):
-    self.video_editor_display_entry.delete(0, ctk.END)
     self.input_method_entry.delete(0, ctk.END)
     self.video_output_directory_entry.delete(0, ctk.END)
 

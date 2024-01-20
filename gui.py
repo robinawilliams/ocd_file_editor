@@ -19,6 +19,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory = ""
         self.queue = []
 
+        self.last_used_file = ""
+
         # Initialize GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
@@ -1217,13 +1219,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             label.configure(text=truncated_message)
 
-    def log_and_show_message(self, message, frame_name, create_messagebox):
-        # Method to check logging state, log if applicable, and show a message
-        core.log_and_show_message(self, message, frame_name, create_messagebox)
-
-    def log_and_show_error(self, error_message, frame_name, create_messagebox, not_logging):
-        # Method to check logging state, log if applicable, and show a messagebox error.
-        core.log_and_show_error(self, error_message, frame_name, create_messagebox, not_logging)
+    def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
+        # Method to check logging state, log if applicable, and show a messagebox.
+        core.log_and_show(self, message, frame_name, create_messagebox, error, not_logging)
 
     """
     Configuration
