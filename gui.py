@@ -190,7 +190,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
          remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var, remove_double_quote_var,
          title_var, reset_var,
-         initial_output_directory, artist_file, file_path_list_file, default_frame, artist_file_search_var,
+         initial_output_directory, artist_file, default_frame, artist_file_search_var,
          deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
          default_rotation_var, remove_double_space_var, remove_colon_var, remove_semicolon_var, remove_percent_var,
          remove_caret_var, remove_dollar_var, remove_asterisk_var, remove_plus_var, remove_equal_var,
@@ -205,7 +205,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_directory = double_check_directory
         self.artist_directory = artist_directory
         self.artist_file = artist_file
-        self.file_path_list_file = file_path_list_file
         self.categories_file = categories_file
 
         # Variables and window geometry - Set instance variables with the values from the configuration file
@@ -1347,11 +1346,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def rename_and_move_file(self, file_path, move_directory, artist_file):
         # Function to process and rename files and moving files to a specified directory
         core.rename_and_move_file(self, file_path, move_directory, artist_file)
-
-    def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
-        # Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full
-        # file paths to a specified file
-        core.get_folder_contents_and_save_to_file(self, folder_path, file_list_file)
 
     def move_file_with_overwrite_check(self, source_path, destination_directory):
         # Function to move a file from a source path to a destination directory with overwrite protection

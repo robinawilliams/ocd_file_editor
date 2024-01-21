@@ -66,7 +66,6 @@ def load_configuration():
     double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='~')
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
-    file_path_list_file = config.get('Filepaths', 'file_path_list_file', fallback='temp.txt')
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
@@ -149,7 +148,7 @@ def load_configuration():
             remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
             remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
             remove_double_quote_var,
-            title_var, reset_var, initial_output_directory, artist_file, file_path_list_file, default_frame,
+            title_var, reset_var, initial_output_directory, artist_file, default_frame,
             artist_file_search_var, deep_walk_var, default_decibel, default_audio_normalization,
             remove_successful_lines_var, default_rotation_var, remove_double_space_var, remove_colon_var,
             remove_semicolon_var, remove_percent_var, remove_caret_var, remove_dollar_var, remove_asterisk_var,
@@ -1182,36 +1181,6 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
                           not_logging=False)
 
 
-# Function to retrieve the contents of a folder, including all files in subdirectories, and saves the full file paths
-# to a specified file
-def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
-    # Initialize an empty list to store file paths
-    file_paths = []
-
-    # Log the os.walk state
-    if self.deep_walk_var.get():
-        deep_walk_status = "including subdirectories"
-    else:
-        deep_walk_status = "excluding subdirectories"
-    self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'",
-                      frame_name="name_normalizer_window",
-                      create_messagebox=False,
-                      error=False,
-                      not_logging=False)
-
-    # Traverse through the folder using os.walk
-    for root, dirs, files in os.walk(folder_path):
-        # Include subdirectories if the deep_walk_var is True or the root folder is selected
-        if self.deep_walk_var.get() or root == folder_path:
-            for file in files:
-                # Append the full file path to the list
-                file_paths.append(str(os.path.join(root, file)))
-
-    # Write the file paths to the specified file
-    with open(file_list_file, 'w') as f:
-        f.write('\n'.join(file_paths))
-
-
 # Function to move a file from a source path to a destination directory with overwrite protection
 def move_file_with_overwrite_check(self, source_path, destination_directory):
     # Create the destination file path by joining the destination directory and the source file name
@@ -1311,46 +1280,45 @@ def process_name_normalizer_folder(self):
         return
 
     try:
-        # TODO Review if a temporary file is actually necessary. Research solution without it
-        # Get folder contents and save to a temporary file
-        get_folder_contents_and_save_to_file(self, folder_path, self.file_path_list_file)
-        try:
-            # Read file paths from the temporary file
-            with open(self.file_path_list_file, 'r') as file:
-                file_paths = file.read().splitlines()
+        # Get folder contents and save to memory
 
-            # Iterate through file paths and rename/move files
-            for file_path in file_paths:
-                rename_and_move_file(
-                    self,
-                    file_path,
-                    move_directory,
-                    artist_file
-                )
-        except OSError as e:
-            # Log error if logging is activated
-            self.log_and_show(f"Error: {str(e)}",
-                              frame_name="name_normalizer_window",
-                              create_messagebox=False,
-                              error=True,
-                              not_logging=False)
-        try:
-            # Remove the temporary file
-            os.remove(self.file_path_list_file)
+        # Initialize an empty list to store file paths
+        file_paths = []
 
-            # Log deletion of temp file if logging is activated
-            self.log_and_show("Deleting temp file.",
-                              frame_name="name_normalizer_window",
-                              create_messagebox=False,
-                              error=False,
-                              not_logging=False)
-        except OSError as e:
-            # Log error if logging is activated
-            self.log_and_show(f"Error: {str(e)}",
-                              frame_name="name_normalizer_window",
-                              create_messagebox=False,
-                              error=True,
-                              not_logging=False)
+        # Log the os.walk state
+        if self.deep_walk_var.get():
+            deep_walk_status = "including subdirectories"
+        else:
+            deep_walk_status = "excluding subdirectories"
+        self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+
+        # Traverse through the folder using os.walk
+        for root, dirs, files in os.walk(folder_path):
+            # Include subdirectories if the deep_walk_var is True or the root folder is selected
+            if self.deep_walk_var.get() or root == folder_path:
+                for file in files:
+                    # Append the full file path to the list
+                    file_paths.append(str(os.path.join(root, file)))
+
+        # Iterate through file paths and rename/move files
+        for file_path in file_paths:
+            rename_and_move_file(
+                self,
+                file_path,
+                move_directory,
+                artist_file
+            )
+
+        # Log the action if logging is enabled
+        self.log_and_show("Files have been processed successfully.",
+                          frame_name="name_normalizer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
@@ -1359,12 +1327,6 @@ def process_name_normalizer_folder(self):
             self.move_directory_entry.delete(0, ctk.END)
             self.artist_file_entry.delete(0, ctk.END)
 
-        # Log the action if logging is enabled
-        self.log_and_show("Files have been processed successfully.",
-                          frame_name="name_normalizer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=False)
     except Exception as e:
         # Display error message if an exception occurs
         self.log_and_show(f"An error occurred: {e}",
