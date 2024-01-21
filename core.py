@@ -44,6 +44,30 @@ def log_and_show(self, message, frame_name, create_messagebox, error, not_loggin
         self.show_message(message, error=error, frame_name=frame_name)
 
 
+def ask_confirmation(self, title, message):
+    """
+    Display a yes/no messagebox for confirmation.
+
+    Parameters:
+    - title (str): The title of the messagebox.
+    - message (str): The message to be displayed in the messagebox.
+
+    Returns:
+    - bool: True if 'Yes' is selected, False otherwise.
+    """
+    # Check confirmation messagebox state and display messageboxes if applicable
+    if self.show_confirmation_messageboxes_var.get():
+        confirmation = messagebox.askyesno(title, message)
+        return confirmation
+    else:
+        if self.fallback_confirmation_var.get():
+            # Automatically choose yes if fallback state is true.
+            return True
+        else:
+            # Automatically choose No if fallback state is False.
+            return False
+
+
 """
 Configuration
 """
@@ -87,6 +111,9 @@ def load_configuration():
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
     activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
     show_messageboxes_var = config.getboolean("Settings", "show_messageboxes_var", fallback=True)
+    show_confirmation_messageboxes_var = config.getboolean("Settings", "show_confirmation_messageboxes_var",
+                                                           fallback=True)
+    fallback_confirmation_var = config.getboolean("Settings", "fallback_confirmation_var", fallback=False)
 
     # Name Normalizer
     remove_all_symbols_var = config.getboolean("Settings", "remove_all_symbols_var", fallback=False)
@@ -147,14 +174,14 @@ def load_configuration():
             file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
             remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
             remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
-            remove_double_quote_var,
-            title_var, reset_var, initial_output_directory, artist_file, default_frame,
+            remove_double_quote_var, title_var, reset_var, initial_output_directory, artist_file, default_frame,
             artist_file_search_var, deep_walk_var, default_decibel, default_audio_normalization,
             remove_successful_lines_var, default_rotation_var, remove_double_space_var, remove_colon_var,
             remove_semicolon_var, remove_percent_var, remove_caret_var, remove_dollar_var, remove_asterisk_var,
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
-            remove_hashtag_var, show_messageboxes_var, valid_extensions)
+            remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
+            valid_extensions)
 
 
 def logging_setup(self):
@@ -180,8 +207,8 @@ def move_file_to_trash(self):
     try:
         if self.selected_file:
             # Ask for confirmation before moving to trash
-            confirmation = messagebox.askyesno("Confirm Action",
-                                               "Are you sure you want to move this file to the trash?")
+            confirmation = ask_confirmation(self, "Confirm Action",
+                                            "Are you sure you want to move this file to the trash?")
             # Log the action if logging is enabled
             self.log_and_show(f"'{self.selected_file}' selected for deletion.",
                               frame_name="file_renamer_window",
@@ -213,7 +240,7 @@ def move_file_to_trash(self):
                               error=True,
                               not_logging=False)
     except OSError as e:
-        self.log_and_show(f"Error: {str(e)}",
+        self.log_and_show(f"{str(e)}",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=True,
@@ -242,7 +269,7 @@ def load_last_used_file(self):
                           error=False,
                           not_logging=False)
     else:
-        self.log_and_show("Error: No last used file found.",
+        self.log_and_show("No last used file found.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=True,
@@ -280,7 +307,7 @@ def on_file_drop(self, event):
                               error=False,
                               not_logging=False)
         except OSError as e:
-            self.log_and_show(f"Error: {str(e)}",
+            self.log_and_show(f"{str(e)}",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=True,
@@ -350,7 +377,7 @@ def undo_last(self):
                           not_logging=True)
     else:
         # Log the action if logging is enabled
-        self.log_and_show("Error: Nothing in the queue. Nothing to undo.",
+        self.log_and_show("Nothing in the queue. Nothing to undo.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=True,
@@ -489,11 +516,10 @@ def suggest_output_directory(self):
 
                     # Verify the folder exists
                     if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
-                        # TODO circle this into the log_and_show message to suppress messageboxes
                         # Ask for confirmation of new output directory if match found
-                        confirmation = messagebox.askyesno("Suggest Output Directory",
-                                                           f"Suggested output directory found. Do you want to use: "
-                                                           f"{artist_folder_path}?")
+                        confirmation = ask_confirmation(self, "Suggest Output Directory",
+                                                        f"Suggested output directory found. Do you want to use: "
+                                                        f"{artist_folder_path}?")
                         if confirmation:
                             self.log_and_show(f"User chose the suggested output directory: {artist_folder_path}",
                                               frame_name="file_renamer_window",
@@ -597,7 +623,7 @@ def add_category(self):
 
     if not new_category:
         # If the new category is an empty string, log an error message and return
-        self.log_and_show("Error: Add Category cannot be empty.",
+        self.log_and_show("Add Category cannot be empty.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=True,
@@ -616,7 +642,7 @@ def add_category(self):
                 # Use the provided weight if it's an integer, otherwise use the default weight
                 weight = int(weight_entry_value) if weight_entry_value else self.default_weight
             except ValueError:
-                self.log_and_show("Error: Weight must be an integer. Using default weight.",
+                self.log_and_show("Weight must be an integer. Using default weight.",
                                   frame_name="file_renamer_window",
                                   create_messagebox=False,
                                   error=True,
@@ -644,7 +670,7 @@ def add_category(self):
                               not_logging=False)
         else:
             # Log the action if logging is enabled
-            self.log_and_show(f"Error: '{new_category}' already exists. Skipping.",
+            self.log_and_show(f"'{new_category}' already exists. Skipping.",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=True,
@@ -661,7 +687,7 @@ def remove_category(self):
 
     if not category_to_remove:
         # If the category to be removed is an empty string, log an error message and return
-        self.log_and_show("Error: Remove Category cannot be empty.",
+        self.log_and_show("Remove Category cannot be empty.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=True,
@@ -710,7 +736,7 @@ def remove_category(self):
                               not_logging=False)
         else:
             # Log the action if logging is enabled
-            self.log_and_show(f"Error: '{category_to_remove}' not found in dictionary. Skipping.",
+            self.log_and_show(f"'{category_to_remove}' not found in dictionary. Skipping.",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=True,
@@ -832,7 +858,7 @@ def rename_files(self):
             self.handle_rename_success(new_path)
         except OSError as e:
             # Log the action if logging is enabled
-            self.log_and_show(f"Error: {str(e)}",
+            self.log_and_show(f"{str(e)}",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=True,
@@ -856,7 +882,7 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 name = name.replace("__-__", "")
             except OSError as e:
                 # Log the action if logging is enabled
-                self.log_and_show(f"Error: {str(e)}",
+                self.log_and_show(f"{str(e)}",
                                   frame_name="file_renamer_window",
                                   create_messagebox=False,
                                   error=True,
@@ -1262,8 +1288,8 @@ def process_name_normalizer_folder(self):
         move_directory = None
 
     # Ask for confirmation before normalizing files
-    confirmation = messagebox.askyesno("Confirm Action",
-                                       "Are you sure you want normalize these files? This cannot be undone.")
+    confirmation = ask_confirmation(self, "Confirm Action",
+                                    "Are you sure you want normalize these files? This cannot be undone.")
     if confirmation:
         self.log_and_show(f"User confirmed the name normalization process for {folder_path}.",
                           frame_name="name_normalizer_window",
@@ -1547,9 +1573,9 @@ def process_video_edits(self):
         # Directory
         elif os.path.isdir(input_method):
             # Ask for confirmation before normalizing files
-            confirmation = messagebox.askyesno("Confirm Action",
-                                               "Are you sure you want edit ALL video files in the provided directory?"
-                                               "\nThis option may be computer intensive.")
+            confirmation = ask_confirmation(self, "Confirm Action",
+                                            "Are you sure you want edit ALL video files in the provided directory?"
+                                            "\nThis option may be computer intensive.")
             if confirmation:
                 self.log_and_show(f"User confirmed the directory for {input_method}.",
                                   frame_name="video_editor_window",

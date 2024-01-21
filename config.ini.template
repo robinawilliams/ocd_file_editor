@@ -29,6 +29,10 @@ double_check_var = False
 activate_logging_var = False
 ; Show messageboxes
 show_messageboxes_var = True
+; Show confirmation messageboxes
+show_confirmation_messageboxes_var = True
+; Fallback confirmation for confirmation messageboxes when suppressed
+fallback_confirmation_var = False
 ; Remove all symbols
 remove_all_symbols_var = False
 ; Append '__-__ ' to the file name

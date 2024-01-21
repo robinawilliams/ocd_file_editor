@@ -168,12 +168,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_frame = None
         self.settings_top_frame = None
         self.settings_label = None
+        self.switch_frame = None
         self.open_on_file_drop_switch = None
         self.remove_duplicates_switch = None
         self.double_check_switch = None
-        self.switch_frame = None
         self.activate_logging_switch = None
         self.show_messageboxes_switch = None
+        self.show_confirmation_messageboxes_switch = None
+        self.confirmation_frame = None
+        self.fallback_confirmation_label = None
+        self.true_radio = None
+        self.false_radio = None
         self.gui_settings_frame = None
         self.appearance_mode_label = None
         self.appearance_mode_menu = None
@@ -196,7 +201,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_caret_var, remove_dollar_var, remove_asterisk_var, remove_plus_var, remove_equal_var,
          remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var, remove_backslash_var,
          remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var, remove_hashtag_var,
-         show_messageboxes_var, valid_extensions) = (
+         show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var, valid_extensions) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -226,6 +231,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_var = ctk.BooleanVar(value=double_check_var)
         self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
         self.show_messageboxes_var = ctk.BooleanVar(value=show_messageboxes_var)
+        self.show_confirmation_messageboxes_var = ctk.BooleanVar(value=show_confirmation_messageboxes_var)
+        self.fallback_confirmation_var = ctk.BooleanVar(value=fallback_confirmation_var)
         self.file_extensions = file_extensions
         self.valid_extensions = valid_extensions
 
@@ -567,7 +574,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse Folder button
         self.browse_folder_button = ctk.CTkButton(self.name_normalizer_top_frame, text="Browse Folder",
                                                   command=lambda: self.browse_input(
-                                                                     frame_name="name_normalizer_window"))
+                                                      frame_name="name_normalizer_window"))
         self.browse_folder_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Folder Path Entry
@@ -828,7 +835,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse move directory folder button
         self.browse_move_directory_button = ctk.CTkButton(self.output_directory_frame, text="Output Directory",
                                                           command=lambda: self.browse_output_directory(
-                                                                     frame_name="name_normalizer_window"))
+                                                              frame_name="name_normalizer_window"))
         self.browse_move_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Move directory entry
@@ -896,7 +903,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Video Editor browse input method button
         self.browse_input_method_button = ctk.CTkButton(self.video_editor_top_frame, text="Browse",
                                                         command=lambda: self.browse_input(
-                                                                     frame_name="video_editor_window"))
+                                                            frame_name="video_editor_window"))
         self.browse_input_method_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Input method entry for a file, directory, or .txt containing a line delimited list of files to process
@@ -972,7 +979,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_video_output_directory_button = ctk.CTkButton(self.video_output_directory_frame,
                                                                   text="Output Directory",
                                                                   command=lambda: self.browse_output_directory(
-                                                                     frame_name="video_editor_window"))
+                                                                      frame_name="video_editor_window"))
         self.browse_video_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Video output directory entry
@@ -1036,23 +1043,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.switch_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
         self.switch_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable open on drop behavior
+        # Switch to enable/disable open on drop behavior
         self.open_on_file_drop_switch = ctk.CTkSwitch(self.switch_frame, text="Open File on Drag and Drop",
                                                       variable=self.open_on_file_drop_var)
         self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable remove duplicates
+        # Switch to enable/disable remove duplicates
         self.remove_duplicates_switch = ctk.CTkSwitch(self.switch_frame,
                                                       text="Remove Duplicates",
                                                       variable=self.remove_duplicates_var)
         self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
 
-        # Checkbox to enable/disable create double check reminder
+        # Switch to enable/disable create double check reminder
         self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
         self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
 
-        # Checkbox to enable/disable activate logging
+        # Switch to enable/disable activate logging
         self.activate_logging_switch = ctk.CTkSwitch(self.switch_frame, text="Activate Logging",
                                                      variable=self.activate_logging_var)
         self.activate_logging_switch.grid(row=2, column=0, padx=10, pady=10)
@@ -1060,14 +1067,39 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Bind the callback function to the activate logging variable
         self.activate_logging_var.trace_add("write", self.handle_logging_activation)
 
-        # Checkbox to enable/disable show messageboxes
+        # Switch to enable/disable show messageboxes
         self.show_messageboxes_switch = ctk.CTkSwitch(self.switch_frame, text="Show Messageboxes",
                                                       variable=self.show_messageboxes_var)
         self.show_messageboxes_switch.grid(row=2, column=1, padx=10, pady=10)
 
+        # Switch to enable/disable show confirmation messageboxes
+        self.show_confirmation_messageboxes_switch = ctk.CTkSwitch(self.switch_frame,
+                                                                   text="Show Confirmation Messageboxes",
+                                                                   variable=self.show_confirmation_messageboxes_var)
+        self.show_confirmation_messageboxes_switch.grid(row=2, column=2, padx=10, pady=10)
+
+        # Confirmation frame
+        self.confirmation_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
+        self.confirmation_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Fallback confirmation state when confirmation messageboxes are suppressed
+        self.fallback_confirmation_label = ctk.CTkLabel(self.confirmation_frame, text="Fallback confirmation state:")
+        self.fallback_confirmation_label.grid(row=0, column=0, padx=10, pady=5)
+
+        # Fallback true radio button
+        self.true_radio = ctk.CTkRadioButton(self.confirmation_frame, text="True",
+                                             variable=self.fallback_confirmation_var, value=True)
+        self.true_radio.grid(row=0, column=1, padx=10, pady=5)
+
+        # Fallback false radio button
+        self.false_radio = ctk.CTkRadioButton(self.confirmation_frame, text="False",
+                                              variable=self.fallback_confirmation_var,
+                                              value=False)
+        self.false_radio.grid(row=0, column=2, padx=10, pady=5)
+
         # GUI settings frame
         self.gui_settings_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.gui_settings_frame.grid(row=2, column=0, padx=10, pady=10)
+        self.gui_settings_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Select light or dark label
         self.appearance_mode_label = ctk.CTkLabel(self.gui_settings_frame, text="Appearance:")
@@ -1228,6 +1260,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
         # Method to check logging state, log if applicable, and show a messagebox.
         core.log_and_show(self, message, frame_name, create_messagebox, error, not_logging)
+
+    def ask_confirmation(self, title, message):
+        # Method to check logging state and show a messagebox.
+        core.ask_confirmation(self, title, message)
 
     """
     Configuration
