@@ -61,7 +61,7 @@ def ask_confirmation(self, title, message):
         return confirmation
     else:
         if self.fallback_confirmation_var.get():
-            # Automatically choose yes if fallback state is true.
+            # Automatically choose Yes if fallback state is True.
             return True
         else:
             # Automatically choose No if fallback state is False.
