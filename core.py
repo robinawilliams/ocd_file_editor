@@ -481,6 +481,7 @@ def suggest_output_directory(self):
             base_name = os.path.basename(self.selected_file)
             base_name_lower = base_name.lower()  # Case insensitive comparison
 
+            # TODO Implement logic for multiple artist matches
             # Extract the artist from the filename
             for artist_folder in os.listdir(self.artist_directory):
                 if artist_folder.lower() in base_name_lower:
@@ -489,6 +490,7 @@ def suggest_output_directory(self):
 
                     # Verify the folder exists
                     if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
+                        # TODO circle this into the log_and_show message to suppress messageboxes
                         # Ask for confirmation of new output directory if match found
                         confirmation = messagebox.askyesno("Suggest Output Directory",
                                                            f"Suggested output directory found. Do you want to use: "
@@ -507,17 +509,16 @@ def suggest_output_directory(self):
                                 create_messagebox=False,
                                 error=False,
                                 not_logging=False)
-                            return self.initial_directory
+                            return self.output_directory
 
         # If the filename doesn't match the expected pattern or suggest_output_directory is False,
-        # use the default initial directory
+        # use the default output directory
         self.log_and_show("Cannot suggest output directory. Falling back to default output directory.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
-        # TODO Double check this logic. Should be saved to same folder as the file is currently in
-        return self.initial_directory
+        return self.output_directory
 
     # If no file is selected, use the default initial directory
     return self.initial_directory
@@ -1187,19 +1188,20 @@ def get_folder_contents_and_save_to_file(self, folder_path, file_list_file):
     # Initialize an empty list to store file paths
     file_paths = []
 
+    # Log the os.walk state
+    if self.deep_walk_var.get():
+        deep_walk_status = "including subdirectories"
+    else:
+        deep_walk_status = "excluding subdirectories"
+    self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'",
+                      frame_name="name_normalizer_window",
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=False)
+
     # Traverse through the folder using os.walk
     for root, dirs, files in os.walk(folder_path):
-        if self.deep_walk_var.get():
-            deep_walk_status = "including subdirectories"
-        else:
-            deep_walk_status = "excluding subdirectories"
-
-        self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'",
-                          frame_name="name_normalizer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=False)
-        # Include subdirectories if the deep_walk_var is True or the foot folder is selected
+        # Include subdirectories if the deep_walk_var is True or the root folder is selected
         if self.deep_walk_var.get() or root == folder_path:
             for file in files:
                 # Append the full file path to the list
@@ -1309,6 +1311,7 @@ def process_name_normalizer_folder(self):
         return
 
     try:
+        # TODO Review if a temporary file is actually necessary. Research solution without it
         # Get folder contents and save to a temporary file
         get_folder_contents_and_save_to_file(self, folder_path, self.file_path_list_file)
         try:
