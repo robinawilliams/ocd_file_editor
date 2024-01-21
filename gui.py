@@ -1318,9 +1318,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Open a dialog to browse and select an output directory
         core.browse_output_directory(self, frame_name)
 
-    def suggest_output_directory(self, rename_function):
+    def suggest_output_directory(self):
         # Function to suggest an output directory matching an artist name
-        return core.suggest_output_directory(self, rename_function)
+        return core.suggest_output_directory(self)
 
     def handle_rename_success(self, new_path):
         # Handle the success of the file renaming process

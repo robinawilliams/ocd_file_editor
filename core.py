@@ -473,7 +473,7 @@ def browse_output_directory(self, frame_name):
         # Check if a file is selected
         if self.selected_file:
             # Determine the initial directory based on options
-            initial_directory = self.suggest_output_directory(rename_function=False)
+            initial_directory = self.suggest_output_directory()
         else:
             # If no file is selected, use the default initial directory
             initial_directory = self.initial_directory
@@ -498,7 +498,7 @@ def browse_output_directory(self, frame_name):
         self.video_output_directory_entry.insert(0, video_output_directory)
 
 
-def suggest_output_directory(self, rename_function):
+def suggest_output_directory(self):
     # Check if a file is selected
     if self.selected_file:
         # Check if the suggest_output_directory_var is True
@@ -516,31 +516,8 @@ def suggest_output_directory(self, rename_function):
 
                     # Verify the folder exists
                     if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
-                        # Check if the function was called from the Rename File button
-                        if rename_function:
-                            # Ask for confirmation of new output directory if match found
-                            confirmation = ask_confirmation(self, "Suggest Output Directory",
-                                                            f"Suggested output directory found. Do you want to use: "
-                                                            f"{artist_folder_path}?")
-                            if confirmation:
-                                self.log_and_show(f"User chose the suggested output directory: {artist_folder_path}",
-                                                  frame_name="file_renamer_window",
-                                                  create_messagebox=False,
-                                                  error=False,
-                                                  not_logging=False)
-                                return artist_folder_path
-                            else:
-                                self.log_and_show(
-                                    "User did not choose the suggested output directory. Falling back to default "
-                                    "location.",
-                                    frame_name="file_renamer_window",
-                                    create_messagebox=False,
-                                    error=False,
-                                    not_logging=False)
-                                return self.output_directory
-                        else:
-                            # Function was called from Output Directory. Default to suggested output directory
-                            return artist_folder_path
+                        # Return the result
+                        return artist_folder_path
 
         # If the filename doesn't match the expected pattern or suggest_output_directory is False,
         # use the default output directory
@@ -839,17 +816,34 @@ def rename_files(self):
             parent_directory = os.path.dirname(os.path.dirname(self.selected_file))
             new_path = os.path.join(parent_directory, os.path.basename(name))
         else:
-            # Use the specified output directory
+            # Use the suggest output directory
             if self.suggest_output_directory_var.get():
-                self.output_directory = self.suggest_output_directory(rename_function=True)
+                self.output_directory = self.suggest_output_directory()
+
+                # Ask for confirmation of new output directory if match found
+                confirmation = ask_confirmation(self, "Suggest Output Directory",
+                                                f"Suggested output directory found. Do you want to use: "
+                                                f"{self.output_directory}?")
+                if confirmation:
+                    self.log_and_show(f"User chose the suggested output directory: {self.output_directory}",
+                                      frame_name="file_renamer_window",
+                                      create_messagebox=False,
+                                      error=False,
+                                      not_logging=False)
+                else:
+                    # If the user did not select the suggested output directory, fallback to the default location
+                    self.log_and_show(
+                        "User did not choose the suggested output directory. Falling back to default "
+                        "location.",
+                        frame_name="file_renamer_window",
+                        create_messagebox=False,
+                        error=False,
+                        not_logging=False)
+                    self.output_directory = os.path.dirname(self.selected_file)
+
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
-                # Log the action if logging is enabled
-                self.log_and_show(f"Suggested output directory: {self.output_directory}",
-                                  frame_name="video_editor_window",
-                                  create_messagebox=False,
-                                  error=False,
-                                  not_logging=False)
             else:
+                # Use the specified output directory
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
 
         # Attempt to rename the file and handle success or errors
