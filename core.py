@@ -276,6 +276,39 @@ def load_last_used_file(self):
                           not_logging=False)
 
 
+def send_to_module(self):
+    # Check if there is a file selected
+    if self.selected_file:
+        if any(self.selected_file.lower().endswith(ext) for ext in self.valid_extensions):
+            # Reset the file_renamer_window
+            self.queue = []
+            self.file_display_text.set("")
+            self.custom_text_entry.delete(0, ctk.END)
+            self.output_directory = ""
+            self.output_directory_entry.delete(0, ctk.END)
+
+            # Set selected file to the video editor input method entry
+            self.input_method_entry.delete(0, ctk.END)
+            self.input_method_entry.insert(0, self.selected_file)
+
+            # Switch frames to the video editor
+            self.video_editor_button_event()
+        else:
+            # File not selected
+            self.log_and_show("Non-video file detected. Cannot send to video editor",
+                              frame_name="file_renamer_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+    else:
+        # File not selected
+        self.log_and_show("No file selected. Cannot send to module",
+                          frame_name="file_renamer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+
+
 # Function to handle a file being dropped onto the application window
 def on_file_drop(self, event):
     # Remove the default custom text entry text

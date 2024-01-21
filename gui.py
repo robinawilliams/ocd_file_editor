@@ -57,6 +57,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_button = None
         self.trash_button = None
         self.last_used_file_button = None
+        self.send_to_video_editor_button = None
         self.last_used_frame = None
         self.last_used_display_label = None
         self.last_used_display = None
@@ -474,6 +475,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Reload Last File",
                                                    command=self.load_last_used_file)
         self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
+
+        # Send to Video Editor button
+        self.send_to_video_editor_button = ctk.CTkButton(self.button_group_frame, text="Send to Video Editor",
+                                                         command=self.send_to_module)
+        self.send_to_video_editor_button.grid(row=0, column=4, padx=10, pady=10)
 
         # Frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
@@ -1289,6 +1295,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def load_last_used_file(self):
         # Load the last used file and update the GUI
         core.load_last_used_file(self)
+
+    def send_to_module(self):
+        # Send the input to another module
+        core.send_to_module(self)
 
     def on_file_drop(self, event):
         # Handle the event when a file is dropped onto the application
