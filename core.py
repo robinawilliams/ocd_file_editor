@@ -236,13 +236,13 @@ def move_file_to_trash(self):
             # Log the action if logging is enabled
             self.log_and_show("No file selected. Cannot move to trash.",
                               frame_name="file_renamer_window",
-                              create_messagebox=False,
+                              create_messagebox=True,
                               error=True,
                               not_logging=False)
     except OSError as e:
         self.log_and_show(f"{str(e)}",
                           frame_name="file_renamer_window",
-                          create_messagebox=False,
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
 
@@ -271,7 +271,7 @@ def load_last_used_file(self):
     else:
         self.log_and_show("No last used file found.",
                           frame_name="file_renamer_window",
-                          create_messagebox=False,
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
 
@@ -309,7 +309,7 @@ def on_file_drop(self, event):
         except OSError as e:
             self.log_and_show(f"{str(e)}",
                               frame_name="file_renamer_window",
-                              create_messagebox=False,
+                              create_messagebox=True,
                               error=True,
                               not_logging=False)
 
@@ -379,7 +379,7 @@ def undo_last(self):
         # Log the action if logging is enabled
         self.log_and_show("Nothing in the queue. Nothing to undo.",
                           frame_name="file_renamer_window",
-                          create_messagebox=False,
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
 
@@ -564,7 +564,7 @@ def handle_rename_success(self, new_path):
             # Handle any errors that may occur
             self.log_and_show(f"Error creating empty file: {str(e)}",
                               frame_name="file_renamer_window",
-                              create_messagebox=False,
+                              create_messagebox=True,
                               error=True,
                               not_logging=False)
 
@@ -608,7 +608,7 @@ def add_category(self):
         # If the new category is an empty string, log an error message and return
         self.log_and_show("Add Category cannot be empty.",
                           frame_name="file_renamer_window",
-                          create_messagebox=False,
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
         return
@@ -627,7 +627,7 @@ def add_category(self):
             except ValueError:
                 self.log_and_show("Weight must be an integer. Using default weight.",
                                   frame_name="file_renamer_window",
-                                  create_messagebox=False,
+                                  create_messagebox=True,
                                   error=True,
                                   not_logging=False)
                 weight = self.default_weight
@@ -655,7 +655,7 @@ def add_category(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{new_category}' already exists. Skipping.",
                               frame_name="file_renamer_window",
-                              create_messagebox=False,
+                              create_messagebox=True,
                               error=True,
                               not_logging=False)
             # Clear the category entry and weight entry fields
@@ -672,7 +672,7 @@ def remove_category(self):
         # If the category to be removed is an empty string, log an error message and return
         self.log_and_show("Remove Category cannot be empty.",
                           frame_name="file_renamer_window",
-                          create_messagebox=False,
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
         return
@@ -721,7 +721,7 @@ def remove_category(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{category_to_remove}' not found in dictionary. Skipping.",
                               frame_name="file_renamer_window",
-                              create_messagebox=False,
+                              create_messagebox=True,
                               error=True,
                               not_logging=False)
 
@@ -860,9 +860,25 @@ def rename_files(self):
             # Log the action if logging is enabled
             self.log_and_show(f"{str(e)}",
                               frame_name="file_renamer_window",
-                              create_messagebox=False,
+                              create_messagebox=True,
                               error=True,
                               not_logging=False)
+    # If a file is selected and either the queue is empty or no custom text is provided show error
+    elif self.selected_file and not (self.queue or self.custom_text_entry.get().strip()):
+        # Log the action if logging is enabled
+        self.log_and_show("File selected but nothing added to the queue. Nothing to rename.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+    # If no file is selected, show error
+    elif not self.selected_file:
+        # Log the action if logging is enabled
+        self.log_and_show("No file selected. Nothing to rename.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
@@ -884,7 +900,7 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 # Log the action if logging is enabled
                 self.log_and_show(f"{str(e)}",
                                   frame_name="file_renamer_window",
-                                  create_messagebox=False,
+                                  create_messagebox=True,
                                   error=True,
                                   not_logging=False)
         else:
