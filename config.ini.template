@@ -131,7 +131,9 @@ artist_file = list_of_artists.txt
 categories_file = categories.json
 
 [Logs]
+; File Renamer log
+file_renamer_log = file_renamer.log
 ; Name Normalizer log
 name_normalizer_log = name_normalizer.log
-; OCD File Renamer log
-ocd_file_renamer_log = ocd_file_renamer.log
+; Video Editor log
+video_editor_log = video_editor.log
