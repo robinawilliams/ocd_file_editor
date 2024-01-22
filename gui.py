@@ -17,6 +17,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize instance variables for selected file, output directory, queue, and last used file
         self.selected_file = ""
         self.output_directory = ""
+        self.override_directory = ""
         self.queue = []
         self.last_used_file = ""
 
