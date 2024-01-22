@@ -19,7 +19,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory = ""
         self.override_directory = ""
         self.queue = []
-        self.last_used_file = ""
+        self.file_renamer_last_used_file = ""
+        self.video_editor_selected_file = ""
+        self.video_editor_output_directory = ""
+        self.video_editor_last_used_file = ""
 
         # Initialize GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
@@ -57,7 +60,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.undo_button = None
         self.clear_button = None
         self.trash_button = None
-        self.last_used_file_button = None
+        self.file_renamer_last_used_file_button = None
         self.send_to_video_editor_button = None
         self.last_used_frame = None
         self.last_used_display_label = None
@@ -155,11 +158,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.audio_normalization_frame = None
         self.audio_normalization_label = None
         self.audio_normalization_entry = None
-        self.video_output_directory_frame = None
-        self.browse_video_output_directory_button = None
-        self.video_output_directory_entry = None
+        self.video_editor_output_directory_frame = None
+        self.browse_video_editor_output_directory_button = None
+        self.video_editor_output_directory_entry = None
         self.process_video_editor_frame = None
         self.clear_video_editor_selection_button = None
+        self.video_editor_last_used_file_button = None
+        self.send_to_file_renamer_button = None
         self.process_video_edits_button = None
         self.video_editor_checkbox_frame = None
         self.remove_successful_lines_checkbox = None
@@ -472,14 +477,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                           command=self.move_file_to_trash)
         self.trash_button.grid(row=0, column=2, padx=10, pady=10)
 
-        # Select Last Used File Button
-        self.last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Reload Last File",
-                                                   command=self.load_last_used_file)
-        self.last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
+        # Select File Renamer Last Used File Button
+        self.file_renamer_last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Reload Last File",
+                                                                command=lambda: self.load_last_used_file(
+                                                                    "file_renamer_window"))
+        self.file_renamer_last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
         # Send to Video Editor button
         self.send_to_video_editor_button = ctk.CTkButton(self.button_group_frame, text="Send to Video Editor",
-                                                         command=self.send_to_module)
+                                                         command=lambda: self.send_to_module(
+                                                             frame_name="file_renamer_window"))
         self.send_to_video_editor_button.grid(row=0, column=4, padx=10, pady=10)
 
         # Frame to display the last used file
@@ -977,21 +984,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.audio_normalization_entry.insert(0, self.default_audio_normalization)
         self.audio_normalization_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        # Video Output directory frame
-        self.video_output_directory_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
-                                                         fg_color="transparent")
-        self.video_output_directory_frame.grid(row=8, column=0, padx=10, pady=5)
+        # Video Editor Output directory frame
+        self.video_editor_output_directory_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                                fg_color="transparent")
+        self.video_editor_output_directory_frame.grid(row=8, column=0, padx=10, pady=5)
 
-        # Browse video output directory folder button
-        self.browse_video_output_directory_button = ctk.CTkButton(self.video_output_directory_frame,
-                                                                  text="Output Directory",
-                                                                  command=lambda: self.browse_output_directory(
-                                                                      frame_name="video_editor_window"))
-        self.browse_video_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
+        # Browse video editor output directory folder button
+        self.browse_video_editor_output_directory_button = ctk.CTkButton(self.video_editor_output_directory_frame,
+                                                                         text="Output Directory",
+                                                                         command=lambda: self.browse_output_directory(
+                                                                             frame_name="video_editor_window"))
+        self.browse_video_editor_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
-        # Video output directory entry
-        self.video_output_directory_entry = ctk.CTkEntry(self.video_output_directory_frame, width=890)
-        self.video_output_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+        # Video editor output directory entry
+        self.video_editor_output_directory_entry = ctk.CTkEntry(self.video_editor_output_directory_frame, width=890)
+        self.video_editor_output_directory_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Process video editor frame
         self.process_video_editor_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -1005,10 +1012,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                      frame_name="video_editor_window"))
         self.clear_video_editor_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
+        # Select Video Editor Last Used File Button
+        self.video_editor_last_used_file_button = ctk.CTkButton(self.process_video_editor_frame,
+                                                                text="Reload Last File",
+                                                                command=lambda: self.load_last_used_file(
+                                                                    "video_editor_window"))
+        self.video_editor_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
+
+        # Send to File Renamer button
+        self.send_to_file_renamer_button = ctk.CTkButton(self.process_video_editor_frame, text="Send to File Renamer",
+                                                         command=lambda: self.send_to_module(
+                                                             frame_name="video_editor_window"))
+        self.send_to_file_renamer_button.grid(row=0, column=2, padx=10, pady=10)
+
         # Process video button
         self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
                                                         command=self.process_video_edits)
-        self.process_video_edits_button.grid(row=0, column=1, padx=5, pady=5)
+        self.process_video_edits_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Video editor checkbox frame
         self.video_editor_checkbox_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -1293,13 +1313,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Move the selected file to the trash
         core.move_file_to_trash(self)
 
-    def load_last_used_file(self):
+    def load_last_used_file(self, frame_name):
         # Load the last used file and update the GUI
-        core.load_last_used_file(self)
+        core.load_last_used_file(self, frame_name)
 
-    def send_to_module(self):
+    def send_to_module(self, frame_name):
         # Send the input to another module
-        core.send_to_module(self)
+        core.send_to_module(self, frame_name)
 
     def on_file_drop(self, event):
         # Handle the event when a file is dropped onto the application

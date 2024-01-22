@@ -248,61 +248,142 @@ def move_file_to_trash(self):
 
 
 # Function to load the last used file
-def load_last_used_file(self):
-    # Check if the last_used_file variable is provided and the file exists
-    if self.last_used_file and os.path.exists(self.last_used_file):
-        # Set the selected file to the last used file and update display
-        self.selected_file = self.last_used_file
-        filename = os.path.basename(self.selected_file)
-
-        # Display only the filename in the file display widget
-        self.file_display_text.set(filename)
-
-        self.queue = []
-        self.update_file_display()
-
-        message = filename
-        # Log the action if logging is enabled
-        self.log_and_show(f"Last used file selected: {message}",
-                          frame_name="file_renamer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=False)
-    else:
-        self.log_and_show("No last used file found.",
-                          frame_name="file_renamer_window",
-                          create_messagebox=True,
-                          error=True,
-                          not_logging=False)
-
-
-def send_to_module(self):
-    # Check if there is a file selected
-    if self.selected_file:
-        if any(self.selected_file.lower().endswith(ext) for ext in self.valid_extensions):
-            # Reset the file_renamer_window
+def load_last_used_file(self, frame_name):
+    if frame_name == "file_renamer_window":
+        # Check if the file_renamer_last_used_file variable is provided and the file exists
+        if self.file_renamer_last_used_file and os.path.exists(self.file_renamer_last_used_file):
+            # Set the selected file to the file renamer last used file and update display
+            self.selected_file = self.file_renamer_last_used_file
+            filename = os.path.basename(self.selected_file)
+    
+            # Display only the filename in the file display widget
+            self.file_display_text.set(filename)
+    
             self.queue = []
-            self.file_display_text.set("")
-            self.custom_text_entry.delete(0, ctk.END)
-            self.output_directory = ""
-            self.output_directory_entry.delete(0, ctk.END)
-
-            # Set selected file to the video editor input method entry
-            self.input_method_entry.delete(0, ctk.END)
-            self.input_method_entry.insert(0, self.selected_file)
-
-            # Switch frames to the video editor
-            self.video_editor_button_event()
+            self.update_file_display()
+    
+            message = filename
+            # Log the action if logging is enabled
+            self.log_and_show(f"Last used file renamer file selected: {message}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
         else:
-            # File not selected
-            self.log_and_show("Non-video file detected. Cannot send to video editor",
+            self.log_and_show("No last used file renamer file found.",
                               frame_name="file_renamer_window",
                               create_messagebox=True,
                               error=True,
                               not_logging=False)
+    elif frame_name == "video_editor_window":
+        # Check if the video_editor_last_used_file variable is provided and the file exists
+        if self.video_editor_last_used_file and os.path.exists(self.video_editor_last_used_file):
+            # Set the video editor selected file to the video editor last used file and update display
+            self.video_editor_selected_file = self.video_editor_last_used_file
+            filename = os.path.basename(self.video_editor_selected_file)
+
+            # Set the selected file to the input entry widget
+            self.input_method_entry.delete(0, ctk.END)
+            self.input_method_entry.insert(0, filename)
+
+            # Log the action and display the message in the gui
+            message = filename
+            # Log the action if logging is enabled
+            self.log_and_show(f"Last used video editor file selected: {message}",
+                              frame_name="video_editor_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+        else:
+            self.log_and_show("No last used video editor file found.",
+                              frame_name="video_editor_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+
+
+def send_to_module(self, frame_name):
+    if frame_name == "file_renamer_window":
+        # Check if there is a file selected
+        if self.selected_file:
+            # Confirm if the file is a valid file for the video editor window
+            if any(self.selected_file.lower().endswith(ext) for ext in self.valid_extensions):
+                # Clear selection for the video_editor_window
+                clear_selection(self, "video_editor_window")
+
+                # Initialize video editor selected file to selected file from file renamer window
+                self.video_editor_selected_file = self.selected_file
+                filename = os.path.basename(self.video_editor_selected_file)
+
+                message = filename
+
+                # Clear selection for the file_renamer_window
+                clear_selection(self, "file_renamer_window")
+
+                # Set the video editor selected file to the input_method_entry
+                self.input_method_entry.insert(0, message)
+
+                # Log the action and display the message in the GUI
+                self.log_and_show(f"File selected via send to module: {message}",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
+
+                # Switch frames to the video editor
+                self.video_editor_button_event()
+            else:
+                # File not selected
+                self.log_and_show("Non-video file detected. Cannot send to Video Editor",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=True,
+                                  error=True,
+                                  not_logging=False)
+        else:
+            # File not selected
+            self.log_and_show("No file selected. Cannot send to module",
+                              frame_name="file_renamer_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+    elif frame_name == "video_editor_window":
+        if self.video_editor_selected_file:
+            # Clear selection for the file_renamer_window
+            clear_selection(self, "file_renamer_window")
+
+            # Set the selected file to the video editor selected file and update display
+            self.selected_file = self.video_editor_selected_file
+            filename = os.path.basename(self.selected_file)
+
+            # Display only the filename in the file display widget
+            self.file_display_text.set(filename)
+
+            self.queue = []
+            self.update_file_display()
+
+            message = filename
+            # Log the action if logging is enabled
+            self.log_and_show(f"File selected via send to module: {message}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+
+            # Clear selection for the video_editor_window
+            clear_selection(self, "video_editor_window")
+
+            # Switch frames to the video editor
+            self.file_renamer_button_event()
+        else:
+            # File not selected
+            self.log_and_show("No file selected. Cannot send to module",
+                              frame_name="video_editor_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
     else:
-        # File not selected
-        self.log_and_show("No file selected. Cannot send to module",
+        # Invalid frame name
+        self.log_and_show("Invalid frame name for send to module",
                           frame_name="file_renamer_window",
                           create_messagebox=True,
                           error=True,
@@ -323,7 +404,7 @@ def on_file_drop(self, event):
     self.queue = []
     self.update_file_display()
 
-    # Log the error and display the error in the gui
+    # Log the action and display the message in the gui
     self.log_and_show(f"File selected via drop: {filename}",
                       frame_name="file_renamer_window",
                       create_messagebox=False,
@@ -424,11 +505,6 @@ def clear_selection(self, frame_name):
         self.override_directory = ""
         self.queue = []
         self.file_display_text.set("")
-        self.log_and_show("Selection cleared",
-                          frame_name="file_renamer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=True)
 
         # Clear custom text entry and reset output directory
         self.custom_text_entry.delete(0, ctk.END)
@@ -436,14 +512,22 @@ def clear_selection(self, frame_name):
         self.output_directory_entry.delete(0, ctk.END)
         self.output_directory_entry.insert(0, self.output_directory)
 
+        self.log_and_show("Selection cleared",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=True)
+
     if frame_name == "name_normalizer_window":
         self.folder_path_entry.delete(0, ctk.END)
         self.move_directory_entry.delete(0, ctk.END)
         self.artist_file_entry.delete(0, ctk.END)
 
     if frame_name == "video_editor_window":
+        self.video_editor_selected_file = ""
+
         self.input_method_entry.delete(0, ctk.END)
-        self.video_output_directory_entry.delete(0, ctk.END)
+        self.video_editor_output_directory_entry.delete(0, ctk.END)
 
         # Clear decibel entry and set default value
         self.decibel_entry.delete(0, ctk.END)
@@ -462,17 +546,20 @@ def browse_input(self, frame_name):
 
         file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
         if file_path:
-            # Set the selected file, update display, and log the action
+            # Set the selected file
             self.selected_file = file_path
+            # Extract just the file name, not the absolute file path
             filename = os.path.basename(self.selected_file)
 
             # Display only the filename in the file display widget
             self.file_display_text.set(filename)
 
+            # Clear the queue
             self.queue = []
+            # Update display
             self.update_file_display()
 
-            # Log the error and display the error in the gui
+            # Log the action and display the message in the gui
             message = filename
             # Log the action if logging is enabled
             self.log_and_show(f"File selected via Browse: {message}",
@@ -488,6 +575,7 @@ def browse_input(self, frame_name):
         self.folder_path_entry.insert(0, folder_path)
 
     if frame_name == "video_editor_window":
+        # Initially ask for a file
         input_method = filedialog.askopenfilename(
             initialdir=self.initial_directory,
             title="Browse a file. Close to select a directory instead",
@@ -497,8 +585,21 @@ def browse_input(self, frame_name):
             # If no file is selected, try to get a directory
             input_method = filedialog.askdirectory(initialdir=self.initial_directory, title="Browse a directory")
 
+        # Set the video editor selected file
+        self.video_editor_selected_file = input_method
+        # Extract just the file name, not the absolute file path
+        filename = os.path.basename(self.video_editor_selected_file)
+
+        # Set the selected file to the input entry widget
         self.input_method_entry.delete(0, ctk.END)
-        self.input_method_entry.insert(0, input_method)
+        self.input_method_entry.insert(0, filename)
+
+        # Log the action and display the message in the gui
+        self.log_and_show(f"File selected via Browse: {filename}",
+                          frame_name="video_editor_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
 
 
 # Function to browse and select an output directory
@@ -518,11 +619,10 @@ def browse_output_directory(self, frame_name):
             initial_directory = self.initial_directory
 
         # Ask for the output directory
-        output_directory = filedialog.askdirectory(initialdir=initial_directory)
+        self.output_directory = filedialog.askdirectory(initialdir=initial_directory)
 
-        if output_directory:
-            # Set the output directory and update the entry field
-            self.output_directory = output_directory
+        # If output directory, update the entry field in the gui
+        if self.output_directory:
             self.output_directory_entry.delete(0, ctk.END)
             self.output_directory_entry.insert(0, self.output_directory)
 
@@ -532,9 +632,13 @@ def browse_output_directory(self, frame_name):
         self.move_directory_entry.insert(0, move_directory)
 
     if frame_name == "video_editor_window":
-        video_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
-        self.video_output_directory_entry.delete(0, ctk.END)
-        self.video_output_directory_entry.insert(0, video_output_directory)
+        # Ask for the output directory
+        self.video_editor_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
+
+        # If video editor output directory, update the entry field in the GUI
+        if self.video_editor_output_directory:
+            self.video_editor_output_directory_entry.delete(0, ctk.END)
+            self.video_editor_output_directory_entry.insert(0, self.video_editor_output_directory)
 
 
 def suggest_output_directory(self):
@@ -601,6 +705,7 @@ def handle_rename_success(self, new_path):
             file_name = f"Double check {folder_name}"
             file_path = os.path.join(double_check_directory, file_name)
 
+            # Empty file
             with open(file_path, 'w'):
                 pass
 
@@ -620,13 +725,13 @@ def handle_rename_success(self, new_path):
                               error=True,
                               not_logging=False)
 
-    # Reset selected file, queue, override directory, and update last used file
+    # Reset selected file, queue, override directory, and update file renamer last used file
     self.selected_file = ""
     self.override_directory = ""
     self.queue = []
     self.file_display_text.set("")
     self.custom_text_entry.delete(0, ctk.END)
-    self.last_used_file = new_path
+    self.file_renamer_last_used_file = new_path
 
     # Get the base name and truncate after x characters
     last_used_name = os.path.basename(new_path)
@@ -877,6 +982,8 @@ def rename_files(self):
             if self.suggest_output_directory_var.get():
                 self.output_directory = self.suggest_output_directory()
 
+                # TODO Maybe change messaging here? It is currently unclear that the fallback happened,
+                #  NOT the actual suggested output directory
                 # Ask for confirmation of new output directory if match found
                 confirmation = ask_confirmation(self, "Suggest Output Directory",
                                                 f"Suggested output directory found. Do you want to use: "
@@ -1502,7 +1609,7 @@ def rotate_video(self, clip, rotation_angle):
         rotated_clip = clip.rotate(rotation_angle)
 
         # Log rotation success if logging is activated.
-        self.log_and_show(f"Rotation successful {clip} {rotation_angle}",
+        self.log_and_show(f"Rotation successful {rotation_angle}",
                           frame_name="video_editor_window",
                           create_messagebox=False,
                           error=False,
@@ -1590,8 +1697,6 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
 # Method to process video edits based on user inputs.
 def process_video_edits(self):
     # Get input parameters from user interface.
-    input_method = self.input_method_entry.get()
-    video_output_directory = self.video_output_directory_entry.get()
     rotation = str(self.rotation_var.get())
     decibel = float(self.decibel_entry.get())
     audio_normalization = float(self.audio_normalization_entry.get())
@@ -1609,7 +1714,7 @@ def process_video_edits(self):
         audio_normalization = None
 
     # Check if an input source is provided
-    if not input_method:
+    if not self.video_editor_selected_file:
         self.log_and_show("Input must be specified (video file, line separated txt, or directory.",
                           frame_name="video_editor_window",
                           create_messagebox=True,
@@ -1618,7 +1723,7 @@ def process_video_edits(self):
         return
 
     # Check if the provided input exists
-    if input_method and not os.path.exists(input_method):
+    if self.video_editor_selected_file and not os.path.exists(self.video_editor_selected_file):
         self.log_and_show("The input does not exist or cannot be found. Please try again.",
                           frame_name="video_editor_window",
                           create_messagebox=True,
@@ -1627,7 +1732,7 @@ def process_video_edits(self):
         return
 
     # Check if the necessary parameters for video editing are provided
-    if input_method and decibel is None and rotation is None and audio_normalization is None:
+    if self.video_editor_selected_file and decibel is None and rotation is None and audio_normalization is None:
         self.log_and_show("You need to specify an operation (audio increase, video rotation, "
                           "audio normalization, or a combination of them",
                           frame_name="video_editor_window",
@@ -1637,7 +1742,7 @@ def process_video_edits(self):
         return
 
     # Check if the provided output directory exists
-    if video_output_directory and not os.path.exists(video_output_directory):
+    if self.video_editor_output_directory and not os.path.exists(self.video_editor_output_directory):
         self.log_and_show("The output directory does not exist or cannot be found. Please try again.",
                           frame_name="video_editor_window",
                           create_messagebox=True,
@@ -1648,29 +1753,31 @@ def process_video_edits(self):
     # Define which input paths based on user input (Video file, .txt file, or directory)
     try:
         # Video file
-        if os.path.isfile(input_method) and any(input_method.lower().endswith(ext) for ext in self.valid_extensions):
-            input_paths = [input_method]
+        if os.path.isfile(self.video_editor_selected_file) and any(self.video_editor_selected_file.lower().endswith(ext)
+                                                                   for ext in self.valid_extensions):
+            input_paths = [self.video_editor_selected_file]
         # .txt file
-        elif os.path.isfile(input_method) and input_method.lower().endswith('.txt'):
-            with open(input_method, 'r') as file:
+        elif os.path.isfile(self.video_editor_selected_file) and self.video_editor_selected_file.lower().endswith(
+                '.txt'):
+            with open(self.video_editor_selected_file, 'r') as file:
                 input_paths = [line.strip() for line in file if
                                os.path.splitext(line.strip())[1].lower() in self.valid_extensions]
         # Directory
-        elif os.path.isdir(input_method):
+        elif os.path.isdir(self.video_editor_selected_file):
             # Ask for confirmation before normalizing files
             confirmation = ask_confirmation(self, "Confirm Action",
                                             "Are you sure you want edit ALL video files in the provided directory?"
                                             "\nThis option may be computer intensive.")
             if confirmation:
-                self.log_and_show(f"User confirmed the directory for {input_method}.",
+                self.log_and_show(f"User confirmed the directory for {self.video_editor_selected_file}.",
                                   frame_name="video_editor_window",
-                                  create_messagebox=True,
-                                  error=True,
+                                  create_messagebox=False,
+                                  error=False,
                                   not_logging=False)
 
                 # Get the absolute file paths of all files within the directory with valid extensions
                 input_paths = []
-                for root, dirs, files in os.walk(input_method):
+                for root, dirs, files in os.walk(self.video_editor_selected_file):
                     for file in files:
                         file_path = os.path.join(root, file)
                         if os.path.splitext(file_path)[1].lower() in self.valid_extensions:
@@ -1747,8 +1854,8 @@ def process_video_edits(self):
                 output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
 
                 # Adjust output path if a video output directory is specified
-                if video_output_directory:
-                    output_path = os.path.join(video_output_directory, os.path.basename(output_path))
+                if self.video_editor_output_directory:
+                    output_path = os.path.join(self.video_editor_output_directory, os.path.basename(output_path))
 
                 # Get a non-conflicting name for the output path
                 output_path = get_non_conflicting_filename(self, output_path)
@@ -1782,18 +1889,30 @@ def process_video_edits(self):
                 # Write the final modified clip to the output path if all operations were successful
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+
+                    filename = os.path.basename(output_path)
+
                     # Log the action if logging is enabled
-                    self.log_and_show(f"Video {operation_suffix.lower()} saved as {output_path}",
+                    self.log_and_show(f"Video saved as {filename}",
                                       frame_name="video_editor_window",
                                       create_messagebox=False,
                                       error=False,
                                       not_logging=False)
 
+                    # Set the video editor last used file upon success
+                    self.video_editor_last_used_file = output_path
+
+                    # TODO Include logic for reset entries
+                    # # Clear selection for the video_editor_window
+                    # clear_selection(self, "video_editor_window")
+
                     # Remove the successfully processed line from the input file
-                    if input_method:
-                        remove_successful_line_from_file(self, input_method, input_path)
+                    if self.video_editor_selected_file:
+                        remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
                 else:
-                    self.log_and_show(f"Operations failed for video {input_path}",
+                    filename = os.path.basename(input_path)
+
+                    self.log_and_show(f"Operations failed for video {filename}",
                                       frame_name="video_editor_window",
                                       create_messagebox=True,
                                       error=True,
@@ -1847,8 +1966,8 @@ def process_video_edits(self):
                 output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
 
                 # Adjust output path if a video output directory is specified
-                if video_output_directory:
-                    output_path = os.path.join(video_output_directory, os.path.basename(output_path))
+                if self.video_editor_output_directory:
+                    output_path = os.path.join(self.video_editor_output_directory, os.path.basename(output_path))
 
                 # Get a non-conflicting name for the output path
                 output_path = get_non_conflicting_filename(self, output_path)
@@ -1882,18 +2001,30 @@ def process_video_edits(self):
                 # Write the final modified clip to the output path if all operations were successful
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+
+                    filename = os.path.basename(output_path)
+
                     # Log the action if logging is enabled
-                    self.log_and_show(f"Video {operation_suffix.lower()} saved as {output_path}",
+                    self.log_and_show(f"Video saved as {filename}",
                                       frame_name="video_editor_window",
                                       create_messagebox=False,
                                       error=False,
                                       not_logging=False)
 
+                    # Set the video editor last used file upon success
+                    self.video_editor_last_used_file = output_path
+
+                    # TODO Include logic for reset entries
+                    # # Clear selection for the video_editor_window
+                    # clear_selection(self, "video_editor_window")
+
                     # Remove the successfully processed line from the input file
-                    if input_method:
-                        remove_successful_line_from_file(self, input_method, input_path)
+                    if self.video_editor_selected_file:
+                        remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
                 else:
-                    self.log_and_show(f"Operations failed for video {input_path}",
+                    filename = os.path.basename(input_path)
+
+                    self.log_and_show(f"Operations failed for video {filename}",
                                       frame_name="video_editor_window",
                                       create_messagebox=True,
                                       error=True,
