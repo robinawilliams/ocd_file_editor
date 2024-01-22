@@ -191,7 +191,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
-         double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
+         double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
          file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
          remove_hashtag_trail_var,
          remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
@@ -221,7 +221,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_decibel = float(default_decibel)
         self.default_audio_normalization = float(default_audio_normalization)
         self.default_frame = default_frame
-        self.ocd_file_renamer_log = ocd_file_renamer_log
+        self.file_renamer_log = file_renamer_log
         self.default_placement_var = default_placement_var
         self.special_character_var = special_character_var
         self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)

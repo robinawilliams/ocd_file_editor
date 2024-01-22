@@ -99,7 +99,7 @@ def load_configuration():
     default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
     default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
     default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
-    ocd_file_renamer_log = config.get('Logs', 'ocd_file_renamer_log', fallback="ocd_file_renamer.log")
+    file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
@@ -170,7 +170,7 @@ def load_configuration():
     return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
             open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
-            double_check_var, activate_logging_var, ocd_file_renamer_log, column_numbers, default_weight,
+            double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
             file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
             remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
             remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
@@ -186,12 +186,12 @@ def load_configuration():
 
 def logging_setup(self):
     # Create the log file if it doesn't exist
-    if not os.path.exists(self.ocd_file_renamer_log):
-        with open(self.ocd_file_renamer_log, 'w'):
+    if not os.path.exists(self.file_renamer_log):
+        with open(self.file_renamer_log, 'w'):
             pass
 
     # Initialize logging
-    logging.basicConfig(filename=self.ocd_file_renamer_log, level=logging.INFO, filemode='a',
+    logging.basicConfig(filename=self.file_renamer_log, level=logging.INFO, filemode='a',
                         format='%(asctime)s - %(levelname)s: %(message)s')
 
     logging.info("Logging started.")
