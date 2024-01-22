@@ -587,7 +587,8 @@ def handle_rename_success(self, new_path):
                 pass
 
             # Log the action if logging is enabled
-            self.log_and_show(f"Empty file created successfully for {folder_name}",
+            self.log_and_show(f"Double check reminder created successfully for {folder_name} in \n"
+                              f"{self.double_check_directory}",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=False,
@@ -595,7 +596,7 @@ def handle_rename_success(self, new_path):
 
         except Exception as e:
             # Handle any errors that may occur
-            self.log_and_show(f"Error creating empty file: {str(e)}",
+            self.log_and_show(f"Double check reminder was not created successfully: {str(e)}",
                               frame_name="file_renamer_window",
                               create_messagebox=True,
                               error=True,
@@ -1242,7 +1243,7 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
                 move_file_with_overwrite_check(self, new_path, move_directory)
         except OSError as e:
             # Log an error if renaming fails
-            self.log_and_show(f"Error renaming {filename}: {e}",
+            self.log_and_show(f"Renaming failed for {filename}: {e}",
                               frame_name="name_normalizer_window",
                               create_messagebox=False,
                               error=True,
@@ -1283,7 +1284,7 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
                           not_logging=False)
     except OSError as e:
         # Log error if logging is activated
-        self.log_and_show(f"Error renaming {os.path.basename(source_path)}: {e}",
+        self.log_and_show(f"Renaming failed for {os.path.basename(source_path)}: {e}",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=True,
@@ -1449,7 +1450,7 @@ def get_non_conflicting_filename(self, path):
         return new_path
     except Exception as e:
         # Log error and display an error message when get non-conflicting file name fails.
-        self.log_and_show(f"Error getting non-conflicting file name: {str(e)}",
+        self.log_and_show(f"Getting non-conflicting file name failed: {str(e)}",
                           frame_name="video_editor_window",
                           create_messagebox=True,
                           error=True,
@@ -1476,7 +1477,7 @@ def rotate_video(self, clip, rotation_angle):
         return rotated_clip
     except Exception as e:
         # Log error and display an error message if rotation fails.
-        self.log_and_show(f"Error rotating video: {str(e)}",
+        self.log_and_show(f"Rotating video failed: {str(e)}",
                           frame_name="video_editor_window",
                           create_messagebox=True,
                           error=True,
@@ -1497,7 +1498,7 @@ def increase_volume(self, clip, increase_db):
 
     except Exception as e:
         # Log error and display an error message if volume increase fails.
-        self.log_and_show(f"Error increasing volume: {str(e)}",
+        self.log_and_show(f"Increasing volume failed: {str(e)}",
                           frame_name="video_editor_window",
                           create_messagebox=True,
                           error=True,
@@ -1518,7 +1519,7 @@ def normalize_audio(self, clip, volume_multiplier):
 
     except Exception as e:
         # Log error and display an error message if audio normalization fails.
-        self.log_and_show(f"Error normalizing audio: {str(e)}",
+        self.log_and_show(f"Normalizing audio failed: {str(e)}",
                           frame_name="video_editor_window",
                           create_messagebox=True,
                           error=True,
@@ -1647,7 +1648,7 @@ def process_video_edits(self):
             raise ValueError("Invalid input detected. Please select a video file, .txt file with video file paths, "
                              "or a directory with video files")
     except Exception as e:
-        self.log_and_show(f"Error processing input: {str(e)}",
+        self.log_and_show(f"Processing input failed: {str(e)}",
                           frame_name="video_editor_window",
                           create_messagebox=True,
                           error=True,
