@@ -857,6 +857,10 @@ def rename_files(self):
         # Remove extra whitespaces from the name
         name = " ".join(name.split()).strip()
 
+        # Initialize override directory to handle explicitly set output directory before suggest output directory call
+        if self.output_directory:
+            self.override_directory = self.output_directory
+
         # If output directory is not explicitly set, default to the same directory as the file
         if not self.output_directory:
             self.output_directory = os.path.dirname(self.selected_file)
@@ -882,15 +886,27 @@ def rename_files(self):
                                       error=False,
                                       not_logging=False)
                 else:
-                    # If the user did not select the suggested output directory, fallback to the default location
-                    self.log_and_show(
-                        "User did not choose the suggested output directory. Falling back to default "
-                        "location.",
-                        frame_name="file_renamer_window",
-                        create_messagebox=False,
-                        error=False,
-                        not_logging=False)
-                    self.output_directory = os.path.dirname(self.selected_file)
+                    # If the user did not select the suggested output directory use this logic
+                    if self.override_directory:
+                        # If the user explicitly set an output directory, use that
+                        self.log_and_show(
+                            "User did not choose the suggested output directory. Using specified output "
+                            "directory.",
+                            frame_name="file_renamer_window",
+                            create_messagebox=False,
+                            error=False,
+                            not_logging=False)
+                        self.output_directory = self.override_directory
+                    else:
+                        # If the user did not explicitly set an output directory, fallback to the default location
+                        self.log_and_show(
+                            "User did not choose the suggested output directory. Falling back to default "
+                            "location.",
+                            frame_name="file_renamer_window",
+                            create_messagebox=False,
+                            error=False,
+                            not_logging=False)
+                        self.output_directory = os.path.dirname(self.selected_file)
 
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
             else:
