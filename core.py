@@ -505,8 +505,13 @@ def browse_output_directory(self, frame_name):
     if frame_name == "file_renamer_window":
         # Check if a file is selected
         if self.selected_file:
-            # Determine the initial directory based on options
-            initial_directory = self.suggest_output_directory()
+            # Check if suggest output directory is true
+            if self.suggest_output_directory_var.get():
+                # Call the suggest output directory function to determine initial directory
+                initial_directory = self.suggest_output_directory()
+            else:
+                # If suggest output directory is false, use the default initial directory
+                initial_directory = self.initial_directory
         else:
             # If no file is selected, use the default initial directory
             initial_directory = self.initial_directory
@@ -533,36 +538,48 @@ def browse_output_directory(self, frame_name):
 
 def suggest_output_directory(self):
     # Check if a file is selected
-    if self.selected_file:
-        # Check if the suggest_output_directory_var is True
-        if self.suggest_output_directory_var.get():
-            # Extract the base name from the selected file
-            base_name = os.path.basename(self.selected_file)
-            base_name_lower = base_name.lower()  # Case insensitive comparison
+    if not self.selected_file:
+        # If no file is selected, use the default initial directory
+        self.log_and_show("No file selected. Using default initial directory.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+        return self.initial_directory
 
-            # TODO Implement logic for multiple artist matches
-            # Extract the artist from the filename
-            for artist_folder in os.listdir(self.artist_directory):
-                if artist_folder.lower() in base_name_lower:
-                    # Construct the artist folder path
-                    artist_folder_path = os.path.join(self.artist_directory, artist_folder)
-
-                    # Verify the folder exists
-                    if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
-                        # Return the result
-                        return artist_folder_path
-
-        # If the filename doesn't match the expected pattern or suggest_output_directory is False,
-        # use the default output directory
-        self.log_and_show("Cannot suggest output directory. Falling back to default output directory.",
+    # Check if the suggest_output_directory_var is True
+    if not self.suggest_output_directory_var.get():
+        # If suggest_output_directory is False, use the default output directory
+        self.log_and_show("Suggest output directory disabled. Using default output directory.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
         return self.output_directory
 
-    # If no file is selected, use the default initial directory
-    return self.initial_directory
+    # Extract the base name from the selected file
+    base_name = os.path.basename(self.selected_file)
+    base_name_lower = base_name.lower()  # Case insensitive comparison
+
+    # TODO Implement logic for multiple artist matches
+    # Extract the artist from the filename
+    for artist_folder in os.listdir(self.artist_directory):
+        if artist_folder.lower() in base_name_lower:
+            # Construct the artist folder path
+            artist_folder_path = os.path.join(self.artist_directory, artist_folder)
+
+            # Verify the folder exists
+            if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
+                # Return the result
+                return artist_folder_path
+
+    # If no matching artist folder is found, use the default output directory
+    self.log_and_show("Cannot suggest output directory. Falling back to default output directory.",
+                      frame_name="file_renamer_window",
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=False)
+    return self.output_directory
 
 
 # Function to handle actions after successful file renaming
