@@ -421,6 +421,7 @@ def undo_last(self):
 def clear_selection(self, frame_name):
     if frame_name == "file_renamer_window":
         self.selected_file = ""
+        self.override_directory = ""
         self.queue = []
         self.file_display_text.set("")
         self.log_and_show("Selection cleared",
@@ -619,8 +620,9 @@ def handle_rename_success(self, new_path):
                               error=True,
                               not_logging=False)
 
-    # Reset selected file, queue, and update last used file
+    # Reset selected file, queue, override directory, and update last used file
     self.selected_file = ""
+    self.override_directory = ""
     self.queue = []
     self.file_display_text.set("")
     self.custom_text_entry.delete(0, ctk.END)
