@@ -247,6 +247,67 @@ def move_file_to_trash(self):
                           not_logging=False)
 
 
+# Function to create double check reminders
+def double_check_reminder(self, new_path):
+    # Check if the double check reminder variable is false
+    if not self.double_check_var.get():
+        # If the user declines, then do not create the double check reminder
+        self.log_and_show(f"Double check reminder is disabled. Skipping.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+
+    # Check if the double check reminder variable is true
+    if self.double_check_var.get():
+        try:
+            # Get the name of the folder immediately above the current location
+            folder_name = os.path.basename(os.path.dirname(new_path))
+
+            # Ask for confirmation of the double check reminder
+            confirmation = ask_confirmation(self, "Double Check Reminder",
+                                            f"Do you want to create a double check reminder for: "
+                                            f"{folder_name}?")
+            if confirmation:
+                # Expand the user's home directory in the output directory path
+                double_check_directory = os.path.expanduser(self.double_check_directory)
+
+                # Ensure the output directory exists, create it if not
+                if not os.path.exists(double_check_directory):
+                    os.makedirs(double_check_directory)
+
+                # Create an empty file with the specified naming scheme
+                file_name = f"Double check {folder_name}"
+                file_path = os.path.join(double_check_directory, file_name)
+
+                # Empty file
+                with open(file_path, 'w'):
+                    pass
+
+                # Log the action if logging is enabled
+                self.log_and_show(f"Double check reminder created successfully for {folder_name} in \n"
+                                  f"{self.double_check_directory}",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
+            else:
+                # If the user declines, then do not create the double check reminder
+                self.log_and_show(f"User declined double check reminder for: {folder_name}",
+                                  frame_name="file_renamer_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
+
+        except Exception as e:
+            # Handle any errors that may occur
+            self.log_and_show(f"Double check reminder was not created successfully: {str(e)}",
+                              frame_name="file_renamer_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+
+
 # Function to load the last used file
 def load_last_used_file(self, frame_name):
     if frame_name == "file_renamer_window":
@@ -255,13 +316,13 @@ def load_last_used_file(self, frame_name):
             # Set the selected file to the file renamer last used file and update display
             self.selected_file = self.file_renamer_last_used_file
             filename = os.path.basename(self.selected_file)
-    
+
             # Display only the filename in the file display widget
             self.file_display_text.set(filename)
-    
+
             self.queue = []
             self.update_file_display()
-    
+
             message = filename
             # Log the action if logging is enabled
             self.log_and_show(f"Last used file renamer file selected: {message}",
@@ -689,41 +750,8 @@ def suggest_output_directory(self):
 
 # Function to handle actions after successful file renaming
 def handle_rename_success(self, new_path):
-    if self.double_check_var.get():
-        try:
-            # Get the name of the folder immediately above the current location
-            folder_name = os.path.basename(os.path.dirname(new_path))
-
-            # Expand the user's home directory in the output directory path
-            double_check_directory = os.path.expanduser(self.double_check_directory)
-
-            # Ensure the output directory exists, create it if not
-            if not os.path.exists(double_check_directory):
-                os.makedirs(double_check_directory)
-
-            # Create an empty file with the specified naming scheme
-            file_name = f"Double check {folder_name}"
-            file_path = os.path.join(double_check_directory, file_name)
-
-            # Empty file
-            with open(file_path, 'w'):
-                pass
-
-            # Log the action if logging is enabled
-            self.log_and_show(f"Double check reminder created successfully for {folder_name} in \n"
-                              f"{self.double_check_directory}",
-                              frame_name="file_renamer_window",
-                              create_messagebox=False,
-                              error=False,
-                              not_logging=False)
-
-        except Exception as e:
-            # Handle any errors that may occur
-            self.log_and_show(f"Double check reminder was not created successfully: {str(e)}",
-                              frame_name="file_renamer_window",
-                              create_messagebox=True,
-                              error=True,
-                              not_logging=False)
+    # Call the double check reminder function
+    double_check_reminder(self, new_path)
 
     # Reset selected file, queue, override directory, and update file renamer last used file
     self.selected_file = ""

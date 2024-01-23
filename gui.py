@@ -1313,6 +1313,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Move the selected file to the trash
         core.move_file_to_trash(self)
 
+    def double_check_reminder(self, new_path):
+        # Create double check reminders
+        core.double_check_reminder(self, new_path)
+
     def load_last_used_file(self, frame_name):
         # Load the last used file and update the GUI
         core.load_last_used_file(self, frame_name)
