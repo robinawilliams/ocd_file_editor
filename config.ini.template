@@ -117,14 +117,14 @@ file_extensions = .mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus
 valid_extensions = .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
 
 [Filepaths]
-; Starting directory for browse
-initial_directory = /path/to/folder
-; Starting directory for name normalizer files browse
-initial_output_directory = /path/to/folder
-; Directory to save double check reminders
-double_check_directory = /path/to/folder
-; Directory with folders to use for suggestions
-artist_directory = /path/to/folder
+; Starting directory for browse (Uncomment and replace /path/to/folder with your directory)
+;initial_directory = /path/to/folder
+; Starting directory for name normalizer files browse (Uncomment and replace /path/to/folder with your directory)
+;initial_output_directory = /path/to/folder
+; Directory to save double check reminders (Uncomment and replace double_check_reminders with your directory)
+;double_check_directory = double_check_reminders
+; Directory with folders to use for suggestions (Uncomment and replace artist_directory with your directory)
+;artist_directory = artist_directory
 ; List of artists to search
 artist_file = list_of_artists.txt
 ; JSON Dictionary containing the categories/genres and weights
