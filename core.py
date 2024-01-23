@@ -570,6 +570,10 @@ def clear_selection(self, frame_name):
                           not_logging=True)
 
     if frame_name == "name_normalizer_window":
+        self.name_normalizer_selected_folder = ""
+        self.name_normalizer_output_directory = ""
+        self.artist_file = ""
+
         self.folder_path_entry.delete(0, ctk.END)
         self.move_directory_entry.delete(0, ctk.END)
         self.artist_file_entry.delete(0, ctk.END)
@@ -621,9 +625,9 @@ def browse_input(self, frame_name):
 
     if frame_name == "name_normalizer_window":
         # Function to browse and select a folder to normalize files
-        folder_path = filedialog.askdirectory(initialdir=self.initial_directory)
+        self.name_normalizer_selected_folder = filedialog.askdirectory(initialdir=self.initial_directory)
         self.folder_path_entry.delete(0, ctk.END)
-        self.folder_path_entry.insert(0, folder_path)
+        self.folder_path_entry.insert(0, self.name_normalizer_selected_folder)
 
     if frame_name == "video_editor_window":
         # Initially ask for a file
@@ -682,9 +686,9 @@ def browse_output_directory(self, frame_name):
             self.output_directory_entry.insert(0, self.output_directory)
 
     if frame_name == "name_normalizer_window":
-        move_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
+        self.name_normalizer_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
         self.move_directory_entry.delete(0, ctk.END)
-        self.move_directory_entry.insert(0, move_directory)
+        self.move_directory_entry.insert(0, self.name_normalizer_output_directory)
 
     if frame_name == "video_editor_window":
         # Ask for the output directory
@@ -989,6 +993,7 @@ def rename_files(self):
         custom_text = self.custom_text_entry.get().strip()
         base_name, extension = os.path.splitext(os.path.basename(self.selected_file))
 
+        # TODO Research a broad remove duplicates feature (Removing all duplicate entries, instead of just in the queue
         # Check if the remove_duplicates_var is set
         if self.remove_duplicates_var.get():
             # Remove duplicates from the queue
@@ -1142,10 +1147,10 @@ Name Normalizer
 """
 
 
-# Function to remove duplicate artists from the filename. Requires artist_file
-def remove_artist_duplicates_from_filename(file_name, artist_file):
+# Function to remove duplicate artists from the filename
+def remove_artist_duplicates_from_filename(self, file_name):
     # Read the list of artists from the artist_file
-    with open(artist_file, 'r') as artist_list_file:
+    with open(self.artist_file, 'r') as artist_list_file:
         artist_list = [artist.strip() for artist in artist_list_file]
 
     # Extract the file name without the path
@@ -1176,7 +1181,7 @@ def remove_artist_duplicates_from_filename(file_name, artist_file):
 
 
 # Function to process and rename files and moving files to a specified directory
-def rename_and_move_file(self, file_path, move_directory, artist_file):
+def rename_and_move_file(self, file_path):
     # Split the file path into directory path and filename
     dir_path, filename = os.path.split(file_path)
     name, ext = os.path.splitext(filename)
@@ -1327,29 +1332,36 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
 
         # Process artist names if artist_file_search_var is True
         if self.artist_file_search_var.get():
-            # Read the list of artists from the artist_file
-            with open(artist_file, 'r') as artist_list_file:
-                artists = [artist.strip() for artist in artist_list_file]
+            try:
+                # Read the list of artists from the artist_file
+                with open(self.artist_file, 'r') as artist_list_file:
+                    artists = [artist.strip() for artist in artist_list_file]
 
-            # Search for artist names and add them as prefixes
-            artist_prefix = ''
-            for artist in artists:
-                # Make the search case-insensitive
-                regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
-                if regex.search(name):
-                    artist_prefix += f"{artist} "
+                # Search for artist names and add them as prefixes
+                artist_prefix = ''
+                for artist in artists:
+                    # Make the search case-insensitive
+                    regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
+                    if regex.search(name):
+                        artist_prefix += f"{artist} "
 
-            # Remove extra spaces and dashes at the beginning and end
-            artist_prefix = artist_prefix.strip()
-            name = name.strip("-")
+                # Remove extra spaces and dashes at the beginning and end
+                artist_prefix = artist_prefix.strip()
+                name = name.strip("-")
 
-            # Add artist prefix to the filename if artist_prefix is not empty
-            name = f"{artist_prefix} - {name}" if artist_prefix else name
+                # Add artist prefix to the filename if artist_prefix is not empty
+                name = f"{artist_prefix} - {name}" if artist_prefix else name
 
-            # Check if remove_duplicates_var is set
-            if self.remove_duplicates_var.get():
-                # Call the remove_artist_duplicates_from_filename function to modify name
-                name = remove_artist_duplicates_from_filename(name, artist_file)
+                # Check if remove_duplicates_var is set
+                if self.remove_duplicates_var.get():
+                    # Call the remove_artist_duplicates_from_filename function to modify name
+                    name = remove_artist_duplicates_from_filename(self, name)
+            except FileNotFoundError:
+                self.log_and_show(f"File not found: {self.artist_file}", frame_name="name_normalizer_window",
+                                  create_messagebox=True, error=True, not_logging=False)
+            except Exception as e:
+                self.log_and_show(f"Artist search failed {self.artist_file}: {e}", frame_name="name_normalizer_window",
+                                  create_messagebox=True, error=True, not_logging=False)
 
         # Add tail if tail_var is True
         if self.tail_var.get():
@@ -1403,11 +1415,13 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
                 counter = 1
 
             # Generate name with incremented counter until a unique name is found
-            new_path = os.path.join(move_directory if move_directory else dir_path, name)
+            new_path = os.path.join(self.name_normalizer_output_directory if self.name_normalizer_output_directory
+                                    else dir_path, name)
             while os.path.exists(new_path):
                 new_name_with_counter = f"{base_name} ({counter}){ext}"
                 name = new_name_with_counter
-                new_path = os.path.join(move_directory if move_directory else dir_path, name)
+                new_path = os.path.join(self.name_normalizer_output_directory if self.name_normalizer_output_directory
+                                        else dir_path, name)
                 counter += 1
         try:
             # Rename the file
@@ -1420,9 +1434,9 @@ def rename_and_move_file(self, file_path, move_directory, artist_file):
                               error=False,
                               not_logging=False)
 
-            # Move the renamed file to the specified directory if move_directory is provided
-            if move_directory:
-                move_file_with_overwrite_check(self, new_path, move_directory)
+            # Move the renamed file to the specified directory if name_normalizer_output_directory is provided
+            if self.name_normalizer_output_directory:
+                move_file_with_overwrite_check(self, new_path, self.name_normalizer_output_directory)
         except OSError as e:
             # Log an error if renaming fails
             self.log_and_show(f"Renaming failed for {filename}: {e}",
@@ -1444,6 +1458,7 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
     # Create the destination file path by joining the destination directory and the source file name
     destination_file = os.path.join(destination_directory, os.path.basename(source_path))
 
+    # TODO Check if you can optimize this with get_non_conflicting_filename
     # Check if the destination file already exists
     if os.path.exists(destination_file):
         # Rename the source file to avoid overwriting by appending a counter
@@ -1476,12 +1491,9 @@ def move_file_with_overwrite_check(self, source_path, destination_directory):
 # Function to performing various name normalization operations on certain files within a specified folder
 def process_name_normalizer_folder(self):
     # Retrieve values from GUI input fields
-    folder_path = self.folder_path_entry.get()
-    move_directory = self.move_directory_entry.get()
-    artist_file = self.artist_file_entry.get()
 
     # Check if the specified folder path exists
-    if not os.path.exists(folder_path):
+    if not os.path.exists(self.name_normalizer_selected_folder):
         self.log_and_show("Folder path does not exist or was not specified.\nPlease try again.",
                           frame_name="name_normalizer_window",
                           create_messagebox=True,
@@ -1489,8 +1501,8 @@ def process_name_normalizer_folder(self):
                           not_logging=False)
         return
 
-    # Check if move_directory is specified and exists
-    if move_directory and not os.path.exists(move_directory):
+    # Check if name_normalizer_output_directory is specified and exists
+    if self.name_normalizer_output_directory and not os.path.exists(self.name_normalizer_output_directory):
         self.log_and_show("Output directory does not exist or was not specified.\nPlease try again.",
                           frame_name="name_normalizer_window",
                           create_messagebox=True,
@@ -1498,39 +1510,40 @@ def process_name_normalizer_folder(self):
                           not_logging=False)
         return
 
-    # Check artist file conditions if artist_file_search_var is True
+    # Check if artist file search is enabled
     if self.artist_file_search_var.get():
-        if not artist_file:
-            # If artist file wasn't specified, try falling back to the default
-            artist_file = self.artist_file
-            # If fallback artist file doesn't exist return so elif portion fires
-            if not os.path.exists(artist_file):
-                return
-        elif not os.path.exists(artist_file):
+        # Check if artist file is not provided
+        if not self.artist_file:
+            # Log and display an error message
+            self.log_and_show("No artist file provided. Please provide one and try again, or turn off Artist Search.",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+            return
+        # Check if artist file does not exist
+        elif not os.path.exists(self.artist_file):
+            # Log and display an error message
             self.log_and_show("Artist file does not exist.\nPlease create it from the template and try "
-                              "again\nor turn off Artist Search.\nSee FAQ",
+                              "again,\nor turn off Artist Search.\nSee FAQ",
                               frame_name="name_normalizer_window",
                               create_messagebox=True,
                               error=True,
                               not_logging=False)
             return
 
-    # Set move_directory to None if not specified
-    if not move_directory:
-        move_directory = None
-
     # Ask for confirmation before normalizing files
     confirmation = ask_confirmation(self, "Confirm Action",
                                     "Are you sure you want normalize these files? This cannot be undone.")
     if confirmation:
-        self.log_and_show(f"User confirmed the name normalization process for {folder_path}.",
+        self.log_and_show(f"User confirmed the name normalization process for {self.name_normalizer_selected_folder}.",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
         pass
     else:
-        self.log_and_show(f"User cancelled the name normalization process for {folder_path}.",
+        self.log_and_show(f"User cancelled the name normalization process for {self.name_normalizer_selected_folder}.",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=False,
@@ -1548,16 +1561,16 @@ def process_name_normalizer_folder(self):
             deep_walk_status = "including subdirectories"
         else:
             deep_walk_status = "excluding subdirectories"
-        self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'",
+        self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{self.name_normalizer_selected_folder}'",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
 
         # Traverse through the folder using os.walk
-        for root, dirs, files in os.walk(folder_path):
+        for root, dirs, files in os.walk(self.name_normalizer_selected_folder):
             # Include subdirectories if the deep_walk_var is True or the root folder is selected
-            if self.deep_walk_var.get() or root == folder_path:
+            if self.deep_walk_var.get() or root == self.name_normalizer_selected_folder:
                 for file in files:
                     # Append the full file path to the list
                     file_paths.append(str(os.path.join(root, file)))
@@ -1566,9 +1579,7 @@ def process_name_normalizer_folder(self):
         for file_path in file_paths:
             rename_and_move_file(
                 self,
-                file_path,
-                move_directory,
-                artist_file
+                file_path
             )
 
         # Log the action if logging is enabled
@@ -1580,10 +1591,8 @@ def process_name_normalizer_folder(self):
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
-            # Clear the entry fields
-            self.folder_path_entry.delete(0, ctk.END)
-            self.move_directory_entry.delete(0, ctk.END)
-            self.artist_file_entry.delete(0, ctk.END)
+            # Clear selection for the name_normalizer_window
+            clear_selection(self, "name_normalizer_window")
 
     except Exception as e:
         # Display error message if an exception occurs
@@ -1596,11 +1605,11 @@ def process_name_normalizer_folder(self):
 
 # Open a dialog to browse and select a file containing a line delimited list of artists
 def browse_artist_file(self):
-    artist_file = filedialog.askopenfilename(
+    self.artist_file = filedialog.askopenfilename(
         initialdir=self.initial_directory,
         filetypes=[("Text Files", "*.txt")])
     self.artist_file_entry.delete(0, ctk.END)
-    self.artist_file_entry.insert(0, artist_file)
+    self.artist_file_entry.insert(0, self.artist_file)
 
 
 """

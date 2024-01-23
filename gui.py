@@ -14,16 +14,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set the window title
         self.title("O.C.D. File Editor")
 
-        # Initialize instance variables for selected file, output directory, queue, and last used file
+        # Initialize instance variables for selected files, output directories, queue, and last used files
         self.selected_file = ""
         self.output_directory = ""
         self.queue = []
+        self.name_normalizer_selected_folder = ""
+        self.name_normalizer_output_directory = ""
         self.file_renamer_last_used_file = ""
         self.video_editor_selected_file = ""
         self.video_editor_output_directory = ""
         self.video_editor_last_used_file = ""
 
-        # Initialize GUI elements
+        # Initialize Main GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
         self.navigation_frame_label = None
@@ -32,7 +34,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_button = None
         self.settings_button = None
 
-        # Initialize OCD File Renamer elements
+        # Initialize OCD File Renamer GUI elements
         self.file_renamer_frame = None
         self.file_renamer_canvas = None
         self.file_renamer_scrollbar = None
@@ -78,7 +80,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.special_character_radio = None
         self.suffix_radio = None
 
-        # Initialize Name Normalizer elements
+        # Initialize Name Normalizer GUI elements
         self.name_normalizer_frame = None
         self.name_normalizer_top_frame = None
         self.name_normalizer_label = None
@@ -138,7 +140,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.name_normalizer_message_label_frame = None
         self.name_normalizer_message_label = None
 
-        # Initialize Video Editor elements
+        # Initialize Video Editor GUI elements
         self.video_editor_frame = None
         self.video_editor_top_frame = None
         self.video_editor_label = None
@@ -170,7 +172,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_message_label_frame = None
         self.video_editor_message_label = None
 
-        # Initialize Settings elements
+        # Initialize Settings GUI elements
         self.settings_frame = None
         self.settings_top_frame = None
         self.settings_label = None
@@ -1408,14 +1410,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Name Normalizer
     """
 
-    @staticmethod
-    def remove_artist_duplicates_from_filename(file_name, artist_file):
-        # Function to remove duplicate artists from the filename. Requires artist_file
-        return core.remove_artist_duplicates_from_filename(file_name, artist_file)
+    def remove_artist_duplicates_from_filename(self, file_name):
+        # Function to remove duplicate artists from the filename
+        return core.remove_artist_duplicates_from_filename(self, file_name)
 
-    def rename_and_move_file(self, file_path, move_directory, artist_file):
+    def rename_and_move_file(self, file_path):
         # Function to process and rename files and moving files to a specified directory
-        core.rename_and_move_file(self, file_path, move_directory, artist_file)
+        core.rename_and_move_file(self, file_path)
 
     def move_file_with_overwrite_check(self, source_path, destination_directory):
         # Function to move a file from a source path to a destination directory with overwrite protection
