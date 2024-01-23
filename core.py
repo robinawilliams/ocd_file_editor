@@ -1735,6 +1735,7 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
 
 
 # Method to process video edits based on user inputs.
+# noinspection PyTypeChecker
 def process_video_edits(self):
     # Get input parameters from user interface.
     rotation = str(self.rotation_var.get())
