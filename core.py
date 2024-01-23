@@ -85,10 +85,10 @@ def load_configuration():
     config.read(config_file_path)
 
     # Filepaths/Directories
-    initial_directory = config.get('Filepaths', 'initial_directory', fallback='~')
-    initial_output_directory = config.get('Filepaths', 'initial_output_directory', fallback='~')
-    double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='~')
-    artist_directory = config.get('Filepaths', 'artist_directory', fallback='~')
+    initial_directory = config.get('Filepaths', 'initial_directory', fallback='/path/to/folder')
+    initial_output_directory = config.get('Filepaths', 'initial_output_directory', fallback='/path/to/folder')
+    double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='double_check_reminders')
+    artist_directory = config.get('Filepaths', 'artist_directory', fallback='artist_directory')
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
@@ -249,15 +249,6 @@ def move_file_to_trash(self):
 
 # Function to create double check reminders
 def double_check_reminder(self, new_path):
-    # Check if the double check reminder variable is false
-    if not self.double_check_var.get():
-        # If the user declines, then do not create the double check reminder
-        self.log_and_show(f"Double check reminder is disabled. Skipping.",
-                          frame_name="file_renamer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=False)
-
     # Check if the double check reminder variable is true
     if self.double_check_var.get():
         try:
@@ -325,7 +316,7 @@ def load_last_used_file(self, frame_name):
 
             message = filename
             # Log the action if logging is enabled
-            self.log_and_show(f"Last used file renamer file selected: {message}",
+            self.log_and_show(f"File selected via Reload Last File: {message}",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=False,
@@ -563,7 +554,6 @@ def undo_last(self):
 def clear_selection(self, frame_name):
     if frame_name == "file_renamer_window":
         self.selected_file = ""
-        self.override_directory = ""
         self.queue = []
         self.file_display_text.set("")
 
@@ -672,6 +662,10 @@ def browse_output_directory(self, frame_name):
             if self.suggest_output_directory_var.get():
                 # Call the suggest output directory function to determine initial directory
                 initial_directory = self.suggest_output_directory()
+
+                # If suggest output directory returns none, use the default initial directory
+                if not initial_directory:
+                    initial_directory = self.initial_directory
             else:
                 # If suggest output directory is false, use the default initial directory
                 initial_directory = self.initial_directory
@@ -705,47 +699,70 @@ def browse_output_directory(self, frame_name):
 def suggest_output_directory(self):
     # Check if a file is selected
     if not self.selected_file:
-        # If no file is selected, use the default initial directory
+        # If no file is selected, return none
         self.log_and_show("No file selected. Using default initial directory.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
-        return self.initial_directory
+        return None
 
     # Check if the suggest_output_directory_var is True
     if not self.suggest_output_directory_var.get():
-        # If suggest_output_directory is False, use the default output directory
+        # If suggest_output_directory is False, return none
         self.log_and_show("Suggest output directory disabled. Using default output directory.",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
-        return self.output_directory
+        return None
 
-    # Extract the base name from the selected file
-    base_name = os.path.basename(self.selected_file)
-    base_name_lower = base_name.lower()  # Case insensitive comparison
+    # Check if self.artist_directory exists
+    if not os.path.exists(self.artist_directory):
+        # If artist directory does not exist, display an error message and return none
+        self.log_and_show(f"Configuration File Error: {self.artist_directory} does not exist so Suggest Output "
+                          f"Directory cannot function as intended."
+                          f"\nUsing default output directory as the fallback."
+                          f"\nPlease ensure the artist_directory set in the config.ini file exists.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return None
 
-    # TODO Implement logic for multiple artist matches
-    # Extract the artist from the filename
-    for artist_folder in os.listdir(self.artist_directory):
-        if artist_folder.lower() in base_name_lower:
-            # Construct the artist folder path
-            artist_folder_path = os.path.join(self.artist_directory, artist_folder)
+    try:
+        # Extract the base name from the selected file
+        base_name = os.path.basename(self.selected_file)
+        base_name_lower = base_name.lower()  # Case insensitive comparison
 
-            # Verify the folder exists
-            if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
-                # Return the result
-                return artist_folder_path
+        # TODO Implement logic for multiple artist matches
+        # Extract the artist from the filename
+        for artist_folder in os.listdir(self.artist_directory):
+            if artist_folder.lower() in base_name_lower:
+                # Construct the artist folder path
+                artist_folder_path = os.path.join(self.artist_directory, artist_folder)
 
-    # If no matching artist folder is found, use the default output directory
-    self.log_and_show("Cannot suggest output directory. Falling back to default output directory.",
-                      frame_name="file_renamer_window",
-                      create_messagebox=False,
-                      error=False,
-                      not_logging=False)
-    return self.output_directory
+                # Verify the folder exists
+                if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
+                    # Return the result
+                    return artist_folder_path
+
+        # If no matching artist folder is found, return none
+        self.log_and_show("Cannot suggest output directory. Falling back to default output directory.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+        return None
+
+    except Exception as e:
+        # Handle any unexpected exceptions and log an error message
+        self.log_and_show(f"Unexpected error suggesting an output directory: {e}",
+                          frame_name="file_renamer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return None
 
 
 # Function to handle actions after successful file renaming
@@ -755,7 +772,6 @@ def handle_rename_success(self, new_path):
 
     # Reset selected file, queue, override directory, and update file renamer last used file
     self.selected_file = ""
-    self.override_directory = ""
     self.queue = []
     self.file_display_text.set("")
     self.custom_text_entry.delete(0, ctk.END)
@@ -992,10 +1008,6 @@ def rename_files(self):
         # Remove extra whitespaces from the name
         name = " ".join(name.split()).strip()
 
-        # Initialize override directory to handle explicitly set output directory before suggest output directory call
-        if self.output_directory:
-            self.override_directory = self.output_directory
-
         # If output directory is not explicitly set, default to the same directory as the file
         if not self.output_directory:
             self.output_directory = os.path.dirname(self.selected_file)
@@ -1008,44 +1020,44 @@ def rename_files(self):
         else:
             # Use the suggest output directory
             if self.suggest_output_directory_var.get():
-                self.output_directory = self.suggest_output_directory()
+                # Call the suggest output directory to get a suggested output directory
+                suggested_output_directory = self.suggest_output_directory()
 
-                # TODO Maybe change messaging here? It is currently unclear that the fallback happened,
-                #  NOT the actual suggested output directory
-                # Ask for confirmation of new output directory if match found
-                confirmation = ask_confirmation(self, "Suggest Output Directory",
-                                                f"Suggested output directory found. Do you want to use: "
-                                                f"{self.output_directory}?")
-                if confirmation:
-                    self.log_and_show(f"User chose the suggested output directory: {self.output_directory}",
-                                      frame_name="file_renamer_window",
-                                      create_messagebox=False,
-                                      error=False,
-                                      not_logging=False)
-                else:
-                    # If the user did not select the suggested output directory use this logic
-                    if self.override_directory:
-                        # If the user explicitly set an output directory, use that
+                # If suggest output directory returns a result, use that as the output directory
+                if suggested_output_directory:
+                    # Ask for confirmation of new output directory if match found
+                    confirmation = ask_confirmation(self, "Suggest Output Directory",
+                                                    f"Suggested output directory found. Do you want to use: "
+                                                    f"{suggested_output_directory}?")
+                    if confirmation:
+                        self.output_directory = suggested_output_directory
+                        self.log_and_show(f"User chose the suggested output directory: {self.output_directory}",
+                                          frame_name="file_renamer_window",
+                                          create_messagebox=False,
+                                          error=False,
+                                          not_logging=False)
+                    else:
+                        # If the user did not select the suggested output directory, use the previously set output
+                        # directory
                         self.log_and_show(
-                            "User did not choose the suggested output directory. Using specified output "
+                            "User did not choose the suggested output directory. Falling back to default "
                             "directory.",
                             frame_name="file_renamer_window",
                             create_messagebox=False,
                             error=False,
                             not_logging=False)
-                        self.output_directory = self.override_directory
-                    else:
-                        # If the user did not explicitly set an output directory, fallback to the default location
-                        self.log_and_show(
-                            "User did not choose the suggested output directory. Falling back to default "
-                            "location.",
-                            frame_name="file_renamer_window",
-                            create_messagebox=False,
-                            error=False,
-                            not_logging=False)
-                        self.output_directory = os.path.dirname(self.selected_file)
+
+                else:
+                    # If suggest output directory does not return a result, use the previously set output directory
+                    # Log the result and update the GUI
+                    self.log_and_show(f"Suggest output directory returned no result. Using {self.output_directory}",
+                                      frame_name="file_renamer_window",
+                                      create_messagebox=False,
+                                      error=False,
+                                      not_logging=False)
 
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
+
             else:
                 # Use the specified output directory
                 new_path = os.path.join(self.output_directory, os.path.basename(name))
