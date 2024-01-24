@@ -1418,10 +1418,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Function to process and rename files and moving files to a specified directory
         core.rename_and_move_file(self, file_path)
 
-    def move_file_with_overwrite_check(self, source_path, destination_directory):
-        # Function to move a file from a source path to a destination directory with overwrite protection
-        core.move_file_with_overwrite_check(self, source_path, destination_directory)
-
     def process_name_normalizer_folder(self):
         # Function to performing various name normalization operations on certain files within a specified folder
         core.process_name_normalizer_folder(self)
