@@ -1269,21 +1269,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Display the message with optional error formatting on the actively selected frame
         if frame_name == "file_renamer_window":
-            label = self.file_renamer_message_label
+            labels = [self.file_renamer_message_label]
         elif frame_name == "name_normalizer_window":
-            label = self.name_normalizer_message_label
+            labels = [self.name_normalizer_message_label]
         elif frame_name == "video_editor_window":
-            label = self.video_editor_message_label
+            labels = [self.video_editor_message_label]
         else:
-            label = self.file_renamer_message_label  # Default to the main frame label
+            labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
+                      self.video_editor_message_label] # Default to the all frame labels
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
 
-        if error:
-            label.configure(text=truncated_message, text_color="#FF0000")  # Red text for errors
-        else:
-            label.configure(text=truncated_message)
+        for label in labels:
+            if error:
+                label.configure(text=truncated_message, text_color="#FF0000")  # Red text for errors
+            else:
+                label.configure(text=truncated_message)
 
     def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
         # Method to check logging state, log if applicable, and show a messagebox.
@@ -1430,9 +1432,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Video Editor
     """
 
-    def get_non_conflicting_filename(self, path):
+    def get_non_conflicting_filename(self, path, frame_name):
         # Function to generate a non-conflicting filename
-        return core.get_non_conflicting_filename(self, path)
+        return core.get_non_conflicting_filename(self, path, frame_name)
 
     def rotate_video(self, clip, rotation_angle):
         # Method to rotate a video clip by a specified angle.

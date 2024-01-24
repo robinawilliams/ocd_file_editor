@@ -1071,13 +1071,8 @@ def rename_files(self):
         try:
             # Check if the new_path exists
             if os.path.exists(new_path):
-                self.log_and_show(f"Conflict detected on: '{os.path.basename(new_path)}'",
-                                  frame_name="file_renamer_window",
-                                  create_messagebox=False,
-                                  error=False,
-                                  not_logging=False)
                 # Get a non-conflicting filename
-                new_path = get_non_conflicting_filename(self, new_path)
+                new_path = get_non_conflicting_filename(self, new_path, frame_name="file_renamer_window")
 
             # Rename the file
             os.rename(self.selected_file, new_path)
@@ -1399,14 +1394,8 @@ def rename_and_move_file(self, file_path):
 
         # Check if the new filename already exists
         if os.path.exists(new_path):
-            # Log the action
-            self.log_and_show(f"Conflict detected on: {name}.",
-                              frame_name="name_normalizer_window",
-                              create_messagebox=False,
-                              error=True,
-                              not_logging=False)
             # Get a non-conflicting name
-            new_path = get_non_conflicting_filename(self, new_path)
+            new_path = get_non_conflicting_filename(self, new_path, frame_name="name_normalizer_window")
 
         try:
             # Rename the file
@@ -1421,14 +1410,14 @@ def rename_and_move_file(self, file_path):
 
             # Move the renamed file to the specified directory if name_normalizer_output_directory is provided
             if self.name_normalizer_output_directory:
-                # TODO Review if this can be combined into one call
                 # Create the destination file path by joining the destination directory and the source file name
                 destination_file = os.path.join(self.name_normalizer_output_directory, os.path.basename(new_path))
 
                 # Check if the destination file already exists
                 if os.path.exists(destination_file):
                     # Get a non-conflicting name
-                    destination_file = get_non_conflicting_filename(self, destination_file)
+                    destination_file = get_non_conflicting_filename(self, destination_file,
+                                                                    frame_name="name_normalizer_window")
 
                 try:
                     # Perform the move to the provided directory
@@ -1442,7 +1431,7 @@ def rename_and_move_file(self, file_path):
                                       not_logging=False)
                 except OSError as e:
                     # Log error if logging is activated
-                    self.log_and_show(f"Renaming failed for {os.path.basename(new_path)}: {e}",
+                    self.log_and_show(f"Moving failed for {os.path.basename(new_path)}: {e}",
                                       frame_name="name_normalizer_window",
                                       create_messagebox=False,
                                       error=True,
@@ -1592,8 +1581,14 @@ Video Editor
 
 
 # Function to generate a non-conflicting filename
-# TODO Include gui confirmation messagebox for user to decide to overwrite (On or off)
-def get_non_conflicting_filename(self, path):
+def get_non_conflicting_filename(self, path, frame_name):
+    # Log the action and display a message
+    self.log_and_show(f"Conflict detected on: '{os.path.basename(path)}'",
+                      frame_name=frame_name,
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=False)
+
     try:
         # Split the given path into the base filename and its extension.
         base, ext = os.path.splitext(path)
@@ -1614,20 +1609,18 @@ def get_non_conflicting_filename(self, path):
             counter += 1
             new_path = f"{base} ({counter}){ext}"
 
-        # TODO Relocate this to the video editor logic
         # Log action and display a message
         self.log_and_show(f"Using non-conflicting file name: {os.path.basename(new_path)}",
-                          frame_name="all",
+                          frame_name=frame_name,
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
         # Return the generated non-conflicting filename.
         return new_path
     except Exception as e:
-        # TODO Relocate this to the video editor logic
         # Log error and display an error message when get non-conflicting file name fails.
         self.log_and_show(f"Getting non-conflicting file name failed: {str(e)}",
-                          frame_name="video_editor_window",
+                          frame_name=frame_name,
                           create_messagebox=True,
                           error=True,
                           not_logging=False)
@@ -1895,7 +1888,7 @@ def process_video_edits(self):
                 # Check if the new_path exists
                 if os.path.exists(output_path):
                     # Get a non-conflicting name for the output path
-                    output_path = get_non_conflicting_filename(self, output_path)
+                    output_path = get_non_conflicting_filename(self, output_path, frame_name="video_editor_window")
 
                 # Load the original video clip
                 original_clip = VideoFileClip(temp_copy_path)
@@ -2009,7 +2002,7 @@ def process_video_edits(self):
                 # Check if the new_path exists
                 if os.path.exists(output_path):
                     # Get a non-conflicting name for the output path
-                    output_path = get_non_conflicting_filename(self, output_path)
+                    output_path = get_non_conflicting_filename(self, output_path, frame_name="video_editor_window")
 
                 # Load the original video clip
                 original_clip = VideoFileClip(input_path)
