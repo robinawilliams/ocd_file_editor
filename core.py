@@ -1542,8 +1542,9 @@ def process_name_normalizer_folder(self):
         # Check if artist file does not exist
         elif not os.path.exists(self.artist_file):
             # Log and display an error message
-            self.log_and_show("Artist file does not exist.\nPlease create it from the template and try "
-                              "again,\nor turn off Artist Search.\nSee FAQ",
+            self.log_and_show(f"The artist file does not exist: '{self.artist_file}'"
+                              f"\nPlease ensure the provided Artist File exists, "
+                              f"\nor turn off Artist Search to proceed.\nSee FAQ",
                               frame_name="name_normalizer_window",
                               create_messagebox=True,
                               error=True,
