@@ -192,6 +192,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.appearance_mode_menu = None
         self.scaling_label = None
         self.scaling_optionemenu = None
+        self.artist_directory_frame = None
+        self.browse_artist_directory_button = None
+        self.artist_directory_entry = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
@@ -199,17 +202,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
          double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
          file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
-         remove_hashtag_trail_var,
-         remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var, remove_ampersand_var,
-         remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var, remove_double_quote_var,
-         title_var, reset_var,
-         initial_output_directory, artist_file, default_frame, artist_file_search_var,
-         deep_walk_var, default_decibel, default_audio_normalization, remove_successful_lines_var,
-         default_rotation_var, remove_double_space_var, remove_colon_var, remove_semicolon_var, remove_percent_var,
-         remove_caret_var, remove_dollar_var, remove_asterisk_var, remove_plus_var, remove_equal_var,
-         remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var, remove_backslash_var,
-         remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var, remove_hashtag_var,
-         show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var, valid_extensions) = (
+         remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
+         remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
+         remove_double_quote_var, title_var, reset_var, initial_output_directory, artist_file, default_frame,
+         artist_file_search_var, deep_walk_var, default_decibel, default_audio_normalization,
+         remove_successful_lines_var, default_rotation_var, remove_double_space_var, remove_colon_var,
+         remove_semicolon_var, remove_percent_var, remove_caret_var, remove_dollar_var, remove_asterisk_var,
+         remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
+         remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
+         remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
+         valid_extensions) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -386,7 +388,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse file button
         self.browse_file_button = ctk.CTkButton(self.file_renamer_top_frame, text="Browse File",
-                                                command=lambda: self.browse_input("file_renamer_window"))
+                                                command=lambda: self.browse_input(
+                                                    frame_name="file_renamer_window"))
         self.browse_file_button.grid(row=0, column=0, padx=5)
 
         # Selected File Display
@@ -1155,6 +1158,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set default value for scaling
         self.scaling_optionemenu.set("100%")
 
+        # Artist directory frame
+        self.artist_directory_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
+        self.artist_directory_frame.grid(row=4, column=0, padx=10, pady=10)
+
+        # Browse Artist Directory button
+        self.browse_artist_directory_button = ctk.CTkButton(self.artist_directory_frame, text="Artist Directory",
+                                                            command=self.browse_artist_directory)
+        self.browse_artist_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Artist Directory entry
+        self.artist_directory_entry = ctk.CTkEntry(self.artist_directory_frame, width=890)
+        self.artist_directory_entry.insert(0, self.artist_directory)
+        self.artist_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
         """
         Misc
         """
@@ -1276,7 +1293,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             labels = [self.video_editor_message_label]
         else:
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
-                      self.video_editor_message_label] # Default to the all frame labels
+                      self.video_editor_message_label]  # Default to the all frame labels
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
@@ -1352,6 +1369,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Open a file dialog to browse and select a file
         core.browse_input(self, frame_name)
 
+    def browse_artist_file(self):
+        # Open a dialog to browse and select a file containing a line delimited list of artists
+        core.browse_artist_file(self)
+
+    def browse_artist_directory(self):
+        # Open a dialog to browse and select a directory to use for the artist search
+        core.browse_artist_directory(self)
+
     def browse_output_directory(self, frame_name):
         # Open a dialog to browse and select an output directory
         core.browse_output_directory(self, frame_name)
@@ -1423,10 +1448,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def process_name_normalizer_folder(self):
         # Function to performing various name normalization operations on certain files within a specified folder
         core.process_name_normalizer_folder(self)
-
-    def browse_artist_file(self):
-        # Open a dialog to browse and select a file containing a line delimited list of artists
-        core.browse_artist_file(self)
 
     """
     Video Editor

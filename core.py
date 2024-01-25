@@ -657,6 +657,27 @@ def browse_input(self, frame_name):
                           not_logging=False)
 
 
+# Open a dialog to browse and select a file containing a line delimited list of artists
+def browse_artist_file(self):
+    self.artist_file = filedialog.askopenfilename(
+        initialdir=self.initial_directory,
+        filetypes=[("Text Files", "*.txt")])
+
+    if self.artist_file:
+        # Clear the entry and set it to the artist file
+        self.artist_file_entry.delete(0, ctk.END)
+        self.artist_file_entry.insert(0, self.artist_file)
+
+
+def browse_artist_directory(self):
+    self.artist_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if self.artist_directory:
+        # Clear the entry and set it to the artist directory
+        self.artist_directory_entry.delete(0, ctk.END)
+        self.artist_directory_entry.insert(0, self.artist_directory)
+
+
 # Function to browse and select an output directory
 def browse_output_directory(self, frame_name):
     if frame_name == "file_renamer_window":
@@ -724,10 +745,10 @@ def suggest_output_directory(self):
     # Check if self.artist_directory exists
     if not os.path.exists(self.artist_directory):
         # If artist directory does not exist, display an error message and return none
-        self.log_and_show(f"Configuration File Error: {self.artist_directory} does not exist so Suggest Output "
-                          f"Directory cannot function as intended."
+        self.log_and_show(f"Suggest Output Directory cannot function as intended since the Artist Directory"
+                          f" does not exist."
                           f"\nUsing default output directory as the fallback."
-                          f"\nPlease ensure the artist_directory set in the config.ini file exists.",
+                          f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
                           frame_name="file_renamer_window",
                           create_messagebox=True,
                           error=True,
@@ -1564,15 +1585,6 @@ def process_name_normalizer_folder(self):
                           create_messagebox=True,
                           error=True,
                           not_logging=False)
-
-
-# Open a dialog to browse and select a file containing a line delimited list of artists
-def browse_artist_file(self):
-    self.artist_file = filedialog.askopenfilename(
-        initialdir=self.initial_directory,
-        filetypes=[("Text Files", "*.txt")])
-    self.artist_file_entry.delete(0, ctk.END)
-    self.artist_file_entry.insert(0, self.artist_file)
 
 
 """
