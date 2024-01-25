@@ -24,6 +24,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_selected_file = ""
         self.video_editor_output_directory = ""
         self.video_editor_last_used_file = ""
+        self.add_artist = ""
+        self.remove_artist = ""
 
         # Initialize Main GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
@@ -32,6 +34,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_button = None
         self.name_normalizer_button = None
         self.video_editor_button = None
+        self.artist_button = None
         self.settings_button = None
 
         # Initialize OCD File Renamer GUI elements
@@ -168,6 +171,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_successful_lines_checkbox = None
         self.video_editor_message_label_frame = None
         self.video_editor_message_label = None
+
+        # Initialize Artist GUI elements
+        self.artist_frame = None
+        self.artist_top_frame = None
+        self.artist_label = None
+        self.add_remove_artist_entry_frame = None
+        self.add_artist_entry = None
+        self.add_artist_button = None
+        self.remove_artist_entry = None
+        self.remove_artist_button = None
+        self.artist_message_label_frame = None
+        self.artist_message_label = None
 
         # Initialize Settings GUI elements
         self.settings_frame = None
@@ -349,6 +364,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                  command=self.video_editor_button_event)
         self.video_editor_button.grid(row=3, column=0, sticky="ew")
 
+        # Create Artist button with specific styling and command
+        self.artist_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                           text="Artist",
+                                           fg_color="transparent", text_color=("gray10", "gray90"),
+                                           hover_color=("gray70", "gray30"),
+                                           anchor="w",
+                                           command=self.artist_button_event)
+        self.artist_button.grid(row=4, column=0, sticky="ew")
+
         # Create Settings button with specific styling and command
         self.settings_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
                                              text="Settings",
@@ -356,7 +380,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              hover_color=("gray70", "gray30"),
                                              anchor="w",
                                              command=self.settings_button_event)
-        self.settings_button.grid(row=4, column=0, sticky="ew")
+        self.settings_button.grid(row=5, column=0, sticky="ew")
 
         """
         file_renamer_window
@@ -1050,6 +1074,57 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_message_label.grid(row=0, column=0, padx=10, pady=10)
 
         """
+        artist_window
+        """
+        # Create Artist frame
+        self.artist_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.artist_frame.grid_columnconfigure(0, weight=1)
+
+        # Artist Label
+        self.artist_label = ctk.CTkLabel(self.artist_frame, text="Artist",
+                                         font=ctk.CTkFont(size=15, weight="bold"))
+        self.artist_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Artist Top frame
+        self.artist_top_frame = ctk.CTkFrame(self.artist_frame, corner_radius=0,
+                                             fg_color="transparent")
+        self.artist_top_frame.grid(row=1, column=0, padx=10, pady=5)
+
+        # TODO Add the rest of the logic here for artist window, display the list in the gui
+
+        # Add and remove artist list frame
+        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
+                                                          fg_color="transparent")
+        self.add_remove_artist_entry_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Add artist entry
+        self.add_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=890)
+        self.add_artist_entry.grid(row=0, column=0, padx=10, pady=10)
+
+        # Add artist button
+        self.add_artist_button = ctk.CTkButton(self.add_remove_artist_entry_frame, text="Add Artist",
+                                               command=self.add_artist_to_file)
+        self.add_artist_button.grid(row=0, column=1, padx=5, pady=5)
+
+        # Remove artist entry
+        self.remove_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=890)
+        self.remove_artist_entry.grid(row=1, column=0, padx=10, pady=10)
+
+        # Remove artist button
+        self.remove_artist_button = ctk.CTkButton(self.add_remove_artist_entry_frame, text="Remove Artist",
+                                                  command=self.remove_artist_from_file)
+        self.remove_artist_button.grid(row=1, column=1, padx=5, pady=5)
+
+        # Frame to display messages on the artist frame
+        self.artist_message_label_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
+                                                       fg_color="transparent")
+        self.artist_message_label_frame.grid(row=12, column=0, padx=10)
+
+        # Artist message Label
+        self.artist_message_label = ctk.CTkLabel(self.artist_message_label_frame, text="")
+        self.artist_message_label.grid(row=0, column=0, padx=10, pady=10)
+
+        """
         settings_window
         """
         # Create settings frame
@@ -1268,7 +1343,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             fg_color=("gray75", "gray25") if name == "name_normalizer_window" else "transparent")
         self.video_editor_button.configure(
             fg_color=("gray75", "gray25") if name == "video_editor_window" else "transparent")
-        self.settings_button.configure(fg_color=("gray75", "gray25") if name == "settings_window" else "transparent")
+        self.artist_button.configure(
+            fg_color=("gray75", "gray25") if name == "artist_window" else "transparent")
+        self.settings_button.configure(
+            fg_color=("gray75", "gray25") if name == "settings_window" else "transparent")
 
         # Show the selected frame and hide others
         if name == "file_renamer_window":
@@ -1283,6 +1361,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.video_editor_frame.grid(row=0, column=1, sticky="nsew")
         else:
             self.video_editor_frame.grid_forget()
+        if name == "artist_window":
+            self.artist_frame.grid(row=0, column=1, sticky="nsew")
+        else:
+            self.artist_frame.grid_forget()
         if name == "settings_window":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
         else:
@@ -1300,6 +1382,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def video_editor_button_event(self):
         self.select_frame_by_name("video_editor_window")
+
+    def artist_button_event(self):
+        self.select_frame_by_name("artist_window")
 
     def settings_button_event(self):
         self.select_frame_by_name("settings_window")
@@ -1335,10 +1420,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.file_renamer_message_label.configure(text_color="#000000")
             self.name_normalizer_message_label.configure(text_color="#000000")
             self.video_editor_message_label.configure(text_color="#000000")
+            self.artist_message_label.configure(text_color="#000000")
         elif current_mode == "Dark":
             self.file_renamer_message_label.configure(text_color="#FFFFFF")
             self.name_normalizer_message_label.configure(text_color="#FFFFFF")
             self.video_editor_message_label.configure(text_color="#FFFFFF")
+            self.artist_message_label.configure(text_color="#FFFFFF")
 
     # Method to display messages with optional error formatting
     def show_message(self, message, error=False, frame_name=None):
@@ -1352,9 +1439,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             labels = [self.name_normalizer_message_label]
         elif frame_name == "video_editor_window":
             labels = [self.video_editor_message_label]
+        elif frame_name == "artist_window":
+            labels = [self.artist_message_label]
         else:
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
-                      self.video_editor_message_label]  # Default to the all frame labels
+                      self.video_editor_message_label, self.artist_message_label]  # Default to all frame labels
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
@@ -1455,7 +1544,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.browse_output_directory(self, frame_name)
 
     def suggest_output_directory(self):
-        # Function to suggest an output directory matching an artist name
+        # Suggest an output directory matching an artist name
         return core.suggest_output_directory(self)
 
     def handle_rename_success(self, new_path):
@@ -1511,15 +1600,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def remove_artist_duplicates_from_filename(self, file_name):
-        # Function to remove duplicate artists from the filename
+        # Remove duplicate artists from the filename
         return core.remove_artist_duplicates_from_filename(self, file_name)
 
     def rename_and_move_file(self, file_path):
-        # Function to process and rename files and moving files to a specified directory
+        # Process and rename files and moving files to a specified directory
         core.rename_and_move_file(self, file_path)
 
     def process_name_normalizer_folder(self):
-        # Function to performing various name normalization operations on certain files within a specified folder
+        # Perform various name normalization operations on certain files within a specified folder
         core.process_name_normalizer_folder(self)
 
     """
@@ -1527,7 +1616,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def get_non_conflicting_filename(self, path, frame_name):
-        # Function to generate a non-conflicting filename
+        # Generate a non-conflicting filename
         return core.get_non_conflicting_filename(self, path, frame_name)
 
     def rotate_video(self, clip, rotation_angle):
@@ -1543,12 +1632,24 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return core.normalize_audio(self, clip, volume_multiplier)
 
     def remove_successful_line_from_file(self, file_path, line_to_remove):
-        # Function to remove a successful line from a file.
+        # Method to remove a successful line from a file.
         core.remove_successful_line_from_file(self, file_path, line_to_remove)
 
     def process_video_edits(self):
         # Method to process video edits based on user inputs.
         core.process_video_edits(self)
+
+    """
+    Artist
+    """
+
+    def add_artist_to_file(self):
+        # Add artists to the artist file
+        core.add_artist_to_file(self)
+
+    def remove_artist_from_file(self):
+        # Remove artists from the artist file
+        core.remove_artist_from_file(self)
 
 
 if __name__ == "__main__":

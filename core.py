@@ -2120,3 +2120,118 @@ def process_video_edits(self):
                               error=True,
                               not_logging=False)
             continue
+
+
+"""
+artist
+"""
+
+
+# Function to add artists to the artist file
+def add_artist_to_file(self):
+    # Get the artist to be added from the entry widget
+    self.add_artist = self.add_artist_entry.get()
+
+    # Check if no artist is provided
+    if not self.add_artist:
+        self.log_and_show("No artist provided to add to the Artist File. "
+                          "\nPlease enter something into the entry and try again.",
+                          frame_name="artist_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return  # Exit the function if no artist is provided
+
+    # Read the list of artists from the artist_file
+    try:
+        with open(self.artist_file, 'r') as artist_list_file:
+            artist_list = [artist.strip() for artist in artist_list_file]
+    except FileNotFoundError:
+        self.log_and_show(f"Artist File '{self.artist_file}' not found.",
+                          frame_name="artist_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return  # Exit the function if the artist_file is not found
+
+    # Check if the add_artist is already in the list (case-insensitive)
+    if any(artist.lower() == self.add_artist.lower() for artist in artist_list):
+        self.log_and_show(f"Artist is already in the Artist File: '{self.add_artist}'",
+                          frame_name="artist_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+    else:
+        # Add the add_artist to the list
+        artist_list.append(self.add_artist)
+
+        # Write the updated list back to the artist_file
+        try:
+            with open(self.artist_file, 'w') as artist_list_file:
+                artist_list_file.write('\n'.join(artist_list))
+            self.log_and_show(f"Added artist to the Artist File: '{self.add_artist}'",
+                              frame_name="artist_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+        except IOError:
+            self.log_and_show(f"Error writing to Artist File '{self.artist_file}'.",
+                              frame_name="artist_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+
+
+# Function to remove artists from the artist file
+def remove_artist_from_file(self):
+    # Get the artist to be removed from the entry widget
+    self.remove_artist = self.remove_artist_entry.get()
+
+    # Check if no artist is provided
+    if not self.remove_artist:
+        self.log_and_show("No artist provided to remove from the Artist File. "
+                          "\nPlease enter something into the entry and try again.",
+                          frame_name="artist_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return  # Exit the function if no artist is provided
+
+    try:
+        # Read the list of artists from the artist_file
+        with open(self.artist_file, 'r') as artist_list_file:
+            artist_list = [artist.strip() for artist in artist_list_file]
+    except FileNotFoundError:
+        self.log_and_show(f"Artist File '{self.artist_file}' not found.",
+                          frame_name="artist_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return  # Exit the function if the artist_file is not found
+
+    # Check if the remove_artist is in the list (case-insensitive)
+    if any(artist.lower() == self.remove_artist.lower() for artist in artist_list):
+        # Remove the remove_artist from the list
+        artist_list = [artist for artist in artist_list if artist.lower() != self.remove_artist.lower()]
+
+        # Write the updated list back to the artist_file
+        try:
+            with open(self.artist_file, 'w') as artist_list_file:
+                artist_list_file.write('\n'.join(artist_list))
+                self.log_and_show(f"Removed artist from the Artist File: '{self.remove_artist}'",
+                                  frame_name="artist_window",
+                                  create_messagebox=False,
+                                  error=False,
+                                  not_logging=False)
+        except IOError:
+            self.log_and_show(f"Error writing to Artist File '{self.artist_file}'.",
+                              frame_name="artist_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+    else:
+        self.log_and_show(f"Artist is not in the Artist File: '{self.remove_artist}'",
+                          frame_name="artist_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
