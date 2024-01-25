@@ -736,9 +736,13 @@ def browse_output_directory(self, frame_name):
             self.output_directory_entry.insert(0, self.output_directory)
 
     if frame_name == "name_normalizer_window":
+        # Ask for the output directory
         self.name_normalizer_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
-        self.move_directory_entry.delete(0, ctk.END)
-        self.move_directory_entry.insert(0, self.name_normalizer_output_directory)
+
+        # If name normalizer output directory, update the entry field in the GUI
+        if self.name_normalizer_output_directory:
+            self.move_directory_entry.delete(0, ctk.END)
+            self.move_directory_entry.insert(0, self.name_normalizer_output_directory)
 
     if frame_name == "video_editor_window":
         # Ask for the output directory
