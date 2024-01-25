@@ -292,6 +292,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initial check for activate logging state prior to application launch
         self.handle_logging_activation()
 
+        # Initialize frame name to default frame
+        self.frame_name = self.default_frame
+
         # Create the GUI elements
         self.create_gui()
 
@@ -386,7 +389,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse file button
         self.browse_file_button = ctk.CTkButton(self.file_renamer_top_frame, text="Browse File",
-                                                command=lambda: self.browse_input("file_renamer_window"))
+                                                command=self.browse_input)
         self.browse_file_button.grid(row=0, column=0, padx=5)
 
         # Selected File Display
@@ -441,8 +444,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Output Directory Browse Button
         self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame, text="Output Directory",
-                                                            command=lambda: self.browse_output_directory(
-                                                                "file_renamer_window"))
+                                                            command=self.browse_output_directory)
         self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Output Directory Entry
@@ -470,7 +472,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Clear Button
         self.clear_button = ctk.CTkButton(self.button_group_frame, text="Clear",
-                                          command=lambda: self.clear_selection("file_renamer_window"))
+                                          command=self.clear_selection)
         self.clear_button.grid(row=0, column=1, padx=10, pady=10)
 
         # Move to Trash Button
@@ -480,14 +482,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Select File Renamer Last Used File Button
         self.file_renamer_last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Reload Last File",
-                                                                command=lambda: self.load_last_used_file(
-                                                                    "file_renamer_window"))
+                                                                command=self.load_last_used_file)
         self.file_renamer_last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
         # Send to Video Editor button
         self.send_to_video_editor_button = ctk.CTkButton(self.button_group_frame, text="Send to Video Editor",
-                                                         command=lambda: self.send_to_module(
-                                                             frame_name="file_renamer_window"))
+                                                         command=self.send_to_module)
         self.send_to_video_editor_button.grid(row=0, column=4, padx=10, pady=10)
 
         # Frame to display the last used file
@@ -588,8 +588,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse Folder button
         self.browse_folder_button = ctk.CTkButton(self.name_normalizer_top_frame, text="Browse Folder",
-                                                  command=lambda: self.browse_input(
-                                                      frame_name="name_normalizer_window"))
+                                                  command=self.browse_input)
         self.browse_folder_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Folder Path Entry
@@ -849,8 +848,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse move directory folder button
         self.browse_move_directory_button = ctk.CTkButton(self.output_directory_frame, text="Output Directory",
-                                                          command=lambda: self.browse_output_directory(
-                                                              frame_name="name_normalizer_window"))
+                                                          command=self.browse_output_directory)
         self.browse_move_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Move directory entry
@@ -880,8 +878,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Clear Name Normalizer Selection Button
         self.clear_name_normalizer_selection_button = ctk.CTkButton(self.normalize_folder_frame,
                                                                     text="Clear",
-                                                                    command=lambda: self.clear_selection(
-                                                                        frame_name="name_normalizer_window"))
+                                                                    command=self.clear_selection)
         self.clear_name_normalizer_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Normalize Folder button
@@ -917,8 +914,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Video Editor browse input method button
         self.browse_input_method_button = ctk.CTkButton(self.video_editor_top_frame, text="Browse",
-                                                        command=lambda: self.browse_input(
-                                                            frame_name="video_editor_window"))
+                                                        command=self.browse_input)
         self.browse_input_method_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Input method entry for a file, directory, or .txt containing a line delimited list of files to process
@@ -993,8 +989,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse video editor output directory folder button
         self.browse_video_editor_output_directory_button = ctk.CTkButton(self.video_editor_output_directory_frame,
                                                                          text="Output Directory",
-                                                                         command=lambda: self.browse_output_directory(
-                                                                             frame_name="video_editor_window"))
+                                                                         command=self.browse_output_directory)
         self.browse_video_editor_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Video editor output directory entry
@@ -1009,21 +1004,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Clear process video editor Button
         self.clear_video_editor_selection_button = ctk.CTkButton(self.process_video_editor_frame,
                                                                  text="Clear",
-                                                                 command=lambda: self.clear_selection(
-                                                                     frame_name="video_editor_window"))
+                                                                 command=self.clear_selection)
         self.clear_video_editor_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Select Video Editor Last Used File Button
         self.video_editor_last_used_file_button = ctk.CTkButton(self.process_video_editor_frame,
                                                                 text="Reload Last File",
-                                                                command=lambda: self.load_last_used_file(
-                                                                    "video_editor_window"))
+                                                                command=self.load_last_used_file)
         self.video_editor_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
 
         # Send to File Renamer button
         self.send_to_file_renamer_button = ctk.CTkButton(self.process_video_editor_frame, text="Send to File Renamer",
-                                                         command=lambda: self.send_to_module(
-                                                             frame_name="video_editor_window"))
+                                                         command=self.send_to_module)
         self.send_to_file_renamer_button.grid(row=0, column=2, padx=10, pady=10)
 
         # Process video button
@@ -1195,18 +1187,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Show the selected frame and hide others
         if name == "file_renamer_window":
             self.file_renamer_frame.grid(row=0, column=1, sticky="nsew")
+            self.frame_name = name
         else:
             self.file_renamer_frame.grid_forget()
         if name == "name_normalizer_window":
             self.name_normalizer_frame.grid(row=0, column=1, sticky="nsew")
+            self.frame_name = name
         else:
             self.name_normalizer_frame.grid_forget()
         if name == "video_editor_window":
             self.video_editor_frame.grid(row=0, column=1, sticky="nsew")
+            self.frame_name = name
         else:
             self.video_editor_frame.grid_forget()
         if name == "settings_window":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
+            self.frame_name = name
         else:
             self.settings_frame.grid_forget()
 
@@ -1263,20 +1259,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.video_editor_message_label.configure(text_color="#FFFFFF")
 
     # Method to display messages with optional error formatting
-    def show_message(self, message, error=False, frame_name=None):
+    def show_message(self, message, error=False):
         # Update text color when displaying a message
         self.update_text_color()
 
         # Display the message with optional error formatting on the actively selected frame
-        if frame_name == "file_renamer_window":
+        if self.frame_name == "file_renamer_window":
             labels = [self.file_renamer_message_label]
-        elif frame_name == "name_normalizer_window":
+        elif self.frame_name == "name_normalizer_window":
             labels = [self.name_normalizer_message_label]
-        elif frame_name == "video_editor_window":
+        elif self.frame_name == "video_editor_window":
             labels = [self.video_editor_message_label]
         else:
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
-                      self.video_editor_message_label] # Default to the all frame labels
+                      self.video_editor_message_label]  # Default to the all frame labels
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
@@ -1287,9 +1283,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 label.configure(text=truncated_message)
 
-    def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
+    def log_and_show(self, message, create_messagebox, error, not_logging):
         # Method to check logging state, log if applicable, and show a messagebox.
-        core.log_and_show(self, message, frame_name, create_messagebox, error, not_logging)
+        core.log_and_show(self, message, create_messagebox, error, not_logging)
 
     def ask_confirmation(self, title, message):
         # Method to check logging state and show a messagebox.
@@ -1320,13 +1316,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create double check reminders
         core.double_check_reminder(self, new_path)
 
-    def load_last_used_file(self, frame_name):
+    def load_last_used_file(self):
         # Load the last used file and update the GUI
-        core.load_last_used_file(self, frame_name)
+        core.load_last_used_file(self)
 
-    def send_to_module(self, frame_name):
+    def send_to_module(self):
         # Send the input to another module
-        core.send_to_module(self, frame_name)
+        core.send_to_module(self)
 
     def on_file_drop(self, event):
         # Handle the event when a file is dropped onto the application
@@ -1344,17 +1340,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Undo the last operation and update the GUI
         core.undo_last(self)
 
-    def clear_selection(self, frame_name):
+    def clear_selection(self):
         # Clear the selected file and update the GUI
-        core.clear_selection(self, frame_name)
+        core.clear_selection(self)
 
-    def browse_input(self, frame_name):
+    def browse_input(self):
         # Open a file dialog to browse and select a file
-        core.browse_input(self, frame_name)
+        core.browse_input(self)
 
-    def browse_output_directory(self, frame_name):
+    def browse_output_directory(self):
         # Open a dialog to browse and select an output directory
-        core.browse_output_directory(self, frame_name)
+        core.browse_output_directory(self)
 
     def suggest_output_directory(self):
         # Function to suggest an output directory matching an artist name
@@ -1432,9 +1428,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Video Editor
     """
 
-    def get_non_conflicting_filename(self, path, frame_name):
+    def get_non_conflicting_filename(self, path):
         # Function to generate a non-conflicting filename
-        return core.get_non_conflicting_filename(self, path, frame_name)
+        return core.get_non_conflicting_filename(self, path)
 
     def rotate_video(self, clip, rotation_angle):
         # Method to rotate a video clip by a specified angle.
