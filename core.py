@@ -593,6 +593,58 @@ def clear_selection(self, frame_name):
         self.audio_normalization_entry.insert(0, self.default_audio_normalization)
 
 
+# Open a dialog to browse and select a file containing a line delimited list of artists
+def browse_artist_file(self):
+    self.artist_file = filedialog.askopenfilename(
+        initialdir=self.initial_directory,
+        filetypes=[("Text Files", "*.txt")])
+
+    if self.artist_file:
+        # Clear the entry and set it to the artist file
+        self.artist_file_entry.delete(0, ctk.END)
+        self.artist_file_entry.insert(0, self.artist_file)
+
+
+# Function to browse and select a directory to use for the artist search
+def browse_artist_directory(self):
+    self.artist_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if self.artist_directory:
+        # Clear the entry and set it to the artist directory
+        self.artist_directory_entry.delete(0, ctk.END)
+        self.artist_directory_entry.insert(0, self.artist_directory)
+
+
+# Function to browse and select the initial directory when the user browses location
+def browse_initial_directory(self):
+    self.initial_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if self.initial_directory:
+        # Clear the entry and set it to the initial directory when the user browses location
+        self.initial_directory_entry.delete(0, ctk.END)
+        self.initial_directory_entry.insert(0, self.initial_directory)
+
+
+# Function to browse and select the initial directory when the user browses output location
+def browse_initial_output_directory(self):
+    self.initial_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
+
+    if self.initial_output_directory:
+        # Clear the entry and set it to the initial directory when the user browses output location
+        self.initial_output_directory_entry.delete(0, ctk.END)
+        self.initial_output_directory_entry.insert(0, self.initial_output_directory)
+
+
+# Function to browse and select a directory to save double check reminders in
+def browse_double_check_reminder_directory(self):
+    self.double_check_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if self.double_check_directory:
+        # Clear the entry and set it to the artist directory
+        self.double_check_reminder_directory_entry.delete(0, ctk.END)
+        self.double_check_reminder_directory_entry.insert(0, self.double_check_directory)
+
+
 # Function to browse and select an input
 def browse_input(self, frame_name):
     if frame_name == "file_renamer_window":
@@ -657,27 +709,6 @@ def browse_input(self, frame_name):
                           not_logging=False)
 
 
-# Open a dialog to browse and select a file containing a line delimited list of artists
-def browse_artist_file(self):
-    self.artist_file = filedialog.askopenfilename(
-        initialdir=self.initial_directory,
-        filetypes=[("Text Files", "*.txt")])
-
-    if self.artist_file:
-        # Clear the entry and set it to the artist file
-        self.artist_file_entry.delete(0, ctk.END)
-        self.artist_file_entry.insert(0, self.artist_file)
-
-
-def browse_artist_directory(self):
-    self.artist_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-
-    if self.artist_directory:
-        # Clear the entry and set it to the artist directory
-        self.artist_directory_entry.delete(0, ctk.END)
-        self.artist_directory_entry.insert(0, self.artist_directory)
-
-
 # Function to browse and select an output directory
 def browse_output_directory(self, frame_name):
     if frame_name == "file_renamer_window":
@@ -688,15 +719,15 @@ def browse_output_directory(self, frame_name):
                 # Call the suggest output directory function to determine initial directory
                 initial_directory = self.suggest_output_directory()
 
-                # If suggest output directory returns none, use the default initial directory
+                # If suggest output directory returns none, use the default initial output directory
                 if not initial_directory:
-                    initial_directory = self.initial_directory
+                    initial_directory = self.initial_output_directory
             else:
                 # If suggest output directory is false, use the default initial directory
                 initial_directory = self.initial_directory
         else:
-            # If no file is selected, use the default initial directory
-            initial_directory = self.initial_directory
+            # If no file is selected, use the default initial output directory
+            initial_directory = self.initial_output_directory
 
         # Ask for the output directory
         self.output_directory = filedialog.askdirectory(initialdir=initial_directory)

@@ -131,9 +131,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory_frame = None
         self.browse_move_directory_button = None
         self.move_directory_entry = None
-        self.artist_file_frame = None
-        self.browse_artist_file_button = None
-        self.artist_file_entry = None
         self.normalize_folder_frame = None
         self.normalize_folder_button = None
         self.clear_name_normalizer_selection_button = None
@@ -192,9 +189,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.appearance_mode_menu = None
         self.scaling_label = None
         self.scaling_optionemenu = None
+        self.master_entry_frame = None
+        self.initial_directory_frame = None
+        self.browse_initial_directory_button = None
+        self.initial_directory_entry = None
+        self.initial_output_directory_frame = None
+        self.browse_initial_output_directory_button = None
+        self.initial_output_directory_entry = None
+        self.double_check_reminder_directory_frame = None
+        self.browse_double_check_reminder_directory_button = None
+        self.double_check_reminder_directory_entry = None
         self.artist_directory_frame = None
         self.browse_artist_directory_button = None
         self.artist_directory_entry = None
+        self.artist_file_frame = None
+        self.browse_artist_file_button = None
+        self.artist_file_entry = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
@@ -860,21 +870,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.move_directory_entry = ctk.CTkEntry(self.output_directory_frame, width=890)
         self.move_directory_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        # Artist File Frame
-        self.artist_file_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
-                                              fg_color="transparent")
-        self.artist_file_frame.grid(row=10, column=0, padx=10, pady=5)
-
-        # Browse Artist File button
-        self.browse_artist_file_button = ctk.CTkButton(self.artist_file_frame, text="Artist File",
-                                                       command=self.browse_artist_file)
-        self.browse_artist_file_button.grid(row=0, column=0, padx=5, pady=5)
-
-        # Artist File entry
-        self.artist_file_entry = ctk.CTkEntry(self.artist_file_frame, width=890)
-        self.artist_file_entry.insert(0, self.artist_file)
-        self.artist_file_entry.grid(row=0, column=1, padx=10, pady=10)
-
         # Normalize Folder frame
         self.normalize_folder_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                                    fg_color="transparent")
@@ -1158,9 +1153,60 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set default value for scaling
         self.scaling_optionemenu.set("100%")
 
+        # Master Entry frame
+        self.master_entry_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
+        self.master_entry_frame.grid(row=4, column=0, padx=10, pady=10)
+
+        # Initial Directory frame
+        self.initial_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
+        self.initial_directory_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Browse Initial Directory button
+        self.browse_initial_directory_button = ctk.CTkButton(self.initial_directory_frame, text="Initial Directory",
+                                                             command=self.browse_initial_directory)
+        self.browse_initial_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Initial Directory entry
+        self.initial_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=890)
+        self.initial_directory_entry.insert(0, self.initial_directory)
+        self.initial_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Initial Output directory frame
+        self.initial_output_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                                           fg_color="transparent")
+        self.initial_output_directory_frame.grid(row=1, column=0, padx=10, pady=10)
+
+        # Browse Initial Output Directory button
+        self.browse_initial_output_directory_button = ctk.CTkButton(self.initial_output_directory_frame,
+                                                                    text="Initial Output Directory",
+                                                                    command=self.browse_initial_output_directory)
+        self.browse_initial_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Initial Directory entry
+        self.initial_output_directory_entry = ctk.CTkEntry(self.initial_output_directory_frame, width=855)
+        self.initial_output_directory_entry.insert(0, self.initial_output_directory)
+        self.initial_output_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Double Check Directory frame
+        self.double_check_reminder_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                                                  fg_color="transparent")
+        self.double_check_reminder_directory_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Browse Double Check Reminder Directory button
+        self.browse_double_check_reminder_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
+                                                                           text="Double Check Reminder Directory",
+                                                                           command=self.
+                                                                           browse_double_check_reminder_directory)
+        self.browse_double_check_reminder_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Double Check Reminder entry
+        self.double_check_reminder_directory_entry = ctk.CTkEntry(self.double_check_reminder_directory_frame, width=775)
+        self.double_check_reminder_directory_entry.insert(0, self.double_check_directory)
+        self.double_check_reminder_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
         # Artist directory frame
-        self.artist_directory_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.artist_directory_frame.grid(row=4, column=0, padx=10, pady=10)
+        self.artist_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
+        self.artist_directory_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Browse Artist Directory button
         self.browse_artist_directory_button = ctk.CTkButton(self.artist_directory_frame, text="Artist Directory",
@@ -1171,6 +1217,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_directory_entry = ctk.CTkEntry(self.artist_directory_frame, width=890)
         self.artist_directory_entry.insert(0, self.artist_directory)
         self.artist_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Artist File Frame
+        self.artist_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                              fg_color="transparent")
+        self.artist_file_frame.grid(row=4, column=0, padx=10, pady=5)
+
+        # Browse Artist File button
+        self.browse_artist_file_button = ctk.CTkButton(self.artist_file_frame, text="Artist File",
+                                                       command=self.browse_artist_file)
+        self.browse_artist_file_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Artist File entry
+        self.artist_file_entry = ctk.CTkEntry(self.artist_file_frame, width=890)
+        self.artist_file_entry.insert(0, self.artist_file)
+        self.artist_file_entry.grid(row=0, column=1, padx=10, pady=10)
 
         """
         Misc
@@ -1365,10 +1426,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Clear the selected file and update the GUI
         core.clear_selection(self, frame_name)
 
-    def browse_input(self, frame_name):
-        # Open a file dialog to browse and select a file
-        core.browse_input(self, frame_name)
-
     def browse_artist_file(self):
         # Open a dialog to browse and select a file containing a line delimited list of artists
         core.browse_artist_file(self)
@@ -1376,6 +1433,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def browse_artist_directory(self):
         # Open a dialog to browse and select a directory to use for the artist search
         core.browse_artist_directory(self)
+
+    def browse_initial_directory(self):
+        # Open a dialog to browse and select the initial directory when the user browses location
+        core.browse_initial_directory(self)
+
+    def browse_initial_output_directory(self):
+        # Open a dialog to browse and select the initial directory when the user browses output location
+        core.browse_initial_output_directory(self)
+
+    def browse_double_check_reminder_directory(self):
+        # Open a dialog to browse and select a directory to save the double check reminders in
+        core.browse_double_check_reminder_directory(self)
+
+    def browse_input(self, frame_name):
+        # Open a file dialog to browse and select a file
+        core.browse_input(self, frame_name)
 
     def browse_output_directory(self, frame_name):
         # Open a dialog to browse and select an output directory
