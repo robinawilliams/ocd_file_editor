@@ -8,6 +8,7 @@ import customtkinter as ctk
 import logging
 import configparser
 import shutil
+import sys
 from moviepy.editor import VideoFileClip
 
 """
@@ -110,6 +111,7 @@ def load_configuration():
     remove_duplicates_var = config.getboolean("Settings", "remove_duplicates_var", fallback=True)
     double_check_var = config.getboolean("Settings", "double_check_var", fallback=False)
     activate_logging_var = config.getboolean("Settings", "activate_logging_var", fallback=False)
+    suppress_var = config.getboolean("Settings", "suppress_var", fallback=True)
     show_messageboxes_var = config.getboolean("Settings", "show_messageboxes_var", fallback=True)
     show_confirmation_messageboxes_var = config.getboolean("Settings", "show_confirmation_messageboxes_var",
                                                            fallback=True)
@@ -181,7 +183,7 @@ def load_configuration():
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            valid_extensions)
+            valid_extensions, suppress_var)
 
 
 def logging_setup(self):
@@ -195,6 +197,31 @@ def logging_setup(self):
                         format='%(asctime)s - %(levelname)s: %(message)s')
 
     logging.info("Logging started.")
+
+
+def stop_logging(self):
+    # Notate that logging stopped if the log file exists
+    if os.path.exists(self.file_renamer_log):
+        logging.info("Logging stopped.")
+
+
+# Redirect output (Fix for MoviePy overriding user's logging choice)
+def redirect_output(self):
+    # If logging state is active, redirect the outputs to the log file instead of the console
+    if self.activate_logging_var.get():
+        # Redirect standard output and error to the log file
+        sys.stdout = open(self.file_renamer_log, 'a')
+        sys.stderr = open(self.file_renamer_log, 'a')
+    # If inactive, either suppress the output completely or revert behavior
+    else:
+        if self.suppress_var.get():
+            # Redirect standard output and error to /dev/null (discard)
+            sys.stdout = open(os.devnull, 'w')
+            sys.stderr = open(os.devnull, 'w')
+        else:
+            # Restore the original standard output and error
+            sys.stdout = self.original_stdout
+            sys.stderr = self.original_stderr
 
 
 """
@@ -1884,6 +1911,9 @@ def process_video_edits(self):
                           not_logging=False)
         return
 
+    # Redirect MoviePy output for video edits
+    redirect_output(self)
+
     # Process each input path
     for input_path in input_paths:
         try:
@@ -2010,6 +2040,9 @@ def process_video_edits(self):
                 # Close the original clip to free resources
                 original_clip.close()
 
+                # Reset redirect MoviePy output for video edits
+                redirect_output(self)
+
                 # Delete the temporary copy
                 os.remove(temp_copy_path)
 
@@ -2123,6 +2156,9 @@ def process_video_edits(self):
 
                 # Close the original clip to free resources
                 original_clip.close()
+
+                # Reset redirect MoviePy output for video edits
+                redirect_output(self)
 
         except OSError as e:
             # Log error and skip to the next file in case of OSError

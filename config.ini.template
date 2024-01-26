@@ -27,6 +27,8 @@ remove_duplicates_var = False
 double_check_var = False
 ; Activate logging
 activate_logging_var = False
+; Suppress console outputs
+suppress_var = False
 ; Show messageboxes
 show_messageboxes_var = True
 ; Show confirmation messageboxes

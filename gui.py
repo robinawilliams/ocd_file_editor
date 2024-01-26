@@ -1,5 +1,6 @@
 import customtkinter as ctk  # Customtkinter for a modern gui
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
+import sys  # Handling standard error and output redirects
 import core  # Main logic for the program
 
 
@@ -26,6 +27,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_last_used_file = ""
         self.add_artist = ""
         self.remove_artist = ""
+
+        # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
+        self.original_stdout = sys.stdout
+        self.original_stderr = sys.stderr
 
         # Initialize Main GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
@@ -195,9 +200,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_switch = None
         self.double_check_switch = None
         self.activate_logging_switch = None
+        self.suppress_switch = None
         self.show_messageboxes_switch = None
-        self.show_confirmation_messageboxes_switch = None
         self.confirmation_frame = None
+        self.show_confirmation_messageboxes_switch = None
         self.fallback_confirmation_label = None
         self.true_radio = None
         self.false_radio = None
@@ -238,7 +244,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-         valid_extensions) = (
+         valid_extensions, suppress_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -267,6 +273,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_duplicates_var = ctk.BooleanVar(value=remove_duplicates_var)
         self.double_check_var = ctk.BooleanVar(value=double_check_var)
         self.activate_logging_var = ctk.BooleanVar(value=activate_logging_var)
+        self.suppress_var = ctk.BooleanVar(value=suppress_var)
         self.show_messageboxes_var = ctk.BooleanVar(value=show_messageboxes_var)
         self.show_confirmation_messageboxes_var = ctk.BooleanVar(value=show_confirmation_messageboxes_var)
         self.fallback_confirmation_var = ctk.BooleanVar(value=fallback_confirmation_var)
@@ -1178,35 +1185,40 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Bind the callback function to the activate logging variable
         self.activate_logging_var.trace_add("write", self.handle_logging_activation)
 
+        # Switch to enable/disable suppress standard outputs/errors
+        self.suppress_switch = ctk.CTkSwitch(self.switch_frame, text="Suppress Standard Output/Error",
+                                             variable=self.suppress_var)
+        self.suppress_switch.grid(row=2, column=1, padx=10, pady=10)
+
         # Switch to enable/disable show messageboxes
         self.show_messageboxes_switch = ctk.CTkSwitch(self.switch_frame, text="Show Messageboxes",
                                                       variable=self.show_messageboxes_var)
-        self.show_messageboxes_switch.grid(row=2, column=1, padx=10, pady=10)
-
-        # Switch to enable/disable show confirmation messageboxes
-        self.show_confirmation_messageboxes_switch = ctk.CTkSwitch(self.switch_frame,
-                                                                   text="Show Confirmation Messageboxes",
-                                                                   variable=self.show_confirmation_messageboxes_var)
-        self.show_confirmation_messageboxes_switch.grid(row=2, column=2, padx=10, pady=10)
+        self.show_messageboxes_switch.grid(row=2, column=2, padx=10, pady=10)
 
         # Confirmation frame
         self.confirmation_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
         self.confirmation_frame.grid(row=2, column=0, padx=10, pady=10)
 
+        # Switch to enable/disable show confirmation messageboxes
+        self.show_confirmation_messageboxes_switch = ctk.CTkSwitch(self.confirmation_frame,
+                                                                   text="Show Confirmation Messageboxes",
+                                                                   variable=self.show_confirmation_messageboxes_var)
+        self.show_confirmation_messageboxes_switch.grid(row=0, column=0, padx=10, pady=10)
+
         # Fallback confirmation state when confirmation messageboxes are suppressed
         self.fallback_confirmation_label = ctk.CTkLabel(self.confirmation_frame, text="Fallback confirmation state:")
-        self.fallback_confirmation_label.grid(row=0, column=0, padx=10, pady=5)
+        self.fallback_confirmation_label.grid(row=0, column=1, padx=10, pady=5)
 
         # Fallback true radio button
         self.true_radio = ctk.CTkRadioButton(self.confirmation_frame, text="True",
                                              variable=self.fallback_confirmation_var, value=True)
-        self.true_radio.grid(row=0, column=1, padx=10, pady=5)
+        self.true_radio.grid(row=0, column=2, padx=10, pady=5)
 
         # Fallback false radio button
         self.false_radio = ctk.CTkRadioButton(self.confirmation_frame, text="False",
                                               variable=self.fallback_confirmation_var,
                                               value=False)
-        self.false_radio.grid(row=0, column=2, padx=10, pady=5)
+        self.false_radio.grid(row=0, column=3, padx=10, pady=5)
 
         # GUI settings frame
         self.gui_settings_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
@@ -1343,6 +1355,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.logging_setup()
             except OSError as e:
                 print(f"Logging failed. Error: {e}")
+        else:
+            # If logging is false, call the logging_setup function
+            self.stop_logging()
 
     # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, name):
@@ -1500,6 +1515,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def logging_setup(self):
         # Setup logging
         core.logging_setup(self)
+
+    def stop_logging(self):
+        # Stop logging
+        core.stop_logging(self)
+
+    def redirect_output(self):
+        # Redirect output (Fix for MoviePy overriding user's logging choice)
+        core.redirect_output(self)
 
     """
     File Operations
