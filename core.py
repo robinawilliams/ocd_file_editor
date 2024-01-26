@@ -676,8 +676,10 @@ def browse_input(self, frame_name):
     if frame_name == "name_normalizer_window":
         # Function to browse and select a folder to normalize files
         self.name_normalizer_selected_folder = filedialog.askdirectory(initialdir=self.initial_directory)
-        self.folder_path_entry.delete(0, ctk.END)
-        self.folder_path_entry.insert(0, self.name_normalizer_selected_folder)
+
+        if self.name_normalizer_selected_folder:
+            self.folder_path_entry.delete(0, ctk.END)
+            self.folder_path_entry.insert(0, self.name_normalizer_selected_folder)
 
     if frame_name == "video_editor_window":
         # Initially ask for a file
@@ -690,21 +692,22 @@ def browse_input(self, frame_name):
             # If no file is selected, try to get a directory
             input_method = filedialog.askdirectory(initialdir=self.initial_directory, title="Browse a directory")
 
-        # Set the video editor selected file
-        self.video_editor_selected_file = input_method
-        # Extract just the file name, not the absolute file path
-        filename = os.path.basename(self.video_editor_selected_file)
+        if input_method:
+            # Set the video editor selected file
+            self.video_editor_selected_file = input_method
+            # Extract just the file name, not the absolute file path
+            filename = os.path.basename(self.video_editor_selected_file)
 
-        # Set the selected file to the input entry widget
-        self.input_method_entry.delete(0, ctk.END)
-        self.input_method_entry.insert(0, filename)
+            # Set the selected file to the input entry widget
+            self.input_method_entry.delete(0, ctk.END)
+            self.input_method_entry.insert(0, filename)
 
-        # Log the action and display the message in the gui
-        self.log_and_show(f"File selected via Browse: {filename}",
-                          frame_name="video_editor_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=False)
+            # Log the action and display the message in the gui
+            self.log_and_show(f"File selected via Browse: {filename}",
+                              frame_name="video_editor_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
 
 
 # Function to browse and select an output directory
