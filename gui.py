@@ -1,6 +1,7 @@
 import customtkinter as ctk  # Customtkinter for a modern gui
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 import sys  # Handling standard error and output redirects
+import atexit  # Used for triggering cleanup operations at exit
 import core  # Main logic for the program
 
 
@@ -327,6 +328,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Initial check for activate logging state prior to application launch
         self.handle_logging_activation()
+
+        # Register the cleanup method to be called on program exit
+        atexit.register(self.cleanup_on_exit)
 
         # Create the GUI elements
         self.create_gui()
@@ -1356,7 +1360,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             except OSError as e:
                 print(f"Logging failed. Error: {e}")
         else:
-            # If logging is false, call the logging_setup function
+            # If logging is false, call the stop_logging function
+            self.stop_logging()
+
+    # Method called on exit for cleanup operations
+    def cleanup_on_exit(self):
+        # Stop logging if currently running
+        if self.activate_logging_var.get():
             self.stop_logging()
 
     # Method to dynamically switch between frames based on the selected name
