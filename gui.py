@@ -139,6 +139,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_name_normalizer_selection_button = None
         self.name_normalizer_message_label_frame = None
         self.name_normalizer_message_label = None
+        self.slider_progressbar_frame = None
+        self.progressbar_1 = None
 
         # Initialize Video Editor GUI elements
         self.video_editor_frame = None
@@ -920,6 +922,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.name_normalizer_message_label = ctk.CTkLabel(self.name_normalizer_message_label_frame, text="")
         self.name_normalizer_message_label.grid(row=0, column=0, padx=10, pady=10)
 
+        # Create progressbar frame
+        self.slider_progressbar_frame = ctk.CTkFrame(self.name_normalizer_frame,
+                                                     corner_radius=0,
+                                                     fg_color="transparent")
+        self.slider_progressbar_frame.grid(row=13, column=0, padx=10)
+        self.slider_progressbar_frame.grid_columnconfigure(0, weight=1)
+        self.slider_progressbar_frame.grid_rowconfigure(4, weight=1)
+
         """
         video_editor_window
         """
@@ -1453,6 +1463,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 label.configure(text=truncated_message, text_color="#FF0000")  # Red text for errors
             else:
                 label.configure(text=truncated_message)
+
+    def start_progress(self):
+        self.progressbar_1 = ctk.CTkProgressBar(self.slider_progressbar_frame,
+                                                orientation="horizontal",
+                                                mode="indeterminate")
+        self.progressbar_1.grid(row=0, column=0, padx=10, pady=10)
+
+        # Start the progress bar
+        self.progressbar_1.start()
+
+    def stop_progress(self):
+        # Stop the progress bar
+        self.progressbar_1.stop()
+
+        # Destroy the progress bar widget
+        self.progressbar_1.destroy()
 
     def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
         # Method to check logging state, log if applicable, and show a messagebox.

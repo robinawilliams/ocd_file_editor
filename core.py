@@ -1572,6 +1572,9 @@ def process_name_normalizer_folder(self):
                           not_logging=False)
         return
 
+    # Start the progress bar for the Name Normalizer function
+    self.start_progress()
+
     try:
         # Get folder contents and save to memory
 
@@ -1611,6 +1614,9 @@ def process_name_normalizer_folder(self):
                           error=False,
                           not_logging=False)
 
+        # Stop the progress bar for the Name Normalizer function
+        self.stop_progress()
+
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
             # Clear selection for the name_normalizer_window
@@ -1623,6 +1629,9 @@ def process_name_normalizer_folder(self):
                           create_messagebox=True,
                           error=True,
                           not_logging=False)
+
+        # Stop the progress bar for the Name Normalizer function
+        self.stop_progress()
 
 
 """
