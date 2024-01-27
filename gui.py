@@ -33,6 +33,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
 
+        # Initialize configuration file variable
+        self.config_file_path = ""
+
         # Initialize Main GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
@@ -229,6 +232,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_file_frame = None
         self.browse_artist_file_button = None
         self.artist_file_entry = None
+        self.configuration_file_frame = None
+        self.open_configuration_file_button = None
+        self.configuration_file_entry = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
@@ -1334,6 +1340,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_file_entry.insert(0, self.artist_file)
         self.artist_file_entry.grid(row=0, column=1, padx=10, pady=10)
 
+        # Configuration File Frame
+        self.configuration_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                                     fg_color="transparent")
+        self.configuration_file_frame.grid(row=5, column=0, padx=10, pady=10)
+
+        # Browse Configuration File button
+        self.open_configuration_file_button = ctk.CTkButton(self.configuration_file_frame, text="Open Config File",
+                                                            command=lambda: self.open_file(
+                                                                self.config_file_path,
+                                                                frame_name="file_renamer_window"))
+        self.open_configuration_file_button.grid(row=0, column=0, padx=5)
+
+        # Configuration File entry
+        self.configuration_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
+        self.configuration_file_entry.insert(0, self.config_file_path)
+        self.configuration_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
         """
         Misc
         """
@@ -1477,8 +1500,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         elif frame_name == "artist_window":
             labels = [self.artist_message_label]
         else:
+            # Default to all frame labels if no frame name is passed
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
-                      self.video_editor_message_label, self.artist_message_label]  # Default to all frame labels
+                      self.video_editor_message_label, self.artist_message_label]
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
@@ -1517,10 +1541,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Configuration
     """
 
-    @staticmethod
-    def load_configuration():
+    def load_configuration(self):
         # Load configuration settings using the core module
-        return core.load_configuration()
+        return core.load_configuration(self)
 
     def logging_setup(self):
         # Setup logging
@@ -1557,6 +1580,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def on_file_drop(self, event):
         # Handle the event when a file is dropped onto the application
         core.on_file_drop(self, event)
+
+    def open_file(self, file_to_open, frame_name):
+        # Open a file using the default system program
+        core.open_file(self, file_to_open, frame_name)
 
     def add_to_queue(self, category):
         # Add a category to the processing queue

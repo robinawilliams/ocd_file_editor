@@ -74,16 +74,18 @@ Configuration
 """
 
 
-def load_configuration():
-    # Check if config.ini file exists
-    config_file_path = 'config.ini'
-    if not os.path.exists(config_file_path):
-        print(f"Error: {config_file_path} not found. Please create the config file and try again.")
+def load_configuration(self):
+    # Check if configuration file exists
+    self.config_file_path = 'config.ini'
+    if not os.path.exists(self.config_file_path):
+        # Display a message to the console if the configuration file does not exist
+        print(f"Error: {self.config_file_path} not found. Please create the config file and try again.")
+        # Quit the program
         quit()
 
     # Load the configuration from the config.ini file
     config = configparser.ConfigParser()
-    config.read(config_file_path)
+    config.read(self.config_file_path)
 
     # Filepaths/Directories
     initial_directory = config.get('Filepaths', 'initial_directory', fallback='/path/to/folder')
@@ -331,6 +333,8 @@ def load_last_used_file(self, frame_name):
         if self.file_renamer_last_used_file and os.path.exists(self.file_renamer_last_used_file):
             # Set the selected file to the file renamer last used file and update display
             self.selected_file = self.file_renamer_last_used_file
+
+            # Get the filename from the file path
             filename = os.path.basename(self.selected_file)
 
             # Display only the filename in the file display widget
@@ -481,6 +485,10 @@ def on_file_drop(self, event):
     self.queue = []
     self.update_file_display()
 
+    # Open the file if the corresponding option is set
+    if self.open_on_file_drop_var.get():
+        self.open_file(self.selected_file, frame_name="file_renamer_window")
+
     # Log the action and display the message in the gui
     self.log_and_show(f"File selected via drop: {filename}",
                       frame_name="file_renamer_window",
@@ -488,18 +496,36 @@ def on_file_drop(self, event):
                       error=False,
                       not_logging=False)
 
-    # Open the file if the corresponding option is set
-    if self.open_on_file_drop_var.get():
+
+def open_file(self, file_to_open, frame_name):
+    # Get the filename from the file path
+    filename = os.path.basename(file_to_open)
+
+    # Check if the file exists
+    if not os.path.exists(file_to_open):
+        # If the provided file does not exist, log an error and return
+        self.log_and_show(f"Cannot open file as it does not exist: {filename}",
+                          frame_name=None,
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return
+
+    # If the file path is not empty, try to open the file using the default system program
+    if file_to_open:
         try:
-            subprocess.Popen(['xdg-open', self.selected_file])  # I use Arch, btw.
-            self.log_and_show(f"File opened: {self.selected_file}",
-                              frame_name="file_renamer_window",
+            subprocess.Popen(['xdg-open', file_to_open])
+
+            # Log a success message if the file is opened successfully
+            self.log_and_show(f"File opened: {filename}",
+                              frame_name=frame_name,
                               create_messagebox=False,
                               error=False,
                               not_logging=False)
         except OSError as e:
+            # If an error occurs while opening the file, log the error
             self.log_and_show(f"{str(e)}",
-                              frame_name="file_renamer_window",
+                              frame_name=frame_name,
                               create_messagebox=True,
                               error=True,
                               not_logging=False)
