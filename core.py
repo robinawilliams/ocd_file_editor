@@ -154,6 +154,7 @@ def load_configuration(self):
     title_var = config.getboolean("Settings", "title_var", fallback=False)
     artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
+    reset_video_entries_var = config.getboolean("Settings", "reset_video_entries_var", fallback=False)
     deep_walk_var = config.getboolean("Settings", "deep_walk_var", fallback=False)
 
     # Video Editor
@@ -185,7 +186,7 @@ def load_configuration(self):
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            valid_extensions, suppress_var)
+            valid_extensions, suppress_var, reset_video_entries_var)
 
 
 def logging_setup(self):
@@ -390,7 +391,7 @@ def send_to_module(self, frame_name):
             # Confirm if the file is a valid file for the video editor window
             if any(self.selected_file.lower().endswith(ext) for ext in self.valid_extensions):
                 # Clear selection for the video_editor_window
-                clear_selection(self, "video_editor_window")
+                self.clear_selection(frame_name="video_editor_window")
 
                 # Initialize video editor selected file to selected file from file renamer window
                 self.video_editor_selected_file = self.selected_file
@@ -399,7 +400,7 @@ def send_to_module(self, frame_name):
                 message = filename
 
                 # Clear selection for the file_renamer_window
-                clear_selection(self, "file_renamer_window")
+                self.clear_selection(frame_name="file_renamer_window")
 
                 # Set the video editor selected file to the input_method_entry
                 self.input_method_entry.insert(0, message)
@@ -430,7 +431,7 @@ def send_to_module(self, frame_name):
     elif frame_name == "video_editor_window":
         if self.video_editor_selected_file:
             # Clear selection for the file_renamer_window
-            clear_selection(self, "file_renamer_window")
+            self.clear_selection(frame_name="file_renamer_window")
 
             # Set the selected file to the video editor selected file and update display
             self.selected_file = self.video_editor_selected_file
@@ -451,7 +452,7 @@ def send_to_module(self, frame_name):
                               not_logging=False)
 
             # Clear selection for the video_editor_window
-            clear_selection(self, "video_editor_window")
+            self.clear_selection(frame_name="video_editor_window")
 
             # Switch frames to the video editor
             self.file_renamer_button_event()
@@ -614,12 +615,6 @@ def clear_selection(self, frame_name):
         self.output_directory_entry.delete(0, ctk.END)
         self.output_directory_entry.insert(0, self.output_directory)
 
-        self.log_and_show("Selection cleared",
-                          frame_name="file_renamer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=True)
-
     if frame_name == "name_normalizer_window":
         self.name_normalizer_selected_folder = ""
         self.name_normalizer_output_directory = ""
@@ -642,6 +637,20 @@ def clear_selection(self, frame_name):
         # Clear audio normalization entry and set default value
         self.audio_normalization_entry.delete(0, ctk.END)
         self.audio_normalization_entry.insert(0, self.default_audio_normalization)
+
+    if frame_name == "artist_window":
+        # Clear add artist entry
+        self.add_artist_entry.delete(0, ctk.END)
+
+        # Clear remove artist entry
+        self.remove_artist_entry.delete(0, ctk.END)
+
+    # Log action and display message on the applicable frame
+    self.log_and_show("Selection cleared",
+                      frame_name=frame_name,
+                      create_messagebox=False,
+                      error=False,
+                      not_logging=True)
 
 
 # Open a dialog to browse and select a file containing a line delimited list of artists
@@ -1673,7 +1682,7 @@ def process_name_normalizer_folder(self):
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
             # Clear selection for the name_normalizer_window
-            clear_selection(self, "name_normalizer_window")
+            self.clear_selection(frame_name="name_normalizer_window")
 
     except Exception as e:
         # Display error message if an exception occurs
@@ -2047,9 +2056,9 @@ def process_video_edits(self):
                     # Set the video editor last used file upon success
                     self.video_editor_last_used_file = output_path
 
-                    # TODO Include logic for reset entries
-                    # # Clear selection for the video_editor_window
-                    # clear_selection(self, "video_editor_window")
+                    if self.reset_video_entries_var.get():
+                        # Clear selection for the video_editor_window
+                        self.clear_selection(frame_name="video_editor_window")
 
                     # Remove the successfully processed line from the input file
                     if self.video_editor_selected_file:
@@ -2164,9 +2173,9 @@ def process_video_edits(self):
                     # Set the video editor last used file upon success
                     self.video_editor_last_used_file = output_path
 
-                    # TODO Include logic for reset entries
-                    # # Clear selection for the video_editor_window
-                    # clear_selection(self, "video_editor_window")
+                    if self.reset_video_entries_var.get():
+                        # Clear selection for the video_editor_window
+                        self.clear_selection(frame_name="video_editor_window")
 
                     # Remove the successfully processed line from the input file
                     if self.video_editor_selected_file:
