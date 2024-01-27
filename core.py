@@ -155,6 +155,7 @@ def load_configuration(self):
     artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
     reset_video_entries_var = config.getboolean("Settings", "reset_video_entries_var", fallback=False)
+    reset_artist_entries_var = config.getboolean("Settings", "reset_artist_entries_var", fallback=True)
     deep_walk_var = config.getboolean("Settings", "deep_walk_var", fallback=False)
 
     # Video Editor
@@ -186,7 +187,7 @@ def load_configuration(self):
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            valid_extensions, suppress_var, reset_video_entries_var)
+            valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var)
 
 
 def logging_setup(self):
@@ -2257,6 +2258,12 @@ def add_artist_to_file(self):
                               create_messagebox=False,
                               error=False,
                               not_logging=False)
+
+            # Reset the artist entries if the action is successful
+            if self.reset_artist_entries_var.get():
+                # Clear add artist entry
+                self.add_artist_entry.delete(0, ctk.END)
+
         except IOError:
             self.log_and_show(f"Error writing to Artist File '{self.artist_file}'.",
                               frame_name="artist_window",
@@ -2301,11 +2308,17 @@ def remove_artist_from_file(self):
         try:
             with open(self.artist_file, 'w') as artist_list_file:
                 artist_list_file.write('\n'.join(artist_list))
-                self.log_and_show(f"Removed artist from the Artist File: '{self.remove_artist}'",
-                                  frame_name="artist_window",
-                                  create_messagebox=False,
-                                  error=False,
-                                  not_logging=False)
+            self.log_and_show(f"Removed artist from the Artist File: '{self.remove_artist}'",
+                              frame_name="artist_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+
+            # Reset the artist entries if the action is successful
+            if self.reset_artist_entries_var.get():
+                # Clear remove artist entry
+                self.remove_artist_entry.delete(0, ctk.END)
+
         except IOError:
             self.log_and_show(f"Error writing to Artist File '{self.artist_file}'.",
                               frame_name="artist_window",

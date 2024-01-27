@@ -105,6 +105,8 @@ artist_file_search_var = False
 reset_var = False
 ; Reset video entries after each run
 reset_video_entries_var = False
+; Reset artist entries after each run
+reset_artist_entries_var = True
 ; Explore subdirectories when name normalizing files (False just normalizes files in the root directory)
 deep_walk_var = False
 ; Remove the successful line from the input file after video editor processing

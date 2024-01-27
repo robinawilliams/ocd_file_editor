@@ -195,6 +195,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_artist_button = None
         self.clear_artist_frame = None
         self.clear_artist_button = None
+        self.reset_artist_frame = None
+        self.reset_artist_checkbox = None
         self.artist_message_label_frame = None
         self.artist_message_label = None
 
@@ -254,7 +256,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-         valid_extensions, suppress_var, reset_video_entries_var) = (
+         valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -326,6 +328,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
         self.reset_var = ctk.BooleanVar(value=reset_var)
         self.reset_video_entries_var = ctk.BooleanVar(value=reset_video_entries_var)
+        self.reset_artist_entries_var = ctk.BooleanVar(value=reset_artist_entries_var)
         self.deep_walk_var = ctk.BooleanVar(value=deep_walk_var)
 
         # Video Editor - Set instance variables with the values from the configuration file
@@ -1162,6 +1165,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_artist_button = ctk.CTkButton(self.clear_artist_frame, text="Clear",
                                                  command=lambda: self.clear_selection("artist_window"))
         self.clear_artist_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Frame for reset artist checkbox
+        self.reset_artist_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
+                                               fg_color="transparent")
+        self.reset_artist_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable reset artist entries
+        self.reset_artist_checkbox = ctk.CTkCheckBox(self.reset_artist_frame,
+                                                     text="Reset entries",
+                                                     variable=self.reset_artist_entries_var)
+        self.reset_artist_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
         # Frame to display messages on the artist frame
         self.artist_message_label_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
