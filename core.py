@@ -1450,8 +1450,23 @@ def rename_and_move_file(self, file_path):
             name = name.replace('?', '')
 
         if self.title_var.get():
-            # Make file name a title
-            name = name.title()
+            # Make file name a title while preserving lowercase letters after apostrophes in contractions
+            words = name.split()
+            formatted_words = []
+
+            for word in words:
+                if "'" in word:
+                    # If the word is a contraction with ', capitalize the first part and keep the rest in lowercase
+                    parts = word.split("'")
+                    formatted_word = "'".join([parts[0].capitalize()] + [part.lower() for part in parts[1:]])
+                else:
+                    # Capitalize the word as usual
+                    formatted_word = word.capitalize()
+
+                formatted_words.append(formatted_word)
+
+            # Join the words back into a formatted name
+            name = ' '.join(formatted_words)
 
         if self.remove_double_space_var.get():
             # Sanitize the filename by removing double spaces
