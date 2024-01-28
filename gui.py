@@ -99,10 +99,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.checkbox_frame1 = None
         self.browse_folder_button = None
         self.folder_path_entry = None
-        self.remove_all_symbols_checkbox = None
         self.tail_checkbox = None
-        self.remove_parenthesis_trail_checkbox = None
-        self.remove_hashtag_trail_checkbox = None
+        self.remove_all_symbols_checkbox = None
+        self.remove_most_symbols_checkbox = None
+        self.remove_numbers_checkbox = None
         self.checkbox_frame2 = None
         self.remove_new_checkbox = None
         self.remove_dash_checkbox = None
@@ -136,6 +136,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_angle_bracket_checkbox = None
         self.remove_question_mark_checkbox = None
         self.checkbox_frame7 = None
+        self.remove_parenthesis_trail_checkbox = None
+        self.remove_hashtag_trail_checkbox = None
+        self.checkbox_frame8 = None
         self.remove_double_space_checkbox = None
         self.artist_search_checkbox = None
         self.deep_walk_checkbox = None
@@ -256,7 +259,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-         valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var) = (
+         valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+         remove_number_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -294,6 +298,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Name Normalizer - Set instance variables with the values from the configuration file
         self.remove_all_symbols_var = ctk.BooleanVar(value=remove_all_symbols_var)
+        self.remove_most_symbols_var = ctk.BooleanVar(value=remove_most_symbols_var)
+        self.remove_number_var = ctk.BooleanVar(value=remove_number_var)
         self.tail_var = ctk.BooleanVar(value=tail_var)
         self.remove_parenthesis_trail_var = ctk.BooleanVar(value=remove_parenthesis_trail_var)
         self.remove_parenthesis_var = ctk.BooleanVar(value=remove_parenthesis_var)
@@ -665,29 +671,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame1.grid(row=2, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable remove all symbols
-        self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                                           text="Remove all symbols",
-                                                           variable=self.remove_all_symbols_var)
-        self.remove_all_symbols_checkbox.grid(row=0, column=0, padx=10, pady=10)
-
         # Checkbox to enable/disable Append '__-__ ' to the file name
         self.tail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                              text="Append '__-__ '",
                                              variable=self.tail_var)
-        self.tail_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        self.tail_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable remove parenthesis and trailing text
-        self.remove_parenthesis_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                                                 text="Remove text following the first '('",
-                                                                 variable=self.remove_parenthesis_trail_var)
-        self.remove_parenthesis_trail_checkbox.grid(row=0, column=2, padx=10, pady=10)
+        # Checkbox to enable/disable remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
+        self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                           text="Remove all symbols",
+                                                           variable=self.remove_all_symbols_var)
+        self.remove_all_symbols_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
-        # Checkbox to enable/disable remove hashtag and trailing text
-        self.remove_hashtag_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                                             text="Remove text following the first '#'",
-                                                             variable=self.remove_hashtag_trail_var)
-        self.remove_hashtag_trail_checkbox.grid(row=0, column=3, padx=10, pady=10)
+        # Checkbox to enable/disable remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
+        self.remove_most_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                            text="Remove most symbols",
+                                                            variable=self.remove_most_symbols_var)
+        self.remove_most_symbols_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Checkbox to enable/disable reset entries
+        self.remove_numbers_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                       text="Remove numbers",
+                                                       variable=self.remove_number_var)
+        self.remove_numbers_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
         # Button Frame 2
         self.checkbox_frame2 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -875,32 +881,49 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame7.grid(row=8, column=0, padx=10, pady=5)
 
+        # Checkbox to enable/disable remove parenthesis and trailing text
+        self.remove_parenthesis_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+                                                                 text="Remove text following the first '('",
+                                                                 variable=self.remove_parenthesis_trail_var)
+        self.remove_parenthesis_trail_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable remove hashtag and trailing text
+        self.remove_hashtag_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+                                                             text="Remove text following the first '#'",
+                                                             variable=self.remove_hashtag_trail_var)
+        self.remove_hashtag_trail_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Button Frame 8
+        self.checkbox_frame8 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.checkbox_frame8.grid(row=9, column=0, padx=10, pady=5)
+
         # Checkbox to enable/disable remove double spaces
-        self.remove_double_space_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+        self.remove_double_space_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
                                                             text="Remove double spaces",
                                                             variable=self.remove_double_space_var)
         self.remove_double_space_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable Titlefy the name
-        self.title_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+        self.title_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
                                               text="Titlefy the name",
                                               variable=self.title_var)
         self.title_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
         # Checkbox to enable/disable Artist Search
-        self.artist_search_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+        self.artist_search_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
                                                       text="Artist Search",
                                                       variable=self.artist_file_search_var)
         self.artist_search_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
         # Checkbox to enable/disable include subdirectories
-        self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+        self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
                                                   text="Include subdirectories",
                                                   variable=self.deep_walk_var)
         self.deep_walk_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
         # Checkbox to enable/disable reset entries
-        self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+        self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
                                               text="Reset entries",
                                               variable=self.reset_var)
         self.reset_checkbox.grid(row=0, column=4, padx=10, pady=10)
@@ -908,7 +931,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Output directory move frame
         self.output_directory_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                                    fg_color="transparent")
-        self.output_directory_frame.grid(row=9, column=0, padx=10, pady=5)
+        self.output_directory_frame.grid(row=10, column=0, padx=10, pady=5)
 
         # Browse move directory folder button
         self.browse_move_directory_button = ctk.CTkButton(self.output_directory_frame, text="Output Directory",

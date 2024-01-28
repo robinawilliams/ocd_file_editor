@@ -121,6 +121,8 @@ def load_configuration(self):
 
     # Name Normalizer
     remove_all_symbols_var = config.getboolean("Settings", "remove_all_symbols_var", fallback=False)
+    remove_most_symbols_var = config.getboolean("Settings", "remove_most_symbols_var", fallback=False)
+    remove_number_var = config.getboolean("Settings", "remove_number_var", fallback=False)
     tail_var = config.getboolean("Settings", "tail_var", fallback=False)
     remove_parenthesis_trail_var = config.getboolean("Settings", "remove_parenthesis_trail_var", fallback=False)
     remove_parenthesis_var = config.getboolean("Settings", "remove_parenthesis_var", fallback=False)
@@ -187,7 +189,8 @@ def load_configuration(self):
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var)
+            valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+            remove_number_var)
 
 
 def logging_setup(self):
@@ -1315,8 +1318,15 @@ def rename_and_move_file(self, file_path):
 
     # Check if the file has one of the video file extensions
     if ext.lower() in self.file_extensions:
-        # Remove specified characters from the filename if remove_all_symbols_var is True
         if self.remove_all_symbols_var.get():
+            # Define the characters to be removed
+            remove_chars = ",;:@$%^&#*+=(){}[]|\\<>\'\"?_-–—"
+
+            # Replace each unwanted character with an empty string
+            for char in remove_chars:
+                name = name.replace(char, "")
+
+        if self.remove_most_symbols_var.get():
             # Define the characters to be removed
             remove_chars = ",;:@$%^&*+={}[]|\\<>\"?-–—"
 
@@ -1324,7 +1334,10 @@ def rename_and_move_file(self, file_path):
             for char in remove_chars:
                 name = name.replace(char, "")
 
-        # Remove new if remove_new_var is True
+        if self.remove_number_var.get():
+            # Remove all numbers from the name
+            name = ''.join(char for char in name if not char.isdigit())
+
         if self.remove_new_var.get():
             if 'New_' in name:
                 # Replace underscore with a space if it immediately trails the word "New". Catchall

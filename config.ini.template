@@ -35,8 +35,12 @@ show_messageboxes_var = True
 show_confirmation_messageboxes_var = True
 ; Fallback confirmation for confirmation messageboxes when suppressed
 fallback_confirmation_var = False
-; Remove all symbols
+; Remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
 remove_all_symbols_var = False
+; Remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
+remove_most_symbols_var = False
+; Remove numbers
+remove_number_var = False
 ; Append '__-__ ' to the file name
 tail_var = False
 ; Remove text following the first '('
