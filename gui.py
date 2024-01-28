@@ -1,7 +1,7 @@
 import customtkinter as ctk  # Customtkinter for a modern gui
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 import sys  # Handling standard error and output redirects
-import atexit  # Used for triggering cleanup operations at exit
+import atexit  # Module for registering functions to be called when a program is closing
 import core  # Main logic for the program
 
 

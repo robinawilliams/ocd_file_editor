@@ -1,15 +1,16 @@
-import os
-import re
-import json
-from tkinter import filedialog, messagebox
-import send2trash
-import subprocess
-import customtkinter as ctk
-import logging
-import configparser
-import shutil
-import sys
-from moviepy.editor import VideoFileClip
+import os  # Operating System module for interacting with the operating system
+import re  # Regular expression module for pattern matching in strings
+import json  # JSON module for working with JSON data
+from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
+import send2trash  # Module for sending files to the trash instead of permanently deleting them
+import subprocess  # Module for running external processes
+import customtkinter as ctk  # Custom Tkinter module for enhanced GUI components
+import logging  # Logging module for capturing log messages
+import configparser  # Module for working with configuration files
+import shutil  # Module for high-level file operations (copying, moving, etc.)
+import sys  # System-specific parameters and functions
+from moviepy.editor import VideoFileClip  # Video editing module for working with video files
+
 
 """
 Messaging
@@ -2242,7 +2243,7 @@ artist
 # Function to add artists to the artist file
 def add_artist_to_file(self):
     # Get the artist to be added from the entry widget
-    self.add_artist = self.add_artist_entry.get()
+    self.add_artist = self.add_artist_entry.get().strip()
 
     # Check if no artist is provided
     if not self.add_artist:
@@ -2303,7 +2304,7 @@ def add_artist_to_file(self):
 # Function to remove artists from the artist file
 def remove_artist_from_file(self):
     # Get the artist to be removed from the entry widget
-    self.remove_artist = self.remove_artist_entry.get()
+    self.remove_artist = self.remove_artist_entry.get().strip()
 
     # Check if no artist is provided
     if not self.remove_artist:
