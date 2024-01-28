@@ -1780,6 +1780,30 @@ def get_non_conflicting_filename(self, path, frame_name):
         return None
 
 
+# Function to remove a successful line from a file.
+def remove_successful_line_from_file(self, file_path, line_to_remove):
+    try:
+        if self.remove_successful_lines_var.get():
+            # Read all lines from the file.
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+
+            # Open the file in write mode to remove the specified line.
+            with open(file_path, 'w') as file:
+                # Write lines back to the file, excluding the successful line to remove.
+                for line in lines:
+                    if line.strip() != line_to_remove:
+                        file.write(line)
+
+    except Exception as e:
+        # Log the exception using the logging module.
+        self.log_and_show(f"An error occurred while removing line from file: {e}",
+                          frame_name="video_editor_window",
+                          create_messagebox=False,
+                          error=True,
+                          not_logging=False)
+
+
 # Method to rotate a video clip by a specified angle.
 def rotate_video(self, clip, rotation_angle):
     try:
@@ -1813,6 +1837,13 @@ def increase_volume(self, clip, increase_db):
         # Modify the volume of the video clip by converting dB to linear scale.
         modified_clip = clip.volumex(10 ** (increase_db / 20.0))
 
+        # Log amplification success if logging is activated.
+        self.log_and_show(f"Amplification successful {increase_db}",
+                          frame_name="video_editor_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+
         # Return the modified video clip.
         return modified_clip
 
@@ -1833,6 +1864,13 @@ def normalize_audio(self, clip, volume_multiplier):
     try:
         # Normalize the audio of the video clip by applying the specified volume multiplier.
         normalized_clip = clip.volumex(volume_multiplier)
+
+        # Log audio normalization success if logging is activated.
+        self.log_and_show(f"Audio Normalization successful {volume_multiplier}",
+                          frame_name="video_editor_window",
+                          create_messagebox=False,
+                          error=False,
+                          not_logging=False)
 
         # Return the normalized video clip.
         return normalized_clip
