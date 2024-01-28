@@ -1763,6 +1763,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Generate a non-conflicting filename
         return core.get_non_conflicting_filename(self, path, frame_name)
 
+    def remove_successful_line_from_file(self, file_path, line_to_remove):
+        # Method to remove a successful line from a file.
+        core.remove_successful_line_from_file(self, file_path, line_to_remove)
+
     def rotate_video(self, clip, rotation_angle):
         # Method to rotate a video clip by a specified angle.
         return core.rotate_video(self, clip, rotation_angle)
