@@ -1877,8 +1877,8 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
 def process_video_edits(self):
     # Get input parameters from user interface.
     rotation = str(self.rotation_var.get())
-    decibel = float(self.decibel_entry.get())
-    audio_normalization = float(self.audio_normalization_entry.get())
+    decibel = float(self.decibel_entry.get().strip())
+    audio_normalization = float(self.audio_normalization_entry.get().strip())
 
     # Check if rotation is none and set to variable to None
     if rotation == "none":
