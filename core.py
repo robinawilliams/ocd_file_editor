@@ -637,21 +637,17 @@ def clear_selection(self, frame_name):
         self.input_method_entry.delete(0, ctk.END)
         self.video_editor_output_directory_entry.delete(0, ctk.END)
 
-        # Clear decibel entry and set default value
+        # Clear decibel entry
         self.decibel_entry.delete(0, ctk.END)
-        self.decibel_entry.insert(0, self.default_decibel)
 
-        # Clear audio normalization entry and set default value
+        # Clear audio normalization entry
         self.audio_normalization_entry.delete(0, ctk.END)
-        self.audio_normalization_entry.insert(0, self.default_audio_normalization)
 
-        # Clear minute entry and set default value
+        # Clear minute entry
         self.minute_entry.delete(0, ctk.END)
-        self.minute_entry.insert(0, self.default_minute)
 
-        # Clear second entry and set default value
+        # Clear second entry
         self.second_entry.delete(0, ctk.END)
-        self.second_entry.insert(0, self.default_second)
 
     if frame_name == "artist_window":
         # Clear add artist entry
