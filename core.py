@@ -102,6 +102,8 @@ def load_configuration(self):
     default_weight = config.get('Settings', 'default_weight', fallback=9)
     default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
     default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
+    default_minute = config.get('Settings', 'default_minute', fallback=0)
+    default_second = config.get('Settings', 'default_second', fallback=0)
     default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
     file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
@@ -191,7 +193,7 @@ def load_configuration(self):
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-            remove_number_var)
+            remove_number_var, default_minute, default_second)
 
 
 def logging_setup(self):
@@ -642,6 +644,14 @@ def clear_selection(self, frame_name):
         # Clear audio normalization entry and set default value
         self.audio_normalization_entry.delete(0, ctk.END)
         self.audio_normalization_entry.insert(0, self.default_audio_normalization)
+
+        # Clear minute entry and set default value
+        self.minute_entry.delete(0, ctk.END)
+        self.minute_entry.insert(0, self.default_minute)
+
+        # Clear second entry and set default value
+        self.second_entry.delete(0, ctk.END)
+        self.second_entry.insert(0, self.default_second)
 
     if frame_name == "artist_window":
         # Clear add artist entry
@@ -1799,7 +1809,7 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
         # Log the exception using the logging module.
         self.log_and_show(f"An error occurred while removing line from file: {e}",
                           frame_name="video_editor_window",
-                          create_messagebox=False,
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
 
@@ -1819,6 +1829,7 @@ def rotate_video(self, clip, rotation_angle):
 
         # Return the rotated video clip.
         return rotated_clip
+
     except Exception as e:
         # Log error and display an error message if rotation fails.
         self.log_and_show(f"Rotating video failed: {str(e)}",
@@ -1887,36 +1898,71 @@ def normalize_audio(self, clip, volume_multiplier):
         return None
 
 
-# Function to remove a successful line from a file.
-def remove_successful_line_from_file(self, file_path, line_to_remove):
+# Method to trim a video by a specified time value.
+def trim_video(self, clip, total_time):
     try:
-        if self.remove_successful_lines_var.get():
-            # Read all lines from the file.
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
+        # Trim the clip to remove the specified duration.
+        trimmed_clip = clip.subclip(total_time)
 
-            # Open the file in write mode to remove the specified line.
-            with open(file_path, 'w') as file:
-                # Write lines back to the file, excluding the successful line to remove.
-                for line in lines:
-                    if line.strip() != line_to_remove:
-                        file.write(line)
-    except Exception as e:
-        # Log the exception using the logging module.
-        self.log_and_show(f"An error occurred while removing line from file: {e}",
+        # Log normalization success if logging is activated.
+        self.log_and_show(f"Trimming successful {total_time}",
                           frame_name="video_editor_window",
                           create_messagebox=False,
+                          error=False,
+                          not_logging=False)
+
+        # Return the trimmed video clip.
+        return trimmed_clip
+
+    except Exception as e:
+        # Log error and display an error message if trimming fails.
+        self.log_and_show(f"Trimming failed: {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
                           error=True,
                           not_logging=False)
+
+        # Return None in case of an error.
+        return None
 
 
 # Method to process video edits based on user inputs.
 # noinspection PyTypeChecker
 def process_video_edits(self):
-    # Get input parameters from user interface.
-    rotation = str(self.rotation_var.get())
-    decibel = float(self.decibel_entry.get().strip())
-    audio_normalization = float(self.audio_normalization_entry.get().strip())
+    try:
+        # Get input parameters from user interface.
+        rotation = str(self.rotation_var.get())
+        decibel = float(self.decibel_entry.get().strip())
+        audio_normalization = float(self.audio_normalization_entry.get().strip())
+        minutes = int(self.minute_entry.get().strip())
+        seconds = int(self.second_entry.get().strip())
+    except ValueError as e:
+        self.log_and_show(f"Value error: Please enter a valid value. {str(e)}",
+                          frame_name="video_editor_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return
+
+    # Check if minutes is 00 and set variable to None
+    if minutes == 0:
+        minutes = None
+        adjusted_minutes = 0
+    else:
+        adjusted_minutes = minutes
+
+    # Check if seconds is 00 and set variable to None
+    if seconds == 0:
+        seconds = None
+        adjusted_seconds = 0
+    else:
+        adjusted_seconds = seconds
+
+    # Convert time to seconds
+    total_time = adjusted_minutes * 60 + adjusted_seconds
+
+    # If there is nothing to trim, set trim to False
+    trim = total_time != 0
 
     # Check if rotation is none and set to variable to None
     if rotation == "none":
@@ -1949,9 +1995,10 @@ def process_video_edits(self):
         return
 
     # Check if the necessary parameters for video editing are provided
-    if self.video_editor_selected_file and decibel is None and rotation is None and audio_normalization is None:
+    if (self.video_editor_selected_file and decibel is None and rotation is None and audio_normalization is None
+            and minutes is None and seconds is None):
         self.log_and_show("You need to specify an operation (audio increase, video rotation, "
-                          "audio normalization, or a combination of them",
+                          "audio normalization, trim, or some combination of them)",
                           frame_name="video_editor_window",
                           create_messagebox=True,
                           error=True,
@@ -2067,6 +2114,11 @@ def process_video_edits(self):
                     normalization_tag = f"NORMALIZED_{audio_normalization}"
                     operation_tags.append(normalization_tag)  # Add to the operations list
 
+                # Determine the trim operation tag
+                if trim:
+                    trim_tag = f"trimmed_{total_time}"
+                    operation_tags.append(trim_tag)  # Add to the operations list
+
                 # Join operation tags to create a filename suffix
                 operation_suffix = "_".join(operation_tags)
 
@@ -2087,7 +2139,7 @@ def process_video_edits(self):
                 successful_operations = True
 
                 # Apply operations in sequence, checking for success
-                if rotation is not None and successful_operations:
+                if rotation and successful_operations:
                     processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
                         original_clip = processed_clip
@@ -2103,6 +2155,13 @@ def process_video_edits(self):
 
                 if audio_normalization and successful_operations:
                     processed_clip = normalize_audio(self, original_clip, audio_normalization)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                if trim and successful_operations:
+                    processed_clip = trim_video(self, original_clip, total_time)
                     if processed_clip:
                         original_clip = processed_clip
                     else:
@@ -2184,6 +2243,11 @@ def process_video_edits(self):
                     normalization_tag = f"NORMALIZED_{audio_normalization}"
                     operation_tags.append(normalization_tag)  # Add to the operations list
 
+                # Determine the trim operation tag
+                if trim:
+                    trim_tag = f"trimmed_{total_time}"
+                    operation_tags.append(trim_tag)  # Add to the operations list
+
                 # Join operation tags to create a filename suffix
                 operation_suffix = "_".join(operation_tags)
 
@@ -2204,7 +2268,7 @@ def process_video_edits(self):
                 successful_operations = True
 
                 # Apply operations in sequence, checking for success
-                if rotation is not None and successful_operations:
+                if rotation and successful_operations:
                     processed_clip = rotate_video(self, original_clip, rotation_angle)
                     if processed_clip:
                         original_clip = processed_clip
@@ -2220,6 +2284,13 @@ def process_video_edits(self):
 
                 if audio_normalization and successful_operations:
                     processed_clip = normalize_audio(self, original_clip, audio_normalization)
+                    if processed_clip:
+                        original_clip = processed_clip
+                    else:
+                        successful_operations = False
+
+                if trim and successful_operations:
+                    processed_clip = trim_video(self, original_clip, total_time)
                     if processed_clip:
                         original_clip = processed_clip
                     else:

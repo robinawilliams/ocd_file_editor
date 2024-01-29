@@ -173,6 +173,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.audio_normalization_frame = None
         self.audio_normalization_label = None
         self.audio_normalization_entry = None
+        self.trim_frame = None
+        self.trim_label = None
+        self.minute_var = None
+        self.minute_entry = None
+        self.colon_label = None
+        self.second_var = None
+        self.second_entry = None
         self.video_editor_output_directory_frame = None
         self.browse_video_editor_output_directory_button = None
         self.video_editor_output_directory_entry = None
@@ -260,7 +267,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-         remove_number_var) = (
+         remove_number_var, default_minute, default_second) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -277,6 +284,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_weight = int(default_weight)
         self.default_decibel = float(default_decibel)
         self.default_audio_normalization = float(default_audio_normalization)
+        self.default_minute = default_minute
+        self.default_second = default_second
         self.default_frame = default_frame
         self.file_renamer_log = file_renamer_log
         self.default_placement_var = default_placement_var
@@ -1065,6 +1074,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.audio_normalization_entry.insert(0, self.default_audio_normalization)
         self.audio_normalization_entry.grid(row=0, column=1, padx=10, pady=10)
 
+        # Trim frame
+        self.trim_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                       fg_color="transparent")
+        self.trim_frame.grid(row=6, column=0, padx=10, pady=5)
+
+        # Trim label
+        self.trim_label = ctk.CTkLabel(self.trim_frame, text="Trim (Minutes:Seconds):")
+        self.trim_label.grid(row=0, column=0, padx=10, pady=5)
+
+        # Initialize minute variable
+        self.minute_var = ctk.StringVar()
+        self.minute_var.set(self.default_minute)
+
+        # Minute entry
+        self.minute_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.minute_var, width=50)
+        self.minute_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trim label
+        self.colon_label = ctk.CTkLabel(self.trim_frame, text=":")
+        self.colon_label.grid(row=0, column=2)
+
+        # Initialize second variable
+        self.second_var = ctk.StringVar()
+        self.second_var.set(self.default_second)
+
+        # Second entry
+        self.second_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var, width=50)
+        self.second_entry.grid(row=0, column=3, padx=10, pady=10)
+
         # Video Editor Output directory frame
         self.video_editor_output_directory_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
                                                                 fg_color="transparent")
@@ -1153,8 +1191,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_top_frame = ctk.CTkFrame(self.artist_frame, corner_radius=0,
                                              fg_color="transparent")
         self.artist_top_frame.grid(row=1, column=0, padx=10, pady=5)
-
-        # TODO Add the rest of the logic here for artist window, display the list in the gui
 
         # Add and remove artist list frame
         self.add_remove_artist_entry_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
@@ -1779,9 +1815,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Method to normalize the audio of a video clip by applying a volume multiplier.
         return core.normalize_audio(self, clip, volume_multiplier)
 
-    def remove_successful_line_from_file(self, file_path, line_to_remove):
-        # Method to remove a successful line from a file.
-        core.remove_successful_line_from_file(self, file_path, line_to_remove)
+    def trim_video(self, clip, total_time):
+        # Method to trim a video by a specified time value.
+        return core.trim_video(self, clip, total_time)
 
     def process_video_edits(self):
         # Method to process video edits based on user inputs.

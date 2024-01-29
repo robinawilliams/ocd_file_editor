@@ -9,6 +9,10 @@ default_weight = 9
 default_decibel = 0.0
 ; Default audio normalization for video editor
 default_audio_normalization = 0.0
+; Default minute for video editor
+default_minute = 00
+; Default second for video editor
+default_second = 00
 ; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, artist_window, settings_window)
 default_frame = file_renamer_window
 ; Reset the output directory after each run
