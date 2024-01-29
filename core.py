@@ -2112,7 +2112,7 @@ def process_video_edits(self):
 
                 # Determine the trim operation tag
                 if trim:
-                    trim_tag = f"trimmed_{total_time}"
+                    trim_tag = f"TRIMMED_{total_time}"
                     operation_tags.append(trim_tag)  # Add to the operations list
 
                 # Join operation tags to create a filename suffix

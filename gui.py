@@ -61,6 +61,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_category_button = None
         self.category_entry = None
         self.weight_label = None
+        self.weight_var = None
         self.weight_entry = None
         self.remove_category_button = None
         self.remove_category_entry = None
@@ -283,7 +284,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Variables and window geometry - Set instance variables with the values from the configuration file
         self.geometry(geometry)
         self.column_numbers = int(column_numbers)
-        self.default_weight = int(default_weight)
+        self.default_weight = default_weight
         self.default_decibel = default_decibel
         self.default_audio_normalization = default_audio_normalization
         self.default_minute = default_minute
@@ -500,9 +501,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.weight_label = ctk.CTkLabel(self.category_frame, text="Weight:")
         self.weight_label.grid(row=0, column=2, padx=5)
 
+        # Initialize weight variable
+        self.weight_var = ctk.StringVar()
+        self.weight_var.set(self.default_weight)
+
+        # Trace the changes in the StringVar
+        self.weight_var.trace_add("write", lambda *args: self.validate_entry(
+            self.weight_var,
+            self.default_weight,
+            desired_type=float))
+
         # Weight Entry
-        self.weight_entry = ctk.CTkEntry(self.category_frame, width=35)
-        self.weight_entry.insert(0, self.default_weight)
+        self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=35)
         self.weight_entry.grid(row=0, column=3, padx=5)
 
         # Remove Category Button
@@ -1062,7 +1072,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.decibel_var.set(self.default_decibel)
 
         # Trace the changes in the StringVar
-        self.decibel_var.trace_add("write", lambda *args: self.validate_entry(self.decibel_var, self.default_decibel))
+        self.decibel_var.trace_add("write", lambda *args: self.validate_entry(
+            self.decibel_var,
+            self.default_decibel,
+            desired_type=float))
 
         # Decibel entry
         self.decibel_entry = ctk.CTkEntry(self.decibel_frame, textvariable=self.decibel_var, width=50)
@@ -1084,7 +1097,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Trace the changes in the StringVar
         self.audio_normalization_var.trace_add("write",
                                                lambda *args: self.validate_entry(
-                                                   self.audio_normalization_var, self.default_audio_normalization))
+                                                   self.audio_normalization_var,
+                                                   self.default_audio_normalization,
+                                                   desired_type=float))
 
         # Audio Normalization entry
         self.audio_normalization_entry = ctk.CTkEntry(self.audio_normalization_frame,
@@ -1106,7 +1121,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.minute_var.set(self.default_minute)
 
         # Trace the changes in the StringVar
-        self.minute_var.trace_add("write", lambda *args: self.validate_entry(self.minute_var, self.default_minute))
+        self.minute_var.trace_add("write", lambda *args: self.validate_entry(
+            self.minute_var,
+            self.default_minute,
+            desired_type=int))
 
         # Minute entry
         self.minute_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.minute_var, width=50)
@@ -1121,7 +1139,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.second_var.set(self.default_second)
 
         # Trace the changes in the StringVar
-        self.second_var.trace_add("write", lambda *args: self.validate_entry(self.second_var, self.default_second))
+        self.second_var.trace_add("write", lambda *args: self.validate_entry(
+            self.second_var,
+            self.default_second,
+            desired_type=int))
 
         # Second entry
         self.second_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var, width=50)
@@ -1648,19 +1669,31 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.progressbar_1.destroy()
 
     @staticmethod
-    def validate_entry(var, default_value):
-        # Ensure the value is a number with leading zeros
+    def validate_entry(var, default_value, desired_type):
+        # Ensure the value is of the desired type
         current_value = var.get()
 
-        if not current_value.isdigit():
+        if desired_type == int:
+            # Check if the value is an integer
+            if not current_value.isdigit():
+                try:
+                    # Try to convert the value to an integer
+                    int_value = int(current_value)
+                    var.set(int_value)
+                except ValueError:
+                    # If conversion to integer fails, set it to the default value
+                    var.set(default_value)
+        elif desired_type == float:
+            # Check if the value is a float
             try:
-                # Check if the value is a float
                 float_value = float(current_value)
-                # If it's a float, update the variable
                 var.set(float_value)
             except ValueError:
-                # If it's neither a digit nor a float, set it to the default value
+                # If conversion to float fails, set it to the default value
                 var.set(default_value)
+        else:
+            # If the desired type is neither int nor float, set it to the default value
+            var.set(default_value)
 
     def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
         # Method to check logging state, log if applicable, and show a messagebox.
