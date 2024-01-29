@@ -981,7 +981,6 @@ def add_category(self):
             # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
             self.weight_entry.delete(0, ctk.END)
-            self.weight_entry.insert(0, self.default_weight)  # Reset to default weight
 
             # Log the action if logging is enabled
             self.log_and_show(f"Category added: '{new_category}' with weight({weight})",
@@ -999,7 +998,6 @@ def add_category(self):
             # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
             self.weight_entry.delete(0, ctk.END)
-            self.weight_entry.insert(0, self.default_weight)  # Reset to default weight
 
 
 def remove_category(self):

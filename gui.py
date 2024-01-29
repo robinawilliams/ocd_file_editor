@@ -509,7 +509,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.weight_var.trace_add("write", lambda *args: self.validate_entry(
             self.weight_var,
             self.default_weight,
-            desired_type=float))
+            desired_type=int))
 
         # Weight Entry
         self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=35)
