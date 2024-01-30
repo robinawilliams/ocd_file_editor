@@ -2171,10 +2171,12 @@ def process_video_edits(self):
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
 
+                    # Get the file name for nice presentation in the gui
                     filename = os.path.basename(output_path)
 
                     # Log the action if logging is enabled
-                    self.log_and_show(f"Video saved as {filename}",
+                    self.log_and_show(f"Video saved as {filename}"
+                                      f"\nPath: {output_path}",
                                       frame_name="video_editor_window",
                                       create_messagebox=False,
                                       error=False,
@@ -2303,7 +2305,8 @@ def process_video_edits(self):
                     filename = os.path.basename(output_path)
 
                     # Log the action if logging is enabled
-                    self.log_and_show(f"Video saved as {filename}",
+                    self.log_and_show(f"Video saved as {filename}"
+                                      f"\nPath: {output_path}",
                                       frame_name="video_editor_window",
                                       create_messagebox=False,
                                       error=False,
