@@ -11,7 +11,6 @@ import shutil  # Module for high-level file operations (copying, moving, etc.)
 import sys  # System-specific parameters and functions
 from moviepy.editor import VideoFileClip  # Video editing module for working with video files
 
-
 """
 Messaging
 """
@@ -548,11 +547,18 @@ def add_to_queue(self, category):
 
         # Update file display and show a message
         self.update_file_display()
-        self.log_and_show(f"Word added: {category}",
+        self.log_and_show(f"Word added to queue: {category}",
                           frame_name="file_renamer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=True)
+    else:
+        # If no file selected, log the action and display a message in the GUI
+        self.log_and_show("Please select a file or folder first and then add a word to the queue.",
+                          frame_name="file_renamer_window",
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
 
 
 # Function to update the file display based on selected options
