@@ -631,11 +631,9 @@ def clear_selection(self, frame_name):
     if frame_name == "name_normalizer_window":
         self.name_normalizer_selected_folder = ""
         self.name_normalizer_output_directory = ""
-        self.artist_file = ""
 
         self.folder_path_entry.delete(0, ctk.END)
         self.move_directory_entry.delete(0, ctk.END)
-        self.artist_file_entry.delete(0, ctk.END)
 
     if frame_name == "video_editor_window":
         self.video_editor_selected_file = ""
