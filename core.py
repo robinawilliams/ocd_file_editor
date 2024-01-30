@@ -241,12 +241,12 @@ File Operations
 # Function to move the selected file to the trash
 def move_file_to_trash(self):
     try:
-        if self.selected_file:
+        if self.file_renamer_selected_file:
             # Ask for confirmation before moving to trash
             confirmation = ask_confirmation(self, "Confirm Action",
                                             "Are you sure you want to move this file to the trash?")
             # Log the action if logging is enabled
-            self.log_and_show(f"'{self.selected_file}' selected for deletion.",
+            self.log_and_show(f"'{self.file_renamer_selected_file}' selected for deletion.",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=False,
@@ -254,9 +254,9 @@ def move_file_to_trash(self):
 
             if confirmation:
                 # Move the file to trash using send2trash library
-                send2trash.send2trash(self.selected_file)
+                send2trash.send2trash(self.file_renamer_selected_file)
                 # Reset selected file, queue, and clear display elements
-                self.selected_file = ""
+                self.file_renamer_selected_file = ""
                 self.queue = []
                 self.file_display_text.set("")
                 self.custom_text_entry.delete(0, ctk.END)
@@ -339,20 +339,14 @@ def load_last_used_file(self, frame_name):
         # Check if the file_renamer_last_used_file variable is provided and the file exists
         if self.file_renamer_last_used_file and os.path.exists(self.file_renamer_last_used_file):
             # Set the selected file to the file renamer last used file and update display
-            self.selected_file = self.file_renamer_last_used_file
-
-            # Get the filename from the file path
-            filename = os.path.basename(self.selected_file)
-
-            # Display only the filename in the file display widget
-            self.file_display_text.set(filename)
+            self.file_renamer_selected_file = self.file_renamer_last_used_file
 
             self.queue = []
             self.update_file_display()
 
-            message = filename
             # Log the action if logging is enabled
-            self.log_and_show(f"File selected via Reload Last File: {message}",
+            self.log_and_show(f"File selected via Reload Last File: "
+                              f"{os.path.basename(self.file_renamer_selected_file)}",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
                               error=False,
@@ -360,6 +354,29 @@ def load_last_used_file(self, frame_name):
         else:
             self.log_and_show("No last used file renamer file found.",
                               frame_name="file_renamer_window",
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+    elif frame_name == "name_normalizer_window":
+        # Check if the name_normalizer_last_used_file variable is provided and the file exists
+        if self.name_normalizer_last_used_file and os.path.exists(self.name_normalizer_last_used_file):
+            # Set the name normalizer selected file to the name normalizer last used file and update display
+            self.name_normalizer_selected_file = self.name_normalizer_last_used_file
+            filename = os.path.basename(self.name_normalizer_selected_file)
+
+            # Set the selected file to the input entry widget
+            self.nn_path_entry.delete(0, ctk.END)
+            self.nn_path_entry.insert(0, filename)
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"Last used name normalizer file selected: {filename}",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+        else:
+            self.log_and_show("No last used name normalizer file found.",
+                              frame_name="name_normalizer_window",
                               create_messagebox=True,
                               error=True,
                               not_logging=False)
@@ -390,30 +407,109 @@ def load_last_used_file(self, frame_name):
                               not_logging=False)
 
 
-def send_to_module(self, frame_name):
+def send_to_module(self, frame_name, destination):
     if frame_name == "file_renamer_window":
+        selected_file = self.file_renamer_selected_file
+    elif frame_name == "name_normalizer_window":
+        selected_file = self.name_normalizer_selected_file
+    elif frame_name == "video_editor_window":
+        selected_file = self.video_editor_selected_file
+    else:
+        # Invalid frame name
+        self.log_and_show("Invalid frame name for send to module",
+                          frame_name=frame_name,
+                          create_messagebox=True,
+                          error=True,
+                          not_logging=False)
+        return
+
+    # Send to File Renamer
+    if destination == "file_renamer_module":
+        if selected_file:
+            # Clear selection for the file_renamer_window
+            self.clear_selection(frame_name="file_renamer_window")
+
+            # Set the name normalizer selected file to the file renamer selected file and update display
+            self.file_renamer_selected_file = selected_file
+
+            self.update_file_display()
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"File selected via send to module: "
+                              f"{os.path.basename(self.file_renamer_selected_file)}",
+                              frame_name=frame_name,
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+
+            # Clear selection for the source module
+            self.clear_selection(frame_name=frame_name)
+
+            # Switch frames to the file renamer
+            self.file_renamer_button_event()
+        else:
+            # File not selected
+            self.log_and_show("No file selected. Cannot send to module",
+                              frame_name=frame_name,
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+
+    # Send to Name Normalizer
+    elif destination == "name_normalizer_module":
+        if selected_file:
+            # Clear selection for the name_normalizer_window
+            self.clear_selection(frame_name="name_normalizer_window")
+
+            # Set the source selected file to the Name Normalizer selected file
+            self.name_normalizer_selected_file = selected_file
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"File selected via send to module: "
+                              f"{os.path.basename(self.name_normalizer_selected_file)}",
+                              frame_name=frame_name,
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+
+            # Clear selection for the source module
+            self.clear_selection(frame_name=frame_name)
+
+            # Set the Name Normalizer selected file to the nn_path_entry
+            self.nn_path_entry.insert(0, self.name_normalizer_selected_file)
+
+            # Switch frames to the file renamer
+            self.name_normalizer_button_event()
+        else:
+            # File not selected
+            self.log_and_show("No file selected. Cannot send to module",
+                              frame_name=frame_name,
+                              create_messagebox=True,
+                              error=True,
+                              not_logging=False)
+
+    # Send to Video Editor
+    elif destination == "video_editor_module":
         # Check if there is a file selected
-        if self.selected_file:
+        if selected_file:
             # Confirm if the file is a valid file for the video editor window
-            if any(self.selected_file.lower().endswith(ext) for ext in self.valid_extensions):
+            if any(selected_file.lower().endswith(ext) for ext in self.valid_extensions):
                 # Clear selection for the video_editor_window
                 self.clear_selection(frame_name="video_editor_window")
 
-                # Initialize video editor selected file to selected file from file renamer window
-                self.video_editor_selected_file = self.selected_file
+                # Initialize video editor selected file to selected file from source module
+                self.video_editor_selected_file = selected_file
                 filename = os.path.basename(self.video_editor_selected_file)
 
-                message = filename
-
-                # Clear selection for the file_renamer_window
-                self.clear_selection(frame_name="file_renamer_window")
+                # Clear selection for the source module
+                self.clear_selection(frame_name=frame_name)
 
                 # Set the video editor selected file to the input_method_entry
-                self.input_method_entry.insert(0, message)
+                self.input_method_entry.insert(0, filename)
 
                 # Log the action and display the message in the GUI
-                self.log_and_show(f"File selected via send to module: {message}",
-                                  frame_name="file_renamer_window",
+                self.log_and_show(f"File selected via send to module: {filename}",
+                                  frame_name=frame_name,
                                   create_messagebox=False,
                                   error=False,
                                   not_logging=False)
@@ -423,59 +519,25 @@ def send_to_module(self, frame_name):
             else:
                 # File not selected
                 self.log_and_show("Non-video file detected. Cannot send to Video Editor",
-                                  frame_name="file_renamer_window",
+                                  frame_name=frame_name,
                                   create_messagebox=True,
                                   error=True,
                                   not_logging=False)
         else:
             # File not selected
             self.log_and_show("No file selected. Cannot send to module",
-                              frame_name="file_renamer_window",
-                              create_messagebox=True,
-                              error=True,
-                              not_logging=False)
-    elif frame_name == "video_editor_window":
-        if self.video_editor_selected_file:
-            # Clear selection for the file_renamer_window
-            self.clear_selection(frame_name="file_renamer_window")
-
-            # Set the selected file to the video editor selected file and update display
-            self.selected_file = self.video_editor_selected_file
-            filename = os.path.basename(self.selected_file)
-
-            # Display only the filename in the file display widget
-            self.file_display_text.set(filename)
-
-            self.queue = []
-            self.update_file_display()
-
-            message = filename
-            # Log the action if logging is enabled
-            self.log_and_show(f"File selected via send to module: {message}",
-                              frame_name="file_renamer_window",
-                              create_messagebox=False,
-                              error=False,
-                              not_logging=False)
-
-            # Clear selection for the video_editor_window
-            self.clear_selection(frame_name="video_editor_window")
-
-            # Switch frames to the video editor
-            self.file_renamer_button_event()
-        else:
-            # File not selected
-            self.log_and_show("No file selected. Cannot send to module",
-                              frame_name="video_editor_window",
+                              frame_name=frame_name,
                               create_messagebox=True,
                               error=True,
                               not_logging=False)
     else:
         # Invalid frame name
         self.log_and_show("Invalid frame name for send to module",
-                          frame_name="file_renamer_window",
+                          frame_name=frame_name,
                           create_messagebox=True,
                           error=True,
                           not_logging=False)
+        return
 
 
 # Function to handle a file being dropped onto the application window
@@ -483,21 +545,17 @@ def on_file_drop(self, event):
     # Remove the default custom text entry text
     self.custom_text_entry.delete(0, ctk.END)
 
-    self.selected_file = event.data.strip('{}')
-    filename = os.path.basename(self.selected_file)
-
-    # Display only the filename in the file display widget
-    self.file_display_text.set(filename)
+    self.file_renamer_selected_file = event.data.strip('{}')
 
     self.queue = []
     self.update_file_display()
 
     # Open the file if the corresponding option is set
     if self.open_on_file_drop_var.get():
-        self.open_file(self.selected_file, frame_name="file_renamer_window")
+        self.open_file(self.file_renamer_selected_file, frame_name="file_renamer_window")
 
     # Log the action and display the message in the gui
-    self.log_and_show(f"File selected via drop: {filename}",
+    self.log_and_show(f"File selected via drop: {os.path.basename(self.file_renamer_selected_file)}",
                       frame_name="file_renamer_window",
                       create_messagebox=False,
                       error=False,
@@ -540,7 +598,7 @@ def open_file(self, file_to_open, frame_name):
 
 # Function to add a category to the queue
 def add_to_queue(self, category):
-    if self.selected_file:
+    if self.file_renamer_selected_file:
         # Check if the category is not already in the queue
         if category not in self.queue:
             self.queue.append(category)
@@ -563,11 +621,11 @@ def add_to_queue(self, category):
 
 # Function to update the file display based on selected options
 def update_file_display(self):
-    if self.selected_file:
+    if self.file_renamer_selected_file:
         custom_text = self.custom_text_entry.get().strip()
 
         # Use only the base name of the file, not the full path
-        base_file_name = os.path.basename(self.selected_file)
+        base_file_name = os.path.basename(self.file_renamer_selected_file)
 
         # Construct the name
         new_name_parts = [
@@ -618,21 +676,20 @@ def undo_last(self):
 # Function to clear the selection and reset related elements
 def clear_selection(self, frame_name):
     if frame_name == "file_renamer_window":
-        self.selected_file = ""
+        self.file_renamer_selected_file = ""
         self.queue = []
         self.file_display_text.set("")
 
         # Clear custom text entry and reset output directory
         self.custom_text_entry.delete(0, ctk.END)
-        self.output_directory = os.path.dirname(self.selected_file)
+        self.output_directory = ""
         self.output_directory_entry.delete(0, ctk.END)
-        self.output_directory_entry.insert(0, self.output_directory)
 
     if frame_name == "name_normalizer_window":
-        self.name_normalizer_selected_folder = ""
+        self.name_normalizer_selected_file = ""
         self.name_normalizer_output_directory = ""
 
-        self.folder_path_entry.delete(0, ctk.END)
+        self.nn_path_entry.delete(0, ctk.END)
         self.move_directory_entry.delete(0, ctk.END)
 
     if frame_name == "video_editor_window":
@@ -729,12 +786,9 @@ def browse_input(self, frame_name):
         file_path = filedialog.askopenfilename(initialdir=self.initial_directory)
         if file_path:
             # Set the selected file
-            self.selected_file = file_path
+            self.file_renamer_selected_file = file_path
             # Extract just the file name, not the absolute file path
-            filename = os.path.basename(self.selected_file)
-
-            # Display only the filename in the file display widget
-            self.file_display_text.set(filename)
+            filename = os.path.basename(self.file_renamer_selected_file)
 
             # Clear the queue
             self.queue = []
@@ -752,18 +806,27 @@ def browse_input(self, frame_name):
 
     if frame_name == "name_normalizer_window":
         # Function to browse and select a folder to normalize files
-        self.name_normalizer_selected_folder = filedialog.askdirectory(initialdir=self.initial_directory)
+        nn_input_method = filedialog.askdirectory(initialdir=self.initial_directory,
+                                                  title="Browse a directory. Close to select a file instead")
 
-        if self.name_normalizer_selected_folder:
-            self.folder_path_entry.delete(0, ctk.END)
-            self.folder_path_entry.insert(0, self.name_normalizer_selected_folder)
+        if not nn_input_method:
+            nn_input_method = filedialog.askopenfilename(
+                initialdir=self.initial_directory,
+                title="Browse a file.",
+                filetypes=[("All Files", "*.*")]
+            )
+
+        if nn_input_method:
+            self.name_normalizer_selected_file = nn_input_method
+            self.nn_path_entry.delete(0, ctk.END)
+            self.nn_path_entry.insert(0, self.name_normalizer_selected_file)
 
     if frame_name == "video_editor_window":
         # Initially ask for a file
         input_method = filedialog.askopenfilename(
             initialdir=self.initial_directory,
             title="Browse a file. Close to select a directory instead",
-            filetypes=[("All Files", "*.*")],
+            filetypes=[("All Files", "*.*")]
         )
         if not input_method:
             # If no file is selected, try to get a directory
@@ -791,7 +854,7 @@ def browse_input(self, frame_name):
 def browse_output_directory(self, frame_name):
     if frame_name == "file_renamer_window":
         # Check if a file is selected
-        if self.selected_file:
+        if self.file_renamer_selected_file:
             # Check if suggest output directory is true
             if self.suggest_output_directory_var.get():
                 # Call the suggest output directory function to determine initial directory
@@ -836,7 +899,7 @@ def browse_output_directory(self, frame_name):
 
 def suggest_output_directory(self):
     # Check if a file is selected
-    if not self.selected_file:
+    if not self.file_renamer_selected_file:
         # If no file is selected, return none
         self.log_and_show("No file selected. Using default initial directory.",
                           frame_name="file_renamer_window",
@@ -870,7 +933,7 @@ def suggest_output_directory(self):
 
     try:
         # Extract the base name from the selected file
-        base_name = os.path.basename(self.selected_file)
+        base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Case insensitive comparison
 
         # TODO Implement logic for multiple artist matches
@@ -911,7 +974,7 @@ def handle_rename_success(self, new_path):
         double_check_reminder(self, new_path)
 
     # Reset selected file, queue and update file renamer last used file
-    self.selected_file = ""
+    self.file_renamer_selected_file = ""
     self.queue = []
     self.file_display_text.set("")
     self.custom_text_entry.delete(0, ctk.END)
@@ -924,10 +987,9 @@ def handle_rename_success(self, new_path):
     self.last_used_display.configure(text=last_used_name)
 
     if self.reset_output_directory_var.get():
-        # Clear and reset the Output Directory to the current directory
-        self.output_directory = os.path.dirname(self.selected_file)
+        # Clear and reset the Output Directory
+        self.output_directory = ""
         self.output_directory_entry.delete(0, ctk.END)
-        self.output_directory_entry.insert(0, self.output_directory)
 
     # Log the action if logging is enabled
     self.log_and_show("File renamed and saved successfully",
@@ -1121,11 +1183,11 @@ File Renaming
 
 def rename_files(self):
     # Check if a file is selected and either the queue is not empty or custom text is provided
-    if self.selected_file and (self.queue or self.custom_text_entry.get().strip()):
+    if self.file_renamer_selected_file and (self.queue or self.custom_text_entry.get().strip()):
 
         # Get custom text and file extension
         custom_text = self.custom_text_entry.get().strip()
-        base_name, extension = os.path.splitext(os.path.basename(self.selected_file))
+        base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
         # Check if the remove_duplicates_var is set
         if self.remove_duplicates_var.get():
@@ -1148,12 +1210,12 @@ def rename_files(self):
 
         # If output directory is not explicitly set, default to the same directory as the file
         if not self.output_directory:
-            self.output_directory = os.path.dirname(self.selected_file)
+            self.output_directory = os.path.dirname(self.file_renamer_selected_file)
 
         # Determine the new path based on user preferences
         if self.move_up_directory_var.get():
             # Ignore the provided output directory and move the file up one folder
-            parent_directory = os.path.dirname(os.path.dirname(self.selected_file))
+            parent_directory = os.path.dirname(os.path.dirname(self.file_renamer_selected_file))
             new_path = os.path.join(parent_directory, os.path.basename(name))
         else:
             # Use the suggest output directory
@@ -1208,8 +1270,8 @@ def rename_files(self):
                 new_path = get_non_conflicting_filename(self, new_path, frame_name="file_renamer_window")
 
             # Rename the file
-            os.rename(self.selected_file, new_path)
-            self.log_and_show(f"File: '{os.path.basename(self.selected_file)}' renamed successfully. "
+            os.rename(self.file_renamer_selected_file, new_path)
+            self.log_and_show(f"File: '{os.path.basename(self.file_renamer_selected_file)}' renamed successfully. "
                               f"\nSaved to: \n{new_path}",
                               frame_name="file_renamer_window",
                               create_messagebox=False,
@@ -1224,7 +1286,7 @@ def rename_files(self):
                               error=True,
                               not_logging=False)
     # If a file is selected and either the queue is empty or no custom text is provided show error
-    elif self.selected_file and not (self.queue or self.custom_text_entry.get().strip()):
+    elif self.file_renamer_selected_file and not (self.queue or self.custom_text_entry.get().strip()):
         # Log the action if logging is enabled
         self.log_and_show("File selected but nothing added to the queue. Nothing to rename.",
                           frame_name="file_renamer_window",
@@ -1232,7 +1294,7 @@ def rename_files(self):
                           error=True,
                           not_logging=False)
     # If no file is selected, show error
-    elif not self.selected_file:
+    elif not self.file_renamer_selected_file:
         # Log the action if logging is enabled
         self.log_and_show("No file selected. Nothing to rename.",
                           frame_name="file_renamer_window",
@@ -1559,6 +1621,9 @@ def rename_and_move_file(self, file_path):
             # Rename the file
             os.rename(file_path, new_path)
 
+            # Set self.name_normalizer_last_used_file to the new path
+            self.name_normalizer_last_used_file = new_path
+
             # Log the renaming operation if logging is activated
             self.log_and_show(f"Renamed: {filename} -> {os.path.basename(new_path)}",
                               frame_name="name_normalizer_window",
@@ -1580,6 +1645,9 @@ def rename_and_move_file(self, file_path):
                 try:
                     # Perform the move to the provided directory
                     shutil.move(str(new_path), str(destination_file))
+
+                    # Update self.name_normalizer_last_used_file to the new path
+                    self.name_normalizer_last_used_file = destination_file
 
                     # Log the move operation if logging is activated
                     self.log_and_show(f"Moved: {os.path.basename(new_path)} -> {os.path.basename(destination_file)}",
@@ -1612,10 +1680,11 @@ def rename_and_move_file(self, file_path):
 
 
 # Function to performing various name normalization operations on certain files within a specified folder
-def process_name_normalizer_folder(self):
-    # Check if the specified folder path exists
-    if not os.path.exists(self.name_normalizer_selected_folder):
-        self.log_and_show("Folder path does not exist or was not specified.\nPlease try again.",
+def process_name_normalizer(self):
+    # Check if the specified folder path or file exists
+    if (not os.path.exists(self.name_normalizer_selected_file)
+            and not os.path.isfile(self.name_normalizer_selected_file)):
+        self.log_and_show("Path does not exist or was not specified.\nPlease try again.",
                           frame_name="name_normalizer_window",
                           create_messagebox=True,
                           error=True,
@@ -1656,66 +1725,63 @@ def process_name_normalizer_folder(self):
 
     # Ask for confirmation before normalizing files
     confirmation = ask_confirmation(self, "Confirm Action",
-                                    "Are you sure you want normalize these files? This cannot be undone.")
+                                    "Are you sure you want normalize the file(s)? This cannot be undone.")
     if confirmation:
-        self.log_and_show(f"User confirmed the name normalization process for {self.name_normalizer_selected_folder}.",
+        self.log_and_show(f"User confirmed the name normalization process for {self.name_normalizer_selected_file}.",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
-        pass
     else:
-        self.log_and_show(f"User cancelled the name normalization process for {self.name_normalizer_selected_folder}.",
+        self.log_and_show(f"User cancelled the name normalization process for {self.name_normalizer_selected_file}.",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
         return
 
-    # Start the progress bar for the Name Normalizer function
-    self.start_progress()
-
     try:
-        # Get folder contents and save to memory
-
-        # Initialize an empty list to store file paths
-        file_paths = []
-
-        # Log the os.walk state
-        if self.deep_walk_var.get():
-            deep_walk_status = "including subdirectories"
+        if os.path.isfile(self.name_normalizer_selected_file):
+            # If a single file is provided, directly process it
+            rename_and_move_file(self, self.name_normalizer_selected_file)
         else:
-            deep_walk_status = "excluding subdirectories"
-        self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{self.name_normalizer_selected_folder}'",
-                          frame_name="name_normalizer_window",
-                          create_messagebox=False,
-                          error=False,
-                          not_logging=False)
+            # Get folder contents and save to memory
 
-        # Traverse through the folder using os.walk
-        for root, dirs, files in os.walk(self.name_normalizer_selected_folder):
-            # Include subdirectories if the deep_walk_var is True or the root folder is selected
-            if self.deep_walk_var.get() or root == self.name_normalizer_selected_folder:
-                for file in files:
-                    # Append the full file path to the list
-                    file_paths.append(str(os.path.join(root, file)))
+            # Initialize an empty list to store file paths
+            file_paths = []
 
-        # Iterate through file paths and rename/move files
-        for file_path in file_paths:
-            rename_and_move_file(
-                self,
-                file_path
-            )
+            # Log the os.walk state
+            if self.deep_walk_var.get():
+                deep_walk_status = "including subdirectories"
+            else:
+                deep_walk_status = "excluding subdirectories"
+            self.log_and_show(f"Info: os.walk, {deep_walk_status}, started on '{self.name_normalizer_selected_file}'",
+                              frame_name="name_normalizer_window",
+                              create_messagebox=False,
+                              error=False,
+                              not_logging=False)
+
+            # Traverse through the folder using os.walk
+            for root, dirs, files in os.walk(self.name_normalizer_selected_file):
+                # Include subdirectories if the deep_walk_var is True or the root folder is selected
+                if self.deep_walk_var.get() or root == self.name_normalizer_selected_file:
+                    for file in files:
+                        # Append the full file path to the list
+                        file_paths.append(str(os.path.join(root, file)))
+
+            # Iterate through file paths and rename/move files
+            for file_path in file_paths:
+                rename_and_move_file(
+                    self,
+                    file_path
+                )
 
         # Log the action if logging is enabled
-        self.log_and_show("Files have been processed successfully.",
+        self.log_and_show("File(s) have been processed successfully.",
                           frame_name="name_normalizer_window",
                           create_messagebox=False,
                           error=False,
                           not_logging=False)
-
-        # Stop the progress bar for the Name Normalizer function
-        self.stop_progress()
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
@@ -1729,9 +1795,6 @@ def process_name_normalizer_folder(self):
                           create_messagebox=True,
                           error=True,
                           not_logging=False)
-
-        # Stop the progress bar for the Name Normalizer function
-        self.stop_progress()
 
 
 """
@@ -2169,11 +2232,8 @@ def process_video_edits(self):
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
 
-                    # Get the file name for nice presentation in the gui
-                    filename = os.path.basename(output_path)
-
                     # Log the action if logging is enabled
-                    self.log_and_show(f"Video saved as {filename}"
+                    self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
                                       f"\nPath: {output_path}",
                                       frame_name="video_editor_window",
                                       create_messagebox=False,
@@ -2191,9 +2251,7 @@ def process_video_edits(self):
                     if self.video_editor_selected_file:
                         remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
                 else:
-                    filename = os.path.basename(input_path)
-
-                    self.log_and_show(f"Operations failed for video {filename}",
+                    self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
                                       frame_name="video_editor_window",
                                       create_messagebox=True,
                                       error=True,
@@ -2300,10 +2358,8 @@ def process_video_edits(self):
                 if successful_operations:
                     original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
 
-                    filename = os.path.basename(output_path)
-
                     # Log the action if logging is enabled
-                    self.log_and_show(f"Video saved as {filename}"
+                    self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
                                       f"\nPath: {output_path}",
                                       frame_name="video_editor_window",
                                       create_messagebox=False,
@@ -2321,9 +2377,7 @@ def process_video_edits(self):
                     if self.video_editor_selected_file:
                         remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
                 else:
-                    filename = os.path.basename(input_path)
-
-                    self.log_and_show(f"Operations failed for video {filename}",
+                    self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
                                       frame_name="video_editor_window",
                                       create_messagebox=True,
                                       error=True,

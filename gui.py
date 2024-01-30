@@ -17,15 +17,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.title("O.C.D. File Editor")
 
         # Initialize instance variables for selected files, output directories, queue, and last used files
-        self.selected_file = ""
+        self.file_renamer_selected_file = ""
+        self.file_renamer_last_used_file = ""
         self.output_directory = ""
         self.queue = []
-        self.name_normalizer_selected_folder = ""
+        self.name_normalizer_selected_file = ""
+        self.name_normalizer_last_used_file = ""
         self.name_normalizer_output_directory = ""
-        self.file_renamer_last_used_file = ""
         self.video_editor_selected_file = ""
-        self.video_editor_output_directory = ""
         self.video_editor_last_used_file = ""
+        self.video_editor_output_directory = ""
         self.add_artist = ""
         self.remove_artist = ""
 
@@ -75,7 +76,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_button = None
         self.trash_button = None
         self.file_renamer_last_used_file_button = None
-        self.send_to_video_editor_button = None
         self.last_used_frame = None
         self.last_used_display_label = None
         self.last_used_display = None
@@ -86,6 +86,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suggest_output_directory_checkbox = None
         self.move_up_directory_checkbox = None
         self.move_text_checkbox = None
+        self.send_to_module_frame = None
+        self.send_to_video_editor_button = None
+        self.send_to_name_normalizer_button = None
         self.placement_frame = None
         self.placement_label = None
         self.placement_choice = None
@@ -98,8 +101,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.name_normalizer_top_frame = None
         self.name_normalizer_label = None
         self.checkbox_frame1 = None
-        self.browse_folder_button = None
-        self.folder_path_entry = None
+        self.nn_browse_button = None
+        self.nn_path_entry = None
         self.tail_checkbox = None
         self.remove_all_symbols_checkbox = None
         self.remove_most_symbols_checkbox = None
@@ -149,11 +152,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.move_directory_entry = None
         self.normalize_folder_frame = None
         self.normalize_folder_button = None
+        self.send_to_module_frame1 = None
+        self.send_to_file_renamer_button1 = None
+        self.send_to_video_editor_button1 = None
         self.clear_name_normalizer_selection_button = None
+        self.name_normalizer_last_used_file_button = None
         self.name_normalizer_message_label_frame = None
         self.name_normalizer_message_label = None
-        self.slider_progressbar_frame = None
-        self.progressbar_1 = None
 
         # Initialize Video Editor GUI elements
         self.video_editor_frame = None
@@ -189,13 +194,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_editor_frame = None
         self.clear_video_editor_selection_button = None
         self.video_editor_last_used_file_button = None
-        self.send_to_file_renamer_button = None
         self.process_video_edits_button = None
         self.video_editor_checkbox_frame = None
         self.remove_successful_lines_checkbox = None
         self.reset_video_checkbox = None
         self.video_editor_message_label_frame = None
         self.video_editor_message_label = None
+        self.send_to_module_frame2 = None
+        self.send_to_file_renamer_button = None
+        self.send_to_name_normalizer_button1 = None
 
         # Initialize Artist GUI elements
         self.artist_frame = None
@@ -253,6 +260,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.configuration_file_frame = None
         self.open_configuration_file_button = None
         self.configuration_file_entry = None
+        self.open_log_file_button = None
+        self.log_file_entry = None
 
         # Read settings from the configuration file and assign them to instance variables
         (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
@@ -574,12 +583,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                     "file_renamer_window"))
         self.file_renamer_last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
 
-        # Send to Video Editor button
-        self.send_to_video_editor_button = ctk.CTkButton(self.button_group_frame, text="Send to Video Editor",
-                                                         command=lambda: self.send_to_module(
-                                                             frame_name="file_renamer_window"))
-        self.send_to_video_editor_button.grid(row=0, column=4, padx=10, pady=10)
-
         # Frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.last_used_frame.grid(row=6, column=0, padx=5)
@@ -659,6 +662,27 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                   variable=self.move_text_var)
         self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
 
+        # Send to Module frame
+        self.send_to_module_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
+                                                 corner_radius=0,
+                                                 fg_color="transparent")
+        self.send_to_module_frame.grid(row=10, column=0, padx=5)
+
+        # Send to Video Editor button
+        self.send_to_video_editor_button = ctk.CTkButton(self.send_to_module_frame, text="Send to Video Editor",
+                                                         command=lambda: self.send_to_module(
+                                                             frame_name="file_renamer_window",
+                                                             destination="video_editor_module"))
+        self.send_to_video_editor_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Send to Name Normalizer button
+        self.send_to_name_normalizer_button = ctk.CTkButton(self.send_to_module_frame,
+                                                            text="Send to Name Normalizer",
+                                                            command=lambda: self.send_to_module(
+                                                                frame_name="file_renamer_window",
+                                                                destination="name_normalizer_module"))
+        self.send_to_name_normalizer_button.grid(row=0, column=1, padx=10, pady=10)
+
         """
         name_normalizer_window
         """
@@ -676,16 +700,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       fg_color="transparent")
         self.name_normalizer_top_frame.grid(row=1, column=0, padx=10, pady=5)
 
-        # Browse Folder button
-        self.browse_folder_button = ctk.CTkButton(self.name_normalizer_top_frame, text="Browse Folder",
-                                                  command=lambda: self.browse_input(
-                                                      frame_name="name_normalizer_window"))
-        self.browse_folder_button.grid(row=0, column=0, padx=5, pady=5)
+        # Browse button
+        self.nn_browse_button = ctk.CTkButton(self.name_normalizer_top_frame, text="Browse",
+                                              command=lambda: self.browse_input(
+                                                  frame_name="name_normalizer_window"))
+        self.nn_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
-        # Folder Path Entry
-        self.folder_path_entry = ctk.CTkEntry(self.name_normalizer_top_frame, width=890)
-        self.folder_path_entry.insert(0, "Select a folder to normalize files using the 'Browse Folder' button...")
-        self.folder_path_entry.grid(row=0, column=1, padx=10, pady=10)
+        # Path Entry
+        self.nn_path_entry = ctk.CTkEntry(self.name_normalizer_top_frame, width=890)
+        self.nn_path_entry.insert(0, "Select a folder or file to normalize using the 'Browse' button...")
+        self.nn_path_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Button Frame 1
         self.checkbox_frame1 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -976,27 +1000,46 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                         frame_name="name_normalizer_window"))
         self.clear_name_normalizer_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
+        # Select Name Normalizer Last Used File Button
+        self.name_normalizer_last_used_file_button = ctk.CTkButton(self.normalize_folder_frame,
+                                                                   text="Reload Last File",
+                                                                   command=lambda: self.load_last_used_file(
+                                                                       "name_normalizer_window"))
+        self.name_normalizer_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
+
         # Normalize Folder button
         self.normalize_folder_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize Folder",
-                                                     command=self.process_name_normalizer_folder)
-        self.normalize_folder_button.grid(row=0, column=1, padx=5, pady=5)
+                                                     command=self.process_name_normalizer)
+        self.normalize_folder_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Send to Module frame
+        self.send_to_module_frame1 = ctk.CTkFrame(self.name_normalizer_frame,
+                                                  corner_radius=0,
+                                                  fg_color="transparent")
+        self.send_to_module_frame1.grid(row=12, column=0, padx=5)
+
+        # Send to File Renamer button
+        self.send_to_file_renamer_button1 = ctk.CTkButton(self.send_to_module_frame1, text="Send to File Renamer",
+                                                          command=lambda: self.send_to_module(
+                                                              frame_name="name_normalizer_window",
+                                                              destination="file_renamer_module"))
+        self.send_to_file_renamer_button1.grid(row=0, column=0, padx=10, pady=10)
+
+        # Send to Video Editor button
+        self.send_to_video_editor_button1 = ctk.CTkButton(self.send_to_module_frame1, text="Send to Video Editor",
+                                                          command=lambda: self.send_to_module(
+                                                              frame_name="name_normalizer_window",
+                                                              destination="video_editor_module"))
+        self.send_to_video_editor_button1.grid(row=0, column=1, padx=10, pady=10)
 
         # Frame to display messages on the Name Normalizer frame
         self.name_normalizer_message_label_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                                                 fg_color="transparent")
-        self.name_normalizer_message_label_frame.grid(row=12, column=0, padx=10)
+        self.name_normalizer_message_label_frame.grid(row=13, column=0, padx=10)
 
         # Name Normalizer message Label
         self.name_normalizer_message_label = ctk.CTkLabel(self.name_normalizer_message_label_frame, text="")
         self.name_normalizer_message_label.grid(row=0, column=0, padx=10, pady=10)
-
-        # Create progressbar frame
-        self.slider_progressbar_frame = ctk.CTkFrame(self.name_normalizer_frame,
-                                                     corner_radius=0,
-                                                     fg_color="transparent")
-        self.slider_progressbar_frame.grid(row=13, column=0, padx=10)
-        self.slider_progressbar_frame.grid_columnconfigure(0, weight=1)
-        self.slider_progressbar_frame.grid_rowconfigure(4, weight=1)
 
         """
         video_editor_window
@@ -1183,16 +1226,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                     "video_editor_window"))
         self.video_editor_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
 
-        # Send to File Renamer button
-        self.send_to_file_renamer_button = ctk.CTkButton(self.process_video_editor_frame, text="Send to File Renamer",
-                                                         command=lambda: self.send_to_module(
-                                                             frame_name="video_editor_window"))
-        self.send_to_file_renamer_button.grid(row=0, column=2, padx=10, pady=10)
-
         # Process video button
         self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
                                                         command=self.process_video_edits)
-        self.process_video_edits_button.grid(row=0, column=3, padx=5, pady=5)
+        self.process_video_edits_button.grid(row=0, column=2, padx=5, pady=5)
 
         # Video editor checkbox frame
         self.video_editor_checkbox_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -1219,6 +1256,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Video editor message Label
         self.video_editor_message_label = ctk.CTkLabel(self.video_editor_message_label_frame, text="")
         self.video_editor_message_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Frame to display messages on the video editor frame
+        self.send_to_module_frame2 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                  fg_color="transparent")
+        self.send_to_module_frame2.grid(row=12, column=0, padx=10)
+
+        # Send to File Renamer button
+        self.send_to_file_renamer_button = ctk.CTkButton(self.send_to_module_frame2, text="Send to File Renamer",
+                                                         command=lambda: self.send_to_module(
+                                                             frame_name="video_editor_window",
+                                                             destination="file_renamer_module"))
+        self.send_to_file_renamer_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Send to Name Normalizer button
+        self.send_to_name_normalizer_button1 = ctk.CTkButton(self.send_to_module_frame2,
+                                                             text="Send to Name Normalizer",
+                                                             command=lambda: self.send_to_module(
+                                                                 frame_name="video_editor_window",
+                                                                 destination="name_normalizer_module"))
+        self.send_to_name_normalizer_button1.grid(row=0, column=1, padx=10, pady=10)
 
         """
         artist_window
@@ -1488,13 +1545,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.open_configuration_file_button = ctk.CTkButton(self.configuration_file_frame, text="Open Config File",
                                                             command=lambda: self.open_file(
                                                                 self.config_file_path,
-                                                                frame_name="file_renamer_window"))
+                                                                frame_name=None))
         self.open_configuration_file_button.grid(row=0, column=0, padx=5)
 
         # Configuration File entry
         self.configuration_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
         self.configuration_file_entry.insert(0, self.config_file_path)
         self.configuration_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Browse Log button
+        self.open_log_file_button = ctk.CTkButton(self.configuration_file_frame, text="Open Log File",
+                                                  command=lambda: self.open_file(
+                                                      self.file_renamer_log,
+                                                      frame_name=None))
+        self.open_log_file_button.grid(row=1, column=0, padx=5)
+
+        # log File entry
+        self.log_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
+        self.log_file_entry.insert(0, self.file_renamer_log)
+        self.log_file_entry.grid(row=1, column=1, padx=10, pady=10)
 
         """
         Misc
@@ -1652,22 +1721,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 label.configure(text=truncated_message)
 
-    def start_progress(self):
-        self.progressbar_1 = ctk.CTkProgressBar(self.slider_progressbar_frame,
-                                                orientation="horizontal",
-                                                mode="indeterminate")
-        self.progressbar_1.grid(row=0, column=0, padx=10, pady=10)
-
-        # Start the progress bar
-        self.progressbar_1.start()
-
-    def stop_progress(self):
-        # Stop the progress bar
-        self.progressbar_1.stop()
-
-        # Destroy the progress bar widget
-        self.progressbar_1.destroy()
-
     @staticmethod
     def validate_entry(var, default_value, desired_type):
         # Ensure the value is of the desired type
@@ -1739,9 +1792,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Load the last used file and update the GUI
         core.load_last_used_file(self, frame_name)
 
-    def send_to_module(self, frame_name):
+    def send_to_module(self, frame_name, destination):
         # Send the input to another module
-        core.send_to_module(self, frame_name)
+        core.send_to_module(self, frame_name, destination)
 
     def on_file_drop(self, event):
         # Handle the event when a file is dropped onto the application
@@ -1859,9 +1912,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Process and rename files and moving files to a specified directory
         core.rename_and_move_file(self, file_path)
 
-    def process_name_normalizer_folder(self):
+    def process_name_normalizer(self):
         # Perform various name normalization operations on certain files within a specified folder
-        core.process_name_normalizer_folder(self)
+        core.process_name_normalizer(self)
 
     """
     Video Editor
