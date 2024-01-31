@@ -1,7 +1,7 @@
 import customtkinter as ctk  # Customtkinter for a modern gui
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 import sys  # Handling standard error and output redirects
-import atexit  # Module for registering functions to be called when a program is closing
+import atexit  # Module for registering functions to be called when the program is closing
 import core  # Main logic for the program
 
 
@@ -380,10 +380,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # Create navigation frame
+        # Create navigation frame (Buttons on the left hand side)
         self.navigation_frame = ctk.CTkFrame(self, corner_radius=0)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(5, weight=1)
+        self.navigation_frame.grid_rowconfigure(5, weight=1)  # Index number is responsible for floating
 
         # Create label for the navigation frame
         self.navigation_frame_label = ctk.CTkLabel(self.navigation_frame, text="  O.C.D. \nFile Editor",
@@ -1231,10 +1231,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                         command=self.process_video_edits)
         self.process_video_edits_button.grid(row=0, column=2, padx=5, pady=5)
 
+        # Frame to display messages on the video editor frame
+        self.send_to_module_frame2 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
+                                                  fg_color="transparent")
+        self.send_to_module_frame2.grid(row=10, column=0, padx=10)
+
+        # Send to File Renamer button
+        self.send_to_file_renamer_button = ctk.CTkButton(self.send_to_module_frame2, text="Send to File Renamer",
+                                                         command=lambda: self.send_to_module(
+                                                             frame_name="video_editor_window",
+                                                             destination="file_renamer_module"))
+        self.send_to_file_renamer_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Send to Name Normalizer button
+        self.send_to_name_normalizer_button1 = ctk.CTkButton(self.send_to_module_frame2,
+                                                             text="Send to Name Normalizer",
+                                                             command=lambda: self.send_to_module(
+                                                                 frame_name="video_editor_window",
+                                                                 destination="name_normalizer_module"))
+        self.send_to_name_normalizer_button1.grid(row=0, column=1, padx=10, pady=10)
+
         # Video editor checkbox frame
         self.video_editor_checkbox_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
                                                         fg_color="transparent")
-        self.video_editor_checkbox_frame.grid(row=10, column=0, padx=10, pady=5)
+        self.video_editor_checkbox_frame.grid(row=11, column=0, padx=10, pady=5)
 
         # Checkbox to enable/disable remove successful lines
         self.remove_successful_lines_checkbox = ctk.CTkCheckBox(self.video_editor_checkbox_frame,
@@ -1251,31 +1271,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Frame to display messages on the video editor frame
         self.video_editor_message_label_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
                                                              fg_color="transparent")
-        self.video_editor_message_label_frame.grid(row=11, column=0, padx=10)
+        self.video_editor_message_label_frame.grid(row=12, column=0, padx=10)
 
         # Video editor message Label
         self.video_editor_message_label = ctk.CTkLabel(self.video_editor_message_label_frame, text="")
         self.video_editor_message_label.grid(row=0, column=0, padx=10, pady=10)
-
-        # Frame to display messages on the video editor frame
-        self.send_to_module_frame2 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
-                                                  fg_color="transparent")
-        self.send_to_module_frame2.grid(row=12, column=0, padx=10)
-
-        # Send to File Renamer button
-        self.send_to_file_renamer_button = ctk.CTkButton(self.send_to_module_frame2, text="Send to File Renamer",
-                                                         command=lambda: self.send_to_module(
-                                                             frame_name="video_editor_window",
-                                                             destination="file_renamer_module"))
-        self.send_to_file_renamer_button.grid(row=0, column=0, padx=10, pady=10)
-
-        # Send to Name Normalizer button
-        self.send_to_name_normalizer_button1 = ctk.CTkButton(self.send_to_module_frame2,
-                                                             text="Send to Name Normalizer",
-                                                             command=lambda: self.send_to_module(
-                                                                 frame_name="video_editor_window",
-                                                                 destination="name_normalizer_module"))
-        self.send_to_name_normalizer_button1.grid(row=0, column=1, padx=10, pady=10)
 
         """
         artist_window
@@ -1370,23 +1370,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Switch to enable/disable open on drop behavior
         self.open_on_file_drop_switch = ctk.CTkSwitch(self.switch_frame, text="Open File on Drag and Drop",
                                                       variable=self.open_on_file_drop_var)
-        self.open_on_file_drop_switch.grid(row=1, column=0, padx=10, pady=10)
+        self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
 
         # Switch to enable/disable remove duplicates
         self.remove_duplicates_switch = ctk.CTkSwitch(self.switch_frame,
                                                       text="Remove Duplicates",
                                                       variable=self.remove_duplicates_var)
-        self.remove_duplicates_switch.grid(row=1, column=1, padx=10, pady=10)
+        self.remove_duplicates_switch.grid(row=0, column=1, padx=10, pady=10)
 
         # Switch to enable/disable create double check reminder
         self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
-        self.double_check_switch.grid(row=1, column=2, padx=10, pady=10)
+        self.double_check_switch.grid(row=0, column=2, padx=10, pady=10)
 
         # Switch to enable/disable activate logging
         self.activate_logging_switch = ctk.CTkSwitch(self.switch_frame, text="Activate Logging",
                                                      variable=self.activate_logging_var)
-        self.activate_logging_switch.grid(row=2, column=0, padx=10, pady=10)
+        self.activate_logging_switch.grid(row=1, column=0, padx=10, pady=10)
 
         # Bind the callback function to the activate logging variable
         self.activate_logging_var.trace_add("write", self.handle_logging_activation)
@@ -1394,16 +1394,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Switch to enable/disable suppress standard outputs/errors
         self.suppress_switch = ctk.CTkSwitch(self.switch_frame, text="Suppress Standard Output/Error",
                                              variable=self.suppress_var)
-        self.suppress_switch.grid(row=2, column=1, padx=10, pady=10)
+        self.suppress_switch.grid(row=1, column=1, padx=10, pady=10)
 
         # Switch to enable/disable show messageboxes
         self.show_messageboxes_switch = ctk.CTkSwitch(self.switch_frame, text="Show Messageboxes",
                                                       variable=self.show_messageboxes_var)
-        self.show_messageboxes_switch.grid(row=2, column=2, padx=10, pady=10)
+        self.show_messageboxes_switch.grid(row=1, column=2, padx=10, pady=10)
 
         # Confirmation frame
         self.confirmation_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.confirmation_frame.grid(row=2, column=0, padx=10, pady=10)
+        self.confirmation_frame.grid(row=2, column=0, padx=10)
 
         # Switch to enable/disable show confirmation messageboxes
         self.show_confirmation_messageboxes_switch = ctk.CTkSwitch(self.confirmation_frame,
