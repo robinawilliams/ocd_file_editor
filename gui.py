@@ -574,7 +574,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Clear Button
         self.clear_button = ctk.CTkButton(self.button_group_frame, text="Clear",
-                                          command=lambda: self.clear_selection("file_renamer_window"))
+                                          command=lambda: self.clear_selection(frame_name="file_renamer_window"))
         self.clear_button.grid(row=0, column=1, padx=10, pady=10)
 
         # Move to Trash Button
@@ -1317,7 +1317,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Clear Button
         self.clear_artist_button = ctk.CTkButton(self.clear_artist_frame,
                                                  text="Clear",
-                                                 command=lambda: self.clear_selection("artist_window"))
+                                                 command=lambda: self.clear_selection(frame_name="artist_window"))
         self.clear_artist_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Frame for reset artist checkbox
@@ -1592,43 +1592,43 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.stop_logging()
 
     # Method to dynamically switch between frames based on the selected name
-    def select_frame_by_name(self, name):
+    def select_frame_by_name(self, frame_name):
         # Set button color for the selected button
         self.file_renamer_button.configure(
-            fg_color=("gray75", "gray25") if name == "file_renamer_window" else "transparent")
+            fg_color=("gray75", "gray25") if frame_name == "file_renamer_window" else "transparent")
         self.name_normalizer_button.configure(
-            fg_color=("gray75", "gray25") if name == "name_normalizer_window" else "transparent")
+            fg_color=("gray75", "gray25") if frame_name == "name_normalizer_window" else "transparent")
         self.video_editor_button.configure(
-            fg_color=("gray75", "gray25") if name == "video_editor_window" else "transparent")
+            fg_color=("gray75", "gray25") if frame_name == "video_editor_window" else "transparent")
         self.artist_button.configure(
-            fg_color=("gray75", "gray25") if name == "artist_window" else "transparent")
+            fg_color=("gray75", "gray25") if frame_name == "artist_window" else "transparent")
         self.settings_button.configure(
-            fg_color=("gray75", "gray25") if name == "settings_window" else "transparent")
+            fg_color=("gray75", "gray25") if frame_name == "settings_window" else "transparent")
 
         # Show the selected frame and hide others, set the active frame_name
-        if name == "file_renamer_window":
+        if frame_name == "file_renamer_window":
             self.file_renamer_frame.grid(row=0, column=1, sticky="nsew")
-            self.frame_name = name
+            self.frame_name = frame_name
         else:
             self.file_renamer_frame.grid_forget()
-        if name == "name_normalizer_window":
+        if frame_name == "name_normalizer_window":
             self.name_normalizer_frame.grid(row=0, column=1, sticky="nsew")
-            self.frame_name = name
+            self.frame_name = frame_name
         else:
             self.name_normalizer_frame.grid_forget()
-        if name == "video_editor_window":
+        if frame_name == "video_editor_window":
             self.video_editor_frame.grid(row=0, column=1, sticky="nsew")
-            self.frame_name = name
+            self.frame_name = frame_name
         else:
             self.video_editor_frame.grid_forget()
-        if name == "artist_window":
+        if frame_name == "artist_window":
             self.artist_frame.grid(row=0, column=1, sticky="nsew")
-            self.frame_name = name
+            self.frame_name = frame_name
         else:
             self.artist_frame.grid_forget()
-        if name == "settings_window":
+        if frame_name == "settings_window":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
-            self.frame_name = name
+            self.frame_name = frame_name
         else:
             self.settings_frame.grid_forget()
 
