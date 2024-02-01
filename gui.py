@@ -2,6 +2,8 @@ import customtkinter as ctk  # Customtkinter for a modern gui
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 import sys  # Handling standard error and output redirects
 import atexit  # Module for registering functions to be called when the program is closing
+import logging  # Logging module for capturing log messages
+from tkinter import messagebox  # Tkinter module for GUI message boxes
 import core  # Main logic for the program
 
 
@@ -614,7 +616,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Variable to track the user's placement choice (prefix, suffix, or special_character)
         self.placement_choice = ctk.StringVar()
-        self.placement_choice.set(self.default_placement_var)  # Default to special_character
+        self.placement_choice.set(self.default_placement_var)
 
         # Radio button for prefix
         self.prefix_radio = ctk.CTkRadioButton(self.placement_frame, text="Prefix",
@@ -1748,9 +1750,33 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # If the desired type is neither int nor float, set it to the default value
             var.set(default_value)
 
-    def log_and_show(self, message, frame_name, create_messagebox, error, not_logging):
-        # Method to check logging state, log if applicable, and show a messagebox.
-        core.log_and_show(self, message, frame_name, create_messagebox, error, not_logging)
+    def log_and_show(self, message, frame_name, create_messagebox=False, error=False, not_logging=False):
+        """
+        Method to check logging state, log if applicable, and show a messagebox.
+
+        Parameters:
+        - message: The message to be logged and displayed.
+        - frame_name: The name of the frame where the message should be displayed.
+        - create_messagebox: Boolean indicating whether to create and display a messagebox.
+        - error: Boolean indicating whether the message is an error message.
+        - not_logging: Boolean indicating whether to skip logging.
+        """
+        # Check logging state and log message if applicable
+        if not not_logging and self.activate_logging_var.get():
+            logging_function = logging.error if error else logging.info
+            logging_function(message)
+
+        # Check messagebox state and display messageboxes if applicable
+        if self.show_messageboxes_var.get():
+            messagebox_function = messagebox.showerror if error else messagebox.showinfo
+            if create_messagebox:
+                messagebox_function("Error" if error else "Info", message)
+            else:
+                # Display the message on the applicable frame if messageboxes are enabled but none were created
+                self.show_message(message, error=error, frame_name=frame_name)
+        else:
+            # Display the message on the applicable frame if messageboxes are disabled
+            self.show_message(message, error=error, frame_name=frame_name)
 
     def ask_confirmation(self, title, message):
         # Method to check logging state and show a messagebox.
