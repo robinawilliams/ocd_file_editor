@@ -1860,24 +1860,18 @@ def process_video_edits(self):
 
                 # Create a temporary copy of the file
                 temp_dir = os.path.dirname(input_path)
-                temp_copy_path = os.path.join(temp_dir, 'temp_EXCEPTION.mp4')
+                temp_copy_path = os.path.join(temp_dir, 'temp.mp4')
                 shutil.copyfile(input_path, temp_copy_path)
 
                 # Extract filename, extension, and output directory
                 filename, extension = os.path.splitext(os.path.basename(temp_copy_path))
                 output_dir = os.path.dirname(temp_copy_path)
 
-                # Initialize a list to keep track of operations
-                operation_tags = []
-
                 # Determine the rotation operation tag
                 rotation_angle = None  # Default rotation angle
 
                 if rotation:
                     if rotation is not None:  # Check if rotation is not set to "none"
-                        rotation_tag = "ROTATED_" + rotation.upper()
-                        operation_tags.append(rotation_tag)  # Add to the operations list
-
                         if rotation == "left":
                             rotation_angle = 90
                         elif rotation == "right":
@@ -1887,26 +1881,8 @@ def process_video_edits(self):
                 else:
                     rotation_angle = None  # Reset rotation angle
 
-                # Determine the volume increase operation tag
-                if decibel:
-                    volume_tag = f"INCREASED_{decibel}DB"
-                    operation_tags.append(volume_tag)  # Add to the operations list
-
-                # Determine the audio normalization operation tag
-                if audio_normalization:
-                    normalization_tag = f"NORMALIZED_{audio_normalization}"
-                    operation_tags.append(normalization_tag)  # Add to the operations list
-
-                # Determine the trim operation tag
-                if trim:
-                    trim_tag = f"TRIMMED_{total_time}"
-                    operation_tags.append(trim_tag)  # Add to the operations list
-
-                # Join operation tags to create a filename suffix
-                operation_suffix = "_".join(operation_tags)
-
                 # Create the output path with the operation suffix
-                output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
+                output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
 
                 # Adjust output path if a video output directory is specified
                 if self.video_editor_output_directory:
@@ -1987,17 +1963,11 @@ def process_video_edits(self):
                 filename, extension = os.path.splitext(os.path.basename(input_path))
                 output_dir = os.path.dirname(input_path)
 
-                # Initialize a list to keep track of operations
-                operation_tags = []
-
                 # Determine the rotation operation tag
                 rotation_angle = None  # Default rotation angle
 
                 if rotation:
                     if rotation is not None:  # Check if rotation is not set to "none"
-                        rotation_tag = "ROTATED_" + rotation.upper()
-                        operation_tags.append(rotation_tag)  # Add to the operations list
-
                         if rotation == "left":
                             rotation_angle = 90
                         elif rotation == "right":
@@ -2007,26 +1977,8 @@ def process_video_edits(self):
                 else:
                     rotation_angle = None  # Reset rotation angle
 
-                # Determine the volume increase operation tag
-                if decibel:
-                    volume_tag = f"INCREASED_{decibel}DB"
-                    operation_tags.append(volume_tag)  # Add to the operations list
-
-                # Determine the audio normalization operation tag
-                if audio_normalization:
-                    normalization_tag = f"NORMALIZED_{audio_normalization}"
-                    operation_tags.append(normalization_tag)  # Add to the operations list
-
-                # Determine the trim operation tag
-                if trim:
-                    trim_tag = f"trimmed_{total_time}"
-                    operation_tags.append(trim_tag)  # Add to the operations list
-
-                # Join operation tags to create a filename suffix
-                operation_suffix = "_".join(operation_tags)
-
                 # Create the output path with the operation suffix
-                output_path = os.path.join(output_dir, f'{filename}_{operation_suffix}{extension}')
+                output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
 
                 # Adjust output path if a video output directory is specified
                 if self.video_editor_output_directory:
