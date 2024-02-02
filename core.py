@@ -1853,203 +1853,108 @@ def process_video_edits(self):
     # Process each input path
     for input_path in input_paths:
         try:
-            # Check if the file name length exceeds 260 characters
-            if len(input_path) > 260:
-                self.log_and_show(f"File over 260 warning!!! Fix: {input_path}",
-                                  error=True)
+            # Check if the file name length exceeds 255 characters
+            if len(input_path) > 255:
+                self.log_and_show(f"File over 255 warning!!! Fix: {input_path}", error=True)
 
                 # Create a temporary copy of the file
                 temp_dir = os.path.dirname(input_path)
                 temp_copy_path = os.path.join(temp_dir, 'temp.mp4')
                 shutil.copyfile(input_path, temp_copy_path)
+            else:
+                temp_copy_path = input_path
 
-                # Extract filename, extension, and output directory
-                filename, extension = os.path.splitext(os.path.basename(temp_copy_path))
-                output_dir = os.path.dirname(temp_copy_path)
+            # Extract filename, extension, and output directory
+            filename, extension = os.path.splitext(os.path.basename(temp_copy_path))
+            output_dir = os.path.dirname(temp_copy_path)
 
-                # Determine the rotation operation tag
-                rotation_angle = None  # Default rotation angle
+            # Determine the rotation operation tag
+            rotation_angle = None  # Default rotation angle
+            if rotation and rotation != "none":
+                if rotation == "left":
+                    rotation_angle = 90
+                elif rotation == "right":
+                    rotation_angle = -90
+                elif rotation == "flip":
+                    rotation_angle = -180
 
-                if rotation:
-                    if rotation is not None:  # Check if rotation is not set to "none"
-                        if rotation == "left":
-                            rotation_angle = 90
-                        elif rotation == "right":
-                            rotation_angle = -90
-                        elif rotation == "flip":
-                            rotation_angle = -180
+            # Create the output path with the operation suffix
+            output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
+
+            # Adjust output path if a video output directory is specified
+            if self.video_editor_output_directory:
+                output_path = os.path.join(self.video_editor_output_directory, os.path.basename(output_path))
+
+            # Check if the new_path exists
+            if os.path.exists(output_path):
+                # Get a non-conflicting name for the output path
+                output_path = self.get_non_conflicting_filename(output_path)
+
+            # Load the original video clip
+            original_clip = VideoFileClip(temp_copy_path)
+            successful_operations = True
+
+            # Apply operations in sequence, checking for success
+            if rotation_angle is not None and successful_operations:
+                processed_clip = rotate_video(self, original_clip, rotation_angle)
+                if processed_clip:
+                    original_clip = processed_clip
                 else:
-                    rotation_angle = None  # Reset rotation angle
+                    successful_operations = False
 
-                # Create the output path with the operation suffix
-                output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
-
-                # Adjust output path if a video output directory is specified
-                if self.video_editor_output_directory:
-                    output_path = os.path.join(self.video_editor_output_directory, os.path.basename(output_path))
-
-                # Check if the new_path exists
-                if os.path.exists(output_path):
-                    # Get a non-conflicting name for the output path
-                    output_path = self.get_non_conflicting_filename(output_path)
-
-                # Load the original video clip
-                original_clip = VideoFileClip(temp_copy_path)
-                successful_operations = True
-
-                # Apply operations in sequence, checking for success
-                if rotation and successful_operations:
-                    processed_clip = rotate_video(self, original_clip, rotation_angle)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                if decibel and successful_operations:
-                    processed_clip = increase_volume(self, original_clip, decibel)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                if audio_normalization and successful_operations:
-                    processed_clip = normalize_audio(self, original_clip, audio_normalization)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                if trim and successful_operations:
-                    processed_clip = trim_video(self, original_clip, total_time)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                # Write the final modified clip to the output path if all operations were successful
-                if successful_operations:
-                    original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-
-                    # Log the action if logging is enabled
-                    self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
-                                      f"\nPath: {output_path}")
-
-                    # Set the video editor last used file upon success
-                    self.video_editor_last_used_file = output_path
-
-                    if self.reset_video_entries_var.get():
-                        # Clear selection for the video_editor_window
-                        self.clear_selection(frame_name="video_editor_window")
-
-                    # Remove the successfully processed line from the input file
-                    if self.video_editor_selected_file:
-                        remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
+            if decibel and successful_operations:
+                processed_clip = increase_volume(self, original_clip, decibel)
+                if processed_clip:
+                    original_clip = processed_clip
                 else:
-                    self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
-                                      create_messagebox=True,
-                                      error=True)
+                    successful_operations = False
 
-                # Close the original clip to free resources
-                original_clip.close()
+            if audio_normalization and successful_operations:
+                processed_clip = normalize_audio(self, original_clip, audio_normalization)
+                if processed_clip:
+                    original_clip = processed_clip
+                else:
+                    successful_operations = False
 
-                # Reset redirect MoviePy output for video edits
-                self.redirect_output()
+            if trim and successful_operations:
+                processed_clip = trim_video(self, original_clip, total_time)
+                if processed_clip:
+                    original_clip = processed_clip
+                else:
+                    successful_operations = False
 
+            # Write the final modified clip to the output path if all operations were successful
+            if successful_operations:
+                original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
+
+                # Log the action if logging is enabled
+                self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
+                                  f"\nPath: {output_path}")
+
+                # Set the video editor last used file upon success
+                self.video_editor_last_used_file = output_path
+
+                if self.reset_video_entries_var.get():
+                    # Clear selection for the video_editor_window
+                    self.clear_selection(frame_name="video_editor_window")
+
+                # Remove the successfully processed line from the input file
+                if self.video_editor_selected_file:
+                    remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
+            else:
+                self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
+                                  create_messagebox=True,
+                                  error=True)
+
+            # Close the original clip to free resources
+            original_clip.close()
+
+            # Reset redirect MoviePy output for video edits
+            self.redirect_output()
+
+            if len(input_path) > 255:
                 # Delete the temporary copy
                 os.remove(temp_copy_path)
-
-            else:
-                # Extract filename, extension, and output directory
-                filename, extension = os.path.splitext(os.path.basename(input_path))
-                output_dir = os.path.dirname(input_path)
-
-                # Determine the rotation operation tag
-                rotation_angle = None  # Default rotation angle
-
-                if rotation:
-                    if rotation is not None:  # Check if rotation is not set to "none"
-                        if rotation == "left":
-                            rotation_angle = 90
-                        elif rotation == "right":
-                            rotation_angle = -90
-                        elif rotation == "flip":
-                            rotation_angle = -180
-                else:
-                    rotation_angle = None  # Reset rotation angle
-
-                # Create the output path with the operation suffix
-                output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
-
-                # Adjust output path if a video output directory is specified
-                if self.video_editor_output_directory:
-                    output_path = os.path.join(self.video_editor_output_directory, os.path.basename(output_path))
-
-                # Check if the new_path exists
-                if os.path.exists(output_path):
-                    # Get a non-conflicting name for the output path
-                    output_path = self.get_non_conflicting_filename(output_path)
-
-                # Load the original video clip
-                original_clip = VideoFileClip(input_path)
-                successful_operations = True
-
-                # Apply operations in sequence, checking for success
-                if rotation and successful_operations:
-                    processed_clip = rotate_video(self, original_clip, rotation_angle)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                if decibel and successful_operations:
-                    processed_clip = increase_volume(self, original_clip, decibel)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                if audio_normalization and successful_operations:
-                    processed_clip = normalize_audio(self, original_clip, audio_normalization)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                if trim and successful_operations:
-                    processed_clip = trim_video(self, original_clip, total_time)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
-
-                # Write the final modified clip to the output path if all operations were successful
-                if successful_operations:
-                    original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-
-                    # Log the action if logging is enabled
-                    self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
-                                      f"\nPath: {output_path}")
-
-                    # Set the video editor last used file upon success
-                    self.video_editor_last_used_file = output_path
-
-                    if self.reset_video_entries_var.get():
-                        # Clear selection for the video_editor_window
-                        self.clear_selection(frame_name="video_editor_window")
-
-                    # Remove the successfully processed line from the input file
-                    if self.video_editor_selected_file:
-                        remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
-                else:
-                    self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
-                                      create_messagebox=True,
-                                      error=True)
-
-                # Close the original clip to free resources
-                original_clip.close()
-
-                # Reset redirect MoviePy output for video edits
-                self.redirect_output()
 
         except OSError as e:
             # Log error and skip to the next file in case of OSError
