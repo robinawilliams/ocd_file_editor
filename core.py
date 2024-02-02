@@ -1102,7 +1102,7 @@ def rename_files(self):
             # Check if the new_path exists
             if os.path.exists(new_path):
                 # Get a non-conflicting filename
-                new_path = get_non_conflicting_filename(self, new_path)
+                new_path = self.get_non_conflicting_filename(new_path)
 
             # Rename the file
             os.rename(self.file_renamer_selected_file, new_path)
@@ -1434,7 +1434,7 @@ def rename_and_move_file(self, file_path):
         # Check if the new filename already exists
         if os.path.exists(new_path):
             # Get a non-conflicting name
-            new_path = get_non_conflicting_filename(self, new_path)
+            new_path = self.get_non_conflicting_filename(new_path)
 
         try:
             # Rename the file
@@ -1454,7 +1454,7 @@ def rename_and_move_file(self, file_path):
                 # Check if the destination file already exists
                 if os.path.exists(destination_file):
                     # Get a non-conflicting name
-                    destination_file = get_non_conflicting_filename(self, destination_file)
+                    destination_file = self.get_non_conflicting_filename(destination_file)
 
                 try:
                     # Perform the move to the provided directory
@@ -1583,7 +1583,7 @@ def get_non_conflicting_filename(self, path):
 
     try:
         # Split the given path into the base filename and its extension.
-        base, ext = os.path.splitext(path)
+        base, ext = os.path.splitext(os.path.basename(path))
 
         # Extract the counter from the original filename if it exists.
         counter = 1
@@ -1592,17 +1592,20 @@ def get_non_conflicting_filename(self, path):
             base, counter = match.groups()
             counter = int(counter)
 
-        # Initialize the new path with the original path.
-        new_path = path
-
         # Check if the file already exists at the given path.
-        while os.path.exists(new_path):
-            # If the file exists, update the counter and modify the new path.
+        while os.path.exists(os.path.join(os.path.dirname(path), f"{base} ({counter}){ext}")):
+            # If the file exists, update the counter.
             counter += 1
-            new_path = f"{base} ({counter}){ext}"
+
+        # Construct the new base filename with the updated counter.
+        new_base = f"{base} ({counter})"
+
+        # Construct the new path by joining the directory and the new base filename.
+        new_path = os.path.join(os.path.dirname(path), f"{new_base}{ext}")
 
         # Log action and display a message
-        self.log_and_show(f"Using non-conflicting file name: {os.path.basename(new_path)}")
+        self.log_and_show(f"Using non-conflicting file name: {new_base}{ext}")
+
         # Return the generated non-conflicting filename.
         return new_path
     except Exception as e:
@@ -1912,7 +1915,7 @@ def process_video_edits(self):
                 # Check if the new_path exists
                 if os.path.exists(output_path):
                     # Get a non-conflicting name for the output path
-                    output_path = get_non_conflicting_filename(self, output_path)
+                    output_path = self.get_non_conflicting_filename(output_path)
 
                 # Load the original video clip
                 original_clip = VideoFileClip(temp_copy_path)
@@ -2032,7 +2035,7 @@ def process_video_edits(self):
                 # Check if the new_path exists
                 if os.path.exists(output_path):
                     # Get a non-conflicting name for the output path
-                    output_path = get_non_conflicting_filename(self, output_path)
+                    output_path = self.get_non_conflicting_filename(output_path)
 
                 # Load the original video clip
                 original_clip = VideoFileClip(input_path)
