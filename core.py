@@ -1845,7 +1845,7 @@ def process_video_edits(self):
         return
 
     # Redirect MoviePy output for video edits
-    redirect_output(self)
+    self.redirect_output()
 
     # Process each input path
     for input_path in input_paths:
@@ -1974,7 +1974,7 @@ def process_video_edits(self):
                 original_clip.close()
 
                 # Reset redirect MoviePy output for video edits
-                redirect_output(self)
+                self.redirect_output()
 
                 # Delete the temporary copy
                 os.remove(temp_copy_path)
@@ -2094,7 +2094,7 @@ def process_video_edits(self):
                 original_clip.close()
 
                 # Reset redirect MoviePy output for video edits
-                redirect_output(self)
+                self.redirect_output()
 
         except OSError as e:
             # Log error and skip to the next file in case of OSError
