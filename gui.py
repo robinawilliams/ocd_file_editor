@@ -1371,7 +1371,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Add NO-GO button
         self.add_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Add NO GO",
-                                          command=self.no_go_creation)
+                                              command=self.no_go_creation)
         self.add_no_go_button.grid(row=0, column=0, padx=5)
 
         # Add NO-GO entry
