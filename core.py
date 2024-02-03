@@ -2099,7 +2099,7 @@ def no_go_creation(self):
 
     # Check if no artist is provided
     if not self.no_go_name:
-        self.log_and_show("NO GO name cannot be empty.",
+        self.log_and_show("NO GO cannot be empty.",
                           create_messagebox=True,
                           error=True)
         return  # Exit the function if no artist is provided
