@@ -1998,15 +1998,17 @@ add_remove_window
 
 # Function to add artists to the artist file
 def add_artist_to_file(self):
-    # Get the artist to be added from the entry widget
-    self.add_artist = self.add_artist_entry.get().strip()
-
-    # Check if no artist is provided
+    # Check if self.add_artist is None
     if not self.add_artist:
-        self.log_and_show("Add Artist cannot be empty.",
-                          create_messagebox=True,
-                          error=True)
-        return  # Exit the function if no artist is provided
+        # Get the artist to be added from the entry widget
+        self.add_artist = self.add_artist_entry.get().strip()
+
+        # Check if no artist is provided
+        if not self.add_artist:
+            self.log_and_show("Add Artist cannot be empty.",
+                              create_messagebox=True,
+                              error=True)
+            return  # Exit the function if no artist is provided
 
     # Read the list of artists from the artist_file
     try:
@@ -2033,28 +2035,31 @@ def add_artist_to_file(self):
                 artist_list_file.write('\n'.join(artist_list))
             self.log_and_show(f"Added artist to the Artist File: '{self.add_artist}'")
 
-            # Reset the artist entries if the action is successful
-            if self.reset_artist_entries_var.get():
-                # Clear add artist entry
-                self.add_artist_entry.delete(0, ctk.END)
-
         except IOError:
             self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
                               create_messagebox=True,
                               error=True)
 
+    # Reset the artist entries if the action is successful
+    if self.reset_artist_entries_var.get():
+        # Clear add artist entry
+        self.add_artist = ""
+        self.add_artist_entry.delete(0, ctk.END)
+
 
 # Function to remove artists from the artist file
 def remove_artist_from_file(self):
-    # Get the artist to be removed from the entry widget
-    self.remove_artist = self.remove_artist_entry.get().strip()
-
-    # Check if no artist is provided
+    # Check if self.remove_artist is None
     if not self.remove_artist:
-        self.log_and_show("Remove Artist cannot be empty.",
-                          create_messagebox=True,
-                          error=True)
-        return  # Exit the function if no artist is provided
+        # Get the artist to be removed from the entry widget
+        self.remove_artist = self.remove_artist_entry.get().strip()
+
+        # Check if no artist is provided
+        if not self.remove_artist:
+            self.log_and_show("Remove Artist cannot be empty.",
+                              create_messagebox=True,
+                              error=True)
+            return  # Exit the function if no artist is provided
 
     try:
         # Read the list of artists from the artist_file
@@ -2077,11 +2082,6 @@ def remove_artist_from_file(self):
                 artist_list_file.write('\n'.join(artist_list))
             self.log_and_show(f"Removed artist from the Artist File: '{self.remove_artist}'")
 
-            # Reset the artist entries if the action is successful
-            if self.reset_artist_entries_var.get():
-                # Clear remove artist entry
-                self.remove_artist_entry.delete(0, ctk.END)
-
         except IOError:
             self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
                               create_messagebox=True,
@@ -2091,18 +2091,26 @@ def remove_artist_from_file(self):
                           create_messagebox=True,
                           error=True)
 
+    # Reset the artist entries if the action is successful
+    if self.reset_artist_entries_var.get():
+        # Clear remove artist entry
+        self.remove_artist = ""
+        self.remove_artist_entry.delete(0, ctk.END)
+
 
 # Function to create a NO-GO file
 def no_go_creation(self):
-    # Get the artist to be added from the entry widget
-    self.no_go_name = self.add_no_go_name_entry.get().strip()
-
-    # Check if no artist is provided
+    # Check if self.no_go_name is None
     if not self.no_go_name:
-        self.log_and_show("Add NO GO cannot be empty.",
-                          create_messagebox=True,
-                          error=True)
-        return  # Exit the function if no artist is provided
+        # Attempt to get the contents from self.add_no_go_name_entry
+        self.no_go_name = self.add_no_go_name_entry.get().strip()
+
+        # Check if self.no_go_name is provided
+        if not self.no_go_name:
+            self.log_and_show("Add NO GO cannot be empty.",
+                              create_messagebox=True,
+                              error=True)
+            return  # Exit the function if no artist is provided
 
     try:
         # Expand the user's home directory in the NO-GO path
@@ -2128,3 +2136,7 @@ def no_go_creation(self):
         self.log_and_show(f"Creating NO GO failed: '{str(e)}'.",
                           create_messagebox=True,
                           error=True)
+
+    # Clear add no-go name entry and reset self.no_go_name
+    self.no_go_name = ""
+    self.add_no_go_name_entry.delete(0, ctk.END)
