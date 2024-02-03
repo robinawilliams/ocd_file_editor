@@ -2039,7 +2039,7 @@ def add_artist_to_file(self):
                 self.add_artist_entry.delete(0, ctk.END)
 
         except IOError:
-            self.log_and_show(f"Error writing to Artist File '{self.artist_file}'.",
+            self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
                               create_messagebox=True,
                               error=True)
 
@@ -2083,7 +2083,7 @@ def remove_artist_from_file(self):
                 self.remove_artist_entry.delete(0, ctk.END)
 
         except IOError:
-            self.log_and_show(f"Error writing to Artist File '{self.artist_file}'.",
+            self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
                               create_messagebox=True,
                               error=True)
     else:
@@ -2099,7 +2099,7 @@ def no_go_creation(self):
 
     # Check if no artist is provided
     if not self.no_go_name:
-        self.log_and_show("NO GO cannot be empty.",
+        self.log_and_show("Add NO GO cannot be empty.",
                           create_messagebox=True,
                           error=True)
         return  # Exit the function if no artist is provided
