@@ -13,7 +13,7 @@ default_audio_normalization = 0.0
 default_minute = 00
 ; Default second for video editor
 default_second = 00
-; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, artist_window, settings_window)
+; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, add_remove_window, settings_window)
 default_frame = file_renamer_window
 ; Reset the output directory after each run
 reset_output_directory_var = True

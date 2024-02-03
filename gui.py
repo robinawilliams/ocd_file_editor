@@ -47,7 +47,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_button = None
         self.name_normalizer_button = None
         self.video_editor_button = None
-        self.artist_button = None
+        self.add_remove_button = None
         self.settings_button = None
 
         # Initialize OCD File Renamer GUI elements
@@ -154,7 +154,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_move_directory_button = None
         self.move_directory_entry = None
         self.normalize_folder_frame = None
-        self.normalize_folder_button = None
+        self.normalize_preview_button = None
+        self.normalize_button = None
         self.send_to_module_frame1 = None
         self.send_to_file_renamer_button1 = None
         self.send_to_video_editor_button1 = None
@@ -207,9 +208,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.send_to_file_renamer_button = None
         self.send_to_name_normalizer_button1 = None
 
-        # Initialize Artist GUI elements
-        self.artist_frame = None
-        self.artist_top_frame = None
+        # Initialize Add/Remove GUI elements
+        self.add_remove_frame = None
+        self.add_remove_top_frame = None
         self.artist_label = None
         self.add_remove_artist_entry_frame = None
         self.add_artist_entry = None
@@ -220,8 +221,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_artist_button = None
         self.reset_artist_frame = None
         self.reset_artist_checkbox = None
-        self.artist_message_label_frame = None
-        self.artist_message_label = None
+        self.category_label_frame = None
+        self.category_label = None
+        self.add_remove_label_frame = None
+        self.add_remove_label = None
 
         # Initialize Settings GUI elements
         self.settings_frame = None
@@ -248,7 +251,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.initial_directory_frame = None
         self.browse_initial_directory_button = None
         self.initial_directory_entry = None
-        self.initial_output_directory_frame = None
         self.browse_initial_output_directory_button = None
         self.initial_output_directory_entry = None
         self.double_check_reminder_directory_frame = None
@@ -257,7 +259,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_directory_frame = None
         self.browse_artist_directory_button = None
         self.artist_directory_entry = None
-        self.artist_file_frame = None
         self.browse_artist_file_button = None
         self.artist_file_entry = None
         self.configuration_file_frame = None
@@ -423,14 +424,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                  command=self.video_editor_button_event)
         self.video_editor_button.grid(row=3, column=0, sticky="ew")
 
-        # Create Artist button with specific styling and command
-        self.artist_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
-                                           text="Artist",
-                                           fg_color="transparent", text_color=("gray10", "gray90"),
-                                           hover_color=("gray70", "gray30"),
-                                           anchor="w",
-                                           command=self.artist_button_event)
-        self.artist_button.grid(row=4, column=0, sticky="ew")
+        # Create Add/Remove button with specific styling and command
+        self.add_remove_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
+                                               text="Add/Remove",
+                                               fg_color="transparent", text_color=("gray10", "gray90"),
+                                               hover_color=("gray70", "gray30"),
+                                               anchor="w",
+                                               command=self.add_remove_button_event)
+        self.add_remove_button.grid(row=4, column=0, sticky="ew")
 
         # Create Settings button with specific styling and command
         self.settings_button = ctk.CTkButton(self.navigation_frame, corner_radius=0, height=40, border_spacing=10,
@@ -499,49 +500,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize category buttons
         self.categories_buttons_initialize()
 
-        # Frame for add/remove category elements
-        self.category_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.category_frame.grid(row=2, column=0, padx=10, pady=10)
-
-        # Add Category Button
-        self.add_category_button = ctk.CTkButton(self.category_frame, text="Add Category", command=self.add_category)
-        self.add_category_button.grid(row=0, column=0, padx=5)
-
-        # Add Category Entry
-        self.category_entry = ctk.CTkEntry(self.category_frame, width=310)
-        self.category_entry.grid(row=0, column=1, padx=5)
-
-        # Weight Label
-        self.weight_label = ctk.CTkLabel(self.category_frame, text="Weight:")
-        self.weight_label.grid(row=0, column=2, padx=5)
-
-        # Initialize weight variable
-        self.weight_var = ctk.StringVar()
-        self.weight_var.set(self.default_weight)
-
-        # Trace the changes in the StringVar
-        self.weight_var.trace_add("write", lambda *args: self.validate_entry(
-            self.weight_var,
-            self.default_weight,
-            desired_type=int))
-
-        # Weight Entry
-        self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=35)
-        self.weight_entry.grid(row=0, column=3, padx=5)
-
-        # Remove Category Button
-        self.remove_category_button = ctk.CTkButton(self.category_frame, text="Remove Category",
-                                                    command=self.remove_category)
-        self.remove_category_button.grid(row=0, column=4, padx=5)
-
-        # Remove Category Entry
-        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
-        self.remove_category_entry.grid(row=0, column=5, padx=5)
-
         # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
                                               fg_color="transparent")
-        self.custom_text_frame.grid(row=3, column=0, padx=10)
+        self.custom_text_frame.grid(row=2, column=0, padx=10)
 
         # Output Directory Browse Button
         self.output_directory_browse_button = ctk.CTkButton(self.custom_text_frame,
@@ -566,7 +528,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Frame to group miscellaneous buttons
         self.button_group_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
                                                fg_color="transparent")
-        self.button_group_frame.grid(row=4, column=0, padx=10)
+        self.button_group_frame.grid(row=3, column=0, padx=10)
 
         # Undo Button
         self.undo_button = ctk.CTkButton(self.button_group_frame, text="Undo", command=self.undo_last)
@@ -589,7 +551,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.last_used_frame.grid(row=6, column=0, padx=5)
+        self.last_used_frame.grid(row=4, column=0, padx=5)
 
         # Last Used File Label
         self.last_used_display_label = ctk.CTkLabel(self.last_used_frame, text="Last used file:")
@@ -602,7 +564,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Frame to display messages
         self.file_renamer_message_label_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
                                                              fg_color="transparent")
-        self.file_renamer_message_label_frame.grid(row=7, column=0, padx=10)
+        self.file_renamer_message_label_frame.grid(row=5, column=0, padx=10)
 
         # Message Label
         self.file_renamer_message_label = ctk.CTkLabel(self.file_renamer_message_label_frame, text="")
@@ -610,7 +572,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Frame to group placement frame
         self.placement_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.placement_frame.grid(row=8, column=0, padx=10, pady=10)
+        self.placement_frame.grid(row=6, column=0, padx=10, pady=10)
 
         # Placement Label
         self.placement_label = ctk.CTkLabel(self.placement_frame, text="Placement:")
@@ -642,7 +604,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Frame to group folder operations
         self.folder_operations_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
                                                     fg_color="transparent")
-        self.folder_operations_frame.grid(row=9, column=0, padx=10)
+        self.folder_operations_frame.grid(row=7, column=0, padx=10)
 
         # Checkbox to enable/disable resetting the Output Directory
         self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
@@ -670,7 +632,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.send_to_module_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
                                                  corner_radius=0,
                                                  fg_color="transparent")
-        self.send_to_module_frame.grid(row=10, column=0, padx=5)
+        self.send_to_module_frame.grid(row=8, column=0, padx=5)
 
         # Send to Video Editor button
         self.send_to_video_editor_button = ctk.CTkButton(self.send_to_module_frame, text="Send to Video Editor",
@@ -1006,10 +968,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                    command=self.load_last_used_file)
         self.name_normalizer_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
 
-        # Normalize Folder button
-        self.normalize_folder_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize Folder",
-                                                     command=self.process_name_normalizer)
-        self.normalize_folder_button.grid(row=0, column=2, padx=5, pady=5)
+        # Normalize Preview button
+        self.normalize_preview_button = ctk.CTkButton(self.normalize_folder_frame, text="Preview",
+                                                      command=lambda: self.process_name_normalizer(mode="preview"))
+        self.normalize_preview_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Normalize button
+        self.normalize_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize",
+                                              command=lambda: self.process_name_normalizer(mode="action"))
+        self.normalize_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Send to Module frame
         self.send_to_module_frame1 = ctk.CTkFrame(self.name_normalizer_frame,
@@ -1270,58 +1237,58 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_message_label.grid(row=0, column=0, padx=10, pady=10)
 
         """
-        artist_window
+        add_remove_window
         """
-        # Create Artist frame
-        self.artist_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
-        self.artist_frame.grid_columnconfigure(0, weight=1)
+        # Create Add/Remove frame
+        self.add_remove_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.add_remove_frame.grid_columnconfigure(0, weight=1)
 
         # Artist Label
-        self.artist_label = ctk.CTkLabel(self.artist_frame, text="Artist",
+        self.artist_label = ctk.CTkLabel(self.add_remove_frame, text="Artist",
                                          font=ctk.CTkFont(size=15, weight="bold"))
         self.artist_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # Artist Top frame
-        self.artist_top_frame = ctk.CTkFrame(self.artist_frame, corner_radius=0,
-                                             fg_color="transparent")
-        self.artist_top_frame.grid(row=1, column=0, padx=10, pady=5)
+        # Add/Remove Top frame
+        self.add_remove_top_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
+                                                 fg_color="transparent")
+        self.add_remove_top_frame.grid(row=1, column=0, padx=10, pady=5)
 
         # Add and remove artist list frame
-        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
+        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                           fg_color="transparent")
         self.add_remove_artist_entry_frame.grid(row=0, column=0, padx=10, pady=10)
-
-        # Add artist entry
-        self.add_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=890)
-        self.add_artist_entry.grid(row=0, column=0, padx=10, pady=10)
 
         # Add artist button
         self.add_artist_button = ctk.CTkButton(self.add_remove_artist_entry_frame, text="Add Artist",
                                                command=self.add_artist_to_file)
-        self.add_artist_button.grid(row=0, column=1, padx=5, pady=5)
+        self.add_artist_button.grid(row=0, column=0, padx=5)
 
-        # Remove artist entry
-        self.remove_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=890)
-        self.remove_artist_entry.grid(row=1, column=0, padx=10, pady=10)
+        # Add artist entry
+        self.add_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=370)
+        self.add_artist_entry.grid(row=0, column=1, padx=5)
 
         # Remove artist button
         self.remove_artist_button = ctk.CTkButton(self.add_remove_artist_entry_frame, text="Remove Artist",
                                                   command=self.remove_artist_from_file)
-        self.remove_artist_button.grid(row=1, column=1, padx=5, pady=5)
+        self.remove_artist_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Remove artist entry
+        self.remove_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=370)
+        self.remove_artist_entry.grid(row=0, column=3, padx=5)
 
         # Frame for clear artist button
-        self.clear_artist_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
+        self.clear_artist_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                fg_color="transparent")
         self.clear_artist_frame.grid(row=1, column=0, padx=10)
 
         # Clear Button
         self.clear_artist_button = ctk.CTkButton(self.clear_artist_frame,
                                                  text="Clear",
-                                                 command=lambda: self.clear_selection(frame_name="artist_window"))
+                                                 command=lambda: self.clear_selection(frame_name="add_remove_window"))
         self.clear_artist_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Frame for reset artist checkbox
-        self.reset_artist_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
+        self.reset_artist_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                fg_color="transparent")
         self.reset_artist_frame.grid(row=2, column=0, padx=10, pady=10)
 
@@ -1331,14 +1298,61 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      variable=self.reset_artist_entries_var)
         self.reset_artist_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
-        # Frame to display messages on the artist frame
-        self.artist_message_label_frame = ctk.CTkFrame(self.artist_top_frame, corner_radius=0,
-                                                       fg_color="transparent")
-        self.artist_message_label_frame.grid(row=12, column=0, padx=10)
+        # Frame for add/remove category elements
+        self.category_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
+        self.category_label_frame.grid(row=3, column=0, padx=10, pady=10)
 
-        # Artist message Label
-        self.artist_message_label = ctk.CTkLabel(self.artist_message_label_frame, text="")
-        self.artist_message_label.grid(row=0, column=0, padx=10, pady=10)
+        # Category Label
+        self.category_label = ctk.CTkLabel(self.category_label_frame, text="Category",
+                                           font=ctk.CTkFont(size=15, weight="bold"))
+        self.category_label.grid(row=0, column=0, padx=10, pady=10)
+
+        self.category_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
+        self.category_frame.grid(row=4, column=0, padx=10, pady=10)
+
+        # Add Category Button
+        self.add_category_button = ctk.CTkButton(self.category_frame, text="Add Category", command=self.add_category)
+        self.add_category_button.grid(row=0, column=0, padx=5)
+
+        # Add Category Entry
+        self.category_entry = ctk.CTkEntry(self.category_frame, width=310)
+        self.category_entry.grid(row=0, column=1, padx=5)
+
+        # Weight Label
+        self.weight_label = ctk.CTkLabel(self.category_frame, text="Weight:")
+        self.weight_label.grid(row=0, column=2, padx=5)
+
+        # Initialize weight variable
+        self.weight_var = ctk.StringVar()
+        self.weight_var.set(self.default_weight)
+
+        # Trace the changes in the StringVar
+        self.weight_var.trace_add("write", lambda *args: self.validate_entry(
+            self.weight_var,
+            self.default_weight,
+            desired_type=int))
+
+        # Weight Entry
+        self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=35)
+        self.weight_entry.grid(row=0, column=3, padx=5)
+
+        # Remove Category Button
+        self.remove_category_button = ctk.CTkButton(self.category_frame, text="Remove Category",
+                                                    command=self.remove_category)
+        self.remove_category_button.grid(row=0, column=4, padx=5)
+
+        # Remove Category Entry
+        self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
+        self.remove_category_entry.grid(row=0, column=5, padx=5)
+
+        # Frame to display messages on the add/remove frame
+        self.add_remove_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.add_remove_label_frame.grid(row=12, column=0, padx=10)
+
+        # Add/Remove Label
+        self.add_remove_label = ctk.CTkLabel(self.add_remove_label_frame, text="")
+        self.add_remove_label.grid(row=0, column=0, padx=10, pady=10)
 
         """
         settings_window
@@ -1463,30 +1477,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_initial_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Initial Directory entry
-        self.initial_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=890)
+        self.initial_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=855)
         self.initial_directory_entry.insert(0, self.initial_directory)
         self.initial_directory_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        # Initial Output directory frame
-        self.initial_output_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
-                                                           fg_color="transparent")
-        self.initial_output_directory_frame.grid(row=1, column=0, padx=10, pady=10)
-
         # Browse Initial Output Directory button
-        self.browse_initial_output_directory_button = ctk.CTkButton(self.initial_output_directory_frame,
+        self.browse_initial_output_directory_button = ctk.CTkButton(self.initial_directory_frame,
                                                                     text="Initial Output Directory",
                                                                     command=self.browse_initial_output_directory)
-        self.browse_initial_output_directory_button.grid(row=0, column=0, padx=5, pady=5)
+        self.browse_initial_output_directory_button.grid(row=1, column=0, padx=5, pady=5)
 
         # Initial Directory entry
-        self.initial_output_directory_entry = ctk.CTkEntry(self.initial_output_directory_frame, width=855)
+        self.initial_output_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=855)
         self.initial_output_directory_entry.insert(0, self.initial_output_directory)
-        self.initial_output_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.initial_output_directory_entry.grid(row=1, column=1, padx=10, pady=10)
 
         # Double Check Directory frame
         self.double_check_reminder_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
                                                                   fg_color="transparent")
-        self.double_check_reminder_directory_frame.grid(row=2, column=0, padx=10, pady=10)
+        self.double_check_reminder_directory_frame.grid(row=1, column=0, padx=10, pady=10)
 
         # Browse Double Check Reminder Directory button
         self.browse_double_check_reminder_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
@@ -1502,7 +1511,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Artist directory frame
         self.artist_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
-        self.artist_directory_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.artist_directory_frame.grid(row=2, column=0, padx=10, pady=10)
 
         # Browse Artist Directory button
         self.browse_artist_directory_button = ctk.CTkButton(self.artist_directory_frame, text="Artist Directory",
@@ -1514,25 +1523,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_directory_entry.insert(0, self.artist_directory)
         self.artist_directory_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        # Artist File Frame
-        self.artist_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
-                                              fg_color="transparent")
-        self.artist_file_frame.grid(row=4, column=0, padx=10, pady=5)
-
         # Browse Artist File button
-        self.browse_artist_file_button = ctk.CTkButton(self.artist_file_frame, text="Artist File",
+        self.browse_artist_file_button = ctk.CTkButton(self.artist_directory_frame, text="Artist File",
                                                        command=self.browse_artist_file)
-        self.browse_artist_file_button.grid(row=0, column=0, padx=5, pady=5)
+        self.browse_artist_file_button.grid(row=1, column=0, padx=5, pady=5)
 
         # Artist File entry
-        self.artist_file_entry = ctk.CTkEntry(self.artist_file_frame, width=890)
+        self.artist_file_entry = ctk.CTkEntry(self.artist_directory_frame, width=890)
         self.artist_file_entry.insert(0, self.artist_file)
-        self.artist_file_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.artist_file_entry.grid(row=1, column=1, padx=10, pady=10)
 
         # Configuration File Frame
         self.configuration_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
                                                      fg_color="transparent")
-        self.configuration_file_frame.grid(row=5, column=0, padx=10, pady=10)
+        self.configuration_file_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Browse Configuration File button
         self.open_configuration_file_button = ctk.CTkButton(self.configuration_file_frame, text="Open Config File",
@@ -1600,8 +1604,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             fg_color=("gray75", "gray25") if frame_name == "name_normalizer_window" else "transparent")
         self.video_editor_button.configure(
             fg_color=("gray75", "gray25") if frame_name == "video_editor_window" else "transparent")
-        self.artist_button.configure(
-            fg_color=("gray75", "gray25") if frame_name == "artist_window" else "transparent")
+        self.add_remove_button.configure(
+            fg_color=("gray75", "gray25") if frame_name == "add_remove_window" else "transparent")
         self.settings_button.configure(
             fg_color=("gray75", "gray25") if frame_name == "settings_window" else "transparent")
 
@@ -1621,11 +1625,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.frame_name = frame_name
         else:
             self.video_editor_frame.grid_forget()
-        if frame_name == "artist_window":
-            self.artist_frame.grid(row=0, column=1, sticky="nsew")
+        if frame_name == "add_remove_window":
+            self.add_remove_frame.grid(row=0, column=1, sticky="nsew")
             self.frame_name = frame_name
         else:
-            self.artist_frame.grid_forget()
+            self.add_remove_frame.grid_forget()
         if frame_name == "settings_window":
             self.settings_frame.grid(row=0, column=1, sticky="nsew")
             self.frame_name = frame_name
@@ -1645,8 +1649,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def video_editor_button_event(self):
         self.select_frame_by_name("video_editor_window")
 
-    def artist_button_event(self):
-        self.select_frame_by_name("artist_window")
+    def add_remove_button_event(self):
+        self.select_frame_by_name("add_remove_window")
 
     def settings_button_event(self):
         self.select_frame_by_name("settings_window")
@@ -1682,12 +1686,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.file_renamer_message_label.configure(text_color="#000000")
             self.name_normalizer_message_label.configure(text_color="#000000")
             self.video_editor_message_label.configure(text_color="#000000")
-            self.artist_message_label.configure(text_color="#000000")
+            self.add_remove_label.configure(text_color="#000000")
         elif current_mode == "Dark":
             self.file_renamer_message_label.configure(text_color="#FFFFFF")
             self.name_normalizer_message_label.configure(text_color="#FFFFFF")
             self.video_editor_message_label.configure(text_color="#FFFFFF")
-            self.artist_message_label.configure(text_color="#FFFFFF")
+            self.add_remove_label.configure(text_color="#FFFFFF")
 
     # Method to display messages with optional error formatting
     def show_message(self, message, error=False, frame_name=None):
@@ -1701,12 +1705,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             labels = [self.name_normalizer_message_label]
         elif frame_name == "video_editor_window":
             labels = [self.video_editor_message_label]
-        elif frame_name == "artist_window":
-            labels = [self.artist_message_label]
+        elif frame_name == "add_remove_window":
+            labels = [self.add_remove_label]
         else:
             # Default to all frame labels if no frame name is passed
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
-                      self.video_editor_message_label, self.artist_message_label]
+                      self.video_editor_message_label, self.add_remove_label]
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
@@ -1928,13 +1932,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Remove duplicate artists from the filename
         return core.remove_artist_duplicates_from_filename(self, file_name)
 
+    def preview_name(self, file_path):
+        # Preview rename files
+        return core.preview_name(self, file_path)
+
     def rename_and_move_file(self, file_path):
-        # Process and rename files and moving files to a specified directory
+        # Rename files and move files to a specified directory
         core.rename_and_move_file(self, file_path)
 
-    def process_name_normalizer(self):
+    def process_name_normalizer(self, mode):
         # Perform various name normalization operations on certain files within a specified folder
-        core.process_name_normalizer(self)
+        core.process_name_normalizer(self, mode)
 
     """
     Video Editor
@@ -1969,7 +1977,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.process_video_edits(self)
 
     """
-    Artist
+    add_remove_window
     """
 
     def add_artist_to_file(self):

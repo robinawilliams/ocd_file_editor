@@ -607,7 +607,7 @@ def clear_selection(self, frame_name):
         # Clear second entry
         self.second_entry.delete(0, ctk.END)
 
-    elif frame_name == "artist_window":
+    elif frame_name == "add_remove_window":
         # Clear add artist entry
         self.add_artist_entry.delete(0, ctk.END)
 
@@ -1204,11 +1204,14 @@ def remove_artist_duplicates_from_filename(self, file_name):
     return new_file_name
 
 
-# Function to process and rename files and moving files to a specified directory
-def rename_and_move_file(self, file_path):
+def preview_name(self, file_path):
     # Split the file path into directory path and filename
     dir_path, filename = os.path.split(file_path)
     name, ext = os.path.splitext(filename)
+
+    if ext.lower() not in self.file_extensions:
+        # Log that the input is ignored if not on the file extensions list
+        self.log_and_show(f"Ignored: {filename} (not on file extensions list)")
 
     # Check if the input has one of the video file extensions
     if ext.lower() in self.file_extensions:
@@ -1436,6 +1439,15 @@ def rename_and_move_file(self, file_path):
             # Get a non-conflicting name
             new_path = self.get_non_conflicting_filename(new_path)
 
+        return new_path
+
+
+# Function to process and rename files and moving files to a specified directory
+def rename_and_move_file(self, file_path):
+    # Call the preview name function to get the name
+    new_path = self.preview_name(file_path)
+
+    if new_path:
         try:
             # Rename the file
             os.rename(file_path, new_path)
@@ -1444,7 +1456,7 @@ def rename_and_move_file(self, file_path):
             self.name_normalizer_last_used_file = new_path
 
             # Log the renaming operation if logging is activated
-            self.log_and_show(f"Renamed: {filename} -> {os.path.basename(new_path)}")
+            self.log_and_show(f"Renamed: {os.path.basename(file_path)} -> {os.path.basename(new_path)}")
 
             # Move the renamed input to the specified directory if name_normalizer_output_directory is provided
             if self.name_normalizer_output_directory:
@@ -1472,15 +1484,14 @@ def rename_and_move_file(self, file_path):
 
         except OSError as e:
             # Log an error if renaming fails
-            self.log_and_show(f"Renaming failed for {filename}: {e}",
+            self.log_and_show(f"Renaming failed for {os.path.basename(file_path)}: {e}",
                               error=True)
     else:
-        # Log that the input is ignored if not on the file extensions list
-        self.log_and_show(f"Ignored: {filename} (not on file extensions list)")
+        return
 
 
 # Function to performing various name normalization operations on certain files within a specified folder
-def process_name_normalizer(self):
+def process_name_normalizer(self, mode):
     # Check if the specified input exists
     if (not os.path.exists(self.name_normalizer_selected_file)
             and not os.path.isfile(self.name_normalizer_selected_file)):
@@ -1515,14 +1526,22 @@ def process_name_normalizer(self):
                               error=True)
             return
 
-    # Ask for confirmation before normalizing files
-    confirmation = ask_confirmation(self, "Confirm Action",
-                                    "Are you sure you want normalize the file(s)? This cannot be undone.")
-    if confirmation:
-        self.log_and_show(f"User confirmed the name normalization process for {self.name_normalizer_selected_file}.")
-    else:
-        self.log_and_show(f"User cancelled the name normalization process for {self.name_normalizer_selected_file}.")
+    if mode == "preview":
+        preview_result = preview_name(self, self.name_normalizer_selected_file)
+        if preview_result:
+            self.log_and_show(f"Preview: \n{os.path.basename(preview_result)}", create_messagebox=True)
         return
+    elif mode == "action":
+        # Ask for confirmation before normalizing files
+        confirmation = ask_confirmation(self, "Confirm Action",
+                                        "Are you sure you want normalize the file(s)? This cannot be undone.")
+        if confirmation:
+            self.log_and_show(f"User confirmed the name normalization process for "
+                              f"{self.name_normalizer_selected_file}.")
+        else:
+            self.log_and_show(f"User cancelled the name normalization process for "
+                              f"{self.name_normalizer_selected_file}.")
+            return
 
     try:
         if os.path.isfile(self.name_normalizer_selected_file):
@@ -1551,10 +1570,7 @@ def process_name_normalizer(self):
 
             # Iterate through file paths and rename/move files
             for file_path in file_paths:
-                rename_and_move_file(
-                    self,
-                    file_path
-                )
+                rename_and_move_file(self, file_path)
 
         # Log the action if logging is enabled
         self.log_and_show("File(s) have been processed successfully.")
@@ -1965,7 +1981,7 @@ def process_video_edits(self):
 
 
 """
-artist
+add_remove_window
 """
 
 
@@ -1976,8 +1992,7 @@ def add_artist_to_file(self):
 
     # Check if no artist is provided
     if not self.add_artist:
-        self.log_and_show("No artist provided to add to the Artist File. "
-                          "\nPlease enter something into the entry and try again.",
+        self.log_and_show("Add Artist cannot be empty.",
                           create_messagebox=True,
                           error=True)
         return  # Exit the function if no artist is provided
@@ -2025,8 +2040,7 @@ def remove_artist_from_file(self):
 
     # Check if no artist is provided
     if not self.remove_artist:
-        self.log_and_show("No artist provided to remove from the Artist File. "
-                          "\nPlease enter something into the entry and try again.",
+        self.log_and_show("Remove Artist cannot be empty.",
                           create_messagebox=True,
                           error=True)
         return  # Exit the function if no artist is provided
