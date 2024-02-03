@@ -62,6 +62,7 @@ def load_configuration(self):
     initial_directory = config.get('Filepaths', 'initial_directory', fallback='/path/to/folder')
     initial_output_directory = config.get('Filepaths', 'initial_output_directory', fallback='/path/to/folder')
     double_check_directory = config.get('Filepaths', 'double_check_directory', fallback='double_check_reminders')
+    no_go_directory = config.get('Filepaths', 'no_go_directory', fallback='no_go_reminders')
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='artist_directory')
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
@@ -163,7 +164,7 @@ def load_configuration(self):
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-            remove_number_var, default_minute, default_second)
+            remove_number_var, default_minute, default_second, no_go_directory)
 
 
 def logging_setup(self):
@@ -672,6 +673,16 @@ def browse_double_check_reminder_directory(self):
         # Clear the entry and set it to the artist directory
         self.double_check_reminder_directory_entry.delete(0, ctk.END)
         self.double_check_reminder_directory_entry.insert(0, self.double_check_directory)
+
+
+# Function to browse and select a directory to save NO GO reminders in
+def browse_no_go_directory(self):
+    self.no_go_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+
+    if self.no_go_directory:
+        # Clear the entry and set it to the artist directory
+        self.no_go_reminder_directory_entry.delete(0, ctk.END)
+        self.no_go_reminder_directory_entry.insert(0, self.no_go_directory)
 
 
 # Function to browse and select an input
@@ -2077,5 +2088,43 @@ def remove_artist_from_file(self):
                               error=True)
     else:
         self.log_and_show(f"Artist is not in the Artist File: '{self.remove_artist}'",
+                          create_messagebox=True,
+                          error=True)
+
+
+# Function to create a NO-GO file
+def no_go_creation(self):
+    # Get the artist to be added from the entry widget
+    self.no_go_name = self.add_no_go_name_entry.get().strip()
+
+    # Check if no artist is provided
+    if not self.no_go_name:
+        self.log_and_show("NO GO name cannot be empty.",
+                          create_messagebox=True,
+                          error=True)
+        return  # Exit the function if no artist is provided
+
+    try:
+        # Expand the user's home directory in the NO-GO path
+        no_go_directory = os.path.expanduser(self.no_go_directory)
+
+        # Ensure the NO-GO directory exists, create it if not
+        if not os.path.exists(no_go_directory):
+            os.makedirs(no_go_directory)
+
+        # Create a file for the NO-GO
+        file_name = f"NO GO - {self.no_go_name}"
+        file_path = os.path.join(no_go_directory, file_name)
+
+        # Empty file
+        with open(file_path, 'w'):
+            pass
+
+        # Log the action if logging is enabled
+        self.log_and_show(f"NO GO created successfully for {self.no_go_name} in \n"
+                          f"{no_go_directory}")
+
+    except Exception as e:
+        self.log_and_show(f"Creating NO GO failed: '{str(e)}'.",
                           create_messagebox=True,
                           error=True)

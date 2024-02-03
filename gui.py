@@ -32,6 +32,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_output_directory = ""
         self.add_artist = ""
         self.remove_artist = ""
+        self.no_go_name = ""
 
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
         self.original_stdout = sys.stdout
@@ -69,6 +70,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.weight_entry = None
         self.remove_category_button = None
         self.remove_category_entry = None
+        self.no_go_label_frame = None
+        self.no_go_label = None
+        self.no_go_entry_frame = None
+        self.add_no_go_button = None
+        self.add_no_go_name_entry = None
         self.custom_text_frame = None
         self.output_directory_browse_button = None
         self.output_directory_entry = None
@@ -256,6 +262,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_reminder_directory_frame = None
         self.browse_double_check_reminder_directory_button = None
         self.double_check_reminder_directory_entry = None
+        self.browse_no_go_reminder_directory_button = None
+        self.no_go_reminder_directory_entry = None
         self.artist_directory_frame = None
         self.browse_artist_directory_button = None
         self.artist_directory_entry = None
@@ -283,13 +291,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-         remove_number_var, default_minute, default_second) = (
+         remove_number_var, default_minute, default_second, no_go_directory) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
         self.initial_directory = initial_directory
         self.initial_output_directory = initial_output_directory
         self.double_check_directory = double_check_directory
+        self.no_go_directory = no_go_directory
         self.artist_directory = artist_directory
         self.artist_file = artist_file
         self.categories_file = categories_file
@@ -1345,6 +1354,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
         self.remove_category_entry.grid(row=0, column=5, padx=5)
 
+        # NO-GO label frame
+        self.no_go_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                              fg_color="transparent")
+        self.no_go_label_frame.grid(row=5, column=0, padx=10, pady=10)
+
+        # NO-GO label
+        self.no_go_label = ctk.CTkLabel(self.no_go_label_frame, text="NO GO",
+                                        font=ctk.CTkFont(size=15, weight="bold"))
+        self.no_go_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # NO-GO frame
+        self.no_go_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                              fg_color="transparent")
+        self.no_go_entry_frame.grid(row=6, column=0, padx=10, pady=10)
+
+        # Add NO-GO button
+        self.add_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Add NO GO",
+                                          command=self.no_go_creation)
+        self.add_no_go_button.grid(row=0, column=0, padx=5)
+
+        # Add NO-GO entry
+        self.add_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
+        self.add_no_go_name_entry.grid(row=0, column=1, padx=5)
+
         # Frame to display messages on the add/remove frame
         self.add_remove_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                    fg_color="transparent")
@@ -1508,6 +1541,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.double_check_reminder_directory_entry = ctk.CTkEntry(self.double_check_reminder_directory_frame, width=775)
         self.double_check_reminder_directory_entry.insert(0, self.double_check_directory)
         self.double_check_reminder_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Browse NO GO Reminder Directory button
+        self.browse_no_go_reminder_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
+                                                                    text="NO GO Directory",
+                                                                    command=self.browse_no_go_directory)
+        self.browse_no_go_reminder_directory_button.grid(row=1, column=0, padx=5, pady=5)
+
+        # NO GO Reminder entry
+        self.no_go_reminder_directory_entry = ctk.CTkEntry(self.double_check_reminder_directory_frame, width=775)
+        self.no_go_reminder_directory_entry.insert(0, self.no_go_directory)
+        self.no_go_reminder_directory_entry.grid(row=1, column=1, padx=10, pady=10)
 
         # Artist directory frame
         self.artist_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
@@ -1864,6 +1908,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Open a dialog to browse and select a directory to save the double check reminders in
         core.browse_double_check_reminder_directory(self)
 
+    def browse_no_go_directory(self):
+        # Open a dialog to browse and select a directory to save the NO-GO reminders in
+        core.browse_no_go_directory(self)
+
     def browse_input(self):
         # Open a file dialog to browse and select a file
         core.browse_input(self)
@@ -1987,6 +2035,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_artist_from_file(self):
         # Remove artists from the artist file
         core.remove_artist_from_file(self)
+
+    def no_go_creation(self):
+        # Create a NO-GO file
+        core.no_go_creation(self)
 
 
 if __name__ == "__main__":

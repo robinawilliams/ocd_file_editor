@@ -137,6 +137,8 @@ valid_extensions = .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
 ;initial_output_directory = /path/to/folder
 ; Directory to save double check reminders (Uncomment and replace double_check_reminders with your directory)
 ;double_check_directory = double_check_reminders
+; Directory to save NO GO reminders (Uncomment and replace no_go_reminders with your directory)
+;no_go_directory = no_go_reminders
 ; Directory with folders to use for suggestions (Uncomment and replace artist_directory with your directory)
 ;artist_directory = artist_directory
 ; List of artists to search
