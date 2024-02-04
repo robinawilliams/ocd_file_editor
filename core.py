@@ -65,6 +65,7 @@ def load_configuration(self):
     no_go_directory = config.get('Filepaths', 'no_go_directory', fallback='no_go_reminders')
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='artist_directory')
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
+    no_go_artist_file = config.get('Filepaths', 'no_go_artist_file', fallback='list_of_no_go_artists.txt')
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
@@ -164,7 +165,7 @@ def load_configuration(self):
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-            remove_number_var, default_minute, default_second, no_go_directory)
+            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file)
 
 
 def logging_setup(self):
@@ -2124,9 +2125,19 @@ def no_go_creation(self):
         file_name = f"NO GO - {self.no_go_name}"
         file_path = os.path.join(no_go_directory, file_name)
 
-        # Empty file
+        # Create NO-GO empty file
         with open(file_path, 'w'):
             pass
+
+        # Add to text file for Tampermonkey Script use
+        if not os.path.isfile(self.no_go_artist_file):
+            # If the file does not exist, create it
+            with open(self.no_go_artist_file, "w"):
+                pass  # do nothing, just create an empty file
+
+        # Write the no_go_name to the file
+        with open(self.no_go_artist_file, "a") as file:
+            file.write("\n" + self.no_go_name)
 
         # Log the action if logging is enabled
         self.log_and_show(f"NO GO created successfully for {self.no_go_name} in \n"

@@ -291,7 +291,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-         remove_number_var, default_minute, default_second, no_go_directory) = (
+         remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -301,6 +301,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.no_go_directory = no_go_directory
         self.artist_directory = artist_directory
         self.artist_file = artist_file
+        self.no_go_artist_file = no_go_artist_file
         self.categories_file = categories_file
 
         # Variables and window geometry - Set instance variables with the values from the configuration file
