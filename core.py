@@ -68,6 +68,7 @@ def load_configuration(self):
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='artist_directory')
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
     no_go_artist_file = config.get('Filepaths', 'no_go_artist_file', fallback='list_of_no_go_artists.txt')
+    excluded_file = config.get('Filepaths', 'excluded_file', fallback='excluded.json')
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
@@ -168,7 +169,7 @@ def load_configuration(self):
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file,
+            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, excluded_file,
             remove_non_ascii_symbols_var)
 
 
@@ -827,15 +828,29 @@ def suggest_output_directory(self):
                           error=True)
         return None
 
+    # Load excluded_folders from the excluded_file or create an empty dictionary
+    try:
+        with open(self.excluded_file, 'r') as json_file:
+            data = json.load(json_file)
+            excluded_folders = data.get("excluded_folders", [])
+    except Exception as e:
+        excluded_folders = []
+        self.log_and_show(f"Loading excluded folders from JSON failed: {e}", error=True)
+
     try:
         # Extract the base name from the selected file
         base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Case insensitive comparison
 
-        # TODO Implement logic for multiple artist matches
         # Extract the artist from the filename
         for artist_folder in os.listdir(self.artist_directory):
             if artist_folder.lower() in base_name_lower:
+                if artist_folder in excluded_folders:
+                    # Log and show message for excluded folder match
+                    self.log_and_show(f"Artist folder '{artist_folder}' is on the excluded folders list. "
+                                      f"Falling back to default output directory.")
+                    return None
+
                 # Construct the artist folder path
                 artist_folder_path = os.path.join(self.artist_directory, artist_folder)
 

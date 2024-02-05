@@ -147,7 +147,9 @@ valid_extensions = .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
 artist_file = list_of_artists.txt
 ; List of NO-GO artists (Tampermonkey Script)
 ;no_go_artist_file = list_of_no_go_artists.txt
-; JSON Dictionary containing the categories/genres and weights
+; JSON Dictionary containing a list of folders to exclude for Artist Directory Search
+excluded_file = excluded.json
+; JSON Dictionary containing categories/genres and weights
 categories_file = categories.json
 
 [Logs]
