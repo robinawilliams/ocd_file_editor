@@ -24,6 +24,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_last_used_file = ""
         self.output_directory = ""
         self.queue = []
+        self.categories = {}
         self.name_normalizer_selected_file = ""
         self.name_normalizer_last_used_file = ""
         self.name_normalizer_output_directory = ""

@@ -828,16 +828,15 @@ def suggest_output_directory(self):
                           error=True)
         return None
 
-    # Load excluded_folders from the excluded_file or create an empty dictionary
     try:
-        with open(self.excluded_file, 'r') as json_file:
-            data = json.load(json_file)
-            excluded_folders = data.get("excluded_folders", [])
-    except Exception as e:
-        excluded_folders = []
-        self.log_and_show(f"Loading excluded folders from JSON failed: {e}", error=True)
+        # Load excluded_folders from the excluded_file or create an empty dictionary
+        try:
+            with open(self.excluded_file, 'r') as json_file:
+                data = json.load(json_file)
+                excluded_folders = data.get("excluded_folders", [])
 
-    try:
+        except (FileNotFoundError, json.JSONDecodeError):
+            excluded_folders = []
         # Extract the base name from the selected file
         base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Case insensitive comparison
