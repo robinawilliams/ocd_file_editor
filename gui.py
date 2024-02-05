@@ -115,6 +115,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.tail_checkbox = None
         self.remove_all_symbols_checkbox = None
         self.remove_most_symbols_checkbox = None
+        self.remove_non_ascii_symbols_checkbox = None
         self.remove_numbers_checkbox = None
         self.checkbox_frame2 = None
         self.remove_new_checkbox = None
@@ -291,7 +292,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-         remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file) = (
+         remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file,
+         remove_non_ascii_symbols_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -334,6 +336,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Name Normalizer - Set instance variables with the values from the configuration file
         self.remove_all_symbols_var = ctk.BooleanVar(value=remove_all_symbols_var)
         self.remove_most_symbols_var = ctk.BooleanVar(value=remove_most_symbols_var)
+        self.remove_non_ascii_symbols_var = ctk.BooleanVar(value=remove_non_ascii_symbols_var)
         self.remove_number_var = ctk.BooleanVar(value=remove_number_var)
         self.tail_var = ctk.BooleanVar(value=tail_var)
         self.remove_parenthesis_trail_var = ctk.BooleanVar(value=remove_parenthesis_trail_var)
@@ -707,11 +710,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                             variable=self.remove_most_symbols_var)
         self.remove_most_symbols_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Checkbox to enable/disable remove non-ascii symbols
+        self.remove_non_ascii_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                                 text="Remove non-ASCII symbols",
+                                                                 variable=self.remove_non_ascii_symbols_var)
+        self.remove_non_ascii_symbols_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
         # Checkbox to enable/disable reset entries
         self.remove_numbers_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                                        text="Remove numbers",
                                                        variable=self.remove_number_var)
-        self.remove_numbers_checkbox.grid(row=0, column=3, padx=10, pady=10)
+        self.remove_numbers_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Button Frame 2
         self.checkbox_frame2 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,

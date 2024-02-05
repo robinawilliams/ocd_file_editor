@@ -9,6 +9,8 @@ import logging  # Logging module for capturing log messages
 import configparser  # Module for working with configuration files
 import shutil  # Module for high-level file operations (copying, moving, etc.)
 import sys  # System-specific parameters and functions
+import string  # Module for various string manipulation functions and constants
+from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
 from moviepy.editor import VideoFileClip  # Video editing module for working with video files
 
 """
@@ -97,6 +99,7 @@ def load_configuration(self):
     # Name Normalizer
     remove_all_symbols_var = config.getboolean("Settings", "remove_all_symbols_var", fallback=False)
     remove_most_symbols_var = config.getboolean("Settings", "remove_most_symbols_var", fallback=False)
+    remove_non_ascii_symbols_var = config.getboolean("Settings", "remove_non_ascii_symbols_var", fallback=False)
     remove_number_var = config.getboolean("Settings", "remove_number_var", fallback=False)
     tail_var = config.getboolean("Settings", "tail_var", fallback=False)
     remove_parenthesis_trail_var = config.getboolean("Settings", "remove_parenthesis_trail_var", fallback=False)
@@ -165,7 +168,8 @@ def load_configuration(self):
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file)
+            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file,
+            remove_non_ascii_symbols_var)
 
 
 def logging_setup(self):
@@ -1227,6 +1231,13 @@ def preview_name(self, file_path):
 
     # Check if the input has one of the video file extensions
     if ext.lower() in self.file_extensions:
+        if self.remove_non_ascii_symbols_var.get():
+            # Get all printable ASCII characters
+            standard_chars = set(string.printable)
+
+            # Replace non-ASCII characters with their ASCII equivalents
+            name = ''.join(unidecode(char) if char not in standard_chars else char for char in name)
+
         if self.remove_all_symbols_var.get():
             # Define the characters to be removed
             remove_chars = ",;:@$%^&#*+=(){}[]|\\<>\'\"?_-–—"

@@ -43,6 +43,8 @@ fallback_confirmation_var = False
 remove_all_symbols_var = False
 ; Remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
 remove_most_symbols_var = False
+; Remove non-ascii symbols
+remove_non_ascii_symbols_var = False
 ; Remove numbers
 remove_number_var = False
 ; Append '__-__ ' to the file name
