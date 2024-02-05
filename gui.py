@@ -34,6 +34,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_artist = ""
         self.remove_artist = ""
         self.no_go_name = ""
+        self.excluded_folders = []
+        self.exclude_name = ""
 
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
         self.original_stdout = sys.stdout
@@ -76,6 +78,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.no_go_entry_frame = None
         self.add_no_go_button = None
         self.add_no_go_name_entry = None
+        self.exclude_label_frame = None
+        self.exclude_label = None
+        self.exclude_entry_frame = None
+        self.add_exclude_button = None
+        self.add_exclude_name_entry = None
         self.custom_text_frame = None
         self.output_directory_browse_button = None
         self.output_directory_entry = None
@@ -393,6 +400,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Initialize frame name to default frame
         self.frame_name = self.default_frame
+
+        # Initialize the exclusion folders
+        self.initialize_exclude()
 
         # Create the GUI elements
         self.create_gui()
@@ -1390,6 +1400,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
         self.add_no_go_name_entry.grid(row=0, column=1, padx=5)
 
+        # Exclude label frame
+        self.exclude_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                                fg_color="transparent")
+        self.exclude_label_frame.grid(row=7, column=0, padx=10, pady=10)
+
+        # Exclude label
+        self.exclude_label = ctk.CTkLabel(self.exclude_label_frame, text="Exclude",
+                                          font=ctk.CTkFont(size=15, weight="bold"))
+        self.exclude_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Exclude frame
+        self.exclude_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                                fg_color="transparent")
+        self.exclude_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+
+        # Add Exclude button
+        self.add_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Add Exclude",
+                                                command=self.add_folder_to_excluded_folders)
+        self.add_exclude_button.grid(row=0, column=0, padx=5)
+
+        # Add Exclude entry
+        self.add_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
+        self.add_exclude_name_entry.grid(row=0, column=1, padx=5)
+
         # Frame to display messages on the add/remove frame
         self.add_remove_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                    fg_color="transparent")
@@ -1844,6 +1878,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Load configuration settings using the core module
         return core.load_configuration(self)
 
+    def initialize_exclude(self):
+        # Load the exclude_file
+        core.initialize_exclude(self)
+
     def logging_setup(self):
         # Setup logging
         core.logging_setup(self)
@@ -2051,6 +2089,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def no_go_creation(self):
         # Create a NO-GO file
         core.no_go_creation(self)
+
+    def add_folder_to_excluded_folders(self):
+        # Exclude folder from Artist Directory search
+        core.add_folder_to_excluded_folders(self)
 
 
 if __name__ == "__main__":

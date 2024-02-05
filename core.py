@@ -173,6 +173,19 @@ def load_configuration(self):
             remove_non_ascii_symbols_var)
 
 
+# Function to load the exclude_file
+def initialize_exclude(self):
+    # Load excluded_folders from the excluded_file or create an empty dictionary
+    try:
+        with open(self.excluded_file, 'r') as json_file:
+            data = json.load(json_file)
+            self.excluded_folders = data.get("excluded_folders", [])
+
+    except Exception as e:
+        self.excluded_folders = []
+        self.log_and_show(f"Initialize exclusion_file failed: {self.excluded_file} {str(e)}.", error=True)
+
+
 def logging_setup(self):
     # Create the log file if it doesn't exist
     if not os.path.exists(self.file_renamer_log):
@@ -829,14 +842,6 @@ def suggest_output_directory(self):
         return None
 
     try:
-        # Load excluded_folders from the excluded_file or create an empty dictionary
-        try:
-            with open(self.excluded_file, 'r') as json_file:
-                data = json.load(json_file)
-                excluded_folders = data.get("excluded_folders", [])
-
-        except (FileNotFoundError, json.JSONDecodeError):
-            excluded_folders = []
         # Extract the base name from the selected file
         base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Case insensitive comparison
@@ -844,7 +849,7 @@ def suggest_output_directory(self):
         # Extract the artist from the filename
         for artist_folder in os.listdir(self.artist_directory):
             if artist_folder.lower() in base_name_lower:
-                if artist_folder in excluded_folders:
+                if artist_folder in self.excluded_folders:
                     # Log and show message for excluded folder match
                     self.log_and_show(f"Artist folder '{artist_folder}' is on the excluded folders list. "
                                       f"Falling back to default output directory.")
@@ -2176,3 +2181,48 @@ def no_go_creation(self):
     # Clear add no-go name entry and reset self.no_go_name
     self.no_go_name = ""
     self.add_no_go_name_entry.delete(0, ctk.END)
+
+
+# Function to exclude folder from Artist Directory search
+def add_folder_to_excluded_folders(self):
+    if not self.exclude_name:
+        # Get the exclude name to be added from the entry widget
+        self.exclude_name = self.add_exclude_name_entry.get().strip()
+
+        # Check if no exclude name is provided
+        if not self.exclude_name:
+            self.log_and_show("Add Exclude cannot be empty.",
+                              create_messagebox=True,
+                              error=True)
+            return  # Exit the function if no exclusion is provided
+
+    # Check if the folder is already in the excluded_folders list
+    if self.exclude_name in self.excluded_folders:
+        self.log_and_show(f"Folder '{self.exclude_name}' is already in the excluded folders list.",
+                          create_messagebox=True,
+                          error=True)
+        # Reset the exclude entry
+        self.exclude_name = ""
+        self.add_exclude_name_entry.delete(0, ctk.END)
+        return  # Exit the function if the folder is already in the list
+
+    try:
+        # Add the folder to the excluded_folders list
+        self.excluded_folders.append(self.exclude_name)
+
+        # Update the JSON file with the new excluded_folders list
+        with open(self.excluded_file, 'w') as json_file:
+            json.dump({"excluded_folders": self.excluded_folders}, json_file, indent=2)
+
+        # Log and show success message
+        self.log_and_show(f"Folder '{self.exclude_name}' added to excluded folders list.")
+
+        # Reset the exclude entry if the action is successful
+        self.exclude_name = ""
+        self.add_exclude_name_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Error adding folder '{self.exclude_name}' to excluded folders list: {e}",
+                          create_messagebox=True,
+                          error=True)
