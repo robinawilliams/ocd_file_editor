@@ -1265,8 +1265,9 @@ def preview_name(self, file_path):
             # Get all printable ASCII characters
             standard_chars = set(string.printable)
 
-            # Replace non-ASCII characters with their ASCII equivalents
-            name = ''.join(unidecode(char) if char not in standard_chars else char for char in name)
+            # Replace non-ASCII characters with their ASCII equivalents (ignore slashes)
+            name = ''.join(unidecode(char) if char not in standard_chars and char not in ['⁄', '／']
+                           else char if char not in ['⁄', '／'] else ' ' for char in name)
 
         if self.remove_all_symbols_var.get():
             # Define the characters to be removed
