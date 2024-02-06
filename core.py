@@ -177,13 +177,24 @@ def load_configuration(self):
 def initialize_exclude(self):
     # Load excluded_folders from the excluded_file or create an empty dictionary
     try:
+        if not os.path.isfile(self.excluded_file):
+            # Return early if the file doesn't exist
+            return
+
         with open(self.excluded_file, 'r') as json_file:
             data = json.load(json_file)
             self.excluded_folders = data.get("excluded_folders", [])
 
+    except FileNotFoundError:
+        # Log that the file is not found (this might not necessarily be an error)
+        self.log_and_show(f"Exclusion file not found: {self.excluded_file}")
+
+    except json.JSONDecodeError as e:
+        # Handle JSON decoding error
+        self.log_and_show(f"Error decoding JSON in exclusion file: {self.excluded_file}, {str(e)}", error=True)
+
     except Exception as e:
-        self.excluded_folders = []
-        self.log_and_show(f"Initialize exclusion_file failed: {self.excluded_file} {str(e)}.", error=True)
+        self.log_and_show(f"Initialize exclusion_file failed: {self.excluded_file}, {str(e)}", error=True)
 
 
 def logging_setup(self):
