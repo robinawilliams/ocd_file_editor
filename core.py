@@ -853,19 +853,20 @@ def suggest_output_directory(self):
         return None
 
     try:
+        # Create a list from self.artist_directory
+        artist_folders = os.listdir(self.artist_directory)
+
+        # Use self.excluded_folders to remove any matches (case-insensitive) from the list
+        excluded_folders_lower = [folder.lower() for folder in self.excluded_folders]
+        artist_folders = [folder for folder in artist_folders if folder.lower() not in excluded_folders_lower]
+
         # Extract the base name from the selected file
         base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Case insensitive comparison
 
-        # Extract the artist from the filename
-        for artist_folder in os.listdir(self.artist_directory):
+        # Use the filtered list to match the artist_folder
+        for artist_folder in artist_folders:
             if artist_folder.lower() in base_name_lower:
-                if artist_folder in self.excluded_folders:
-                    # Log and show message for excluded folder match
-                    self.log_and_show(f"Artist folder '{artist_folder}' is on the excluded folders list. "
-                                      f"Falling back to default output directory.")
-                    return None
-
                 # Construct the artist folder path
                 artist_folder_path = os.path.join(self.artist_directory, artist_folder)
 
