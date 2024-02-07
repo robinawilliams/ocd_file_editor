@@ -1181,11 +1181,24 @@ def rename_files(self):
             self.log_and_show(f"File: '{os.path.basename(self.file_renamer_selected_file)}' renamed successfully. "
                               f"\nSaved to: \n{new_path}")
             self.handle_rename_success(new_path)
+
         except OSError as e:
-            # Log the action if logging is enabled
-            self.log_and_show(f"{str(e)}",
-                              create_messagebox=True,
-                              error=True)
+            if "Invalid cross-device link" in str(e):
+                # Attempt to use shutil.move if "Invalid cross-device link" error
+                try:
+                    shutil.move(self.file_renamer_selected_file, new_path)
+                    self.log_and_show(
+                        f"File: '{os.path.basename(self.file_renamer_selected_file)}' renamed and moved successfully. "
+                        f"\nSaved to: \n{new_path}")
+                    self.handle_rename_success(new_path)
+                except Exception as move_error:
+                    # Log the action if shutil.move also fails
+                    self.log_and_show(f"Renaming and moving file failed: {str(move_error)}",
+                                      create_messagebox=True, error=True)
+            else:
+                # Log the action for other OSError
+                self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
+
     # If an input is selected and either the queue is empty or no custom text is provided show error
     elif self.file_renamer_selected_file and not (self.queue or self.custom_text_entry.get().strip()):
         # Log the action if logging is enabled
