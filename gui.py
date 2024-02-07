@@ -548,6 +548,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.custom_text_entry.insert(0, "Enter your custom text here...")
         self.custom_text_entry.grid(row=0, column=2, padx=10, pady=10)
 
+        # Bind the update_file_display function to the custom text entry change event
+        self.custom_text_entry.bind("<KeyRelease>", self.update_file_display)
+
         # Rename File Button
         self.rename_button = ctk.CTkButton(self.custom_text_frame, text="Rename File",
                                            command=self.rename_files)
@@ -1934,7 +1937,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Add a category to the processing queue
         core.add_to_queue(self, category)
 
-    def update_file_display(self):
+    def update_file_display(self, event=None):
         # Update the display with the currently selected file
         core.update_file_display(self)
 
