@@ -83,8 +83,10 @@ def load_configuration(self):
     file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
+    keyword_var = config.get("Settings", "keyword_var", fallback="Sort")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
+    artist_identifier_var = config.getboolean("Settings", "artist_identifier_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
     move_text_var = config.getboolean('Settings', 'move_text_var', fallback=False)
     open_on_file_drop_var = config.getboolean("Settings", "open_on_file_drop_var", fallback=False)
@@ -170,7 +172,7 @@ def load_configuration(self):
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, excluded_file,
-            remove_non_ascii_symbols_var)
+            remove_non_ascii_symbols_var, artist_identifier_var, keyword_var)
 
 
 # Function to load the exclude_file
@@ -186,7 +188,7 @@ def initialize_exclude(self):
             self.excluded_folders = data.get("excluded_folders", [])
 
     except FileNotFoundError:
-        # Log that the file is not found (this might not necessarily be an error)
+        # Log that the file is not found
         self.log_and_show(f"Exclusion file not found: {self.excluded_file}")
 
     except json.JSONDecodeError as e:
@@ -1150,6 +1152,23 @@ def rename_files(self):
             if os.path.exists(new_path):
                 # Get a non-conflicting filename
                 new_path = self.get_non_conflicting_filename(new_path)
+
+            # Check if Artist Identifier is true
+            if self.artist_identifier_var.get():
+                # Use artist identifier to find other instances of artists
+                identified = self.artist_identifier()
+
+                if identified:
+                    # Log the result and display a messagebox to the user
+                    self.log_and_show(f"Artist Identifier: "
+                                      f"\nFile name: "
+                                      f"\n{os.path.basename(identified)} "
+                                      f"\nFile path: "
+                                      f"\n{identified}",
+                                      create_messagebox=True)
+                else:
+                    # Log the action
+                    self.log_and_show(f"No Artist Identifier result")
 
             # Rename the file
             os.rename(self.file_renamer_selected_file, new_path)
@@ -2239,3 +2258,68 @@ def add_folder_to_excluded_folders(self):
         self.log_and_show(f"Error adding folder '{self.exclude_name}' to excluded folders list: {e}",
                           create_messagebox=True,
                           error=True)
+
+
+# Function to attempt to identify Artists
+def artist_identifier(self):
+    # Check if an input is selected
+    if not self.file_renamer_selected_file:
+        # If no input is selected, return none
+        self.log_and_show("No input selected.")
+        return None
+
+    # Check if the artist_identifier_var is True
+    if not self.artist_identifier_var.get():
+        # If artist_identifier_var is False, return none
+        self.log_and_show("Artist Identifier disabled.")
+        return None
+
+    # Check if self.artist_directory exists
+    if not os.path.exists(self.artist_directory):
+        # If artist directory does not exist, display an error message and return none
+        self.log_and_show(f"Artist Identifier cannot function as intended since the Artist Directory"
+                          f" does not exist."
+                          f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
+                          create_messagebox=True,
+                          error=True)
+        return None
+
+    try:
+        # Extract the base name from the selected file
+        base_name = os.path.basename(self.file_renamer_selected_file)
+
+        # Check if there is a '-' in the name
+        if '-' not in base_name:
+            # If no '-', return none
+            self.log_and_show("No '-' found in the file name. Cannot identify artist.")
+            return None
+
+        # Extract the artist from the text before '-'
+        artist = base_name.split('-')[0].strip()
+
+        # Search for a case-insensitive match for the artist in self.artist_directory
+        for root, dirs, files in os.walk(self.artist_directory):
+            for file_name in files:
+                # Check if the artist is present in the file name
+                if artist.lower() in file_name.lower():
+                    # Construct the artist file path
+                    artist_file_path = os.path.join(root, file_name)
+
+                    # Verify the file exists and the keyword is in the absolute path
+                    if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
+                            and self.keyword_var.lower() in artist_file_path.lower():
+                        # Check if the artist's name is not part of the directory path
+                        if artist.lower() not in os.path.dirname(artist_file_path).lower():
+                            # Return the result
+                            return artist_file_path
+
+        # If no matching artist is found, return none
+        self.log_and_show("No matching artist file found.")
+        return None
+
+    except Exception as e:
+        # Handle any unexpected exceptions and log an error message
+        self.log_and_show(f"Unexpected error identifying artist: {e}",
+                          create_messagebox=True,
+                          error=True)
+        return None

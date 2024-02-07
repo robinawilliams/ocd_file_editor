@@ -248,6 +248,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.switch_frame = None
         self.open_on_file_drop_switch = None
         self.remove_duplicates_switch = None
+        self.artist_identifier_switch = None
         self.double_check_switch = None
         self.activate_logging_switch = None
         self.suppress_switch = None
@@ -301,7 +302,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, excluded_file,
-         remove_non_ascii_symbols_var) = (
+         remove_non_ascii_symbols_var, artist_identifier_var, keyword_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -327,8 +328,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_log = file_renamer_log
         self.default_placement_var = default_placement_var
         self.special_character_var = special_character_var
+        self.keyword_var = keyword_var
         self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)
         self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
+        self.artist_identifier_var = ctk.BooleanVar(value=artist_identifier_var)
         self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
         self.move_text_var = ctk.BooleanVar(value=move_text_var)
         self.open_on_file_drop_var = ctk.BooleanVar(value=open_on_file_drop_var)
@@ -1464,10 +1467,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.remove_duplicates_var)
         self.remove_duplicates_switch.grid(row=0, column=1, padx=10, pady=10)
 
+        # Switch to enable/disable artist identifier
+        self.artist_identifier_switch = ctk.CTkSwitch(self.switch_frame, text="Artist Identifier",
+                                                      variable=self.artist_identifier_var)
+        self.artist_identifier_switch.grid(row=0, column=2, padx=10, pady=10)
+
         # Switch to enable/disable create double check reminder
         self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
                                                  variable=self.double_check_var)
-        self.double_check_switch.grid(row=0, column=2, padx=10, pady=10)
+        self.double_check_switch.grid(row=0, column=3, padx=10, pady=10)
 
         # Switch to enable/disable activate logging
         self.activate_logging_switch = ctk.CTkSwitch(self.switch_frame, text="Activate Logging",
@@ -2093,6 +2101,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def add_folder_to_excluded_folders(self):
         # Exclude folder from Artist Directory search
         core.add_folder_to_excluded_folders(self)
+
+    def artist_identifier(self):
+        # Attempt to identify artists
+        return core.artist_identifier(self)
 
 
 if __name__ == "__main__":

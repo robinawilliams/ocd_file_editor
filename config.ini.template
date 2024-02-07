@@ -19,6 +19,8 @@ default_frame = file_renamer_window
 reset_output_directory_var = True
 ; Suggest an output directory
 suggest_output_directory_var = False
+; Identify artists
+artist_identifier_var = False
 ; Set output directory to one folder above the current directory
 move_up_directory_var = False
 ; Move text between - and __-__
@@ -125,6 +127,8 @@ remove_successful_lines_var = False
 default_placement_var = special_character
 ; Set the special character for the placement (alphanumeric character)
 special_character_var = -
+; Set the keyword for the Artist Identifier
+keyword_var = Sort
 ; Set the default rotation for video editor (left, right, flip, none)
 default_rotation_var = none
 ; List of file extensions to process (skip any not listed) - Name Normalizer
