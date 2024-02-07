@@ -750,13 +750,18 @@ def browse_input(self):
             )
 
         if nn_input_method:
+            # Set the name normalizer selected file
             self.name_normalizer_selected_file = nn_input_method
+
+            # Extract just the file name, not the absolute file path
+            filename = os.path.basename(nn_input_method)
+
+            # Reset the entry and insert the filename
             self.nn_path_entry.delete(0, ctk.END)
-            self.nn_path_entry.insert(0, self.name_normalizer_selected_file)
+            self.nn_path_entry.insert(0, filename)
 
             # Log the action if logging is enabled
-            self.log_and_show(f"Input selected via Browse: "
-                              f"{os.path.basename(self.name_normalizer_selected_file)}")
+            self.log_and_show(f"Input selected via Browse: {filename}")
 
     elif self.frame_name == "video_editor_window":
         # Initially ask for a file
@@ -772,8 +777,9 @@ def browse_input(self):
         if input_method:
             # Set the video editor selected file
             self.video_editor_selected_file = input_method
+
             # Extract just the file name, not the absolute file path
-            filename = os.path.basename(self.video_editor_selected_file)
+            filename = os.path.basename(input_method)
 
             # Set the selected file to the input entry widget
             self.input_method_entry.delete(0, ctk.END)
