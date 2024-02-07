@@ -24,6 +24,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_last_used_file = ""
         self.output_directory = ""
         self.queue = []
+        self.tabs = {}
         self.categories = {}
         self.name_normalizer_selected_file = ""
         self.name_normalizer_last_used_file = ""
@@ -2001,14 +2002,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Remove a category from the list and update the GUI
         core.remove_category(self)
 
-    def create_category_button(self, category):
-        return core.create_category_button(self, category)
+    def create_category_button(self, tab, category):
+        return core.create_category_button(self, tab, category)
 
     def categories_buttons_initialize(self):
         # Initialize category-related buttons in the GUI
         core.categories_buttons_initialize(self)
 
-    def refresh_category_buttons(self, sorted_categories=None):
+    def refresh_category_buttons(self):
         # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
 

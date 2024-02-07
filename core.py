@@ -959,12 +959,10 @@ def add_category(self):
 
             # Add the new category to the dictionary with the specified weight
             self.categories[new_category] = weight
-            # Sort categories alphabetically, case-insensitive
-            sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
             # Save the updated categories to the file
             self.save_categories()
             # Refresh the category buttons in the GUI
-            self.refresh_category_buttons(sorted_categories)
+            self.refresh_category_buttons()
             # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
             self.weight_entry.delete(0, ctk.END)
@@ -996,12 +994,10 @@ def remove_category(self):
     if category_to_remove in self.categories:
         # Remove the category from the dictionary
         del self.categories[category_to_remove]
-        # Sort categories alphabetically, case-insensitive
-        sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
         # Save the updated categories to the file
         self.save_categories()
         # Refresh the category buttons in the GUI
-        self.refresh_category_buttons(sorted_categories)
+        self.refresh_category_buttons()
         # Clear the remove category entry field
         self.remove_category_entry.delete(0, ctk.END)
 
@@ -1013,12 +1009,10 @@ def remove_category(self):
         if matching_category:
             # Remove the case-insensitive matched category from the dictionary
             del self.categories[matching_category]
-            # Sort categories alphabetically, case-insensitive
-            sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
             # Save the updated categories to the file
             self.save_categories()
             # Refresh the category buttons in the GUI
-            self.refresh_category_buttons(sorted_categories)
+            self.refresh_category_buttons()
             # Clear the remove category entry field
             self.remove_category_entry.delete(0, ctk.END)
 
@@ -1031,8 +1025,8 @@ def remove_category(self):
                               error=True)
 
 
-def create_category_button(self, category):
-    return ctk.CTkButton(self.button_frame, text=category, command=lambda c=category: self.add_to_queue(c))
+def create_category_button(self, tab, category):
+    return ctk.CTkButton(tab, text=category, command=lambda c=category: self.add_to_queue(c))
 
 
 def categories_buttons_initialize(self):
@@ -1043,34 +1037,90 @@ def categories_buttons_initialize(self):
     except (FileNotFoundError, json.JSONDecodeError):
         self.categories = {}
 
-    # Sort the category keys alphabetically, case-insensitive
-    sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
+    # Create tabview
+    self.tabview = ctk.CTkTabview(self.button_frame)
+    self.tabview.grid(row=0, column=0)
 
-    # Batch processing for button creation
-    buttons = [self.create_category_button(category) for category in sorted_categories]
+    # Create a tab for all categories
+    all_categories_tab = self.tabview.add("All Categories")
+    self.tabs["All Categories"] = all_categories_tab  # Store the reference to the tab
 
-    for i, button in enumerate(buttons):
+    # Create a tab for each weight
+    weights = set(self.categories.values())
+    for weight in weights:
+        tab = self.tabview.add(f"Weight {weight}")
+        self.tabs[weight] = tab  # Store the reference to the tab
+
+        # Filter categories based on weight and sort case-insensitively
+        weight_categories = sorted([category for category, w in self.categories.items() if w == weight],
+                                   key=lambda x: x.lower())
+
+        # Batch processing for button creation
+        buttons = [self.create_category_button(tab, category) for category in weight_categories]
+
+        for i, button in enumerate(buttons):
+            button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
+
+        self.buttons = buttons
+
+    # Create buttons for all categories in the "All Categories" tab
+    all_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
+    all_buttons = [self.create_category_button(all_categories_tab, category) for category in all_categories]
+
+    for i, button in enumerate(all_buttons):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
 
-    self.buttons = buttons
+    self.all_buttons = all_buttons
 
 
-def refresh_category_buttons(self, sorted_categories=None):
-    # If sorted_categories is not provided, sort the categories alphabetically, case-insensitive
-    if sorted_categories is None:
-        sorted_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
-
-    # Remove existing buttons
-    for button in self.buttons:
+def refresh_category_buttons(self):
+    # Destroy existing tabs and buttons
+    if hasattr(self, 'tabview') and self.tabview:
+        self.tabview.destroy()
+    for button in getattr(self, 'buttons', []):
         button.destroy()
 
-    # Batch processing for button creation
-    buttons = [self.create_category_button(category) for category in sorted_categories]
+    # Load categories from the file or create an empty dictionary
+    try:
+        with open(self.categories_file, "r") as file:
+            self.categories = json.load(file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        self.categories = {}
 
-    for i, button in enumerate(buttons):
+    # Create tabview
+    self.tabview = ctk.CTkTabview(self.button_frame)
+    self.tabview.grid(row=0, column=0)
+
+    # Create a tab for all categories
+    all_categories_tab = self.tabview.add("All Categories")
+    self.tabs["All Categories"] = all_categories_tab  # Store the reference to the tab
+
+    # Create a tab for each weight
+    weights = set(self.categories.values())
+    for weight in weights:
+        tab = self.tabview.add(f"Weight {weight}")
+        self.tabs[weight] = tab  # Store the reference to the tab
+
+        # Filter categories based on weight and sort case-insensitively
+        weight_categories = sorted([category for category, w in self.categories.items() if w == weight],
+                                   key=lambda x: x.lower())
+
+        # Batch processing for button creation
+        buttons = [self.create_category_button(tab, category) for category in weight_categories]
+
+        for i, button in enumerate(buttons):
+            button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
+
+        self.buttons = buttons
+
+    # Create buttons for all categories in the "All Categories" tab
+    all_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
+    all_buttons = [self.create_category_button(all_categories_tab, category) for category in all_categories]
+
+    for i, button in enumerate(all_buttons):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
 
-    self.buttons = buttons
+    self.all_buttons = all_buttons
 
 
 def save_categories(self):
