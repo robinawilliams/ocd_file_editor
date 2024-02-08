@@ -2011,6 +2011,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
 
+    def create_tabview(self):
+        # Create the tabview and buttons
+        core.create_tabview(self)
+
     def save_categories(self):
         # Save the current list of categories to the configuration
         core.save_categories(self)

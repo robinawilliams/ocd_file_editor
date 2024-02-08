@@ -1054,40 +1054,8 @@ def categories_buttons_initialize(self):
     self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
     self.button_frame.grid(row=1, column=0, padx=10, pady=5)
 
-    # Create tabview
-    self.tabview = ctk.CTkTabview(self.button_frame)
-    self.tabview.grid(row=0, column=0)
-
-    # Create a tab for all categories
-    all_categories_tab = self.tabview.add("All Categories")
-    self.tabs["All Categories"] = all_categories_tab  # Store the reference to the tab
-
-    # Create a tab for each weight
-    weights = set(self.categories.values())
-    for weight in weights:
-        tab = self.tabview.add(f"Weight {weight}")
-        self.tabs[weight] = tab  # Store the reference to the tab
-
-        # Filter categories based on weight and sort case-insensitively
-        weight_categories = sorted([category for category, w in self.categories.items() if w == weight],
-                                   key=lambda x: x.lower())
-
-        # Batch processing for button creation
-        buttons = [self.create_category_button(tab, category) for category in weight_categories]
-
-        for i, button in enumerate(buttons):
-            button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
-
-        self.buttons = buttons
-
-    # Create buttons for all categories in the "All Categories" tab
-    all_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
-    all_buttons = [self.create_category_button(all_categories_tab, category) for category in all_categories]
-
-    for i, button in enumerate(all_buttons):
-        button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
-
-    self.all_buttons = all_buttons
+    # Create the tabview and buttons
+    self.create_tabview()
 
 
 def refresh_category_buttons(self):
@@ -1116,6 +1084,12 @@ def refresh_category_buttons(self):
     except Exception as e:
         self.log_and_show(f"Initialize categories_file failed: {self.categories_file}, {str(e)}", error=True)
 
+    # Create the tabview and buttons
+    self.create_tabview()
+
+
+# Function to create the tabview and buttons
+def create_tabview(self):
     # Create tabview
     self.tabview = ctk.CTkTabview(self.button_frame)
     self.tabview.grid(row=0, column=0)
