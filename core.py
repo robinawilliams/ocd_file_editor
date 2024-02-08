@@ -1032,10 +1032,27 @@ def create_category_button(self, tab, category):
 def categories_buttons_initialize(self):
     # Load categories from the file or create an empty dictionary
     try:
+        if not os.path.isfile(self.categories_file):
+            # Raise error if the file doesn't exist
+            raise FileNotFoundError
+
         with open(self.categories_file, "r") as file:
             self.categories = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        self.categories = {}
+
+    except FileNotFoundError:
+        # Log that the file is not found
+        self.log_and_show(f"Categories file not found: {self.categories_file}", error=True)
+
+    except json.JSONDecodeError as e:
+        # Handle JSON decoding error
+        self.log_and_show(f"Decoding JSON in categories_file failed: {self.categories_file}, {str(e)}", error=True)
+
+    except Exception as e:
+        self.log_and_show(f"Initialize categories_file failed: {self.categories_file}, {str(e)}", error=True)
+
+    # Categories button frame
+    self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
+    self.button_frame.grid(row=1, column=0, padx=10, pady=5)
 
     # Create tabview
     self.tabview = ctk.CTkTabview(self.button_frame)
@@ -1082,10 +1099,22 @@ def refresh_category_buttons(self):
 
     # Load categories from the file or create an empty dictionary
     try:
+        if not os.path.isfile(self.categories_file):
+            # Raise error if the file doesn't exist
+            raise FileNotFoundError
+
         with open(self.categories_file, "r") as file:
             self.categories = json.load(file)
-    except (FileNotFoundError, json.JSONDecodeError):
-        self.categories = {}
+    except FileNotFoundError:
+        # Log that the file is not found
+        self.log_and_show(f"Categories file not found: {self.categories_file}", error=True)
+
+    except json.JSONDecodeError as e:
+        # Handle JSON decoding error
+        self.log_and_show(f"Decoding JSON in categories_file failed: {self.categories_file}, {str(e)}", error=True)
+
+    except Exception as e:
+        self.log_and_show(f"Initialize categories_file failed: {self.categories_file}, {str(e)}", error=True)
 
     # Create tabview
     self.tabview = ctk.CTkTabview(self.button_frame)

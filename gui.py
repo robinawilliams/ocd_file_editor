@@ -411,6 +411,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create the GUI elements
         self.create_gui()
 
+        # Initialize category buttons | Done after gui creation
+        self.categories_buttons_initialize()
+
     def create_gui(self):
         # Set up grid layout with 1 row and 2 columns, configuring weights for resizing
         self.grid_rowconfigure(0, weight=1)
@@ -522,12 +525,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                textvariable=self.file_display_text)
         self.file_display_entry.grid(row=0, column=1, padx=5)
 
-        # Categories button frame
-        self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.button_frame.grid(row=1, column=0, padx=10, pady=5)
-
-        # Initialize category buttons
-        self.categories_buttons_initialize()
+        # PLACEHOLDER Categories button_frame on row1 in categories_buttons_initialize
 
         # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
