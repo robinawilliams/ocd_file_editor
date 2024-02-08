@@ -68,7 +68,7 @@ def load_configuration(self):
     artist_directory = config.get('Filepaths', 'artist_directory', fallback='artist_directory')
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
     no_go_artist_file = config.get('Filepaths', 'no_go_artist_file', fallback='list_of_no_go_artists.txt')
-    excluded_file = config.get('Filepaths', 'excluded_file', fallback='excluded.json')
+    dictionary_file = config.get('Filepaths', 'dictionary_file', fallback='dictionary.json')
     categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
@@ -85,6 +85,7 @@ def load_configuration(self):
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
     keyword_var = config.get("Settings", "keyword_var", fallback="Sort")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
+    use_custom_tab_names_var = config.getboolean("Settings", "use_custom_tab_names_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     artist_identifier_var = config.getboolean("Settings", "artist_identifier_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
@@ -171,32 +172,68 @@ def load_configuration(self):
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, excluded_file,
-            remove_non_ascii_symbols_var, artist_identifier_var, keyword_var)
+            remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
+            remove_non_ascii_symbols_var, artist_identifier_var, keyword_var, use_custom_tab_names_var)
 
 
-# Function to load the exclude_file
-def initialize_exclude(self):
-    # Load excluded_folders from the excluded_file or create an empty dictionary
+# Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
+def initialize_json(self):
+    # Load excluded_folders from the dictionary_file or create an empty dictionary
     try:
-        if not os.path.isfile(self.excluded_file):
+        if not os.path.isfile(self.dictionary_file):
             # Return early if the file doesn't exist
             return
 
-        with open(self.excluded_file, 'r') as json_file:
+        with open(self.dictionary_file, 'r') as json_file:
             data = json.load(json_file)
+            # Get excluded_folders 
             self.excluded_folders = data.get("excluded_folders", [])
+
+            # Get weight_to_tab_name
+            weight_to_tab_name = data.get('weight_to_tab_name', {})
+            # Make sure the keys are integers
+            self.weight_to_tab_name = {int(key): value for key, value in weight_to_tab_name.items()}
 
     except FileNotFoundError:
         # Log that the file is not found
-        self.log_and_show(f"Exclusion file not found: {self.excluded_file}")
+        self.log_and_show(f"Exclusion file not found: {self.dictionary_file}")
 
     except json.JSONDecodeError as e:
         # Handle JSON decoding error
-        self.log_and_show(f"Error decoding JSON in exclusion file: {self.excluded_file}, {str(e)}", error=True)
+        self.log_and_show(f"Error decoding JSON in exclusion file: {self.dictionary_file}, {str(e)}", error=True)
 
     except Exception as e:
-        self.log_and_show(f"Initialize exclusion_file failed: {self.excluded_file}, {str(e)}", error=True)
+        self.log_and_show(f"Initialize exclusion_file failed: {self.dictionary_file}, {str(e)}", error=True)
+
+
+# Function to update the json dictionary
+def update_json(self, file_to_update, dictionary_name, updated_data):
+    try:
+        if not os.path.isfile(file_to_update):
+            # Return early if the file doesn't exist
+            raise FileNotFoundError
+
+        # Read existing JSON data
+        with open(file_to_update, 'r') as json_file:
+            data = json.load(json_file)
+
+        # Update the dictionary key
+        data[dictionary_name] = updated_data
+
+        # Write the updated data back to the JSON file
+        with open(file_to_update, 'w') as json_file:
+            json.dump(data, json_file, indent=2)
+
+    except FileNotFoundError:
+        # Log that the file is not found
+        self.log_and_show(f"JSON file not found: {file_to_update}", create_messagebox=True, error=True)
+
+    except json.JSONDecodeError as e:
+        # Handle JSON decoding error
+        self.log_and_show(f"Decoding JSON in JSON file failed: {file_to_update}, {str(e)}", error=True)
+
+    except Exception as e:
+        self.log_and_show(f"Updating JSON failed: {file_to_update}, {str(e)}", error=True)
 
 
 def logging_setup(self):
@@ -1101,7 +1138,12 @@ def create_tabview(self):
     # Create a tab for each weight
     weights = set(self.categories.values())
     for weight in weights:
-        tab = self.tabview.add(f"Weight {weight}")
+        if self.use_custom_tab_names_var.get() and weight in self.weight_to_tab_name:
+            tab_name = self.weight_to_tab_name[weight]
+            tab = self.tabview.add(tab_name)
+        else:
+            tab = self.tabview.add(f"Weight {weight}")
+
         self.tabs[weight] = tab  # Store the reference to the tab
 
         # Filter categories based on weight and sort case-insensitively
@@ -2320,8 +2362,7 @@ def add_folder_to_excluded_folders(self):
         self.excluded_folders.append(self.exclude_name)
 
         # Update the JSON file with the new excluded_folders list
-        with open(self.excluded_file, 'w') as json_file:
-            json.dump({"excluded_folders": self.excluded_folders}, json_file, indent=2)
+        self.update_json(self.dictionary_file, "excluded_folders", self.excluded_folders)
 
         # Log and show success message
         self.log_and_show(f"Folder '{self.exclude_name}' added to excluded folders list.")

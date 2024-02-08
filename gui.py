@@ -25,6 +25,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory = ""
         self.queue = []
         self.tabs = {}
+        self.weight_to_tab_name = {}
         self.categories = {}
         self.name_normalizer_selected_file = ""
         self.name_normalizer_last_used_file = ""
@@ -254,6 +255,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.activate_logging_switch = None
         self.suppress_switch = None
         self.show_messageboxes_switch = None
+        self.use_custom_tab_names_switch = None
         self.confirmation_frame = None
         self.show_confirmation_messageboxes_switch = None
         self.fallback_confirmation_label = None
@@ -302,8 +304,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
-         remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, excluded_file,
-         remove_non_ascii_symbols_var, artist_identifier_var, keyword_var) = (
+         remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
+         remove_non_ascii_symbols_var, artist_identifier_var, keyword_var, use_custom_tab_names_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -314,7 +316,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_directory = artist_directory
         self.artist_file = artist_file
         self.no_go_artist_file = no_go_artist_file
-        self.excluded_file = excluded_file
+        self.dictionary_file = dictionary_file
         self.categories_file = categories_file
 
         # Variables and window geometry - Set instance variables with the values from the configuration file
@@ -331,6 +333,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.special_character_var = special_character_var
         self.keyword_var = keyword_var
         self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)
+        self.use_custom_tab_names_var = ctk.BooleanVar(value=use_custom_tab_names_var)
         self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
         self.artist_identifier_var = ctk.BooleanVar(value=artist_identifier_var)
         self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
@@ -405,8 +408,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize frame name to default frame
         self.frame_name = self.default_frame
 
-        # Initialize the exclusion folders
-        self.initialize_exclude()
+        # Initialize the json file (excluded_folders and weight_to_tab_name)
+        self.initialize_json()
 
         # Create the GUI elements
         self.create_gui()
@@ -1497,6 +1500,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.show_messageboxes_var)
         self.show_messageboxes_switch.grid(row=1, column=2, padx=10, pady=10)
 
+        # Switch to enable/disable use_custom_tab_names_var
+        self.use_custom_tab_names_switch = ctk.CTkSwitch(self.switch_frame, text="Use Custom Tab Names",
+                                                         variable=self.use_custom_tab_names_var)
+        self.use_custom_tab_names_switch.grid(row=1, column=3, padx=10, pady=10)
+
+        # Bind the callback function to the use use_custom_tab_names_var
+        self.use_custom_tab_names_var.trace_add("write", self.refresh_category_buttons)
+
         # Confirmation frame
         self.confirmation_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
         self.confirmation_frame.grid(row=2, column=0, padx=10)
@@ -1888,9 +1899,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Load configuration settings using the core module
         return core.load_configuration(self)
 
-    def initialize_exclude(self):
-        # Load the exclude_file
-        core.initialize_exclude(self)
+    def initialize_json(self):
+        # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
+        core.initialize_json(self)
+
+    def update_json(self, file_to_update, dictionary_name, updated_data):
+        # Update the json dictionary
+        core.update_json(self, file_to_update, dictionary_name, updated_data)
 
     def logging_setup(self):
         # Setup logging
@@ -2007,7 +2022,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize category-related buttons in the GUI
         core.categories_buttons_initialize(self)
 
-    def refresh_category_buttons(self):
+    def refresh_category_buttons(self, *args):
         # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
 
