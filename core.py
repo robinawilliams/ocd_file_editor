@@ -247,8 +247,8 @@ def move_file_to_trash(self):
     try:
         if self.file_renamer_selected_file:
             # Ask for confirmation before moving to trash
-            confirmation = ask_confirmation(self, "Confirm Action",
-                                            "Are you sure you want to move this file to the trash?")
+            confirmation = self.ask_confirmation("Confirm Action",
+                                                 "Are you sure you want to move this file to the trash?")
             # Log the action if logging is enabled
             self.log_and_show(f"'{self.file_renamer_selected_file}' selected for deletion.")
 
@@ -282,9 +282,9 @@ def double_check_reminder(self, new_path):
         folder_name = os.path.basename(os.path.dirname(new_path))
 
         # Ask for confirmation of the double check reminder
-        confirmation = ask_confirmation(self, "Double Check Reminder",
-                                        f"Do you want to create a double check reminder for: "
-                                        f"{folder_name}?")
+        confirmation = self.ask_confirmation("Double Check Reminder",
+                                             f"Do you want to create a double check reminder for: "
+                                             f"{folder_name}?")
         if confirmation:
             # Expand the user's home directory in the output directory path
             double_check_directory = os.path.expanduser(self.double_check_directory)
@@ -900,7 +900,7 @@ def handle_rename_success(self, new_path):
     # Check if the double check reminder variable is true
     if self.double_check_var.get():
         # Call the double check reminder function
-        double_check_reminder(self, new_path)
+        self.double_check_reminder(new_path)
 
     # Reset selected file, queue and update file renamer last used file
     self.file_renamer_selected_file = ""
@@ -1182,9 +1182,9 @@ def rename_files(self):
                 # If suggest output directory returns a result, use that as the output directory
                 if suggested_output_directory:
                     # Ask for confirmation of new output directory if match found
-                    confirmation = ask_confirmation(self, "Suggest Output Directory",
-                                                    f"Suggested output directory found. Do you want to use: "
-                                                    f"{suggested_output_directory}?")
+                    confirmation = self.ask_confirmation("Suggest Output Directory",
+                                                         f"Suggested output directory found. Do you want to use: "
+                                                         f"{suggested_output_directory}?")
                     if confirmation:
                         self.output_directory = suggested_output_directory
                         self.log_and_show(f"User chose the suggested output directory: {self.output_directory}")
@@ -1553,7 +1553,7 @@ def preview_name(self, file_path):
                 # Check if remove_duplicates_var is set
                 if self.remove_duplicates_var.get():
                     # Call the remove_artist_duplicates_from_filename function to modify name
-                    name = remove_artist_duplicates_from_filename(self, name)
+                    name = self.remove_artist_duplicates_from_filename(name)
             except FileNotFoundError:
                 self.log_and_show(f"File not found: {self.artist_file}",
                                   create_messagebox=True, error=True)
@@ -1673,14 +1673,14 @@ def process_name_normalizer(self, mode):
             return
 
     if mode == "preview":
-        preview_result = preview_name(self, self.name_normalizer_selected_file)
+        preview_result = self.preview_name(self.name_normalizer_selected_file)
         if preview_result:
             self.log_and_show(f"Preview: \n{os.path.basename(preview_result)}", create_messagebox=True)
         return
     elif mode == "action":
         # Ask for confirmation before normalizing files
-        confirmation = ask_confirmation(self, "Confirm Action",
-                                        "Are you sure you want normalize the file(s)? This cannot be undone.")
+        confirmation = self.ask_confirmation("Confirm Action",
+                                             "Are you sure you want normalize the file(s)? This cannot be undone.")
         if confirmation:
             self.log_and_show(f"User confirmed the name normalization process for "
                               f"{self.name_normalizer_selected_file}.")
@@ -1692,7 +1692,7 @@ def process_name_normalizer(self, mode):
     try:
         if os.path.isfile(self.name_normalizer_selected_file):
             # If a single file is provided, directly process it
-            rename_and_move_file(self, self.name_normalizer_selected_file)
+            self.rename_and_move_file(self.name_normalizer_selected_file)
         else:
             # Get folder contents and save to memory
 
@@ -1716,7 +1716,7 @@ def process_name_normalizer(self, mode):
 
             # Iterate through file paths and rename/move files
             for file_path in file_paths:
-                rename_and_move_file(self, file_path)
+                self.rename_and_move_file(file_path)
 
         # Log the action if logging is enabled
         self.log_and_show("File(s) have been processed successfully.")
@@ -1783,6 +1783,11 @@ def get_non_conflicting_filename(self, path):
 # Function to remove a successful line from a file.
 def remove_successful_line_from_file(self, file_path, line_to_remove):
     try:
+        if not file_path.lower().endswith('.txt'):
+            # If the file does not have a .txt extension, return without performing any operation.
+            self.log_and_show("The provided file is not a txt file.", error=True)
+            return
+
         if self.remove_successful_lines_var.get():
             # Read all lines from the file.
             with open(file_path, 'r') as file:
@@ -1983,9 +1988,9 @@ def process_video_edits(self):
         # Directory
         elif os.path.isdir(self.video_editor_selected_file):
             # Ask for confirmation before normalizing files
-            confirmation = ask_confirmation(self, "Confirm Action",
-                                            "Are you sure you want edit ALL video files in the provided directory?"
-                                            "\nThis option may be computer intensive.")
+            confirmation = self.ask_confirmation("Confirm Action",
+                                                 "Are you sure you want edit ALL video files in the provided directory?"
+                                                 "\nThis option may be computer intensive.")
             if confirmation:
                 self.log_and_show(f"User confirmed the directory for {self.video_editor_selected_file}.")
 
@@ -2058,28 +2063,28 @@ def process_video_edits(self):
 
             # Apply operations in sequence, checking for success
             if rotation_angle is not None and successful_operations:
-                processed_clip = rotate_video(self, original_clip, rotation_angle)
+                processed_clip = self.rotate_video(original_clip, rotation_angle)
                 if processed_clip:
                     original_clip = processed_clip
                 else:
                     successful_operations = False
 
             if decibel and successful_operations:
-                processed_clip = increase_volume(self, original_clip, decibel)
+                processed_clip = self.increase_volume(original_clip, decibel)
                 if processed_clip:
                     original_clip = processed_clip
                 else:
                     successful_operations = False
 
             if audio_normalization and successful_operations:
-                processed_clip = normalize_audio(self, original_clip, audio_normalization)
+                processed_clip = self.normalize_audio(original_clip, audio_normalization)
                 if processed_clip:
                     original_clip = processed_clip
                 else:
                     successful_operations = False
 
             if trim and successful_operations:
-                processed_clip = trim_video(self, original_clip, total_time)
+                processed_clip = self.trim_video(original_clip, total_time)
                 if processed_clip:
                     original_clip = processed_clip
                 else:
@@ -2088,10 +2093,6 @@ def process_video_edits(self):
             # Write the final modified clip to the output path if all operations were successful
             if successful_operations:
                 original_clip.write_videofile(output_path, codec="libx264", audio_codec="aac")
-
-                # Log the action if logging is enabled
-                self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
-                                  f"\nPath: {output_path}")
 
                 # Set the video editor last used file upon success
                 self.video_editor_last_used_file = output_path
@@ -2102,7 +2103,11 @@ def process_video_edits(self):
 
                 # Remove the successfully processed line from the input file
                 if self.video_editor_selected_file:
-                    remove_successful_line_from_file(self, self.video_editor_selected_file, input_path)
+                    self.remove_successful_line_from_file(self.video_editor_selected_file, input_path)
+
+                # Log the action if logging is enabled
+                self.log_and_show(f"Video saved as {os.path.basename(output_path)}"
+                                  f"\nPath: {output_path}")
             else:
                 self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
                                   create_messagebox=True,

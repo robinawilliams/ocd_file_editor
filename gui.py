@@ -1878,7 +1878,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def ask_confirmation(self, title, message):
         # Method to check logging state and show a messagebox.
-        core.ask_confirmation(self, title, message)
+        return core.ask_confirmation(self, title, message)
 
     """
     Configuration
