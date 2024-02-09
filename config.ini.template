@@ -15,6 +15,8 @@ default_minute = 00
 default_second = 00
 ; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, add_remove_window, settings_window)
 default_frame = file_renamer_window
+; Default tab to open with (All Categories)
+default_tab = All Categories
 ; Use custom tab names
 use_custom_tab_names_var = False
 ; Sort tab names

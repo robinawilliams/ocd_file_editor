@@ -308,7 +308,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-         suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+         default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var) = (
             self.load_configuration())
@@ -332,6 +332,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_minute = default_minute
         self.default_second = default_second
         self.default_frame = default_frame
+        self.default_tab = default_tab
         self.file_renamer_log = file_renamer_log
         self.default_placement_var = default_placement_var
         self.special_character_var = special_character_var
@@ -417,6 +418,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Create the GUI elements
         self.create_gui()
+
+        # Select default frame
+        self.select_frame_by_name(self.default_frame)
 
     def create_gui(self):
         # Set up grid layout with 1 row and 2 columns, configuring weights for resizing
@@ -1696,12 +1700,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.log_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
         self.log_file_entry.insert(0, self.file_renamer_log)
         self.log_file_entry.grid(row=1, column=1, padx=10, pady=10)
-
-        """
-        Misc
-        """
-        # Select default frame
-        self.select_frame_by_name(self.default_frame)
 
     # Callback for updating the scroll region when the inner frame is configured
     def on_frame_configure(self, event=None):

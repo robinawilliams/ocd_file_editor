@@ -79,6 +79,7 @@ def load_configuration(self):
     default_minute = config.get('Settings', 'default_minute', fallback=0)
     default_second = config.get('Settings', 'default_second', fallback=0)
     default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
+    default_tab = config.get('Settings', 'default_tab', fallback="All Categories")
     file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
@@ -162,7 +163,7 @@ def load_configuration(self):
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+            default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var)
 
@@ -1132,6 +1133,14 @@ def create_tabview(self):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
 
     self.all_buttons = all_buttons
+
+    # Attempt to set the default tab
+    try:
+        # Check if self.default_tab is in the tab names
+        if self.default_tab and self.tabview.index(self.default_tab) is not None:
+            self.tabview.set(self.default_tab)
+    except ValueError:
+        return
 
 
 """
