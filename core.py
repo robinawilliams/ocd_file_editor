@@ -146,11 +146,6 @@ def load_configuration(self):
     default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
 
     # File extensions
-    file_extensions_str = config.get('Settings', 'file_extensions',
-                                     fallback='.mp3, .wav, .ogg, .flac, .aac, .wma, .m4a, .aiff, .alac, .opus, .mp4, '
-                                              '.mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v')
-    file_extensions = tuple(ext.strip() for ext in file_extensions_str.split(','))
-
     valid_extensions_str = config.get('Settings', 'valid_extensions',
                                       fallback='.mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v')
     valid_extensions = [ext.strip() for ext in valid_extensions_str.split(',')]
@@ -160,7 +155,7 @@ def load_configuration(self):
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
             open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
             double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
-            file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
+            use_custom_tab_names_var, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
             remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
             remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
             remove_double_quote_var, title_var, reset_var, initial_output_directory, artist_file, default_frame,
@@ -172,7 +167,7 @@ def load_configuration(self):
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-            remove_non_ascii_symbols_var, artist_identifier_var, use_custom_tab_names_var)
+            remove_non_ascii_symbols_var, artist_identifier_var)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -187,6 +182,9 @@ def initialize_json(self):
             data = json.load(json_file)
             # Get excluded_folders dictionary
             self.excluded_folders = data.get("excluded_folders", [])
+
+            # Get file_extensions dictionary
+            self.file_extensions = data.get("file_extensions", [])
 
             # Get weight_to_tab_name dictionary
             weight_to_tab_name = data.get("weight_to_tab_name", {})

@@ -25,6 +25,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory = ""
         self.queue = []
         self.tabs = {}
+        self.excluded_folders = []
+        self.file_extensions = []
         self.weight_to_tab_name = {}
         self.categories = {}
         self.name_normalizer_selected_file = ""
@@ -36,7 +38,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_artist = ""
         self.remove_artist = ""
         self.no_go_name = ""
-        self.excluded_folders = []
         self.exclude_name = ""
 
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
@@ -293,7 +294,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
          double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
-         file_extensions, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
+         use_custom_tab_names_var, remove_all_symbols_var, tail_var, remove_parenthesis_trail_var,
          remove_hashtag_trail_var, remove_new_var, remove_dash_var, remove_endash_var, remove_emdash_var,
          remove_ampersand_var, remove_at_var, remove_underscore_var, remove_comma_var, remove_single_quote_var,
          remove_double_quote_var, title_var, reset_var, initial_output_directory, artist_file, default_frame,
@@ -305,7 +306,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-         remove_non_ascii_symbols_var, artist_identifier_var, use_custom_tab_names_var) = (
+         remove_non_ascii_symbols_var, artist_identifier_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -345,7 +346,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.show_messageboxes_var = ctk.BooleanVar(value=show_messageboxes_var)
         self.show_confirmation_messageboxes_var = ctk.BooleanVar(value=show_confirmation_messageboxes_var)
         self.fallback_confirmation_var = ctk.BooleanVar(value=fallback_confirmation_var)
-        self.file_extensions = file_extensions
         self.valid_extensions = valid_extensions
 
         # Name Normalizer - Set instance variables with the values from the configuration file
