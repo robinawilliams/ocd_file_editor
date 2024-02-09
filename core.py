@@ -79,7 +79,7 @@ def load_configuration(self):
     default_minute = config.get('Settings', 'default_minute', fallback=0)
     default_second = config.get('Settings', 'default_second', fallback=0)
     default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
-    default_tab = config.get('Settings', 'default_tab', fallback="All Categories")
+    default_tab = config.get('Settings', 'default_tab', fallback="All")
     file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
@@ -1089,7 +1089,11 @@ def create_tabview(self):
 
     # Create a tab for all categories
     all_cat_tab = self.tabview.add("All")
-    self.tabs["All Categories"] = all_cat_tab  # Store the reference to the tab
+    self.tabs["All"] = all_cat_tab  # Store the reference to the tab
+
+    # Create a tab for "Most Categories" with weights 1-9
+    most_cat_tab = self.tabview.add("Most")
+    self.tabs["Most"] = most_cat_tab  # Store the reference to the tab
 
     # Sort the weight tab_names
     if self.sort_tab_names_var.get():
@@ -1133,6 +1137,15 @@ def create_tabview(self):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
 
     self.all_buttons = all_buttons
+
+    # Create buttons for categories with weights 1-9 in the "Most Categories" tab
+    most_categories = [category for category, w in self.categories.items() if 1 <= w <= 9]
+    most_buttons = [self.create_category_button(most_cat_tab, category) for category in most_categories]
+
+    for i, button in enumerate(most_buttons):
+        button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
+
+    self.most_buttons = most_buttons
 
     # Attempt to set the default tab
     try:
