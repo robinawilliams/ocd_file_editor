@@ -265,6 +265,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.tab_name_frame = None
         self.use_custom_tab_names_switch = None
         self.sort_tab_names_switch = None
+        self.sort_tab_names_reverse_switch = None
         self.gui_settings_frame = None
         self.appearance_mode_label = None
         self.appearance_mode_menu = None
@@ -309,7 +310,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-         remove_non_ascii_symbols_var, artist_identifier_var, sort_alphabetically_var) = (
+         remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -337,7 +338,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.keyword_var = keyword_var
         self.reset_output_directory_var = ctk.BooleanVar(value=reset_output_directory_var)
         self.use_custom_tab_names_var = ctk.BooleanVar(value=use_custom_tab_names_var)
-        self.sort_alphabetically_var = ctk.BooleanVar(value=sort_alphabetically_var)
+        self.sort_tab_names_var = ctk.BooleanVar(value=sort_tab_names_var)
+        self.sort_reverse_order_var = ctk.BooleanVar(value=sort_reverse_order_var)
         self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
         self.artist_identifier_var = ctk.BooleanVar(value=artist_identifier_var)
         self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
@@ -1536,18 +1538,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Switch to enable/disable use_custom_tab_names_var
         self.use_custom_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Use Custom Tab Names",
                                                          variable=self.use_custom_tab_names_var)
-        self.use_custom_tab_names_switch.grid(row=1, column=3, padx=10)
+        self.use_custom_tab_names_switch.grid(row=0, column=0, padx=10)
 
         # Bind the callback function to use_custom_tab_names_var
         self.use_custom_tab_names_var.trace_add("write", self.refresh_category_buttons)
 
-        # Switch to enable/disable sort_alphabetically_var
-        self.sort_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names Alphabetically",
-                                                   variable=self.sort_alphabetically_var)
-        self.sort_tab_names_switch.grid(row=1, column=4, padx=10)
+        # Switch to enable/disable sort tab names
+        self.sort_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names",
+                                                   variable=self.sort_tab_names_var)
+        self.sort_tab_names_switch.grid(row=0, column=1, padx=10)
 
-        # Bind the callback function to sort_alphabetically_var
-        self.sort_alphabetically_var.trace_add("write", self.refresh_category_buttons)
+        # Bind the callback function to sort_tab_names_var
+        self.sort_tab_names_var.trace_add("write", self.refresh_category_buttons)
+
+        # Switch to enable/disable sort_reverse_order_var
+        self.sort_tab_names_reverse_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names (A-Z/Z-A)",
+                                                           variable=self.sort_reverse_order_var)
+        self.sort_tab_names_reverse_switch.grid(row=0, column=2, padx=10)
+
+        # Bind the callback function to sort_reverse_order_var
+        self.sort_reverse_order_var.trace_add("write", self.refresh_category_buttons)
 
         # GUI settings frame
         self.gui_settings_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")

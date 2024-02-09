@@ -85,7 +85,8 @@ def load_configuration(self):
     keyword_var = config.get("Settings", "keyword_var", fallback="Sort")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     use_custom_tab_names_var = config.getboolean("Settings", "use_custom_tab_names_var", fallback=False)
-    sort_alphabetically_var = config.getboolean("Settings", "sort_alphabetically_var", fallback=False)
+    sort_tab_names_var = config.getboolean("Settings", "sort_tab_names_var", fallback=False)
+    sort_reverse_order_var = config.getboolean("Settings", "sort_reverse_order_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     artist_identifier_var = config.getboolean("Settings", "artist_identifier_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
@@ -163,7 +164,7 @@ def load_configuration(self):
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-            remove_non_ascii_symbols_var, artist_identifier_var, sort_alphabetically_var)
+            remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -1089,10 +1090,13 @@ def create_tabview(self):
     all_categories_tab = self.tabview.add("All Categories")
     self.tabs["All Categories"] = all_categories_tab  # Store the reference to the tab
 
-    # Sort the weights alphabetically
-    if self.sort_alphabetically_var.get():
+    # Sort the weight tab_names
+    if self.sort_tab_names_var.get():
+        # Determine the order to sort (forward or backward)
+        sort_reverse_order_var = True if self.sort_reverse_order_var.get() else False
+
         # Create a tab for each sorted weight
-        weights = sorted(list(set(self.categories.values())))
+        weights = sorted(list(set(self.categories.values())), reverse=sort_reverse_order_var)
     else:
         # Create a tab for each weight
         weights = set(self.categories.values())
