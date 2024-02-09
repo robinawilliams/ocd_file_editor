@@ -1088,8 +1088,8 @@ def create_tabview(self):
     self.tabview.grid(row=0, column=0)
 
     # Create a tab for all categories
-    all_categories_tab = self.tabview.add("All Categories")
-    self.tabs["All Categories"] = all_categories_tab  # Store the reference to the tab
+    all_cat_tab = self.tabview.add("All")
+    self.tabs["All Categories"] = all_cat_tab  # Store the reference to the tab
 
     # Sort the weight tab_names
     if self.sort_tab_names_var.get():
@@ -1103,7 +1103,7 @@ def create_tabview(self):
         weights = set(self.categories.values())
 
     for weight in weights:
-        # Set either custom names or use default weight naming scheme
+        # Set either custom names or use the default weight naming scheme
         if self.use_custom_tab_names_var.get() and weight in self.weight_to_tab_name:
             tab_name = self.weight_to_tab_name[weight]
         else:
@@ -1127,7 +1127,7 @@ def create_tabview(self):
 
     # Create buttons for all categories in the "All Categories" tab
     all_categories = sorted(self.categories.keys(), key=lambda x: x.lower())
-    all_buttons = [self.create_category_button(all_categories_tab, category) for category in all_categories]
+    all_buttons = [self.create_category_button(all_cat_tab, category) for category in all_categories]
 
     for i, button in enumerate(all_buttons):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)

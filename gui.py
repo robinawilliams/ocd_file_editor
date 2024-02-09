@@ -1556,7 +1556,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.sort_tab_names_var.trace_add("write", self.refresh_category_buttons)
 
         # Switch to enable/disable sort_reverse_order_var
-        self.sort_tab_names_reverse_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names (A-Z/Z-A)",
+        self.sort_tab_names_reverse_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names (A-Z / Z-A)",
                                                            variable=self.sort_reverse_order_var)
         self.sort_tab_names_reverse_switch.grid(row=0, column=2, padx=10)
 
