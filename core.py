@@ -78,6 +78,7 @@ def load_configuration(self):
     default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
     default_minute = config.get('Settings', 'default_minute', fallback=0)
     default_second = config.get('Settings', 'default_second', fallback=0)
+    default_most_number = config.get('Settings', 'default_most_number', fallback=9)
     default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
     default_tab = config.get('Settings', 'default_tab', fallback="All")
     file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
@@ -165,7 +166,8 @@ def load_configuration(self):
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-            remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var)
+            remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
+            default_most_number)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -1138,8 +1140,8 @@ def create_tabview(self):
 
     self.all_buttons = all_buttons
 
-    # Create buttons for categories with weights 1-9 in the "Most Categories" tab
-    most_categories = [category for category, w in self.categories.items() if 1 <= w <= 9]
+    # Create buttons for categories with weights 1-default_most_number in the "Most Categories" tab
+    most_categories = [category for category, w in self.categories.items() if 1 <= w <= self.default_most_number]
     most_buttons = [self.create_category_button(most_cat_tab, category) for category in most_categories]
 
     for i, button in enumerate(most_buttons):

@@ -310,7 +310,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-         remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var) = (
+         remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
+         default_most_number) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -331,6 +332,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_audio_normalization = default_audio_normalization
         self.default_minute = default_minute
         self.default_second = default_second
+        self.default_most_number = int(default_most_number)
         self.default_frame = default_frame
         self.default_tab = default_tab
         self.file_renamer_log = file_renamer_log
