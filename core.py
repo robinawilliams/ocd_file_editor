@@ -85,6 +85,7 @@ def load_configuration(self):
     keyword_var = config.get("Settings", "keyword_var", fallback="Sort")
     reset_output_directory_var = config.getboolean("Settings", "reset_output_directory_var", fallback=False)
     use_custom_tab_names_var = config.getboolean("Settings", "use_custom_tab_names_var", fallback=False)
+    sort_alphabetically_var = config.getboolean("Settings", "sort_alphabetically_var", fallback=False)
     suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
     artist_identifier_var = config.getboolean("Settings", "artist_identifier_var", fallback=False)
     move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
@@ -162,7 +163,7 @@ def load_configuration(self):
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-            remove_non_ascii_symbols_var, artist_identifier_var)
+            remove_non_ascii_symbols_var, artist_identifier_var, sort_alphabetically_var)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -1088,14 +1089,22 @@ def create_tabview(self):
     all_categories_tab = self.tabview.add("All Categories")
     self.tabs["All Categories"] = all_categories_tab  # Store the reference to the tab
 
-    # Create a tab for each weight
-    weights = set(self.categories.values())
+    # Sort the weights alphabetically
+    if self.sort_alphabetically_var.get():
+        # Create a tab for each sorted weight
+        weights = sorted(list(set(self.categories.values())))
+    else:
+        # Create a tab for each weight
+        weights = set(self.categories.values())
+
     for weight in weights:
+        # Set either custom names or use default weight naming scheme
         if self.use_custom_tab_names_var.get() and weight in self.weight_to_tab_name:
             tab_name = self.weight_to_tab_name[weight]
-            tab = self.tabview.add(tab_name)
         else:
-            tab = self.tabview.add(f"Weight {weight}")
+            tab_name = f"Weight {weight}"
+
+        tab = self.tabview.add(tab_name)
 
         self.tabs[weight] = tab  # Store the reference to the tab
 
