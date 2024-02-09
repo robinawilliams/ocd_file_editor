@@ -133,8 +133,6 @@ special_character_var = -
 keyword_var = Sort
 ; Set the default rotation for video editor (left, right, flip, none)
 default_rotation_var = none
-; List of file extensions to process (skip any not listed) - Video Editor
-valid_extensions = .mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v
 
 [Filepaths]
 ; Starting directory for browse (Uncomment and replace /path/to/folder with your directory)

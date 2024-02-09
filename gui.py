@@ -27,6 +27,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.tabs = {}
         self.excluded_folders = []
         self.file_extensions = []
+        self.valid_extensions = []
         self.weight_to_tab_name = {}
         self.categories = {}
         self.name_normalizer_selected_file = ""
@@ -304,7 +305,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-         valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+         suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var) = (
             self.load_configuration())
@@ -346,7 +347,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.show_messageboxes_var = ctk.BooleanVar(value=show_messageboxes_var)
         self.show_confirmation_messageboxes_var = ctk.BooleanVar(value=show_confirmation_messageboxes_var)
         self.fallback_confirmation_var = ctk.BooleanVar(value=fallback_confirmation_var)
-        self.valid_extensions = valid_extensions
 
         # Name Normalizer - Set instance variables with the values from the configuration file
         self.remove_all_symbols_var = ctk.BooleanVar(value=remove_all_symbols_var)

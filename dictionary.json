@@ -23,6 +23,17 @@
     ".mpg",
     ".m4v"
   ],
+  "valid_extensions": [
+    ".mp4",
+    ".mkv",
+    ".flv",
+    ".avi",
+    ".mov",
+    ".wmv",
+    ".mpeg",
+    ".mpg",
+    ".m4v"
+  ],
   "weight_to_tab_name": {
     "1": "Indie",
     "2": "Easy Listening",

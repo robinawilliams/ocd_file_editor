@@ -145,11 +145,6 @@ def load_configuration(self):
     remove_successful_lines_var = config.getboolean("Settings", "remove_successful_lines_var", fallback=False)
     default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
 
-    # File extensions
-    valid_extensions_str = config.get('Settings', 'valid_extensions',
-                                      fallback='.mp4, .mkv, .flv, .avi, .mov, .wmv, .mpeg, .mpg, .m4v')
-    valid_extensions = [ext.strip() for ext in valid_extensions_str.split(',')]
-
     # Return the loaded configuration values as a tuple
     return (move_text_var, initial_directory, artist_directory, double_check_directory, keyword_var,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
@@ -165,7 +160,7 @@ def load_configuration(self):
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+            suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var)
 
@@ -185,6 +180,9 @@ def initialize_json(self):
 
             # Get file_extensions dictionary
             self.file_extensions = data.get("file_extensions", [])
+
+            # Get valid_extensions dictionary
+            self.valid_extensions = data.get("valid_extensions", [])
 
             # Get weight_to_tab_name dictionary
             weight_to_tab_name = data.get("weight_to_tab_name", {})
