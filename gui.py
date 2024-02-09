@@ -289,7 +289,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.log_file_entry = None
 
         # Read settings from the configuration file and assign them to instance variables
-        (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
+        (move_text_var, initial_directory, artist_directory, double_check_directory, keyword_var,
          geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
          open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
          double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
@@ -305,7 +305,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
          valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-         remove_non_ascii_symbols_var, artist_identifier_var, keyword_var, use_custom_tab_names_var) = (
+         remove_non_ascii_symbols_var, artist_identifier_var, use_custom_tab_names_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -317,7 +317,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_file = artist_file
         self.no_go_artist_file = no_go_artist_file
         self.dictionary_file = dictionary_file
-        self.categories_file = categories_file
 
         # Variables and window geometry - Set instance variables with the values from the configuration file
         self.geometry(geometry)
@@ -408,14 +407,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize frame name to default frame
         self.frame_name = self.default_frame
 
-        # Initialize the json file (excluded_folders and weight_to_tab_name)
+        # Initialize the json file dictionaries
         self.initialize_json()
 
         # Create the GUI elements
         self.create_gui()
-
-        # Initialize category buttons | Done after gui creation
-        self.categories_buttons_initialize()
 
     def create_gui(self):
         # Set up grid layout with 1 row and 2 columns, configuring weights for resizing
@@ -528,7 +524,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                textvariable=self.file_display_text)
         self.file_display_entry.grid(row=0, column=1, padx=5)
 
-        # PLACEHOLDER Categories button_frame on row1 in categories_buttons_initialize
+        # Categories button frame
+        self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
+        self.button_frame.grid(row=1, column=0, padx=10, pady=5)
+
+        # Create a tabview and initialize category buttons on button_frame
+        self.create_tabview()
 
         # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
@@ -1900,7 +1901,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return core.load_configuration(self)
 
     def initialize_json(self):
-        # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
+        # Function to load the json file dictionaries
         core.initialize_json(self)
 
     def update_json(self, file_to_update, dictionary_name, updated_data):
@@ -2018,10 +2019,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def create_category_button(self, tab, category):
         return core.create_category_button(self, tab, category)
 
-    def categories_buttons_initialize(self):
-        # Initialize category-related buttons in the GUI
-        core.categories_buttons_initialize(self)
-
     def refresh_category_buttons(self, *args):
         # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
@@ -2029,10 +2026,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def create_tabview(self):
         # Create the tabview and buttons
         core.create_tabview(self)
-
-    def save_categories(self):
-        # Save the current list of categories to the configuration
-        core.save_categories(self)
 
     """
     File Renaming

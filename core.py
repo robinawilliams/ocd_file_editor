@@ -69,7 +69,6 @@ def load_configuration(self):
     artist_file = config.get('Filepaths', 'artist_file', fallback='list_of_artists.txt')
     no_go_artist_file = config.get('Filepaths', 'no_go_artist_file', fallback='list_of_no_go_artists.txt')
     dictionary_file = config.get('Filepaths', 'dictionary_file', fallback='dictionary.json')
-    categories_file = config.get('Filepaths', 'categories_file', fallback='categories.json')
 
     # Variables and window geometry
     geometry = config.get('Settings', 'geometry', fallback='1280x850')
@@ -157,7 +156,7 @@ def load_configuration(self):
     valid_extensions = [ext.strip() for ext in valid_extensions_str.split(',')]
 
     # Return the loaded configuration values as a tuple
-    return (move_text_var, initial_directory, artist_directory, double_check_directory, categories_file,
+    return (move_text_var, initial_directory, artist_directory, double_check_directory, keyword_var,
             geometry, reset_output_directory_var, suggest_output_directory_var, move_up_directory_var,
             open_on_file_drop_var, remove_duplicates_var, default_placement_var, special_character_var,
             double_check_var, activate_logging_var, file_renamer_log, column_numbers, default_weight,
@@ -173,26 +172,29 @@ def load_configuration(self):
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
             valid_extensions, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
-            remove_non_ascii_symbols_var, artist_identifier_var, keyword_var, use_custom_tab_names_var)
+            remove_non_ascii_symbols_var, artist_identifier_var, use_custom_tab_names_var)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
 def initialize_json(self):
-    # Load excluded_folders from the dictionary_file or create an empty dictionary
+    # Load data from the dictionary_file
     try:
         if not os.path.isfile(self.dictionary_file):
             # Return early if the file doesn't exist
             return
 
-        with open(self.dictionary_file, 'r') as json_file:
+        with open(self.dictionary_file, "r") as json_file:
             data = json.load(json_file)
-            # Get excluded_folders 
+            # Get excluded_folders dictionary
             self.excluded_folders = data.get("excluded_folders", [])
 
-            # Get weight_to_tab_name
-            weight_to_tab_name = data.get('weight_to_tab_name', {})
+            # Get weight_to_tab_name dictionary
+            weight_to_tab_name = data.get("weight_to_tab_name", {})
             # Make sure the keys are integers
             self.weight_to_tab_name = {int(key): value for key, value in weight_to_tab_name.items()}
+
+            # Get categories dictionary
+            self.categories = data.get("categories", {})
 
     except FileNotFoundError:
         # Log that the file is not found
@@ -997,7 +999,7 @@ def add_category(self):
             # Add the new category to the dictionary with the specified weight
             self.categories[new_category] = weight
             # Save the updated categories to the file
-            self.save_categories()
+            self.update_json(self.dictionary_file, "categories", self.categories)
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons()
             # Clear the category entry and weight entry fields
@@ -1032,7 +1034,7 @@ def remove_category(self):
         # Remove the category from the dictionary
         del self.categories[category_to_remove]
         # Save the updated categories to the file
-        self.save_categories()
+        self.update_json(self.dictionary_file, "categories", self.categories)
         # Refresh the category buttons in the GUI
         self.refresh_category_buttons()
         # Clear the remove category entry field
@@ -1047,7 +1049,7 @@ def remove_category(self):
             # Remove the case-insensitive matched category from the dictionary
             del self.categories[matching_category]
             # Save the updated categories to the file
-            self.save_categories()
+            self.update_json(self.dictionary_file, "categories", self.categories)
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons()
             # Clear the remove category entry field
@@ -1066,35 +1068,6 @@ def create_category_button(self, tab, category):
     return ctk.CTkButton(tab, text=category, command=lambda c=category: self.add_to_queue(c))
 
 
-def categories_buttons_initialize(self):
-    # Load categories from the file or create an empty dictionary
-    try:
-        if not os.path.isfile(self.categories_file):
-            # Raise error if the file doesn't exist
-            raise FileNotFoundError
-
-        with open(self.categories_file, "r") as file:
-            self.categories = json.load(file)
-
-    except FileNotFoundError:
-        # Log that the file is not found
-        self.log_and_show(f"Categories file not found: {self.categories_file}", error=True)
-
-    except json.JSONDecodeError as e:
-        # Handle JSON decoding error
-        self.log_and_show(f"Decoding JSON in categories_file failed: {self.categories_file}, {str(e)}", error=True)
-
-    except Exception as e:
-        self.log_and_show(f"Initialize categories_file failed: {self.categories_file}, {str(e)}", error=True)
-
-    # Categories button frame
-    self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
-    self.button_frame.grid(row=1, column=0, padx=10, pady=5)
-
-    # Create the tabview and buttons
-    self.create_tabview()
-
-
 def refresh_category_buttons(self):
     # Destroy existing tabs and buttons
     if hasattr(self, 'tabview') and self.tabview:
@@ -1103,23 +1076,7 @@ def refresh_category_buttons(self):
         button.destroy()
 
     # Load categories from the file or create an empty dictionary
-    try:
-        if not os.path.isfile(self.categories_file):
-            # Raise error if the file doesn't exist
-            raise FileNotFoundError
-
-        with open(self.categories_file, "r") as file:
-            self.categories = json.load(file)
-    except FileNotFoundError:
-        # Log that the file is not found
-        self.log_and_show(f"Categories file not found: {self.categories_file}", error=True)
-
-    except json.JSONDecodeError as e:
-        # Handle JSON decoding error
-        self.log_and_show(f"Decoding JSON in categories_file failed: {self.categories_file}, {str(e)}", error=True)
-
-    except Exception as e:
-        self.log_and_show(f"Initialize categories_file failed: {self.categories_file}, {str(e)}", error=True)
+    self.initialize_json()
 
     # Create the tabview and buttons
     self.create_tabview()
@@ -1166,12 +1123,6 @@ def create_tabview(self):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
 
     self.all_buttons = all_buttons
-
-
-def save_categories(self):
-    # Save the current categories to the file
-    with open(self.categories_file, "w") as file:
-        json.dump(self.categories, file)
 
 
 """
