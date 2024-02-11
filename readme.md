@@ -44,8 +44,10 @@ Introducing the O.C.D. File Editor, a powerful Python tool crafted for dynamic f
 ### File Renamer
 Rename files (or folders)
 - Drag and drop a file into the window or choose "Browse File" to select one.
-- Use category buttons to add words to the renaming queue.
-- Manage categories with "Add Category" and "Remove Category" fields. Add a weight to the category to influence position. The lower weight, the higher the precedence.
+- Categories:
+  - Use tabs to separate the categories by weight or show all categories.
+  - Use category buttons to add words to the renaming queue.
+  - Click the same category button again to remove words from the renaming queue.
 - Choose "Output Directory" to select the output folder. Leave blank to default to current directory.
 - Type in the custom text entry field to add custom text to the renaming queue.
 - Click "Rename File" to rename the file with the changes in the queue.
@@ -54,6 +56,7 @@ Rename files (or folders)
 - "Move to Trash" sends the selected file to the trash.
 - "Reload Last File" reloads the last used file.
 - "Send to Video Editor" sends the selected file to the Video Editor module.
+- "Send to Name Normalizer" sends the selected file to the Name Normalizer module.
 
 Checkboxes/Radio Buttons
 - "Placement" determines where to place words in the renaming process.
@@ -70,7 +73,8 @@ Checkboxes/Radio Buttons
    - Use " - " and "\_\_-\_\_" in the preprocessed file name. For example, "Artist - WORDS TO MOVE__-__ .mp3"
 
 ### Name Normalizer 
-Name Normalize a folder containing files for easy use with File Renamer. You can include certain file types by changing file_extensions in the config.ini file.
+Name Normalize a file or folder containing files for easy use with File Renamer. You can include certain file types by changing file_extensions in the dictionary.json file.
+  - Drag and drop a file/folder into the window or choose "Browse" to select one.
   - "Append "\_\_-\_\_ " to the file name"
   - "Artist Search"
   - "Include subdirectories"
@@ -94,6 +98,7 @@ Name Normalize a folder containing files for easy use with File Renamer. You can
   - "Remove equal signs"
   - "Remove hashtags"
   - "Remove new"
+  - "Remove non-ASCII symbols"
   - "Remove numbers"
   - "Remove parenthesis"
   - "Remove percents"
@@ -109,39 +114,59 @@ Name Normalize a folder containing files for easy use with File Renamer. You can
   - "Reset entries"
   - "Titlefy the name"
   - "Output Directory"
-  - "Artist File"
   - "Clear"
-  - "Normalize Folder"
+  - "Reload Last File"
+  - "Preview"
+  - "Normalize"
+  - "Send to File Renamer" sends the selected file to the File Renamer module.
+  - "Send to Video Editor" sends the selected file to the Video Editor module.
 
 ### Video Editor
 Make basic edits to videos.
-- Choose "Browse" to select an input method (video file, .txt file containing file paths, or a directory with video files to edit.)
+- Drag and drop a file/folder into the window or choose "Browse" to select an input method (video file, .txt file containing file paths, or a directory with video files to edit.)
 - "Rotate Video" determines how much to rotate the video ("Left", "Right", "Flip"). Use "None" to disable rotation.
 - "Increase Audio (dB)" determines how much to amplify the audio, e.g. "5.0" for 5 decibels.
-- "Normalize Audio" determines how much normalize the audio, e.g. "0.9" for 0.9 audio normalization.
+- "Normalize Audio" determines how much to normalize the audio, e.g. "0.9" for 0.9 audio normalization.
+- "Trim (Minutes:Seconds)" determines how much to trim the video, e.g. "01:05" to trim one minute and five seconds from the video.
 - "Output Directory" to select the output directory for the file(s). Default is the initial directory of the file if none is explicitly provided.
 - "Clear" to clear all entries in the frame.
 - "Reload Last File" reloads the last used file.
-- "Send to File Renamer" sends the selected file to the File Renamer module.
 - "Process video(s)" to process video files in the provided input method.
+- "Send to File Renamer" sends the selected file to the File Renamer module.
+- "Send to Name Normalizer" sends the selected file to the Name Normalizer module.
+- "Remove successful lines from input file" to remove the successful lines from the input file.
+- "Reset entries" after successful processing.
 
-### Artist
+### Add/Remove
 Add or remove artists from the Artist File in the GUI.
 - "Add Artist" to add artists to the Artist File.
 - "Remove Artist" to remove artists to the Artist File.
 - "Clear" to clear all entries in the frame.
 - "Reset entries" resets the entries after adding/removing artists.
 
+Add or remove categories from the Dictionary file in the GUI.
+- Manage categories with "Add Category" and "Remove Category" fields. Add a weight to the category to influence position. The lower weight, the higher the precedence.
+
+Flag an artist as no-go in the GUI.
+- Manage NO-GO with "Add NO-GO" field.
+
+Add an excluded folder from the Artist Directory in the GUI.
+- Manage Exclusions with "Add Exclude" field.
+
 ### Settings
 Change basic settings for this session within the GUI. Change variables in the config.ini file to persist between sessions. 
 - "Open File on Drag and Drop" (Linux only).
 - "Remove Duplicates" removes duplicate entries in the file name.
+- "Artist Identifier" attempts to identify the artist in other folders while conducting file renaming operations.
 - "Create Double Check Reminder" creates an empty file for double-checking.
 - "Activate Logging" logs actions taken within the program.
 - "Suppress Standard Output/Error" will supress the outputs to the console and redirect them to the log file.
 - "Show Messageboxes" displays messagebox notifications. False defaults to standard messaging in the frame.
 - "Show Confirmation Messageboxes" displays confirmation messagebox notifications. False defaults to standard messaging in the frame. Confirmation messageboxes will always be displayed.
 - "Fallback confirmation state" sets what the response is when confirmation messagebox notifications are suppressed.
+- "Use Custom Tab Names" sets the tab names you set in the Dictionary.json file.
+- "Sort Tab Names" sorts the tab names.
+- "Sort Tab Names (A-Z / Z-A)" sorts the tab names alphabetically or reverse alphabetically.
 - "Appearance" switches between light and dark mode. 
 - "UI Scaling" switches between different scaling sizes for the user interface. 
 - "Initial Directory" sets the initial directory when the user browses for an input.
