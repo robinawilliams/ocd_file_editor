@@ -306,13 +306,9 @@ def move_file_to_trash(self):
                 self.log_and_show("File moved to trash successfully")
         else:
             # Log the action if logging is enabled
-            self.log_and_show("No input selected. Cannot move to trash.",
-                              create_messagebox=True,
-                              error=True)
+            self.log_and_show("No input selected. Cannot move to trash.", create_messagebox=True, error=True)
     except OSError as e:
-        self.log_and_show(f"{str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
 
 # Function to create double check reminders
@@ -351,8 +347,7 @@ def double_check_reminder(self, new_path):
     except Exception as e:
         # Handle any errors that may occur
         self.log_and_show(f"Double check reminder was not created successfully: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
 
 
 # Function to load the last used file
@@ -371,8 +366,7 @@ def load_last_used_file(self):
                               f"{os.path.basename(self.file_renamer_selected_file)}")
         else:
             self.log_and_show("No last used File Renamer input found.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
     elif self.frame_name == "name_normalizer_window":
         # Check if the name_normalizer_last_used_file variable is provided and the input exists
         if self.name_normalizer_last_used_file and os.path.exists(self.name_normalizer_last_used_file):
@@ -388,8 +382,7 @@ def load_last_used_file(self):
             self.log_and_show(f"Last used Name Normalizer input selected: {filename}")
         else:
             self.log_and_show("No last used Name Normalizer input found.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
     elif self.frame_name == "video_editor_window":
         # Check if the video_editor_last_used_file variable is provided and the input exists
         if self.video_editor_last_used_file and os.path.exists(self.video_editor_last_used_file):
@@ -405,8 +398,7 @@ def load_last_used_file(self):
             self.log_and_show(f"Last used Video Editor input selected: {filename}")
         else:
             self.log_and_show("No last used Video Editor input found.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
 
 
 def send_to_module(self, destination):
@@ -443,8 +435,7 @@ def send_to_module(self, destination):
         else:
             # Input not selected
             self.log_and_show("No input selected. Cannot send to module",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
 
     # Send to Name Normalizer
     elif destination == "name_normalizer_module":
@@ -470,8 +461,7 @@ def send_to_module(self, destination):
         else:
             # Input not selected
             self.log_and_show("No input selected. Cannot send to module",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
 
     # Send to Video Editor
     elif destination == "video_editor_module":
@@ -500,18 +490,15 @@ def send_to_module(self, destination):
             else:
                 # Input not selected
                 self.log_and_show("Non-video input detected. Cannot send to Video Editor",
-                                  create_messagebox=True,
-                                  error=True)
+                                  create_messagebox=True, error=True)
         else:
             # Input not selected
             self.log_and_show("No input selected. Cannot send to module",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
     else:
         # Invalid frame name
         self.log_and_show("Invalid frame name for send to module",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
 
@@ -561,8 +548,7 @@ def open_file(self, file_to_open):
     if not os.path.exists(file_to_open):
         # If the provided input does not exist, log an error and return
         self.log_and_show(f"Cannot open input as it does not exist: {filename}",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # If the input path is not empty, try to open the input using the default system program
@@ -574,9 +560,7 @@ def open_file(self, file_to_open):
             self.log_and_show(f"Input opened: {filename}")
         except OSError as e:
             # If an error occurs while opening the file, log the error
-            self.log_and_show(f"{str(e)}",
-                              create_messagebox=True,
-                              error=True)
+            self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
 
 # Function to add a category to the queue
@@ -584,17 +568,27 @@ def add_to_queue(self, category):
     if self.file_renamer_selected_file:
         # Check if the category is not already in the queue
         if category not in self.queue:
+            # Add the category to the queue
             self.queue.append(category)
+            self.log_and_show(f"Word added to queue: {category}", not_logging=True)
 
-        # Update file display and show a message
+        # Check if the category is already in the queue
+        elif category in self.queue:
+            # Ask for confirmation of removing the category from the queue
+            confirmation = self.ask_confirmation("Queue Conflict",
+                                                 f"{category} is already in the queue. Do you want to remove it?")
+
+            if confirmation:
+                # Remove the category from the queue
+                self.queue.remove(category)
+                self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
+
+        # Update file display
         self.update_file_display()
-        self.log_and_show(f"Word added to queue: {category}",
-                          not_logging=True)
     else:
         # If no input selected, log the action and display a message in the GUI
         self.log_and_show("Please select an input first and then add a word to the queue.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
 
 
 # Function to update the file display based on selected options
@@ -617,6 +611,13 @@ def update_file_display(self):
         name = " ".join(part for part in new_name_parts if part).strip()
 
         # Handle name length constraints
+        if len(name) > 255:
+            self.log_and_show("The proposed file name exceeds 255 characters. "
+                              "Operating system limitations prohibit this.",
+                              create_messagebox=True, error=True)
+            # Truncate the name
+            name = f"...{name[180:]}"
+
         if len(name) > 250:
             self.log_and_show("The proposed file name exceeds 250 characters. Please consider "
                               "shortening it to comply with operating system limitations.",
@@ -634,13 +635,11 @@ def undo_last(self):
         # Remove the last category from the queue and update display
         self.queue.pop()
         self.update_file_display()
-        self.log_and_show("Last category removed",
-                          not_logging=True)
+        self.log_and_show("Last category removed", not_logging=True)
     else:
         # Log the action if logging is enabled
         self.log_and_show("Nothing in the queue. Nothing to undo.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
 
 
 # Function to clear the selection and reset related elements
@@ -691,8 +690,7 @@ def clear_selection(self, frame_name):
         return
 
     # Log action and display message on the applicable frame
-    self.log_and_show("Selection cleared",
-                      not_logging=True)
+    self.log_and_show("Selection cleared", not_logging=True)
 
 
 # Open a dialog to browse and select an input containing a line delimited list of artists
@@ -896,8 +894,7 @@ def suggest_output_directory(self):
                           f" does not exist."
                           f"\nUsing default output directory as the fallback."
                           f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return None
 
     try:
@@ -930,8 +927,7 @@ def suggest_output_directory(self):
     except Exception as e:
         # Handle any unexpected exceptions and log an error message
         self.log_and_show(f"Unexpected error suggesting an output directory: {e}",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return None
 
 
@@ -976,8 +972,7 @@ def add_category(self):
     if not new_category:
         # If the new category is an empty string, log an error message and return
         self.log_and_show("Add Category cannot be empty.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     if new_category:
@@ -993,8 +988,7 @@ def add_category(self):
                 weight = int(weight_entry_value) if weight_entry_value else self.default_weight
             except ValueError:
                 self.log_and_show("Weight must be an integer. Using default weight.",
-                                  create_messagebox=True,
-                                  error=True)
+                                  create_messagebox=True, error=True)
                 weight = self.default_weight
 
             # Add the new category to the dictionary with the specified weight
@@ -1012,8 +1006,7 @@ def add_category(self):
         else:
             # Log the action if logging is enabled
             self.log_and_show(f"'{new_category}' already exists. Skipping.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
             # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
             self.weight_entry.delete(0, ctk.END)
@@ -1025,9 +1018,7 @@ def remove_category(self):
 
     if not category_to_remove:
         # If the category to be removed is an empty string, log an error message and return
-        self.log_and_show("Remove Category cannot be empty.",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show("Remove Category cannot be empty.", create_messagebox=True, error=True)
         return
 
     # Check for a case-sensitive match
@@ -1061,8 +1052,7 @@ def remove_category(self):
         else:
             # Log the action if logging is enabled
             self.log_and_show(f"'{category_to_remove}' not found in dictionary. Skipping.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
 
 
 def create_category_button(self, tab, category):
@@ -1282,14 +1272,11 @@ def rename_files(self):
     elif self.file_renamer_selected_file and not (self.queue or self.custom_text_entry.get().strip()):
         # Log the action if logging is enabled
         self.log_and_show("Input selected but nothing added to the queue. Nothing to rename.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
     # If no input is selected, show error
     elif not self.file_renamer_selected_file:
         # Log the action if logging is enabled
-        self.log_and_show("No input selected. Nothing to rename.",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show("No input selected. Nothing to rename.", create_messagebox=True, error=True)
 
 
 def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
@@ -1309,9 +1296,7 @@ def construct_new_name(self, base_name, weighted_categories, custom_text, extens
                 name = name.replace("__-__", "")
             except OSError as e:
                 # Log the action if logging is enabled
-                self.log_and_show(f"{str(e)}",
-                                  create_messagebox=True,
-                                  error=True)
+                self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
         else:
             # If there's no special character found, default to suffix
             name = f"{base_name} {categories_text} {custom_text}".strip()
@@ -1581,11 +1566,9 @@ def preview_name(self, file_path):
                     # Call the remove_artist_duplicates_from_filename function to modify name
                     name = self.remove_artist_duplicates_from_filename(name)
             except FileNotFoundError:
-                self.log_and_show(f"File not found: {self.artist_file}",
-                                  create_messagebox=True, error=True)
+                self.log_and_show(f"File not found: {self.artist_file}", create_messagebox=True, error=True)
             except Exception as e:
-                self.log_and_show(f"Artist search failed {self.artist_file}: {e}",
-                                  create_messagebox=True, error=True)
+                self.log_and_show(f"Artist search failed {self.artist_file}: {e}", create_messagebox=True, error=True)
 
         # Add tail if tail_var is True
         if self.tail_var.get():
@@ -1651,13 +1634,11 @@ def rename_and_move_file(self, file_path):
                     self.log_and_show(f"Moved: {os.path.basename(new_path)} -> {os.path.basename(destination_file)}")
                 except OSError as e:
                     # Log error if logging is activated
-                    self.log_and_show(f"Moving failed for {os.path.basename(new_path)}: {e}",
-                                      error=True)
+                    self.log_and_show(f"Moving failed for {os.path.basename(new_path)}: {e}", error=True)
 
         except OSError as e:
             # Log an error if renaming fails
-            self.log_and_show(f"Renaming failed for {os.path.basename(file_path)}: {e}",
-                              error=True)
+            self.log_and_show(f"Renaming failed for {os.path.basename(file_path)}: {e}", error=True)
     else:
         return
 
@@ -1668,15 +1649,13 @@ def process_name_normalizer(self, mode):
     if (not os.path.exists(self.name_normalizer_selected_file)
             and not os.path.isfile(self.name_normalizer_selected_file)):
         self.log_and_show("Path does not exist or was not specified.\nPlease try again.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # Check if name_normalizer_output_directory is specified and exists
     if self.name_normalizer_output_directory and not os.path.exists(self.name_normalizer_output_directory):
         self.log_and_show("Output directory does not exist or was not specified.\nPlease try again.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # Check if artist file search is enabled
@@ -1685,8 +1664,7 @@ def process_name_normalizer(self, mode):
         if not self.artist_file:
             # Log and display an error message
             self.log_and_show("No artist file provided. Please provide one and try again, or turn off Artist Search.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
             return
         # Check if artist file does not exist
         elif not os.path.exists(self.artist_file):
@@ -1694,8 +1672,7 @@ def process_name_normalizer(self, mode):
             self.log_and_show(f"The artist file does not exist: '{self.artist_file}'"
                               f"\nPlease ensure the provided Artist File exists, "
                               f"\nor turn off Artist Search to proceed.\nSee FAQ",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
             return
 
     if mode == "preview":
@@ -1754,9 +1731,7 @@ def process_name_normalizer(self, mode):
 
     except Exception as e:
         # Display error message if an exception occurs
-        self.log_and_show(f"An error occurred: {e}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"An error occurred: {e}", create_messagebox=True, error=True)
 
 
 """
@@ -1798,9 +1773,7 @@ def get_non_conflicting_filename(self, path):
         return new_path
     except Exception as e:
         # Log error and display an error message when get non-conflicting file name fails.
-        self.log_and_show(f"Getting non-conflicting file name failed: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Getting non-conflicting file name failed: {str(e)}", create_messagebox=True, error=True)
 
         # Return None in case of an error.
         return None
@@ -1828,9 +1801,7 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
 
     except Exception as e:
         # Log the exception using the logging module.
-        self.log_and_show(f"An error occurred while removing line from file: {e}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"An error occurred while removing line from file: {e}", create_messagebox=True, error=True)
 
 
 # Method to rotate a video clip by a specified angle.
@@ -1847,9 +1818,7 @@ def rotate_video(self, clip, rotation_angle):
 
     except Exception as e:
         # Log error and display an error message if rotation fails.
-        self.log_and_show(f"Rotating video failed: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Rotating video failed: {str(e)}", create_messagebox=True, error=True)
 
         # Return None in case of an error.
         return None
@@ -1869,9 +1838,7 @@ def increase_volume(self, clip, increase_db):
 
     except Exception as e:
         # Log error and display an error message if volume increase fails.
-        self.log_and_show(f"Increasing volume failed: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Increasing volume failed: {str(e)}", create_messagebox=True, error=True)
 
         # Return None in case of an error.
         return None
@@ -1891,9 +1858,7 @@ def normalize_audio(self, clip, volume_multiplier):
 
     except Exception as e:
         # Log error and display an error message if audio normalization fails.
-        self.log_and_show(f"Normalizing audio failed: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Normalizing audio failed: {str(e)}", create_messagebox=True, error=True)
 
         # Return None in case of an error.
         return None
@@ -1913,9 +1878,7 @@ def trim_video(self, clip, total_time):
 
     except Exception as e:
         # Log error and display an error message if trimming fails.
-        self.log_and_show(f"Trimming failed: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Trimming failed: {str(e)}", create_messagebox=True, error=True)
 
         # Return None in case of an error.
         return None
@@ -1932,9 +1895,7 @@ def process_video_edits(self):
         minutes = int(self.minute_entry.get().strip())
         seconds = int(self.second_entry.get().strip())
     except ValueError as e:
-        self.log_and_show(f"Value error: Please enter a valid value. {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Value error: Please enter a valid value. {str(e)}", create_messagebox=True, error=True)
         return
 
     # Check if minutes is 00 and set variable to None
@@ -1972,15 +1933,13 @@ def process_video_edits(self):
     # Check if an input source is provided
     if not self.video_editor_selected_file:
         self.log_and_show("Input must be specified (video file, line separated txt, or directory.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # Check if the provided input exists
     if self.video_editor_selected_file and not os.path.exists(self.video_editor_selected_file):
         self.log_and_show("The input does not exist or cannot be found. Please try again.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # Check if the necessary parameters for video editing are provided
@@ -1988,15 +1947,13 @@ def process_video_edits(self):
             and minutes is None and seconds is None):
         self.log_and_show("You need to specify an operation (audio increase, video rotation, "
                           "audio normalization, trim, or some combination of them)",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # Check if the provided output directory exists
     if self.video_editor_output_directory and not os.path.exists(self.video_editor_output_directory):
         self.log_and_show("The output directory does not exist or cannot be found. Please try again.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return
 
     # Define which input paths based on user input (Video file, .txt file, or directory)
@@ -2035,9 +1992,7 @@ def process_video_edits(self):
             raise ValueError("Invalid input detected. Please select a video file, .txt file with video file paths, "
                              "or a directory with video files")
     except Exception as e:
-        self.log_and_show(f"Processing input failed: {str(e)}",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Processing input failed: {str(e)}", create_messagebox=True, error=True)
         return
 
     # Redirect MoviePy output for video edits
@@ -2136,8 +2091,7 @@ def process_video_edits(self):
                                   f"\nPath: {output_path}")
             else:
                 self.log_and_show(f"Operations failed for video {os.path.basename(input_path)}",
-                                  create_messagebox=True,
-                                  error=True)
+                                  create_messagebox=True, error=True)
 
             # Close the original clip to free resources
             original_clip.close()
@@ -2152,8 +2106,7 @@ def process_video_edits(self):
         except OSError as e:
             # Log error and skip to the next file in case of OSError
             self.log_and_show(f"OSError: {str(e)} Skipping this file and moving to the next one.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
             continue
 
 
@@ -2171,9 +2124,7 @@ def add_artist_to_file(self):
 
         # Check if no artist is provided
         if not self.add_artist:
-            self.log_and_show("Add Artist cannot be empty.",
-                              create_messagebox=True,
-                              error=True)
+            self.log_and_show("Add Artist cannot be empty.", create_messagebox=True, error=True)
             return  # Exit the function if no artist is provided
 
     # Read the list of artists from the artist_file
@@ -2181,16 +2132,13 @@ def add_artist_to_file(self):
         with open(self.artist_file, 'r') as artist_list_file:
             artist_list = [artist.strip() for artist in artist_list_file]
     except FileNotFoundError:
-        self.log_and_show(f"Artist File '{self.artist_file}' not found.",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Artist File '{self.artist_file}' not found.", create_messagebox=True, error=True)
         return  # Exit the function if the artist_file is not found
 
     # Check if the add_artist is already in the list (case-insensitive)
     if any(artist.lower() == self.add_artist.lower() for artist in artist_list):
         self.log_and_show(f"Artist is already in the Artist File: '{self.add_artist}'",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
     else:
         # Add the add_artist to the list
         artist_list.append(self.add_artist)
@@ -2203,8 +2151,7 @@ def add_artist_to_file(self):
 
         except IOError:
             self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
 
     # Reset the artist entries if the action is successful
     if self.reset_artist_entries_var.get():
@@ -2222,9 +2169,7 @@ def remove_artist_from_file(self):
 
         # Check if no artist is provided
         if not self.remove_artist:
-            self.log_and_show("Remove Artist cannot be empty.",
-                              create_messagebox=True,
-                              error=True)
+            self.log_and_show("Remove Artist cannot be empty.", create_messagebox=True, error=True)
             return  # Exit the function if no artist is provided
 
     try:
@@ -2232,9 +2177,7 @@ def remove_artist_from_file(self):
         with open(self.artist_file, 'r') as artist_list_file:
             artist_list = [artist.strip() for artist in artist_list_file]
     except FileNotFoundError:
-        self.log_and_show(f"Artist File '{self.artist_file}' not found.",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Artist File '{self.artist_file}' not found.", create_messagebox=True, error=True)
         return  # Exit the function if the artist_file is not found
 
     # Check if the remove_artist is in the list (case-insensitive)
@@ -2250,12 +2193,10 @@ def remove_artist_from_file(self):
 
         except IOError:
             self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
-                              create_messagebox=True,
-                              error=True)
+                              create_messagebox=True, error=True)
     else:
         self.log_and_show(f"Artist is not in the Artist File: '{self.remove_artist}'",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
 
     # Reset the artist entries if the action is successful
     if self.reset_artist_entries_var.get():
@@ -2273,9 +2214,7 @@ def no_go_creation(self):
 
         # Check if self.no_go_name is provided
         if not self.no_go_name:
-            self.log_and_show("Add NO GO cannot be empty.",
-                              create_messagebox=True,
-                              error=True)
+            self.log_and_show("Add NO GO cannot be empty.", create_messagebox=True, error=True)
             return  # Exit the function if no artist is provided
 
     try:
@@ -2309,9 +2248,7 @@ def no_go_creation(self):
                           f"{no_go_directory}")
 
     except Exception as e:
-        self.log_and_show(f"Creating NO GO failed: '{str(e)}'.",
-                          create_messagebox=True,
-                          error=True)
+        self.log_and_show(f"Creating NO GO failed: '{str(e)}'.", create_messagebox=True, error=True)
 
     # Clear add no-go name entry and reset self.no_go_name
     self.no_go_name = ""
@@ -2326,16 +2263,13 @@ def add_folder_to_excluded_folders(self):
 
         # Check if no exclude name is provided
         if not self.exclude_name:
-            self.log_and_show("Add Exclude cannot be empty.",
-                              create_messagebox=True,
-                              error=True)
+            self.log_and_show("Add Exclude cannot be empty.", create_messagebox=True, error=True)
             return  # Exit the function if no exclusion is provided
 
     # Check if the folder is already in the excluded_folders list
     if self.exclude_name in self.excluded_folders:
         self.log_and_show(f"Folder '{self.exclude_name}' is already in the excluded folders list.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         # Reset the exclude entry
         self.exclude_name = ""
         self.add_exclude_name_entry.delete(0, ctk.END)
@@ -2358,8 +2292,7 @@ def add_folder_to_excluded_folders(self):
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Error adding folder '{self.exclude_name}' to excluded folders list: {e}",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
 
 
 # Function to attempt to identify Artists
@@ -2382,8 +2315,7 @@ def artist_identifier(self):
         self.log_and_show(f"Artist Identifier cannot function as intended since the Artist Directory"
                           f" does not exist."
                           f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return None
 
     try:
@@ -2422,6 +2354,5 @@ def artist_identifier(self):
     except Exception as e:
         # Handle any unexpected exceptions and log an error message
         self.log_and_show(f"Unexpected error identifying artist: {e}",
-                          create_messagebox=True,
-                          error=True)
+                          create_messagebox=True, error=True)
         return None
