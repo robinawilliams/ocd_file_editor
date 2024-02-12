@@ -645,6 +645,59 @@ def undo_last(self):
                           create_messagebox=True, error=True)
 
 
+# Function to undo the last file rename operation
+def undo_file_rename(self):
+    if self.history:
+        # Get the last operation from the history
+        last_operation = self.history.pop()
+
+        # Extract the information needed to revert the changes
+        original_path, new_path = last_operation['original_path'], last_operation['new_path']
+
+        # Ask for confirmation of the undo file rename operation
+        confirmation = self.ask_confirmation("Undo File Rename",
+                                             f"Do you want to undo the file rename operation?: "
+                                             f"\n{os.path.basename(new_path)}"
+                                             f"\nOriginal name: "
+                                             f"\n{os.path.basename(original_path)}")
+
+        if confirmation:
+            try:
+                # Attempt to revert the changes by renaming the file back to the original path
+                os.rename(new_path, original_path)
+
+                # Log and display a message
+                self.log_and_show(f"Undo successful. File reverted to: \n{original_path}")
+
+                # Set the last used file
+                self.file_renamer_last_used_file = original_path
+            except OSError as e:
+                if "Invalid cross-device link" in str(e):
+                    # Attempt to use shutil.move if "Invalid cross-device link" error
+                    try:
+                        shutil.move(new_path, original_path)
+                        self.log_and_show(
+                            f"File: '{os.path.basename(new_path)}' renamed and moved successfully. "
+                            f"\nSaved to: \n{original_path}")
+                        # Set the last used file
+                        self.file_renamer_last_used_file = original_path
+                    except Exception as move_error:
+                        # Log the action if shutil.move also fails
+                        self.log_and_show(f"Renaming and moving file failed: {str(move_error)}",
+                                          create_messagebox=True, error=True)
+                else:
+                    # Log the action for other OSError
+                    self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
+
+        else:
+            # If the user declines, re-add the operation to the history
+            self.history.append(last_operation)
+            return
+    else:
+        # Log the action if logging is enabled
+        self.log_and_show("No previous file rename operation. Nothing to undo.", create_messagebox=True, error=True)
+
+
 # Function to clear the selection and reset related elements
 def clear_selection(self, frame_name):
     if frame_name == "file_renamer_window":
@@ -936,10 +989,11 @@ def suggest_output_directory(self):
 
 # Function to handle actions after successful input renaming
 def handle_rename_success(self, new_path):
-    # Check if the double check reminder variable is true
-    if self.double_check_var.get():
-        # Call the double check reminder function
-        self.double_check_reminder(new_path)
+    # Store information about the rename operation in the history
+    self.history.append({
+        'original_path': self.file_renamer_selected_file,
+        'new_path': new_path
+    })
 
     # Reset selected file, queue and update file renamer last used file
     self.file_renamer_selected_file = ""
@@ -958,6 +1012,11 @@ def handle_rename_success(self, new_path):
         # Clear and reset the Output Directory
         self.output_directory = ""
         self.output_directory_entry.delete(0, ctk.END)
+
+    # Check if the double check reminder variable is true
+    if self.double_check_var.get():
+        # Call the double check reminder function
+        self.double_check_reminder(new_path)
 
     # Log the action if logging is enabled
     self.log_and_show("File renamed and saved successfully")

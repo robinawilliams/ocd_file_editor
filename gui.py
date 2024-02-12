@@ -23,6 +23,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_selected_file = ""
         self.file_renamer_last_used_file = ""
         self.output_directory = ""
+        self.history = []
         self.queue = []
         self.tabs = {}
         self.excluded_folders = []
@@ -94,6 +95,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.rename_button = None
         self.button_group_frame = None
         self.undo_button = None
+        self.undo_file_rename_button = None
         self.clear_button = None
         self.trash_button = None
         self.file_renamer_last_used_file_button = None
@@ -579,20 +581,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.undo_button = ctk.CTkButton(self.button_group_frame, text="Undo", command=self.undo_last)
         self.undo_button.grid(row=0, column=0, padx=10, pady=10)
 
+        # Undo File Rename Button
+        self.undo_file_rename_button = ctk.CTkButton(self.button_group_frame,
+                                                     text="Undo File Rename",
+                                                     command=self.undo_file_rename)
+        self.undo_file_rename_button.grid(row=0, column=1, padx=10, pady=10)
+
         # Clear Button
         self.clear_button = ctk.CTkButton(self.button_group_frame, text="Clear",
                                           command=lambda: self.clear_selection(frame_name="file_renamer_window"))
-        self.clear_button.grid(row=0, column=1, padx=10, pady=10)
+        self.clear_button.grid(row=0, column=2, padx=10, pady=10)
 
         # Move to Trash Button
         self.trash_button = ctk.CTkButton(self.button_group_frame, text="Move to Trash",
                                           command=self.move_file_to_trash)
-        self.trash_button.grid(row=0, column=2, padx=10, pady=10)
+        self.trash_button.grid(row=0, column=3, padx=10, pady=10)
 
         # Select File Renamer Last Used File Button
         self.file_renamer_last_used_file_button = ctk.CTkButton(self.button_group_frame, text="Reload Last File",
                                                                 command=self.load_last_used_file)
-        self.file_renamer_last_used_file_button.grid(row=0, column=3, padx=10, pady=10)
+        self.file_renamer_last_used_file_button.grid(row=0, column=4, padx=10, pady=10)
 
         # Frame to display the last used file
         self.last_used_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
@@ -1984,6 +1992,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def undo_last(self):
         # Undo the last operation and update the GUI
         core.undo_last(self)
+
+    def undo_file_rename(self):
+        # Undo the last file rename operation
+        core.undo_file_rename(self)
 
     def clear_selection(self, frame_name):
         # Clear the selected file and update the GUI
