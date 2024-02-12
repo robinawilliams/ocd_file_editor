@@ -1135,8 +1135,10 @@ def create_tabview(self):
 
     # Create buttons for categories with weights 1-default_most_number in the "Most Categories" tab
     most_categories = [category for category, w in self.categories.items() if 1 <= w <= self.default_most_number]
-    sorted_most_categories = sorted(most_categories)  # Sort the categories alphabetically
-    most_buttons = [self.create_category_button(most_cat_tab, category) for category in sorted_most_categories]
+    # Sort the categories alphabetically and ignore case
+    most_categories_sorted = sorted(most_categories, key=lambda x: x.lower())
+    # Create buttons for the sorted categories
+    most_buttons = [self.create_category_button(most_cat_tab, category) for category in most_categories_sorted]
 
     for i, button in enumerate(most_buttons):
         button.grid(row=i // self.column_numbers, column=i % self.column_numbers, padx=5, pady=5)
