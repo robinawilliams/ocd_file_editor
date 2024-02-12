@@ -223,9 +223,12 @@ def update_json(self, file_to_update, dictionary_name, updated_data):
         # Update the dictionary key
         data[dictionary_name] = updated_data
 
-        # Write the updated data back to the JSON file
+        # Sort the dictionary alphabetically
+        sorted_data = {key: value for key, value in sorted(data.items())}
+
+        # Write the sorted data back to the JSON file
         with open(file_to_update, 'w') as json_file:
-            json.dump(data, json_file, indent=2)
+            json.dump(sorted_data, json_file, indent=2)
 
     except FileNotFoundError:
         # Log that the file is not found
