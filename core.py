@@ -1960,7 +1960,8 @@ def process_video_edits(self):
         minutes = int(self.minute_entry.get().strip())
         seconds = int(self.second_entry.get().strip())
     except ValueError as e:
-        self.log_and_show(f"Value error: Please enter a valid value. {str(e)}", create_messagebox=True, error=True)
+        self.log_and_show(f"Value error: Please enter a valid value (integer or float) into the entry field. {str(e)}",
+                          create_messagebox=True, error=True)
         return
 
     # Check if minutes is 00 and set variable to None
