@@ -1,6 +1,8 @@
 [Settings]
 ; Starting size for window
 geometry = 1280x850
+; Starting scaling for window
+scaling = 100
 ; Column size for the gui
 column_numbers = 7
 ; Default weight for category

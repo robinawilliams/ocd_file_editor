@@ -313,7 +313,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-         default_most_number) = (
+         default_most_number, scaling) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -328,6 +328,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Variables and window geometry - Set instance variables with the values from the configuration file
         self.geometry(geometry)
+        self.scaling = scaling
         self.column_numbers = int(column_numbers)
         self.default_weight = default_weight
         self.default_decibel = default_decibel
@@ -425,6 +426,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Select default frame
         self.select_frame_by_name(self.default_frame)
+
+        # Set scaling at the start
+        self.change_scaling_event(self.scaling)
 
     def create_gui(self):
         # Set up grid layout with 1 row and 2 columns, configuring weights for resizing
@@ -1601,7 +1605,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.scaling_optionemenu.grid(row=1, column=1, padx=10, pady=10)
 
         # Set default value for scaling
-        self.scaling_optionemenu.set("100%")
+        self.scaling_optionemenu.set(f"{self.scaling}%")
 
         # Master Entry frame
         self.master_entry_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")

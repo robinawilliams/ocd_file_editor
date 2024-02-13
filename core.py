@@ -72,6 +72,7 @@ def load_configuration(self):
 
     # Variables and window geometry
     geometry = config.get('Settings', 'geometry', fallback='1280x850')
+    scaling = config.get('Settings', 'scaling', fallback='100')
     column_numbers = config.get('Settings', 'column_numbers', fallback=7)
     default_weight = config.get('Settings', 'default_weight', fallback=9)
     default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
@@ -167,7 +168,7 @@ def load_configuration(self):
             default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-            default_most_number)
+            default_most_number, scaling)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
