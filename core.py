@@ -535,9 +535,9 @@ def on_file_drop(self, event):
         self.queue = []
         self.update_file_display()
 
-    # Open the input if the corresponding option is set
-    if self.open_on_file_drop_var.get():
-        self.open_file(selected_file)
+        # Open the input if the corresponding option is set
+        if self.open_on_file_drop_var.get():
+            self.open_file(selected_file)
 
     # Log the action and display the message in the gui
     self.log_and_show(f"Input selected via drop: {filename}")
@@ -1991,7 +1991,7 @@ def process_video_edits(self):
     if decibel == 0.0:
         decibel = None
 
-    # Check if rotation is none and set variable to None
+    # Check if rotation is 0.0 and set variable to None
     if audio_normalization == 0.0:
         audio_normalization = None
 
