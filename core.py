@@ -734,7 +734,34 @@ def undo_file_rename(self):
                     for original_path, new_path in zip(original_paths, new_paths):
                         # Check if new path is provided and skip if the there is no change
                         if new_path is not None and (original_path != new_path):
-                            os.rename(new_path, original_path)
+                            try:
+                                # Check if the file exists
+                                if not os.path.isfile(new_path):
+                                    # Raise error if not found
+                                    raise FileNotFoundError
+
+                                # Rename the file
+                                os.rename(new_path, original_path)
+                            except FileNotFoundError:
+                                # Handle the file not found error and log an error message
+                                self.log_and_show(f"File not found: "
+                                                  f"\n{new_path}",
+                                                  create_messagebox=True, error=True)
+                                continue
+                            except OSError as e:
+                                # Use shutil as a fallback
+                                if "Invalid cross-device link" in str(e):
+                                    try:
+                                        # Rename the file and move it across devices
+                                        shutil.move(new_path, original_path)
+                                    except Exception as e:
+                                        # Handle any exceptions and log an error message
+                                        self.log_and_show(f"Unexpected error renaming: "
+                                                          f"\n{new_path}"
+                                                          f"\n{original_path} "
+                                                          f"\n{e}",
+                                                          create_messagebox=True, error=True)
+                                        continue
 
                     # Log and display a message
                     self.log_and_show(f"Undo successful. Files reverted to: \n{', '.join(original_paths)}")
@@ -742,26 +769,8 @@ def undo_file_rename(self):
                     # Set the last used file
                     self.name_normalizer_last_used_file = original_paths[-1]
                 except OSError as e:
-                    if "Invalid cross-device link" in str(e):
-                        # Attempt to use shutil.move if "Invalid cross-device link" error
-                        try:
-                            for original_path, new_path in zip(original_paths, new_paths):
-                                # Check if new path is provided and skip if the there is no change
-                                if new_path is not None and (original_path != new_path):
-                                    shutil.move(new_path, original_path)
-                            self.log_and_show(
-                                f"Files: '{', '.join(os.path.basename(new_path) for new_path in new_paths)}' "
-                                f"renamed and moved successfully. "
-                                f"\nSaved to: \n{', '.join(original_paths)}")
-                            # Set the last used file
-                            self.name_normalizer_last_used_file = original_paths[-1]
-                        except Exception as move_error:
-                            # Log the action if shutil.move also fails
-                            self.log_and_show(f"Renaming and moving files failed: {str(move_error)}",
-                                              create_messagebox=True, error=True)
-                    else:
-                        # Log the action for other OSError
-                        self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
+                    # Log the action for other OSError
+                    self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
             else:
                 # If the user declines, re-add the operation to the nn_history
