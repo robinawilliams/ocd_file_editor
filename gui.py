@@ -24,6 +24,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_last_used_file = ""
         self.output_directory = ""
         self.history = []
+        self.nn_history = []
         self.queue = []
         self.tabs = {}
         self.excluded_folders = []
@@ -181,6 +182,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.send_to_file_renamer_button1 = None
         self.send_to_video_editor_button1 = None
         self.clear_name_normalizer_selection_button = None
+        self.undo_nn_button = None
         self.name_normalizer_last_used_file_button = None
         self.name_normalizer_message_label_frame = None
         self.name_normalizer_message_label = None
@@ -1025,21 +1027,27 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                         frame_name="name_normalizer_window"))
         self.clear_name_normalizer_selection_button.grid(row=0, column=0, padx=10, pady=10)
 
+        # Undo Name Normalizer Button
+        self.undo_nn_button = ctk.CTkButton(self.normalize_folder_frame,
+                                            text="Undo Name Normalizer",
+                                            command=self.undo_file_rename)
+        self.undo_nn_button.grid(row=0, column=1, padx=10, pady=10)
+
         # Select Name Normalizer Last Used File Button
         self.name_normalizer_last_used_file_button = ctk.CTkButton(self.normalize_folder_frame,
                                                                    text="Reload Last File",
                                                                    command=self.load_last_used_file)
-        self.name_normalizer_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
+        self.name_normalizer_last_used_file_button.grid(row=0, column=2, padx=10, pady=10)
 
         # Normalize Preview button
         self.normalize_preview_button = ctk.CTkButton(self.normalize_folder_frame, text="Preview",
                                                       command=lambda: self.process_name_normalizer(mode="preview"))
-        self.normalize_preview_button.grid(row=0, column=2, padx=5, pady=5)
+        self.normalize_preview_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Normalize button
         self.normalize_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize",
                                               command=lambda: self.process_name_normalizer(mode="action"))
-        self.normalize_button.grid(row=0, column=3, padx=5, pady=5)
+        self.normalize_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Send to Module frame
         self.send_to_module_frame1 = ctk.CTkFrame(self.name_normalizer_frame,
@@ -2099,7 +2107,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def rename_and_move_file(self, file_path):
         # Rename files and move files to a specified directory
-        core.rename_and_move_file(self, file_path)
+        return core.rename_and_move_file(self, file_path)
 
     def process_name_normalizer(self, mode):
         # Perform various name normalization operations on certain files within a specified folder

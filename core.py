@@ -648,55 +648,129 @@ def undo_last(self):
 
 # Function to undo the last file rename operation
 def undo_file_rename(self):
-    if self.history:
-        # Get the last operation from the history
-        last_operation = self.history.pop()
+    if self.frame_name == "file_renamer_window":
+        if self.history:
+            # Get the last operation from the history
+            last_operation = self.history.pop()
 
-        # Extract the information needed to revert the changes
-        original_path, new_path = last_operation['original_path'], last_operation['new_path']
+            # Extract the information needed to revert the changes
+            original_path, new_path = last_operation['original_path'], last_operation['new_path']
 
-        # Ask for confirmation of the undo file rename operation
-        confirmation = self.ask_confirmation("Undo File Rename",
-                                             f"Do you want to undo the file rename operation?: "
-                                             f"\n{os.path.basename(new_path)}"
-                                             f"\nOriginal name: "
-                                             f"\n{os.path.basename(original_path)}")
+            # Ask for confirmation of the undo file rename operation
+            confirmation = self.ask_confirmation("Undo File Rename",
+                                                 f"Do you want to undo the file rename operation?: "
+                                                 f"\n{os.path.basename(new_path)}"
+                                                 f"\nOriginal name: "
+                                                 f"\n{os.path.basename(original_path)}")
 
-        if confirmation:
-            try:
-                # Attempt to revert the changes by renaming the file back to the original path
-                os.rename(new_path, original_path)
+            if confirmation:
+                try:
+                    # Attempt to revert the changes by renaming the file back to the original path
+                    os.rename(new_path, original_path)
 
-                # Log and display a message
-                self.log_and_show(f"Undo successful. File reverted to: \n{original_path}")
+                    # Log and display a message
+                    self.log_and_show(f"Undo successful. File reverted to: \n{original_path}")
 
-                # Set the last used file
-                self.file_renamer_last_used_file = original_path
-            except OSError as e:
-                if "Invalid cross-device link" in str(e):
-                    # Attempt to use shutil.move if "Invalid cross-device link" error
-                    try:
-                        shutil.move(new_path, original_path)
-                        self.log_and_show(
-                            f"File: '{os.path.basename(new_path)}' renamed and moved successfully. "
-                            f"\nSaved to: \n{original_path}")
-                        # Set the last used file
-                        self.file_renamer_last_used_file = original_path
-                    except Exception as move_error:
-                        # Log the action if shutil.move also fails
-                        self.log_and_show(f"Renaming and moving file failed: {str(move_error)}",
-                                          create_messagebox=True, error=True)
-                else:
-                    # Log the action for other OSError
-                    self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
+                    # Set the last used file
+                    self.file_renamer_last_used_file = original_path
+                except OSError as e:
+                    if "Invalid cross-device link" in str(e):
+                        # Attempt to use shutil.move if "Invalid cross-device link" error
+                        try:
+                            shutil.move(new_path, original_path)
+                            self.log_and_show(
+                                f"File: '{os.path.basename(new_path)}' renamed and moved successfully. "
+                                f"\nSaved to: \n{original_path}")
+                            # Set the last used file
+                            self.file_renamer_last_used_file = original_path
+                        except Exception as move_error:
+                            # Log the action if shutil.move also fails
+                            self.log_and_show(f"Renaming and moving file failed: {str(move_error)}",
+                                              create_messagebox=True, error=True)
+                    else:
+                        # Log the action for other OSError
+                        self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
+            else:
+                # If the user declines, re-add the operation to the history
+                self.history.append(last_operation)
+                return
         else:
-            # If the user declines, re-add the operation to the history
-            self.history.append(last_operation)
-            return
-    else:
-        # Log the action if logging is enabled
-        self.log_and_show("No previous file rename operation. Nothing to undo.", create_messagebox=True, error=True)
+            # Log the action if logging is enabled
+            self.log_and_show("No previous file rename operation. Nothing to undo.", create_messagebox=True, error=True)
+
+    elif self.frame_name == "name_normalizer_window":
+        if self.nn_history:
+            # Get the last operation from the nn_history
+            last_operation = self.nn_history.pop()
+
+            # Extract the information needed to revert the changes
+            original_paths, new_paths = last_operation['original_paths'], last_operation['new_paths']
+
+            # Filter out None values from new_paths
+            new_paths = [path for path in new_paths if path is not None]
+
+            # Truncate paths if they exceed a certain limit (Beautify the data for the gui)
+            max_display_paths = 3
+            truncated_original_paths = original_paths[:max_display_paths]
+            truncated_new_paths = new_paths[:max_display_paths]
+            truncated_original_paths_str = ', '.join(os.path.basename(path) for path in truncated_original_paths)
+            truncated_new_paths_str = ', '.join(os.path.basename(path) for path in truncated_new_paths)
+            if len(original_paths) > max_display_paths:
+                truncated_original_paths_str += f", and {len(original_paths) - max_display_paths} more..."
+            if len(new_paths) > max_display_paths:
+                truncated_new_paths_str += f", and {len(new_paths) - max_display_paths} more..."
+
+            # Ask for confirmation of the undo name normalizer operation
+            confirmation = self.ask_confirmation("Undo Name Normalizer",
+                                                 f"Do you want to undo the name normalizer operation?: "
+                                                 f"\n{truncated_new_paths_str}"
+                                                 f"\n\nOriginal names: "
+                                                 f"\n{truncated_original_paths_str}")
+
+            if confirmation:
+                try:
+                    # Attempt to revert the changes by renaming/moving the files back to their original paths
+                    for original_path, new_path in zip(original_paths, new_paths):
+                        # Check if new path is provided and skip if the there is no change
+                        if new_path is not None and (original_path != new_path):
+                            os.rename(new_path, original_path)
+
+                    # Log and display a message
+                    self.log_and_show(f"Undo successful. Files reverted to: \n{', '.join(original_paths)}")
+
+                    # Set the last used file
+                    self.name_normalizer_last_used_file = original_paths[-1]
+                except OSError as e:
+                    if "Invalid cross-device link" in str(e):
+                        # Attempt to use shutil.move if "Invalid cross-device link" error
+                        try:
+                            for original_path, new_path in zip(original_paths, new_paths):
+                                # Check if new path is provided and skip if the there is no change
+                                if new_path is not None and (original_path != new_path):
+                                    shutil.move(new_path, original_path)
+                            self.log_and_show(
+                                f"Files: '{', '.join(os.path.basename(new_path) for new_path in new_paths)}' "
+                                f"renamed and moved successfully. "
+                                f"\nSaved to: \n{', '.join(original_paths)}")
+                            # Set the last used file
+                            self.name_normalizer_last_used_file = original_paths[-1]
+                        except Exception as move_error:
+                            # Log the action if shutil.move also fails
+                            self.log_and_show(f"Renaming and moving files failed: {str(move_error)}",
+                                              create_messagebox=True, error=True)
+                    else:
+                        # Log the action for other OSError
+                        self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
+
+            else:
+                # If the user declines, re-add the operation to the nn_history
+                self.nn_history.append(last_operation)
+                return
+        else:
+            # Log the action if logging is enabled
+            self.log_and_show("No previous name normalizer operation. Nothing to undo.", create_messagebox=True,
+                              error=True)
 
 
 # Function to clear the selection and reset related elements
@@ -1702,11 +1776,17 @@ def rename_and_move_file(self, file_path):
                     # Log error if logging is activated
                     self.log_and_show(f"Moving failed for {os.path.basename(new_path)}: {e}", error=True)
 
+            # Return a tuple with file path and name normalizer last used file
+            return file_path, self.name_normalizer_last_used_file
+
         except OSError as e:
             # Log an error if renaming fails
             self.log_and_show(f"Renaming failed for {os.path.basename(file_path)}: {e}", error=True)
+            # Return a tuple with file path and file path if error
+            return file_path, file_path
     else:
-        return
+        # Return a tuple with file path and file path if no result
+        return file_path, file_path
 
 
 # Function to performing various name normalization operations on certain files within a specified folder
@@ -1749,7 +1829,8 @@ def process_name_normalizer(self, mode):
     elif mode == "action":
         # Ask for confirmation before normalizing files
         confirmation = self.ask_confirmation("Confirm Action",
-                                             "Are you sure you want normalize the file(s)? This cannot be undone.")
+                                             "Are you sure you want normalize the file(s)? You may not be able "
+                                             "to undo this operation.")
         if confirmation:
             self.log_and_show(f"User confirmed the name normalization process for "
                               f"{self.name_normalizer_selected_file}.")
@@ -1761,12 +1842,22 @@ def process_name_normalizer(self, mode):
     try:
         if os.path.isfile(self.name_normalizer_selected_file):
             # If a single file is provided, directly process it
-            self.rename_and_move_file(self.name_normalizer_selected_file)
+            original_path, new_path = self.rename_and_move_file(self.name_normalizer_selected_file)
+
+            # Check if the tuple is the same to prevent no operations from being added to history
+            if original_path != new_path:
+                # Append the operation to the history
+                self.nn_history.append({
+                    'original_paths': [original_path],
+                    'new_paths': [new_path]
+                })
         else:
             # Get folder contents and save to memory
 
             # Initialize an empty list to store file paths
             file_paths = []
+            original_paths = []
+            new_paths = []
 
             # Log the os.walk state
             if self.deep_walk_var.get():
@@ -1783,9 +1874,19 @@ def process_name_normalizer(self, mode):
                         # Append the full file path to the list
                         file_paths.append(str(os.path.join(root, file)))
 
-            # Iterate through file paths and rename/move files
-            for file_path in file_paths:
-                self.rename_and_move_file(file_path)
+                    # Iterate through file paths and rename/move files
+                    for file_path in file_paths:
+                        original_path, new_path = self.rename_and_move_file(file_path)
+                        # Check if the tuple is the same to prevent no operations from being added to history
+                        if original_path != new_path:
+                            original_paths.append(original_path)
+                            new_paths.append(new_path)
+
+                    # Append the batch operation to the name normalizer history
+                    self.nn_history.append({
+                        'original_paths': original_paths,
+                        'new_paths': new_paths
+                    })
 
         # Log the action if logging is enabled
         self.log_and_show("File(s) have been processed successfully.")
