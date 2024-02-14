@@ -75,6 +75,7 @@ def load_configuration(self):
     scaling = config.get('Settings', 'scaling', fallback='100')
     column_numbers = config.get('Settings', 'column_numbers', fallback=7)
     default_weight = config.get('Settings', 'default_weight', fallback=9)
+    default_ctn_weight = config.get('Settings', 'default_ctn_weight', fallback=1)
     default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
     default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
     default_minute = config.get('Settings', 'default_minute', fallback=0)
@@ -168,7 +169,7 @@ def load_configuration(self):
             default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-            default_most_number, scaling)
+            default_most_number, scaling, default_ctn_weight)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -2533,3 +2534,99 @@ def artist_identifier(self):
         self.log_and_show(f"Unexpected error identifying artist: {e}",
                           create_messagebox=True, error=True)
         return None
+
+
+# Function to add a custom tab name to the dictionary
+def add_custom_tab_name(self):
+    # Get the new custom tab name from the add custom tab name entry widget
+    new_custom_tab_name = self.custom_tab_name_entry.get().strip()
+
+    if not new_custom_tab_name:
+        # If the new custom tab name is an empty string, log an error message and return
+        self.log_and_show("New Custom Tab cannot be empty.",
+                          create_messagebox=True, error=True)
+        return
+
+    if new_custom_tab_name:
+        # Convert to lowercase for case-insensitive check
+        new_custom_tab_name_lower = new_custom_tab_name.lower()
+        # Prevent duplicate entries in the json file
+        if new_custom_tab_name_lower not in map(lambda x: x.lower(), self.weight_to_tab_name.values()):
+            # Get the weight from the GUI entry field
+            weight_entry_value = self.weight_entry1.get().strip()
+
+            try:
+                # Use the provided weight if it's an integer, otherwise use the default custom tab name weight
+                weight = int(weight_entry_value) if weight_entry_value else self.default_ctn_weight
+            except ValueError:
+                self.log_and_show("Weight must be an integer. Using default weight.",
+                                  create_messagebox=True, error=True)
+                weight = self.default_ctn_weight
+
+            # Add the new custom tab name to the dictionary under the specified weight
+            self.weight_to_tab_name[weight] = new_custom_tab_name
+            # Save the updated custom tab names to the file
+            self.update_json(self.dictionary_file, "weight_to_tab_name", self.weight_to_tab_name)
+            # Refresh the category buttons in the GUI
+            self.refresh_category_buttons()
+            # Clear the category entry and weight entry fields
+            self.custom_tab_name_entry.delete(0, ctk.END)
+            self.weight_entry1.delete(0, ctk.END)
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"Custom Tab Name added: '{new_custom_tab_name}' for weight({weight})")
+        else:
+            # Log the action if logging is enabled
+            self.log_and_show(f"'{new_custom_tab_name}' already exists. Skipping.",
+                              create_messagebox=True, error=True)
+            # Clear the custom_tab_name entry and weight entry fields
+            self.custom_tab_name_entry.delete(0, ctk.END)
+            self.weight_entry1.delete(0, ctk.END)
+
+
+# Remove a  custom tab name to the dictionary
+def remove_custom_tab_name(self):
+    # Get the custom tab name to be removed from the remove custom tab name entry widget
+    ctn_to_remove = self.remove_custom_tab_name_entry.get().strip()
+
+    if not ctn_to_remove:
+        # If the custom tab name to be removed is an empty string, log an error message and return
+        self.log_and_show("Remove Custom Tab cannot be empty.", create_messagebox=True, error=True)
+        return
+
+    # Check for a case-sensitive match in values
+    if ctn_to_remove in self.weight_to_tab_name.values():
+        # Remove the custom tab name from the dictionary
+        keys_to_remove = [key for key, value in self.weight_to_tab_name.items() if value == ctn_to_remove]
+        for key in keys_to_remove:
+            del self.weight_to_tab_name[key]
+
+        # Save the updated custom tab names to the file
+        self.update_json(self.dictionary_file, "weight_to_tab_name", self.weight_to_tab_name)
+        # Refresh the category buttons in the GUI
+        self.refresh_category_buttons()
+        # Clear the remove custom tab name entry field
+        self.remove_custom_tab_name_entry.delete(0, ctk.END)
+
+        # Log the action if logging is enabled
+        self.log_and_show(f"Custom Tab Name removed: {ctn_to_remove}")
+    else:
+        # Check for a case-insensitive match for a custom tab name in values
+        matching_ctn = next(
+            (key for key, value in self.weight_to_tab_name.items() if value.lower() == ctn_to_remove.lower()), None)
+        if matching_ctn:
+            # Remove the case-insensitive matched custom tab name from the dictionary
+            del self.weight_to_tab_name[matching_ctn]
+            # Save the updated custom tab names to the file
+            self.update_json(self.dictionary_file, "weight_to_tab_name", self.weight_to_tab_name)
+            # Refresh the category buttons in the GUI
+            self.refresh_category_buttons()
+            # Clear the remove custom tab name entry field
+            self.remove_custom_tab_name_entry.delete(0, ctk.END)
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"Custom Tab Name removed: {matching_ctn}")
+        else:
+            # Log the action if logging is enabled
+            self.log_and_show(f"'{ctn_to_remove}' not found in dictionary. Skipping.",
+                              create_messagebox=True, error=True)

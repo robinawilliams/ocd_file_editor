@@ -246,8 +246,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.reset_artist_checkbox = None
         self.category_label_frame = None
         self.category_label = None
-        self.add_remove_label_frame = None
-        self.add_remove_label = None
+        self.ctn_label_frame = None
+        self.ctn_label = None
+        self.ctn_frame = None
+        self.add_ctn_button = None
+        self.custom_tab_name_entry = None
+        self.weight_label1 = None
+        self.weight_var1 = None
+        self.weight_entry1 = None
+        self.remove_ctn_button = None
+        self.remove_custom_tab_name_entry = None
+        self.add_remove_message_label_frame = None
+        self.add_remove_message_label = None
 
         # Initialize Settings GUI elements
         self.settings_frame = None
@@ -315,7 +325,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-         default_most_number, scaling) = (
+         default_most_number, scaling, default_ctn_weight) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -333,6 +343,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.scaling = scaling
         self.column_numbers = int(column_numbers)
         self.default_weight = default_weight
+        self.default_ctn_weight = default_ctn_weight
         self.default_decibel = default_decibel
         self.default_audio_normalization = default_audio_normalization
         self.default_minute = default_minute
@@ -1416,10 +1427,57 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
         self.remove_category_entry.grid(row=0, column=5, padx=5)
 
+        # Frame for add/remove Custom Tab Name elements
+        self.ctn_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
+        self.ctn_label_frame.grid(row=5, column=0, padx=10, pady=10)
+
+        # Custom Tab Name Label
+        self.ctn_label = ctk.CTkLabel(self.ctn_label_frame, text="Custom Tab Name",
+                                      font=ctk.CTkFont(size=15, weight="bold"))
+        self.ctn_label.grid(row=0, column=0, padx=10, pady=10)
+
+        self.ctn_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
+        self.ctn_frame.grid(row=6, column=0, padx=10, pady=10)
+
+        # Add Custom Tab Name Button
+        self.add_ctn_button = ctk.CTkButton(self.ctn_frame, text="Add Custom Tab", command=self.add_custom_tab_name)
+        self.add_ctn_button.grid(row=0, column=0, padx=5)
+
+        # Add Custom Tab Name Entry
+        self.custom_tab_name_entry = ctk.CTkEntry(self.ctn_frame, width=310)
+        self.custom_tab_name_entry.grid(row=0, column=1, padx=5)
+
+        # Weight1 Label
+        self.weight_label1 = ctk.CTkLabel(self.ctn_frame, text="Weight:")
+        self.weight_label1.grid(row=0, column=2, padx=5)
+
+        # Initialize weight variable
+        self.weight_var1 = ctk.StringVar()
+        self.weight_var1.set(self.default_ctn_weight)
+
+        # Trace the changes in the StringVar
+        self.weight_var1.trace_add("write", lambda *args: self.validate_entry(
+            self.weight_var1,
+            self.default_ctn_weight,
+            desired_type=int))
+
+        # Weight Entry1
+        self.weight_entry1 = ctk.CTkEntry(self.ctn_frame, textvariable=self.weight_var1, width=35)
+        self.weight_entry1.grid(row=0, column=3, padx=5)
+
+        # Remove Custom Tab Name Button
+        self.remove_ctn_button = ctk.CTkButton(self.ctn_frame, text="Remove Custom Tab",
+                                               command=self.remove_custom_tab_name)
+        self.remove_ctn_button.grid(row=0, column=4, padx=5)
+
+        # Remove Custom Tab Name Entry
+        self.remove_custom_tab_name_entry = ctk.CTkEntry(self.ctn_frame, width=310)
+        self.remove_custom_tab_name_entry.grid(row=0, column=5, padx=5)
+
         # NO-GO label frame
         self.no_go_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                               fg_color="transparent")
-        self.no_go_label_frame.grid(row=5, column=0, padx=10, pady=10)
+        self.no_go_label_frame.grid(row=7, column=0, padx=10, pady=10)
 
         # NO-GO label
         self.no_go_label = ctk.CTkLabel(self.no_go_label_frame, text="NO GO",
@@ -1429,7 +1487,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # NO-GO frame
         self.no_go_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                               fg_color="transparent")
-        self.no_go_entry_frame.grid(row=6, column=0, padx=10, pady=10)
+        self.no_go_entry_frame.grid(row=8, column=0, padx=10, pady=10)
 
         # Add NO-GO button
         self.add_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Add NO GO",
@@ -1443,7 +1501,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Exclude label frame
         self.exclude_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                 fg_color="transparent")
-        self.exclude_label_frame.grid(row=7, column=0, padx=10, pady=10)
+        self.exclude_label_frame.grid(row=9, column=0, padx=10, pady=10)
 
         # Exclude label
         self.exclude_label = ctk.CTkLabel(self.exclude_label_frame, text="Exclude",
@@ -1453,7 +1511,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Exclude frame
         self.exclude_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                 fg_color="transparent")
-        self.exclude_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+        self.exclude_entry_frame.grid(row=10, column=0, padx=10, pady=10)
 
         # Add Exclude button
         self.add_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Add Exclude",
@@ -1465,13 +1523,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_exclude_name_entry.grid(row=0, column=1, padx=5)
 
         # Frame to display messages on the add/remove frame
-        self.add_remove_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                                   fg_color="transparent")
-        self.add_remove_label_frame.grid(row=12, column=0, padx=10)
+        self.add_remove_message_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                                           fg_color="transparent")
+        self.add_remove_message_label_frame.grid(row=12, column=0, padx=10)
 
-        # Add/Remove Label
-        self.add_remove_label = ctk.CTkLabel(self.add_remove_label_frame, text="")
-        self.add_remove_label.grid(row=0, column=0, padx=10, pady=10)
+        # Add/Remove Message Label
+        self.add_remove_message_label = ctk.CTkLabel(self.add_remove_message_label_frame, text="")
+        self.add_remove_message_label.grid(row=0, column=0, padx=10, pady=10)
 
         """
         settings_window
@@ -1843,12 +1901,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.file_renamer_message_label.configure(text_color="#000000")
             self.name_normalizer_message_label.configure(text_color="#000000")
             self.video_editor_message_label.configure(text_color="#000000")
-            self.add_remove_label.configure(text_color="#000000")
+            self.add_remove_message_label.configure(text_color="#000000")
         elif current_mode == "Dark":
             self.file_renamer_message_label.configure(text_color="#FFFFFF")
             self.name_normalizer_message_label.configure(text_color="#FFFFFF")
             self.video_editor_message_label.configure(text_color="#FFFFFF")
-            self.add_remove_label.configure(text_color="#FFFFFF")
+            self.add_remove_message_label.configure(text_color="#FFFFFF")
 
     # Method to display messages with optional error formatting
     def show_message(self, message, error=False, frame_name=None):
@@ -1863,11 +1921,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         elif frame_name == "video_editor_window":
             labels = [self.video_editor_message_label]
         elif frame_name == "add_remove_window":
-            labels = [self.add_remove_label]
+            labels = [self.add_remove_message_label]
         else:
             # Default to all frame labels if no frame name is passed
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
-                      self.video_editor_message_label, self.add_remove_label]
+                      self.video_editor_message_label, self.add_remove_message_label]
 
         # Truncate the message after x characters for GUI friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
@@ -2168,6 +2226,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def artist_identifier(self):
         # Attempt to identify artists
         return core.artist_identifier(self)
+
+    def add_custom_tab_name(self):
+        # Add a custom tab name to the dictionary
+        core.add_custom_tab_name(self)
+
+    def remove_custom_tab_name(self):
+        # Remove a custom tab name to the dictionary
+        core.remove_custom_tab_name(self)
 
 
 if __name__ == "__main__":

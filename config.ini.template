@@ -7,6 +7,8 @@ scaling = 100
 column_numbers = 7
 ; Default weight for category
 default_weight = 9
+; Default weight for custom tab name
+default_ctn_weight = 1
 ; Default decibel for video editor
 default_decibel = 0.0
 ; Default audio normalization for video editor
