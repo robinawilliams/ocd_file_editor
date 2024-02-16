@@ -116,6 +116,8 @@ def load_configuration(self):
     remove_hashtag_trail_var = config.getboolean("Settings", "remove_hashtag_trail_var", fallback=False)
     remove_hashtag_var = config.getboolean("Settings", "remove_hashtag_var", fallback=False)
     remove_new_var = config.getboolean("Settings", "remove_new_var", fallback=False)
+    remove_custom_text_var = config.getboolean("Settings", "remove_custom_text_var", fallback=False)
+    replace_mode_var = config.getboolean("Settings", "replace_mode_var", fallback=False)
     remove_dash_var = config.getboolean("Settings", "remove_dash_var", fallback=False)
     remove_endash_var = config.getboolean("Settings", "remove_endash_var", fallback=False)
     remove_emdash_var = config.getboolean("Settings", "remove_emdash_var", fallback=False)
@@ -169,7 +171,7 @@ def load_configuration(self):
             default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-            default_most_number, scaling, default_ctn_weight)
+            default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -182,6 +184,13 @@ def initialize_json(self):
 
         with open(self.dictionary_file, "r") as json_file:
             data = json.load(json_file)
+
+            # Get categories dictionary
+            self.categories = data.get("categories", {})
+
+            # Get custom_text_to_remove dictionary
+            self.custom_text_to_remove = data.get("custom_text_to_remove", [])
+
             # Get excluded_folders dictionary
             self.excluded_folders = data.get("excluded_folders", [])
 
@@ -195,9 +204,6 @@ def initialize_json(self):
             weight_to_tab_name = data.get("weight_to_tab_name", {})
             # Make sure the keys are integers
             self.weight_to_tab_name = {int(key): value for key, value in weight_to_tab_name.items()}
-
-            # Get categories dictionary
-            self.categories = data.get("categories", {})
 
     except FileNotFoundError:
         # Log that the file is not found
@@ -801,6 +807,7 @@ def clear_selection(self, frame_name):
 
         self.nn_path_entry.delete(0, ctk.END)
         self.move_directory_entry.delete(0, ctk.END)
+        self.custom_text_removal_entry.delete(0, ctk.END)
 
     elif frame_name == "video_editor_window":
         self.video_editor_selected_file = ""
@@ -1514,6 +1521,45 @@ def preview_name(self, file_path):
 
     # Check if the input has one of the video file extensions
     if ext.lower() in self.file_extensions:
+        # Remove custom text
+        try:
+            # Get the text to remove from the entry
+            text_to_remove = self.custom_text_removal_entry.get().strip()
+        except Exception as e:
+            self.log_and_show(f"An error occurred getting the custom text to remove: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            text_to_remove = None
+
+        # Check if text to remove is provided
+        if text_to_remove:
+            if self.replace_mode_var.get():
+                # Check if the text to remove is present in name (case-insensitive)
+                pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
+
+                # Remove all instances of the text to remove from name
+                name = pattern.sub('', name)
+            else:
+                # Check if the text to remove is present in name (case-sensitive)
+                if text_to_remove in name:
+                    # Remove all instances of the text to remove from name
+                    name = name.replace(text_to_remove, '')
+
+        if self.remove_custom_text_var.get():
+            # Remove custom text from the custom_text_to_remove list
+            if self.replace_mode_var.get():
+                for text_to_remove in self.custom_text_to_remove:
+                    # Check if the text to remove is present in name (case-insensitive)
+                    pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
+
+                    # Remove all instances of the text to remove from name
+                    name = pattern.sub('', name)
+            else:
+                # Check if the text to remove is present in name (case-sensitive)
+                for text_to_remove in self.custom_text_to_remove:
+                    # Remove all instances of the text to remove from name
+                    name = name.replace(text_to_remove, '')
+
         if self.remove_non_ascii_symbols_var.get():
             # Get all printable ASCII characters
             standard_chars = set(string.printable)

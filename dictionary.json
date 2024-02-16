@@ -81,6 +81,9 @@
     "Vocal": 9,
     "Zydeco": 9
   },
+  "custom_text_to_remove": [
+    "custom_text_to_remove"
+  ],
   "excluded_folders": [
     "excluded_folders"
   ],

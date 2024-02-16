@@ -28,6 +28,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.queue = []
         self.tabs = {}
         self.excluded_folders = []
+        self.custom_text_to_remove = []
         self.file_extensions = []
         self.valid_extensions = []
         self.weight_to_tab_name = {}
@@ -167,6 +168,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.checkbox_frame7 = None
         self.remove_parenthesis_trail_checkbox = None
         self.remove_hashtag_trail_checkbox = None
+        self.remove_custom_text_checkbox = None
+        self.replace_mode_switch = None
         self.checkbox_frame8 = None
         self.remove_double_space_checkbox = None
         self.artist_search_checkbox = None
@@ -175,6 +178,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory_frame = None
         self.browse_move_directory_button = None
         self.move_directory_entry = None
+        self.custom_text_label = None
+        self.custom_text_removal_entry = None
         self.normalize_folder_frame = None
         self.normalize_preview_button = None
         self.normalize_button = None
@@ -325,7 +330,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-         default_most_number, scaling, default_ctn_weight) = (
+         default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -383,6 +388,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_hashtag_trail_var = ctk.BooleanVar(value=remove_hashtag_trail_var)
         self.remove_hashtag_var = ctk.BooleanVar(value=remove_hashtag_var)
         self.remove_new_var = ctk.BooleanVar(value=remove_new_var)
+        self.remove_custom_text_var = ctk.BooleanVar(value=remove_custom_text_var)
+        self.replace_mode_var = ctk.BooleanVar(value=replace_mode_var)
         self.remove_dash_var = ctk.BooleanVar(value=remove_dash_var)
         self.remove_endash_var = ctk.BooleanVar(value=remove_endash_var)
         self.remove_emdash_var = ctk.BooleanVar(value=remove_emdash_var)
@@ -977,6 +984,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                              variable=self.remove_hashtag_trail_var)
         self.remove_hashtag_trail_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
+        # Checkbox to enable/disable remove custom text
+        self.remove_custom_text_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+                                                           text="Remove custom text",
+                                                           variable=self.remove_custom_text_var)
+        self.remove_custom_text_checkbox.grid(row=0, column=2, padx=10, pady=10)
+
+        # Switch to enable/disable replace mode (case-sensitive vs case-insensitive)
+        self.replace_mode_switch = ctk.CTkSwitch(self.checkbox_frame7, text="Case-sensitive "
+                                                                            "/ Case-insensitive",
+                                                 variable=self.replace_mode_var)
+        self.replace_mode_switch.grid(row=0, column=3, padx=10)
+
         # Button Frame 8
         self.checkbox_frame8 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                             fg_color="transparent")
@@ -1023,8 +1042,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_move_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Move directory entry
-        self.move_directory_entry = ctk.CTkEntry(self.output_directory_frame, width=890)
+        self.move_directory_entry = ctk.CTkEntry(self.output_directory_frame, width=400)
         self.move_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Custom Text Removal Label
+        self.custom_text_label = ctk.CTkLabel(self.output_directory_frame, text="Remove Text:")
+        self.custom_text_label.grid(row=0, column=2, padx=10, pady=10)
+
+        # Custom Text Removal Entry
+        self.custom_text_removal_entry = ctk.CTkEntry(self.output_directory_frame, width=330)
+        self.custom_text_removal_entry.grid(row=0, column=3, padx=10, pady=10)
 
         # Normalize Folder frame
         self.normalize_folder_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
