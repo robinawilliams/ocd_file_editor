@@ -1503,10 +1503,16 @@ def remove_artist_duplicates_from_filename(self, file_name):
         # Reattach the dash and any remaining text
         new_file_name = f"{file_name[:index + 1]} {temp_name.strip()}"
     else:
-        new_file_name = file_name
+        # No dash found, return the original filename
+        return file_name
 
     # Sanitize file name. Remove double spaces.
     new_file_name = ' '.join(new_file_name.split()).strip()
+
+    # Check for double dashes and remove the second dash
+    if ' - - ' in new_file_name:
+        new_file_name = new_file_name.replace(' - - ', ' - ', 1)
+
     return new_file_name
 
 
