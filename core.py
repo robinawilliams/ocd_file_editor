@@ -2351,15 +2351,13 @@ add_remove_window
 
 # Function to add artists to the artist file
 def add_artist_to_file(self):
-    # Check if self.add_artist is None
-    if not self.add_artist:
-        # Get the artist to be added from the entry widget
-        self.add_artist = self.add_artist_entry.get().strip()
+    # Get the artist to be added from the entry widget
+    add_artist = self.add_artist_entry.get().strip()
 
-        # Check if no artist is provided
-        if not self.add_artist:
-            self.log_and_show("Add Artist cannot be empty.", create_messagebox=True, error=True)
-            return  # Exit the function if no artist is provided
+    # Check if no artist is provided
+    if not add_artist:
+        self.log_and_show("Add Artist cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no artist is provided
 
     # Read the list of artists from the artist_file
     try:
@@ -2370,18 +2368,18 @@ def add_artist_to_file(self):
         return  # Exit the function if the artist_file is not found
 
     # Check if the add_artist is already in the list (case-insensitive)
-    if any(artist.lower() == self.add_artist.lower() for artist in artist_list):
-        self.log_and_show(f"Artist is already in the Artist File: '{self.add_artist}'",
+    if any(artist.lower() == add_artist.lower() for artist in artist_list):
+        self.log_and_show(f"Artist is already in the Artist File: '{add_artist}'",
                           create_messagebox=True, error=True)
     else:
         # Add the add_artist to the list
-        artist_list.append(self.add_artist)
+        artist_list.append(add_artist)
 
         # Write the updated list back to the artist_file
         try:
             with open(self.artist_file, 'w') as artist_list_file:
                 artist_list_file.write('\n'.join(artist_list))
-            self.log_and_show(f"Added artist to the Artist File: '{self.add_artist}'")
+            self.log_and_show(f"Added artist to the Artist File: '{add_artist}'")
 
         except IOError:
             self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
@@ -2390,21 +2388,18 @@ def add_artist_to_file(self):
     # Reset the artist entries if the action is successful
     if self.reset_artist_entries_var.get():
         # Clear add artist entry
-        self.add_artist = ""
         self.add_artist_entry.delete(0, ctk.END)
 
 
 # Function to remove artists from the artist file
 def remove_artist_from_file(self):
-    # Check if self.remove_artist is None
-    if not self.remove_artist:
-        # Get the artist to be removed from the entry widget
-        self.remove_artist = self.remove_artist_entry.get().strip()
+    # Get the artist to be removed from the entry widget
+    remove_artist = self.remove_artist_entry.get().strip()
 
-        # Check if no artist is provided
-        if not self.remove_artist:
-            self.log_and_show("Remove Artist cannot be empty.", create_messagebox=True, error=True)
-            return  # Exit the function if no artist is provided
+    # Check if no artist is provided
+    if not remove_artist:
+        self.log_and_show("Remove Artist cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no artist is provided
 
     try:
         # Read the list of artists from the artist_file
@@ -2415,41 +2410,38 @@ def remove_artist_from_file(self):
         return  # Exit the function if the artist_file is not found
 
     # Check if the remove_artist is in the list (case-insensitive)
-    if any(artist.lower() == self.remove_artist.lower() for artist in artist_list):
+    if any(artist.lower() == remove_artist.lower() for artist in artist_list):
         # Remove the remove_artist from the list
-        artist_list = [artist for artist in artist_list if artist.lower() != self.remove_artist.lower()]
+        artist_list = [artist for artist in artist_list if artist.lower() != remove_artist.lower()]
 
         # Write the updated list back to the artist_file
         try:
             with open(self.artist_file, 'w') as artist_list_file:
                 artist_list_file.write('\n'.join(artist_list))
-            self.log_and_show(f"Removed artist from the Artist File: '{self.remove_artist}'")
+            self.log_and_show(f"Removed artist from the Artist File: '{remove_artist}'")
 
         except IOError:
             self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
                               create_messagebox=True, error=True)
     else:
-        self.log_and_show(f"Artist is not in the Artist File: '{self.remove_artist}'",
+        self.log_and_show(f"Artist is not in the Artist File: '{remove_artist}'",
                           create_messagebox=True, error=True)
 
     # Reset the artist entries if the action is successful
     if self.reset_artist_entries_var.get():
         # Clear remove artist entry
-        self.remove_artist = ""
         self.remove_artist_entry.delete(0, ctk.END)
 
 
 # Function to create a NO-GO file
 def no_go_creation(self):
-    # Check if self.no_go_name is None
-    if not self.no_go_name:
-        # Attempt to get the contents from self.add_no_go_name_entry
-        self.no_go_name = self.add_no_go_name_entry.get().strip()
+    # Attempt to get the contents from self.add_no_go_name_entry
+    no_go_name = self.add_no_go_name_entry.get().strip()
 
-        # Check if self.no_go_name is provided
-        if not self.no_go_name:
-            self.log_and_show("Add NO GO cannot be empty.", create_messagebox=True, error=True)
-            return  # Exit the function if no artist is provided
+    # Check if no_go_name is provided
+    if not no_go_name:
+        self.log_and_show("Add NO GO cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no artist is provided
 
     try:
         # Expand the user's home directory in the NO-GO path
@@ -2460,7 +2452,7 @@ def no_go_creation(self):
             os.makedirs(no_go_directory)
 
         # Create a file for the NO-GO
-        file_name = f"NO GO - {self.no_go_name}"
+        file_name = f"NO GO - {no_go_name}"
         file_path = os.path.join(no_go_directory, file_name)
 
         # Create NO-GO empty file
@@ -2475,57 +2467,211 @@ def no_go_creation(self):
 
         # Write the no_go_name to the file
         with open(self.no_go_artist_file, "a") as file:
-            file.write("\n" + self.no_go_name)
+            file.write("\n" + no_go_name)
 
         # Log the action if logging is enabled
-        self.log_and_show(f"NO GO created successfully for {self.no_go_name} in \n"
+        self.log_and_show(f"NO GO created successfully for '{no_go_name}' in \n"
                           f"{no_go_directory}")
 
     except Exception as e:
         self.log_and_show(f"Creating NO GO failed: '{str(e)}'.", create_messagebox=True, error=True)
 
-    # Clear add no-go name entry and reset self.no_go_name
-    self.no_go_name = ""
+    # Clear add no-go name entry and reset
     self.add_no_go_name_entry.delete(0, ctk.END)
+
+
+def no_go_removal(self):
+    # Attempt to get the contents from self.remove_no_go_name_entry
+    remove_no_go_name = self.remove_no_go_name_entry.get().strip()
+
+    # Check if remove_no_go_name is provided
+    if not remove_no_go_name:
+        self.log_and_show("Remove NO GO cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no artist is provided
+
+    try:
+        # Expand the user's home directory in the NO-GO path
+        no_go_directory = os.path.expanduser(self.no_go_directory)
+
+        # Ensure the NO-GO directory exists
+        if not os.path.exists(no_go_directory):
+            self.log_and_show("NO GO directory does not exist.", create_messagebox=True, error=True)
+            return  # Exit the function if NO GO directory does not exist
+
+        # Check if the NO-GO file exists 
+        # TODO Compare case-insensitively
+        no_go_file_name = f"NO GO - {remove_no_go_name}"
+        no_go_file_path = os.path.join(no_go_directory, no_go_file_name)
+        if os.path.isfile(no_go_file_path):
+            os.remove(no_go_file_path)
+            self.log_and_show(f"NO GO file '{no_go_file_name}' removed successfully.")
+        else:
+            self.log_and_show(f"NO GO file '{no_go_file_name}' not found.", create_messagebox=True, error=True)
+
+        # Check and remove the entry from self.no_go_artist_file tampermonkey (case-insensitive)
+        with open(self.no_go_artist_file, "r") as file:
+            lines = file.readlines()
+
+        with open(self.no_go_artist_file, "w") as file:
+            for line in lines:
+                if line.strip().lower() != remove_no_go_name.lower():
+                    file.write(line)
+
+        self.log_and_show(f"NO GO entry '{remove_no_go_name}' removed from {self.no_go_artist_file} successfully.")
+
+    except Exception as e:
+        self.log_and_show(f"Removing NO GO failed: '{str(e)}'.", create_messagebox=True, error=True)
+
+    # Clear remove no-go name entry and reset
+    self.remove_no_go_name_entry.delete(0, ctk.END)
 
 
 # Function to exclude folder from Artist Directory search
 def add_folder_to_excluded_folders(self):
-    if not self.exclude_name:
-        # Get the exclude name to be added from the entry widget
-        self.exclude_name = self.add_exclude_name_entry.get().strip()
+    # Get the exclude name to be added from the entry widget
+    exclude_name = self.add_exclude_name_entry.get().strip()
 
-        # Check if no exclude name is provided
-        if not self.exclude_name:
-            self.log_and_show("Add Exclude cannot be empty.", create_messagebox=True, error=True)
-            return  # Exit the function if no exclusion is provided
+    # Check if no exclude name is provided
+    if not exclude_name:
+        self.log_and_show("Add Exclude cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no exclusion is provided
 
     # Check if the folder is already in the excluded_folders list
-    if self.exclude_name in self.excluded_folders:
-        self.log_and_show(f"Folder '{self.exclude_name}' is already in the excluded folders list.",
+    if exclude_name in self.excluded_folders:
+        self.log_and_show(f"Folder '{exclude_name}' is already in the excluded folders list.",
                           create_messagebox=True, error=True)
         # Reset the exclude entry
-        self.exclude_name = ""
         self.add_exclude_name_entry.delete(0, ctk.END)
         return  # Exit the function if the folder is already in the list
 
     try:
         # Add the folder to the excluded_folders list
-        self.excluded_folders.append(self.exclude_name)
+        self.excluded_folders.append(exclude_name)
 
         # Update the JSON file with the new excluded_folders list
         self.update_json(self.dictionary_file, "excluded_folders", self.excluded_folders)
 
         # Log and show success message
-        self.log_and_show(f"Folder '{self.exclude_name}' added to excluded folders list.")
+        self.log_and_show(f"Folder '{exclude_name}' added to excluded folders list.")
 
         # Reset the exclude entry if the action is successful
-        self.exclude_name = ""
         self.add_exclude_name_entry.delete(0, ctk.END)
 
     except Exception as e:
         # Log and show error message if an exception occurs
-        self.log_and_show(f"Error adding folder '{self.exclude_name}' to excluded folders list: {e}",
+        self.log_and_show(f"Adding folder '{exclude_name}' to excluded folders list failed: {str(e)}",
+                          create_messagebox=True, error=True)
+
+
+# Function to include folder in Artist Directory search
+def remove_folder_from_excluded_folders(self):
+    # Get the exclude name to be removed from the entry widget
+    exclude_name = self.remove_exclude_name_entry.get().strip()
+
+    # Check if no exclude name is provided
+    if not exclude_name:
+        self.log_and_show("Remove Exclude cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no exclusion is provided
+
+    # Check if the folder is in the excluded_folders list (case-insensitive)
+    if exclude_name.lower() not in map(str.lower, self.excluded_folders):
+        self.log_and_show(f"Folder '{exclude_name}' is not in the excluded folders list.",
+                          create_messagebox=True, error=True)
+        # Reset the remove entry
+        self.remove_exclude_name_entry.delete(0, ctk.END)
+        return  # Exit the function if the folder is not in the list
+
+    try:
+        # Remove the folder from the excluded_folders list (case-insensitive)
+        self.excluded_folders = [folder for folder in self.excluded_folders if folder.lower() != exclude_name.lower()]
+
+        # Update the JSON file with the new excluded_folders list
+        self.update_json(self.dictionary_file, "excluded_folders", self.excluded_folders)
+
+        # Log and show success message
+        self.log_and_show(f"Folder '{exclude_name}' removed from excluded folders list.")
+
+        # Reset the remove entry if the action is successful
+        self.remove_exclude_name_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Removing folder '{exclude_name}' from excluded folders list failed: {str(e)}",
+                          create_messagebox=True, error=True)
+
+
+# Function to add text to custom_text_to_remove list
+def add_custom_text_to_remove(self):
+    # Get the custom text to be added from the entry widget
+    custom_text = self.add_ctr_name_entry.get().strip()
+
+    # Check if no custom text is provided
+    if not custom_text:
+        self.log_and_show("Add CTR cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no exclusion is provided
+
+    # Check if the folder is already in the custom_text_to_remove list
+    if custom_text in self.custom_text_to_remove:
+        self.log_and_show(f"Custom Text '{custom_text}' is already in the custom text to remove list.",
+                          create_messagebox=True, error=True)
+        # Reset the add custom text to remove entry
+        self.add_ctr_name_entry.delete(0, ctk.END)
+        return  # Exit the function if the folder is already in the list
+
+    try:
+        # Add the folder to the custom_text_to_remove list
+        self.custom_text_to_remove.append(custom_text)
+
+        # Update the JSON file with the new custom_text_to_remove list
+        self.update_json(self.dictionary_file, "custom_text_to_remove", self.custom_text_to_remove)
+
+        # Log and show success message
+        self.log_and_show(f"Custom Text '{custom_text}' added to custom text to remove list.")
+
+        # Reset the custom text to remove entry if the action is successful
+        self.add_ctr_name_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Adding Custom Text '{custom_text}' to custom text to remove list failed: {str(e)}",
+                          create_messagebox=True, error=True)
+
+
+# Function to remove text from custom_text_to_remove list
+def remove_custom_text_to_remove(self):
+    # Get the custom text to be removed from the entry widget
+    custom_text = self.remove_ctr_name_entry.get().strip()
+
+    # Check if no custom text is provided
+    if not custom_text:
+        self.log_and_show("Remove CTR cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no exclusion is provided
+
+    # Check if the folder is in the custom_text_to_remove list (case-insensitive)
+    if custom_text.lower() not in map(str.lower, self.custom_text_to_remove):
+        self.log_and_show(f"Custom Text '{custom_text}' is not in the custom text to remove list.",
+                          create_messagebox=True, error=True)
+        # Reset the remove custom_text_to_remove entry
+        self.remove_ctr_name_entry.delete(0, ctk.END)
+        return  # Exit the function if the folder is not in the list
+
+    try:
+        # Remove the folder from the custom_text_to_remove list (case-insensitive)
+        self.custom_text_to_remove = [folder for folder in self.custom_text_to_remove if
+                                      folder.lower() != custom_text.lower()]
+
+        # Update the JSON file with the new custom_text_to_remove list
+        self.update_json(self.dictionary_file, "custom_text_to_remove", self.custom_text_to_remove)
+
+        # Log and show success message
+        self.log_and_show(f"Custom Text '{custom_text}' removed from custom text to remove list.")
+
+        # Reset the remove custom_text_to_remove entry if the action is successful
+        self.remove_ctr_name_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Removing Custom Text '{custom_text}' from custom text to remove list failed: {str(e)}",
                           create_messagebox=True, error=True)
 
 

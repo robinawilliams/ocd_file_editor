@@ -39,10 +39,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_selected_file = ""
         self.video_editor_last_used_file = ""
         self.video_editor_output_directory = ""
-        self.add_artist = ""
-        self.remove_artist = ""
-        self.no_go_name = ""
-        self.exclude_name = ""
 
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
         self.original_stdout = sys.stdout
@@ -85,11 +81,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.no_go_entry_frame = None
         self.add_no_go_button = None
         self.add_no_go_name_entry = None
+        self.remove_no_go_button = None
+        self.remove_no_go_name_entry = None
         self.exclude_label_frame = None
         self.exclude_label = None
         self.exclude_entry_frame = None
         self.add_exclude_button = None
         self.add_exclude_name_entry = None
+        self.remove_exclude_button = None
+        self.remove_exclude_name_entry = None
+        self.ctr_label_frame = None
+        self.ctr_label = None
+        self.ctr_entry_frame = None
+        self.add_ctr_button = None
+        self.remove_ctr_name_entry = None
+        self.add_ctr_name_entry = None
+        self.remove_ctr_button = None
         self.custom_text_frame = None
         self.output_directory_browse_button = None
         self.output_directory_entry = None
@@ -1525,6 +1532,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
         self.add_no_go_name_entry.grid(row=0, column=1, padx=5)
 
+        # Remove NO-GO button
+        self.remove_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Remove NO GO",
+                                                 command=self.no_go_removal)
+        self.remove_no_go_button.grid(row=0, column=3, padx=5)
+
+        # Remove NO-GO entry
+        self.remove_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
+        self.remove_no_go_name_entry.grid(row=0, column=4, padx=5)
+
         # Exclude label frame
         self.exclude_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                 fg_color="transparent")
@@ -1549,10 +1565,52 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
         self.add_exclude_name_entry.grid(row=0, column=1, padx=5)
 
+        # Remove Exclude button
+        self.remove_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Remove Exclude",
+                                                   command=self.remove_folder_from_excluded_folders)
+        self.remove_exclude_button.grid(row=0, column=3, padx=5)
+
+        # Remove Exclude entry
+        self.remove_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
+        self.remove_exclude_name_entry.grid(row=0, column=4, padx=5)
+
+        # Custom Text to Remove label frame
+        self.ctr_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.ctr_label_frame.grid(row=11, column=0, padx=10, pady=10)
+
+        # Custom Text to Remove label
+        self.ctr_label = ctk.CTkLabel(self.ctr_label_frame, text="Custom Text to Remove",
+                                      font=ctk.CTkFont(size=15, weight="bold"))
+        self.ctr_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Custom Text to Remove frame
+        self.ctr_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+                                            fg_color="transparent")
+        self.ctr_entry_frame.grid(row=12, column=0, padx=10, pady=10)
+
+        # Add ctr button
+        self.add_ctr_button = ctk.CTkButton(self.ctr_entry_frame, text="Add CTR",
+                                            command=self.add_custom_text_to_remove)
+        self.add_ctr_button.grid(row=0, column=0, padx=5)
+
+        # Add ctr entry
+        self.add_ctr_name_entry = ctk.CTkEntry(self.ctr_entry_frame, width=370)
+        self.add_ctr_name_entry.grid(row=0, column=1, padx=5)
+
+        # Remove ctr button
+        self.remove_ctr_button = ctk.CTkButton(self.ctr_entry_frame, text="Remove CTR",
+                                               command=self.remove_custom_text_to_remove)
+        self.remove_ctr_button.grid(row=0, column=3, padx=5)
+
+        # Remove ctr entry
+        self.remove_ctr_name_entry = ctk.CTkEntry(self.ctr_entry_frame, width=370)
+        self.remove_ctr_name_entry.grid(row=0, column=4, padx=5)
+
         # Frame to display messages on the add/remove frame
         self.add_remove_message_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
                                                            fg_color="transparent")
-        self.add_remove_message_label_frame.grid(row=12, column=0, padx=10)
+        self.add_remove_message_label_frame.grid(row=13, column=0, padx=10)
 
         # Add/Remove Message Label
         self.add_remove_message_label = ctk.CTkLabel(self.add_remove_message_label_frame, text="")
@@ -2246,9 +2304,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create a NO-GO file
         core.no_go_creation(self)
 
+    def no_go_removal(self):
+        # Remove a NO-GO file
+        core.no_go_removal(self)
+
     def add_folder_to_excluded_folders(self):
         # Exclude folder from Artist Directory search
         core.add_folder_to_excluded_folders(self)
+
+    def remove_folder_from_excluded_folders(self):
+        # Include folder in Artist Directory search
+        core.remove_folder_from_excluded_folders(self)
+
+    def add_custom_text_to_remove(self):
+        # Add text to custom_text_to_remove list
+        core.add_custom_text_to_remove(self)
+
+    def remove_custom_text_to_remove(self):
+        # Remove text from custom_text_to_remove list
+        core.remove_custom_text_to_remove(self)
 
     def artist_identifier(self):
         # Attempt to identify artists
