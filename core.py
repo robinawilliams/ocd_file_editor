@@ -1566,6 +1566,10 @@ def preview_name(self, file_path):
                     # Remove all instances of the text to remove from name
                     name = name.replace(text_to_remove, '')
 
+        if self.remove_custom_text_var.get() or text_to_remove:
+            # Replace consecutive spaces with a single space when custom text is removed
+            name = re.sub(r'\s+', ' ', name)
+
         if self.remove_non_ascii_symbols_var.get():
             # Get all printable ASCII characters
             standard_chars = set(string.printable)
