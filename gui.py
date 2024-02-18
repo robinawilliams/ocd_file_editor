@@ -1371,33 +1371,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              font=ctk.CTkFont(size=15, weight="bold"))
         self.add_remove_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # Create add_remove_tabview
-        self.add_remove_tabview = ctk.CTkTabview(self.add_remove_frame)
-        self.add_remove_tabview.grid(row=1, column=0)
-
-        # Sort the add/remove tab_names
-        if self.sort_tab_names_var.get():
-            # Determine the order to sort (forward or backward)
-            sort_reverse_order_var = True if self.sort_reverse_order_var.get() else False
-
-            # Create a tab for each sorted tab_name
-            tab_names = sorted(list(set(self.tab_names)), reverse=sort_reverse_order_var)
-        else:
-            # Create a tab for each tab_name
-            tab_names = list(set(self.tab_names))
-
-        for tab_name in tab_names:
-            # Use the tab_name naming scheme
-            tab_name = f"{tab_name}"
-
-            # Create the tab
-            tab = self.add_remove_tabview.add(tab_name)
-
-            # Store the reference to the tab
-            self.tabs[tab_name] = tab
-
-        # Set the default tab
-        self.add_remove_tabview.set(self.default_add_remove_tab)
+        # Create an add_remove_tabview on add_remove_frame row 1
+        self.create_add_remove_tabview()
 
         # Add and remove artist list frame
         self.add_remove_artist_entry_frame = ctk.CTkFrame(self.tabs.get("Artist"), corner_radius=0,
@@ -1746,7 +1721,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.sort_tab_names_switch.grid(row=0, column=1, padx=10)
 
         # Bind the callback function to sort_tab_names_var
-        self.sort_tab_names_var.trace_add("write", self.refresh_category_buttons)
+        self.sort_tab_names_var.trace_add("write", self.refresh_buttons_and_tabs)
 
         # Switch to enable/disable sort_reverse_order_var
         self.sort_tab_names_reverse_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names (A-Z / Z-A)",
@@ -1754,7 +1729,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.sort_tab_names_reverse_switch.grid(row=0, column=2, padx=10)
 
         # Bind the callback function to sort_reverse_order_var
-        self.sort_reverse_order_var.trace_add("write", self.refresh_category_buttons)
+        self.sort_reverse_order_var.trace_add("write", self.refresh_buttons_and_tabs)
 
         # GUI settings frame
         self.gui_settings_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
@@ -2375,6 +2350,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_custom_tab_name(self):
         # Remove a custom tab name to the dictionary
         core.remove_custom_tab_name(self)
+
+    def refresh_add_remove_tabview(self):
+        # Refresh the add/remove tabview tabs
+        core.refresh_add_remove_tabview(self)
+
+    def create_add_remove_tabview(self):
+        # Create add/remove tabview
+        core.create_add_remove_tabview(self)
+
+    def refresh_buttons_and_tabs(self, *args):
+        self.refresh_category_buttons()
+        self.refresh_add_remove_tabview()
 
     def artist_identifier(self):
         # Attempt to identify artists

@@ -3026,6 +3026,47 @@ def remove_custom_tab_name(self):
                               create_messagebox=True, error=True)
 
 
+# Function to refresh the add/remove tabview
+def refresh_add_remove_tabview(self):
+    # Destroy existing tabs
+    if hasattr(self, 'add_remove_tabview') and self.add_remove_tabview:
+        self.add_remove_tabview.destroy()
+
+    # Create the add_remove_tabview
+    self.create_add_remove_tabview()
+
+
+# Function to create add/remove tabview
+def create_add_remove_tabview(self):
+    # Create add_remove_tabview
+    self.add_remove_tabview = ctk.CTkTabview(self.add_remove_frame)
+    self.add_remove_tabview.grid(row=1, column=0)
+
+    # Sort the add/remove tab_names
+    if self.sort_tab_names_var.get():
+        # Determine the order to sort (forward or backward)
+        sort_reverse_order_var = True if self.sort_reverse_order_var.get() else False
+
+        # Create a tab for each sorted tab_name
+        tab_names = sorted(list(set(self.tab_names)), reverse=sort_reverse_order_var)
+    else:
+        # Create a tab for each tab_name
+        tab_names = list(set(self.tab_names))
+
+    for tab_name in tab_names:
+        # Use the tab_name naming scheme
+        tab_name = f"{tab_name}"
+
+        # Create the tab
+        tab = self.add_remove_tabview.add(tab_name)
+
+        # Store the reference to the tab
+        self.tabs[tab_name] = tab
+
+    # Set the default tab
+    self.add_remove_tabview.set(self.default_add_remove_tab)
+
+
 # Function to attempt to identify Artists
 def artist_identifier(self):
     # Check if an input is selected
