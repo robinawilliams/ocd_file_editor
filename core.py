@@ -83,6 +83,7 @@ def load_configuration(self):
     default_most_number = config.get('Settings', 'default_most_number', fallback=9)
     default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
     default_tab = config.get('Settings', 'default_tab', fallback="All")
+    default_add_remove_tab = config.get('Settings', 'default_add_remove_tab', fallback="Artist")
     file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
     default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
     special_character_var = config.get("Settings", "special_character_var", fallback="-")
@@ -171,7 +172,8 @@ def load_configuration(self):
             default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-            default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var)
+            default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var,
+            default_add_remove_tab)
 
 
 # Function to load the json file (exclude_file and weight_to_tab_name dictionaries)
@@ -1215,30 +1217,30 @@ def create_category_button(self, tab, category):
 
 def refresh_category_buttons(self):
     # Destroy existing tabs and buttons
-    if hasattr(self, 'tabview') and self.tabview:
-        self.tabview.destroy()
+    if hasattr(self, 'cat_tabview') and self.cat_tabview:
+        self.cat_tabview.destroy()
     for button in getattr(self, 'buttons', []):
         button.destroy()
 
     # Load categories from the file or create an empty dictionary
     self.initialize_json()
 
-    # Create the tabview and buttons
-    self.create_tabview()
+    # Create the cat_tabview and buttons
+    self.create_cat_tabview()
 
 
-# Function to create the tabview and buttons
-def create_tabview(self):
-    # Create tabview
-    self.tabview = ctk.CTkTabview(self.button_frame)
-    self.tabview.grid(row=0, column=0)
+# Function to create the cat_tabview and buttons
+def create_cat_tabview(self):
+    # Create cat_tabview
+    self.cat_tabview = ctk.CTkTabview(self.button_frame)
+    self.cat_tabview.grid(row=0, column=0)
 
     # Create a tab for all categories
-    all_cat_tab = self.tabview.add("All")
+    all_cat_tab = self.cat_tabview.add("All")
     self.tabs["All"] = all_cat_tab  # Store the reference to the tab
 
     # Create a tab for "Most Categories" with weights 1-9
-    most_cat_tab = self.tabview.add("Most")
+    most_cat_tab = self.cat_tabview.add("Most")
     self.tabs["Most"] = most_cat_tab  # Store the reference to the tab
 
     # Sort the weight tab_names
@@ -1259,7 +1261,7 @@ def create_tabview(self):
         else:
             tab_name = f"Weight {weight}"
 
-        tab = self.tabview.add(tab_name)
+        tab = self.cat_tabview.add(tab_name)
 
         self.tabs[weight] = tab  # Store the reference to the tab
 
@@ -1299,8 +1301,8 @@ def create_tabview(self):
     # Attempt to set the default tab
     try:
         # Check if self.default_tab is in the tab names
-        if self.default_tab and self.tabview.index(self.default_tab) is not None:
-            self.tabview.set(self.default_tab)
+        if self.default_tab and self.cat_tabview.index(self.default_tab) is not None:
+            self.cat_tabview.set(self.default_tab)
     except ValueError:
         return
 
@@ -2534,18 +2536,22 @@ def add_folder_to_excluded_folders(self):
     # Check if no exclude name is provided
     if not exclude_name:
         self.log_and_show("Add Exclude cannot be empty.", create_messagebox=True, error=True)
-        return  # Exit the function if no exclusion is provided
+        return  # Exit the function if no exclude_name is provided
 
-    # Check if the folder is already in the excluded_folders list
-    if exclude_name in self.excluded_folders:
+    # Convert both the input exclude name and existing excluded folders to lowercase
+    exclude_name_lower = exclude_name.lower()
+    excluded_folders_lower = [folder.lower() for folder in self.excluded_folders]
+
+    # Check if the exclude_name is already in the excluded_folders list (case-insensitive)
+    if exclude_name_lower in excluded_folders_lower:
         self.log_and_show(f"Folder '{exclude_name}' is already in the excluded folders list.",
                           create_messagebox=True, error=True)
         # Reset the exclude entry
         self.add_exclude_name_entry.delete(0, ctk.END)
-        return  # Exit the function if the folder is already in the list
+        return  # Exit the function if the exclude_name is already in the list
 
     try:
-        # Add the folder to the excluded_folders list
+        # Add the exclude_name to the excluded_folders list
         self.excluded_folders.append(exclude_name)
 
         # Update the JSON file with the new excluded_folders list
@@ -2571,19 +2577,23 @@ def remove_folder_from_excluded_folders(self):
     # Check if no exclude name is provided
     if not exclude_name:
         self.log_and_show("Remove Exclude cannot be empty.", create_messagebox=True, error=True)
-        return  # Exit the function if no exclusion is provided
+        return  # Exit the function if no exclude_name is provided
 
-    # Check if the folder is in the excluded_folders list (case-insensitive)
-    if exclude_name.lower() not in map(str.lower, self.excluded_folders):
+    # Convert both the input exclude name and existing excluded folders to lowercase
+    exclude_name_lower = exclude_name.lower()
+    excluded_folders_lower = [folder.lower() for folder in self.excluded_folders]
+
+    # Check if the exclude_name is in the excluded_folders list (case-insensitive)
+    if exclude_name_lower not in excluded_folders_lower:
         self.log_and_show(f"Folder '{exclude_name}' is not in the excluded folders list.",
                           create_messagebox=True, error=True)
         # Reset the remove entry
         self.remove_exclude_name_entry.delete(0, ctk.END)
-        return  # Exit the function if the folder is not in the list
+        return  # Exit the function if the exclude_name is not in the list
 
     try:
         # Remove the folder from the excluded_folders list (case-insensitive)
-        self.excluded_folders = [folder for folder in self.excluded_folders if folder.lower() != exclude_name.lower()]
+        self.excluded_folders = [folder for folder in self.excluded_folders if folder.lower() != exclude_name_lower]
 
         # Update the JSON file with the new excluded_folders list
         self.update_json(self.dictionary_file, "excluded_folders", self.excluded_folders)
@@ -2608,18 +2618,22 @@ def add_custom_text_to_remove(self):
     # Check if no custom text is provided
     if not custom_text:
         self.log_and_show("Add CTR cannot be empty.", create_messagebox=True, error=True)
-        return  # Exit the function if no exclusion is provided
+        return  # Exit the function if no custom_text is provided
 
-    # Check if the folder is already in the custom_text_to_remove list
-    if custom_text in self.custom_text_to_remove:
+    # Convert both the input custom text and existing custom texts to lowercase
+    custom_text_lower = custom_text.lower()
+    custom_texts_lower = [text.lower() for text in self.custom_text_to_remove]
+
+    # Check if the custom_text is already in the custom_text_to_remove list (case-insensitive)
+    if custom_text_lower in custom_texts_lower:
         self.log_and_show(f"Custom Text '{custom_text}' is already in the custom text to remove list.",
                           create_messagebox=True, error=True)
         # Reset the add custom text to remove entry
         self.add_ctr_name_entry.delete(0, ctk.END)
-        return  # Exit the function if the folder is already in the list
+        return  # Exit the function if the custom_text is already in the list
 
     try:
-        # Add the folder to the custom_text_to_remove list
+        # Add the custom_text to the custom_text_to_remove list
         self.custom_text_to_remove.append(custom_text)
 
         # Update the JSON file with the new custom_text_to_remove list
@@ -2645,20 +2659,24 @@ def remove_custom_text_to_remove(self):
     # Check if no custom text is provided
     if not custom_text:
         self.log_and_show("Remove CTR cannot be empty.", create_messagebox=True, error=True)
-        return  # Exit the function if no exclusion is provided
+        return  # Exit the function if no custom_text is provided
 
-    # Check if the folder is in the custom_text_to_remove list (case-insensitive)
-    if custom_text.lower() not in map(str.lower, self.custom_text_to_remove):
+    # Convert both the input custom text and existing custom texts to lowercase
+    custom_text_lower = custom_text.lower()
+    custom_texts_lower = [text.lower() for text in self.custom_text_to_remove]
+
+    # Check if the custom_text is in the custom_text_to_remove list (case-insensitive)
+    if custom_text_lower not in custom_texts_lower:
         self.log_and_show(f"Custom Text '{custom_text}' is not in the custom text to remove list.",
                           create_messagebox=True, error=True)
         # Reset the remove custom_text_to_remove entry
         self.remove_ctr_name_entry.delete(0, ctk.END)
-        return  # Exit the function if the folder is not in the list
+        return  # Exit the function if the custom_text is not in the list
 
     try:
-        # Remove the folder from the custom_text_to_remove list (case-insensitive)
-        self.custom_text_to_remove = [folder for folder in self.custom_text_to_remove if
-                                      folder.lower() != custom_text.lower()]
+        # Remove the custom_text from the custom_text_to_remove list (case-insensitive)
+        self.custom_text_to_remove = [text for text in self.custom_text_to_remove if
+                                      text.lower() != custom_text_lower]
 
         # Update the JSON file with the new custom_text_to_remove list
         self.update_json(self.dictionary_file, "custom_text_to_remove", self.custom_text_to_remove)
@@ -2675,67 +2693,186 @@ def remove_custom_text_to_remove(self):
                           create_messagebox=True, error=True)
 
 
-# Function to attempt to identify Artists
-def artist_identifier(self):
-    # Check if an input is selected
-    if not self.file_renamer_selected_file:
-        # If no input is selected, return none
-        self.log_and_show("No input selected.")
-        return None
+# Function to add extension to file_extensions list
+def add_file_extension(self):
+    # Get the extension to be added from the entry widget
+    file_extension = self.add_file_extension_entry.get().strip()
 
-    # Check if the artist_identifier_var is True
-    if not self.artist_identifier_var.get():
-        # If artist_identifier_var is False, return none
-        self.log_and_show("Artist Identifier disabled.")
-        return None
+    # Check if no extension is provided
+    if not file_extension:
+        self.log_and_show("Add File Ext. cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no file_extension is provided
 
-    # Check if self.artist_directory exists
-    if not os.path.exists(self.artist_directory):
-        # If artist directory does not exist, display an error message and return none
-        self.log_and_show(f"Artist Identifier cannot function as intended since the Artist Directory"
-                          f" does not exist."
-                          f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
+    # Check if the extension starts with a period; if not, add one
+    if not file_extension.startswith('.'):
+        file_extension = '.' + file_extension
+
+    # Convert both the input file extension and existing file extensions to lowercase
+    file_extension_lower = file_extension.lower()
+    file_extensions_lower = [ext.lower() for ext in self.file_extensions]
+
+    # Check if the extension is already in the file_extensions list (case-insensitive)
+    if file_extension_lower in file_extensions_lower:
+        self.log_and_show(f"File Extension '{file_extension}' is already in the file extensions list.",
                           create_messagebox=True, error=True)
-        return None
+        # Reset the add extension to remove entry
+        self.add_file_extension_entry.delete(0, ctk.END)
+        return  # Exit the function if the file_extension is already in the list
 
     try:
-        # Extract the base name from the selected file
-        base_name = os.path.basename(self.file_renamer_selected_file)
+        # Add the extension to the file_extensions list
+        self.file_extensions.append(file_extension)
 
-        # Check if there is a '-' in the name
-        if '-' not in base_name:
-            # If no '-', return none
-            self.log_and_show("No '-' found in the file name. Cannot identify artist.")
-            return None
+        # Update the JSON file with the new file_extensions list
+        self.update_json(self.dictionary_file, "file_extensions", self.file_extensions)
 
-        # Extract the artist from the text before '-'
-        artist = base_name.split('-')[0].strip()
+        # Log and show success message
+        self.log_and_show(f"File Extension '{file_extension}' added to file extensions list.")
 
-        # Search for a case-insensitive match for the artist in self.artist_directory
-        for root, dirs, files in os.walk(self.artist_directory):
-            for file_name in files:
-                # Check if the artist is present in the file name
-                if artist.lower() in file_name.lower():
-                    # Construct the artist file path
-                    artist_file_path = os.path.join(root, file_name)
-
-                    # Verify the file exists and the keyword is in the absolute path
-                    if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
-                            and self.keyword_var.lower() in artist_file_path.lower():
-                        # Check if the artist's name is not part of the directory path
-                        if artist.lower() not in os.path.dirname(artist_file_path).lower():
-                            # Return the result
-                            return artist_file_path
-
-        # If no matching artist is found, return none
-        self.log_and_show("No matching artist file found.")
-        return None
+        # Reset the file extensions entry if the action is successful
+        self.add_file_extension_entry.delete(0, ctk.END)
 
     except Exception as e:
-        # Handle any unexpected exceptions and log an error message
-        self.log_and_show(f"Unexpected error identifying artist: {e}",
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Adding File Extension '{file_extension}' to file extensions list failed: {str(e)}",
                           create_messagebox=True, error=True)
-        return None
+
+
+# Function to remove extension from file_extensions list
+def remove_file_extension(self):
+    # Get the extension to be removed from the entry widget
+    file_extension = self.remove_file_extension_entry.get().strip()
+
+    # Check if no extension is provided
+    if not file_extension:
+        self.log_and_show("Remove File Ext. cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no file_extension is provided
+
+    # Check if the extension starts with a period; if not, add one
+    if not file_extension.startswith('.'):
+        file_extension = '.' + file_extension
+
+    # Convert both the input file extension and existing file extensions to lowercase
+    file_extension_lower = file_extension.lower()
+    file_extensions_lower = [ext.lower() for ext in self.file_extensions]
+
+    # Check if the file_extension is in the file_extensions list (case-insensitive)
+    if file_extension_lower not in file_extensions_lower:
+        self.log_and_show(f"File Extension '{file_extension}' is not in the file extensions list.",
+                          create_messagebox=True, error=True)
+        # Reset the remove file_extensions entry
+        self.remove_file_extension_entry.delete(0, ctk.END)
+        return  # Exit the function if the file_extension is not in the list
+
+    try:
+        # Remove the file_extension from the file_extensions list (case-insensitive)
+        self.file_extensions = [ext for ext in self.file_extensions if
+                                ext.lower() != file_extension_lower]
+
+        # Update the JSON file with the new file_extensions list
+        self.update_json(self.dictionary_file, "file_extensions", self.file_extensions)
+
+        # Log and show success message
+        self.log_and_show(f"File Extension '{file_extension}' removed from file extensions list.")
+
+        # Reset the remove file_extensions entry if the action is successful
+        self.remove_file_extension_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Removing File Extension '{file_extension}' from file extensions list failed: {str(e)}",
+                          create_messagebox=True, error=True)
+
+
+# Function to add extension to valid_extensions list
+def add_valid_extension(self):
+    # Get the extension to be added from the entry widget
+    valid_extension = self.add_valid_extension_entry.get().strip()
+
+    # Check if no extension is provided
+    if not valid_extension:
+        self.log_and_show("Add Valid Ext. cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no valid_extension is provided
+
+    # Check if the extension starts with a period; if not, add one
+    if not valid_extension.startswith('.'):
+        valid_extension = '.' + valid_extension
+
+    # Convert both the input valid extension and existing valid extensions to lowercase
+    valid_extension_lower = valid_extension.lower()
+    valid_extensions_lower = [ext.lower() for ext in self.valid_extensions]
+
+    # Check if the extension is already in the valid_extensions list (case-insensitive)
+    if valid_extension_lower in valid_extensions_lower:
+        self.log_and_show(f"File Extension '{valid_extension}' is already in the valid extensions list.",
+                          create_messagebox=True, error=True)
+        # Reset the add extension to remove entry
+        self.add_valid_extension_entry.delete(0, ctk.END)
+        return  # Exit the function if the valid_extension is already in the list
+
+    try:
+        # Add the extension to the valid_extensions list
+        self.valid_extensions.append(valid_extension)
+
+        # Update the JSON file with the new valid_extensions list
+        self.update_json(self.dictionary_file, "valid_extensions", self.valid_extensions)
+
+        # Log and show success message
+        self.log_and_show(f"File Extension '{valid_extension}' added to valid extensions list.")
+
+        # Reset the valid extensions entry if the action is successful
+        self.add_valid_extension_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Adding File Extension '{valid_extension}' to valid extensions list failed: {str(e)}",
+                          create_messagebox=True, error=True)
+
+
+# Function to remove extension from valid_extensions list
+def remove_valid_extension(self):
+    # Get the extension to be removed from the entry widget
+    valid_extension = self.remove_valid_extension_entry.get().strip()
+
+    # Check if no extension is provided
+    if not valid_extension:
+        self.log_and_show("Remove Valid Ext. cannot be empty.", create_messagebox=True, error=True)
+        return  # Exit the function if no valid_extension is provided
+
+    # Check if the extension starts with a period; if not, add one
+    if not valid_extension.startswith('.'):
+        valid_extension = '.' + valid_extension
+
+    # Convert both the input valid extension and existing valid extensions to lowercase
+    valid_extension_lower = valid_extension.lower()
+    valid_extensions_lower = [ext.lower() for ext in self.valid_extensions]
+
+    # Check if the valid_extension is in the valid_extensions list (case-insensitive)
+    if valid_extension_lower not in valid_extensions_lower:
+        self.log_and_show(f"File Extension '{valid_extension}' is not in the valid extensions list.",
+                          create_messagebox=True, error=True)
+        # Reset the remove valid_extensions entry
+        self.remove_valid_extension_entry.delete(0, ctk.END)
+        return  # Exit the function if the valid_extension is not in the list
+
+    try:
+        # Remove the valid_extension from the valid_extensions list (case-insensitive)
+        self.valid_extensions = [ext for ext in self.valid_extensions if
+                                 ext.lower() != valid_extension_lower]
+
+        # Update the JSON file with the new valid_extensions list
+        self.update_json(self.dictionary_file, "valid_extensions", self.valid_extensions)
+
+        # Log and show success message
+        self.log_and_show(f"File Extension '{valid_extension}' removed from valid extensions list.")
+
+        # Reset the remove valid_extensions entry if the action is successful
+        self.remove_valid_extension_entry.delete(0, ctk.END)
+
+    except Exception as e:
+        # Log and show error message if an exception occurs
+        self.log_and_show(f"Removing File Extension '{valid_extension}' from valid extensions list failed: {str(e)}",
+                          create_messagebox=True, error=True)
 
 
 # Function to add a custom tab name to the dictionary
@@ -2832,3 +2969,66 @@ def remove_custom_tab_name(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{ctn_to_remove}' not found in dictionary. Skipping.",
                               create_messagebox=True, error=True)
+
+
+# Function to attempt to identify Artists
+def artist_identifier(self):
+    # Check if an input is selected
+    if not self.file_renamer_selected_file:
+        # If no input is selected, return none
+        self.log_and_show("No input selected.")
+        return None
+
+    # Check if the artist_identifier_var is True
+    if not self.artist_identifier_var.get():
+        # If artist_identifier_var is False, return none
+        self.log_and_show("Artist Identifier disabled.")
+        return None
+
+    # Check if self.artist_directory exists
+    if not os.path.exists(self.artist_directory):
+        # If artist directory does not exist, display an error message and return none
+        self.log_and_show(f"Artist Identifier cannot function as intended since the Artist Directory"
+                          f" does not exist."
+                          f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
+                          create_messagebox=True, error=True)
+        return None
+
+    try:
+        # Extract the base name from the selected file
+        base_name = os.path.basename(self.file_renamer_selected_file)
+
+        # Check if there is a '-' in the name
+        if '-' not in base_name:
+            # If no '-', return none
+            self.log_and_show("No '-' found in the file name. Cannot identify artist.")
+            return None
+
+        # Extract the artist from the text before '-'
+        artist = base_name.split('-')[0].strip()
+
+        # Search for a case-insensitive match for the artist in self.artist_directory
+        for root, dirs, files in os.walk(self.artist_directory):
+            for file_name in files:
+                # Check if the artist is present in the file name
+                if artist.lower() in file_name.lower():
+                    # Construct the artist file path
+                    artist_file_path = os.path.join(root, file_name)
+
+                    # Verify the file exists and the keyword is in the absolute path
+                    if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
+                            and self.keyword_var.lower() in artist_file_path.lower():
+                        # Check if the artist's name is not part of the directory path
+                        if artist.lower() not in os.path.dirname(artist_file_path).lower():
+                            # Return the result
+                            return artist_file_path
+
+        # If no matching artist is found, return none
+        self.log_and_show("No matching artist file found.")
+        return None
+
+    except Exception as e:
+        # Handle any unexpected exceptions and log an error message
+        self.log_and_show(f"Unexpected error identifying artist: {e}",
+                          create_messagebox=True, error=True)
+        return None

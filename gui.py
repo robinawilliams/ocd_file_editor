@@ -40,6 +40,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_last_used_file = ""
         self.video_editor_output_directory = ""
 
+        # List of tabs for the add_remove_tabview
+        self.tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Remove", "Exclude",
+                          "File Extensions", "NO GO", "Valid Extensions"]
+
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
@@ -68,36 +72,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_display_text = None
         self.file_display_entry = None
         self.button_frame = None
-        self.category_frame = None
-        self.add_category_button = None
-        self.category_entry = None
-        self.weight_label = None
-        self.weight_var = None
-        self.weight_entry = None
-        self.remove_category_button = None
-        self.remove_category_entry = None
-        self.no_go_label_frame = None
-        self.no_go_label = None
-        self.no_go_entry_frame = None
-        self.add_no_go_button = None
-        self.add_no_go_name_entry = None
-        self.remove_no_go_button = None
-        self.remove_no_go_name_entry = None
-        self.exclude_label_frame = None
-        self.exclude_label = None
-        self.exclude_entry_frame = None
-        self.add_exclude_button = None
-        self.add_exclude_name_entry = None
-        self.remove_exclude_button = None
-        self.remove_exclude_name_entry = None
-        self.ctr_label_frame = None
-        self.ctr_label = None
-        self.ctr_entry_frame = None
-        self.add_ctr_button = None
-        self.remove_ctr_name_entry = None
-        self.add_ctr_name_entry = None
-        self.remove_ctr_button = None
         self.custom_text_frame = None
+
         self.output_directory_browse_button = None
         self.output_directory_entry = None
         self.custom_text_entry = None
@@ -245,21 +221,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Initialize Add/Remove GUI elements
         self.add_remove_frame = None
-        self.add_remove_top_frame = None
-        self.artist_label = None
+        self.add_remove_label = None
+        self.add_remove_tabview = None
         self.add_remove_artist_entry_frame = None
-        self.add_artist_entry = None
         self.add_artist_button = None
-        self.remove_artist_entry = None
+        self.add_artist_entry = None
         self.remove_artist_button = None
-        self.clear_artist_frame = None
-        self.clear_artist_button = None
-        self.reset_artist_frame = None
-        self.reset_artist_checkbox = None
-        self.category_label_frame = None
-        self.category_label = None
-        self.ctn_label_frame = None
-        self.ctn_label = None
+        self.remove_artist_entry = None
+        self.category_frame = None
+        self.add_category_button = None
+        self.category_entry = None
+        self.weight_label = None
+        self.weight_var = None
+        self.weight_entry = None
+        self.remove_category_button = None
+        self.remove_category_entry = None
         self.ctn_frame = None
         self.add_ctn_button = None
         self.custom_tab_name_entry = None
@@ -268,6 +244,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.weight_entry1 = None
         self.remove_ctn_button = None
         self.remove_custom_tab_name_entry = None
+        self.ctr_entry_frame = None
+        self.add_ctr_button = None
+        self.add_ctr_name_entry = None
+        self.remove_ctr_button = None
+        self.remove_ctr_name_entry = None
+        self.exclude_entry_frame = None
+        self.add_exclude_button = None
+        self.add_exclude_name_entry = None
+        self.remove_exclude_button = None
+        self.remove_exclude_name_entry = None
+        self.file_extension_entry_frame = None
+        self.add_file_extension_button = None
+        self.add_file_extension_entry = None
+        self.remove_file_extension_button = None
+        self.remove_file_extension_entry = None
+        self.no_go_entry_frame = None
+        self.add_no_go_button = None
+        self.add_no_go_name_entry = None
+        self.remove_no_go_button = None
+        self.remove_no_go_name_entry = None
+        self.valid_extension_entry_frame = None
+        self.add_valid_extension_button = None
+        self.add_valid_extension_entry = None
+        self.remove_valid_extension_button = None
+        self.remove_valid_extension_entry = None
+        self.clear_artist_frame = None
+        self.clear_artist_button = None
+        self.reset_artist_frame = None
+        self.reset_artist_checkbox = None
         self.add_remove_message_label_frame = None
         self.add_remove_message_label = None
 
@@ -337,7 +342,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
-         default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var) = (
+         default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var,
+         default_add_remove_tab) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -363,6 +369,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_most_number = int(default_most_number)
         self.default_frame = default_frame
         self.default_tab = default_tab
+        self.default_add_remove_tab = default_add_remove_tab
         self.file_renamer_log = file_renamer_log
         self.default_placement_var = default_placement_var
         self.special_character_var = special_character_var
@@ -572,8 +579,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
         self.button_frame.grid(row=1, column=0, padx=10, pady=5)
 
-        # Create a tabview and initialize category buttons on button_frame
-        self.create_tabview()
+        # Create a cat_tabview and initialize category buttons on button_frame
+        self.create_cat_tabview()
 
         # Frame to group custom text entry and output directory
         self.custom_text_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
@@ -1359,18 +1366,41 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_remove_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.add_remove_frame.grid_columnconfigure(0, weight=1)
 
-        # Artist Label
-        self.artist_label = ctk.CTkLabel(self.add_remove_frame, text="Artist",
-                                         font=ctk.CTkFont(size=15, weight="bold"))
-        self.artist_label.grid(row=0, column=0, padx=10, pady=10)
+        # Add/Remove Label
+        self.add_remove_label = ctk.CTkLabel(self.add_remove_frame, text="Add/Remove",
+                                             font=ctk.CTkFont(size=15, weight="bold"))
+        self.add_remove_label.grid(row=0, column=0, padx=10, pady=10)
 
-        # Add/Remove Top frame
-        self.add_remove_top_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
-                                                 fg_color="transparent")
-        self.add_remove_top_frame.grid(row=1, column=0, padx=10, pady=5)
+        # Create add_remove_tabview
+        self.add_remove_tabview = ctk.CTkTabview(self.add_remove_frame)
+        self.add_remove_tabview.grid(row=1, column=0)
+
+        # Sort the add/remove tab_names
+        if self.sort_tab_names_var.get():
+            # Determine the order to sort (forward or backward)
+            sort_reverse_order_var = True if self.sort_reverse_order_var.get() else False
+
+            # Create a tab for each sorted tab_name
+            tab_names = sorted(list(set(self.tab_names)), reverse=sort_reverse_order_var)
+        else:
+            # Create a tab for each tab_name
+            tab_names = list(set(self.tab_names))
+
+        for tab_name in tab_names:
+            # Use the tab_name naming scheme
+            tab_name = f"{tab_name}"
+
+            # Create the tab
+            tab = self.add_remove_tabview.add(tab_name)
+
+            # Store the reference to the tab
+            self.tabs[tab_name] = tab
+
+        # Set the default tab
+        self.add_remove_tabview.set(self.default_add_remove_tab)
 
         # Add and remove artist list frame
-        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.tabs.get("Artist"), corner_radius=0,
                                                           fg_color="transparent")
         self.add_remove_artist_entry_frame.grid(row=0, column=0, padx=10, pady=10)
 
@@ -1392,39 +1422,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=370)
         self.remove_artist_entry.grid(row=0, column=3, padx=5)
 
-        # Frame for clear artist button
-        self.clear_artist_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                               fg_color="transparent")
-        self.clear_artist_frame.grid(row=1, column=0, padx=10)
-
-        # Clear Button
-        self.clear_artist_button = ctk.CTkButton(self.clear_artist_frame,
-                                                 text="Clear",
-                                                 command=lambda: self.clear_selection(frame_name="add_remove_window"))
-        self.clear_artist_button.grid(row=0, column=0, padx=10, pady=10)
-
-        # Frame for reset artist checkbox
-        self.reset_artist_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                               fg_color="transparent")
-        self.reset_artist_frame.grid(row=2, column=0, padx=10, pady=10)
-
-        # Checkbox to enable/disable reset artist entries
-        self.reset_artist_checkbox = ctk.CTkCheckBox(self.reset_artist_frame,
-                                                     text="Reset entries",
-                                                     variable=self.reset_artist_entries_var)
-        self.reset_artist_checkbox.grid(row=0, column=1, padx=10, pady=10)
-
-        # Frame for add/remove category elements
-        self.category_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
-        self.category_label_frame.grid(row=3, column=0, padx=10, pady=10)
-
-        # Category Label
-        self.category_label = ctk.CTkLabel(self.category_label_frame, text="Category",
-                                           font=ctk.CTkFont(size=15, weight="bold"))
-        self.category_label.grid(row=0, column=0, padx=10, pady=10)
-
-        self.category_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
-        self.category_frame.grid(row=4, column=0, padx=10, pady=10)
+        self.category_frame = ctk.CTkFrame(self.tabs.get("Category"), corner_radius=0, fg_color="transparent")
+        self.category_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Add Category Button
         self.add_category_button = ctk.CTkButton(self.category_frame, text="Add Category", command=self.add_category)
@@ -1461,16 +1460,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
         self.remove_category_entry.grid(row=0, column=5, padx=5)
 
-        # Frame for add/remove Custom Tab Name elements
-        self.ctn_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
-        self.ctn_label_frame.grid(row=5, column=0, padx=10, pady=10)
-
-        # Custom Tab Name Label
-        self.ctn_label = ctk.CTkLabel(self.ctn_label_frame, text="Custom Tab Name",
-                                      font=ctk.CTkFont(size=15, weight="bold"))
-        self.ctn_label.grid(row=0, column=0, padx=10, pady=10)
-
-        self.ctn_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0, fg_color="transparent")
+        self.ctn_frame = ctk.CTkFrame(self.tabs.get("Custom Tab Name"), corner_radius=0, fg_color="transparent")
         self.ctn_frame.grid(row=6, column=0, padx=10, pady=10)
 
         # Add Custom Tab Name Button
@@ -1508,84 +1498,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_custom_tab_name_entry = ctk.CTkEntry(self.ctn_frame, width=310)
         self.remove_custom_tab_name_entry.grid(row=0, column=5, padx=5)
 
-        # NO-GO label frame
-        self.no_go_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                              fg_color="transparent")
-        self.no_go_label_frame.grid(row=7, column=0, padx=10, pady=10)
-
-        # NO-GO label
-        self.no_go_label = ctk.CTkLabel(self.no_go_label_frame, text="NO GO",
-                                        font=ctk.CTkFont(size=15, weight="bold"))
-        self.no_go_label.grid(row=0, column=0, padx=10, pady=10)
-
-        # NO-GO frame
-        self.no_go_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                              fg_color="transparent")
-        self.no_go_entry_frame.grid(row=8, column=0, padx=10, pady=10)
-
-        # Add NO-GO button
-        self.add_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Add NO GO",
-                                              command=self.no_go_creation)
-        self.add_no_go_button.grid(row=0, column=0, padx=5)
-
-        # Add NO-GO entry
-        self.add_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
-        self.add_no_go_name_entry.grid(row=0, column=1, padx=5)
-
-        # Remove NO-GO button
-        self.remove_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Remove NO GO",
-                                                 command=self.no_go_removal)
-        self.remove_no_go_button.grid(row=0, column=3, padx=5)
-
-        # Remove NO-GO entry
-        self.remove_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
-        self.remove_no_go_name_entry.grid(row=0, column=4, padx=5)
-
-        # Exclude label frame
-        self.exclude_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                                fg_color="transparent")
-        self.exclude_label_frame.grid(row=9, column=0, padx=10, pady=10)
-
-        # Exclude label
-        self.exclude_label = ctk.CTkLabel(self.exclude_label_frame, text="Exclude",
-                                          font=ctk.CTkFont(size=15, weight="bold"))
-        self.exclude_label.grid(row=0, column=0, padx=10, pady=10)
-
-        # Exclude frame
-        self.exclude_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                                fg_color="transparent")
-        self.exclude_entry_frame.grid(row=10, column=0, padx=10, pady=10)
-
-        # Add Exclude button
-        self.add_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Add Exclude",
-                                                command=self.add_folder_to_excluded_folders)
-        self.add_exclude_button.grid(row=0, column=0, padx=5)
-
-        # Add Exclude entry
-        self.add_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
-        self.add_exclude_name_entry.grid(row=0, column=1, padx=5)
-
-        # Remove Exclude button
-        self.remove_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Remove Exclude",
-                                                   command=self.remove_folder_from_excluded_folders)
-        self.remove_exclude_button.grid(row=0, column=3, padx=5)
-
-        # Remove Exclude entry
-        self.remove_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
-        self.remove_exclude_name_entry.grid(row=0, column=4, padx=5)
-
-        # Custom Text to Remove label frame
-        self.ctr_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
-                                            fg_color="transparent")
-        self.ctr_label_frame.grid(row=11, column=0, padx=10, pady=10)
-
-        # Custom Text to Remove label
-        self.ctr_label = ctk.CTkLabel(self.ctr_label_frame, text="Custom Text to Remove",
-                                      font=ctk.CTkFont(size=15, weight="bold"))
-        self.ctr_label.grid(row=0, column=0, padx=10, pady=10)
-
         # Custom Text to Remove frame
-        self.ctr_entry_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+        self.ctr_entry_frame = ctk.CTkFrame(self.tabs.get("Custom Text to Remove"), corner_radius=0,
                                             fg_color="transparent")
         self.ctr_entry_frame.grid(row=12, column=0, padx=10, pady=10)
 
@@ -1607,8 +1521,122 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_ctr_name_entry = ctk.CTkEntry(self.ctr_entry_frame, width=370)
         self.remove_ctr_name_entry.grid(row=0, column=4, padx=5)
 
+        # Exclude frame
+        self.exclude_entry_frame = ctk.CTkFrame(self.tabs.get("Exclude"), corner_radius=0,
+                                                fg_color="transparent")
+        self.exclude_entry_frame.grid(row=10, column=0, padx=10, pady=10)
+
+        # Add Exclude button
+        self.add_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Add Exclude",
+                                                command=self.add_folder_to_excluded_folders)
+        self.add_exclude_button.grid(row=0, column=0, padx=5)
+
+        # Add Exclude entry
+        self.add_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
+        self.add_exclude_name_entry.grid(row=0, column=1, padx=5)
+
+        # Remove Exclude button
+        self.remove_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Remove Exclude",
+                                                   command=self.remove_folder_from_excluded_folders)
+        self.remove_exclude_button.grid(row=0, column=3, padx=5)
+
+        # Remove Exclude entry
+        self.remove_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
+        self.remove_exclude_name_entry.grid(row=0, column=4, padx=5)
+
+        # File Extension frame
+        self.file_extension_entry_frame = ctk.CTkFrame(self.tabs.get("File Extensions"), corner_radius=0,
+                                                       fg_color="transparent")
+        self.file_extension_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+
+        # Add File Extension button
+        self.add_file_extension_button = ctk.CTkButton(self.file_extension_entry_frame, text="Add File Ext.",
+                                                       command=self.add_file_extension)
+        self.add_file_extension_button.grid(row=0, column=0, padx=5)
+
+        # Add File Extension entry
+        self.add_file_extension_entry = ctk.CTkEntry(self.file_extension_entry_frame, width=370)
+        self.add_file_extension_entry.grid(row=0, column=1, padx=5)
+
+        # Remove File Extension button
+        self.remove_file_extension_button = ctk.CTkButton(self.file_extension_entry_frame, text="Remove File Ext.",
+                                                          command=self.remove_file_extension)
+        self.remove_file_extension_button.grid(row=0, column=3, padx=5)
+
+        # Remove File Extension entry
+        self.remove_file_extension_entry = ctk.CTkEntry(self.file_extension_entry_frame, width=370)
+        self.remove_file_extension_entry.grid(row=0, column=4, padx=5)
+
+        # NO-GO frame
+        self.no_go_entry_frame = ctk.CTkFrame(self.tabs.get("NO GO"), corner_radius=0,
+                                              fg_color="transparent")
+        self.no_go_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+
+        # Add NO-GO button
+        self.add_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Add NO GO",
+                                              command=self.no_go_creation)
+        self.add_no_go_button.grid(row=0, column=0, padx=5)
+
+        # Add NO-GO entry
+        self.add_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
+        self.add_no_go_name_entry.grid(row=0, column=1, padx=5)
+
+        # Remove NO-GO button
+        self.remove_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Remove NO GO",
+                                                 command=self.no_go_removal)
+        self.remove_no_go_button.grid(row=0, column=3, padx=5)
+
+        # Remove NO-GO entry
+        self.remove_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
+        self.remove_no_go_name_entry.grid(row=0, column=4, padx=5)
+
+        # Valid Extension frame
+        self.valid_extension_entry_frame = ctk.CTkFrame(self.tabs.get("Valid Extensions"), corner_radius=0,
+                                                        fg_color="transparent")
+        self.valid_extension_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+
+        # Add Valid Extension button
+        self.add_valid_extension_button = ctk.CTkButton(self.valid_extension_entry_frame, text="Add Valid Ext.",
+                                                        command=self.add_valid_extension)
+        self.add_valid_extension_button.grid(row=0, column=0, padx=5)
+
+        # Add Valid Extension entry
+        self.add_valid_extension_entry = ctk.CTkEntry(self.valid_extension_entry_frame, width=370)
+        self.add_valid_extension_entry.grid(row=0, column=1, padx=5)
+
+        # Remove Valid Extension button
+        self.remove_valid_extension_button = ctk.CTkButton(self.valid_extension_entry_frame, text="Remove Valid Ext.",
+                                                           command=self.remove_valid_extension)
+        self.remove_valid_extension_button.grid(row=0, column=3, padx=5)
+
+        # Remove Valid Extension entry
+        self.remove_valid_extension_entry = ctk.CTkEntry(self.valid_extension_entry_frame, width=370)
+        self.remove_valid_extension_entry.grid(row=0, column=4, padx=5)
+
+        # Frame for clear artist button
+        self.clear_artist_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
+                                               fg_color="transparent")
+        self.clear_artist_frame.grid(row=2, column=0, padx=10)
+
+        # Clear Button
+        self.clear_artist_button = ctk.CTkButton(self.clear_artist_frame,
+                                                 text="Clear",
+                                                 command=lambda: self.clear_selection(frame_name="add_remove_window"))
+        self.clear_artist_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Frame for reset artist checkbox
+        self.reset_artist_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
+                                               fg_color="transparent")
+        self.reset_artist_frame.grid(row=3, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable reset artist entries
+        self.reset_artist_checkbox = ctk.CTkCheckBox(self.reset_artist_frame,
+                                                     text="Reset entries",
+                                                     variable=self.reset_artist_entries_var)
+        self.reset_artist_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
         # Frame to display messages on the add/remove frame
-        self.add_remove_message_label_frame = ctk.CTkFrame(self.add_remove_top_frame, corner_radius=0,
+        self.add_remove_message_label_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
                                                            fg_color="transparent")
         self.add_remove_message_label_frame.grid(row=13, column=0, padx=10)
 
@@ -2215,9 +2243,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
 
-    def create_tabview(self):
-        # Create the tabview and buttons
-        core.create_tabview(self)
+    def create_cat_tabview(self):
+        # Create the cat_tabview and buttons
+        core.create_cat_tabview(self)
 
     """
     File Renaming
@@ -2324,9 +2352,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Remove text from custom_text_to_remove list
         core.remove_custom_text_to_remove(self)
 
-    def artist_identifier(self):
-        # Attempt to identify artists
-        return core.artist_identifier(self)
+    def add_file_extension(self):
+        # Add extension to file_extensions list
+        core.add_file_extension(self)
+
+    def remove_file_extension(self):
+        # Remove extension from file_extensions list
+        core.remove_file_extension(self)
+
+    def add_valid_extension(self):
+        # Add extension to valid_extensions list
+        core.add_valid_extension(self)
+
+    def remove_valid_extension(self):
+        # Remove extension from valid_extensions list
+        core.remove_valid_extension(self)
 
     def add_custom_tab_name(self):
         # Add a custom tab name to the dictionary
@@ -2335,6 +2375,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_custom_tab_name(self):
         # Remove a custom tab name to the dictionary
         core.remove_custom_tab_name(self)
+
+    def artist_identifier(self):
+        # Attempt to identify artists
+        return core.artist_identifier(self)
 
 
 if __name__ == "__main__":
