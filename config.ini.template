@@ -23,6 +23,8 @@ default_most_number = 9
 default_frame = file_renamer_window
 ; Default tab to open with (All, Most)
 default_tab = All
+; Default add/remove tab to open with (Artist, Category, Custom Tab Name, Custom Text to Remove, Exclude, File Extensions, NO GO, Valid Extensions)
+default_add_remove_tab = Artist
 ; Use custom tab names
 use_custom_tab_names_var = False
 ; Sort tab names
