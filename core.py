@@ -830,11 +830,66 @@ def clear_selection(self, frame_name):
         self.second_entry.delete(0, ctk.END)
 
     elif frame_name == "add_remove_window":
+        """Artist"""
         # Clear add artist entry
         self.add_artist_entry.delete(0, ctk.END)
 
         # Clear remove artist entry
         self.remove_artist_entry.delete(0, ctk.END)
+
+        """Category"""
+        # Clear add category entry
+        self.category_entry.delete(0, ctk.END)
+
+        self.weight_entry.delete(0, ctk.END)
+
+        # Clear remove category entry
+        self.remove_category_entry.delete(0, ctk.END)
+
+        """Custom Tab Name"""
+        # Clear add custom tab name entry
+        self.custom_tab_name_entry.delete(0, ctk.END)
+
+        self.weight_entry1.delete(0, ctk.END)
+
+        # Clear remove custom tab name entry
+        self.remove_custom_tab_name_entry.delete(0, ctk.END)
+
+        """Custom Text to Remove"""
+        # Clear add custom text to remove entry
+        self.add_ctr_name_entry.delete(0, ctk.END)
+
+        # Clear remove custom text to remove entry
+        self.remove_ctr_name_entry.delete(0, ctk.END)
+
+        """Exclude"""
+        # Clear add exclude entry
+        self.add_exclude_name_entry.delete(0, ctk.END)
+
+        # Clear remove exclude entry
+        self.remove_exclude_name_entry.delete(0, ctk.END)
+
+        """File Extensions"""
+        # Clear add extension entry
+        self.add_file_extension_entry.delete(0, ctk.END)
+
+        # Clear remove extension entry
+        self.remove_file_extension_entry.delete(0, ctk.END)
+
+        """NO GO"""
+        # Clear add NO-GO entry
+        self.add_no_go_name_entry.delete(0, ctk.END)
+
+        # Clear remove NO-GO entry
+        self.remove_no_go_name_entry.delete(0, ctk.END)
+
+        """Valid Extensions"""
+        # Clear add extension entry
+        self.add_valid_extension_entry.delete(0, ctk.END)
+
+        # Clear remove extension entry
+        self.remove_valid_extension_entry.delete(0, ctk.END)
+
     else:
         # Invalid frame name
         return
