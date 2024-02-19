@@ -147,7 +147,7 @@ def load_configuration(self):
     artist_file_search_var = config.getboolean("Settings", "artist_file_search_var", fallback=False)
     reset_var = config.getboolean("Settings", "reset_var", fallback=False)
     reset_video_entries_var = config.getboolean("Settings", "reset_video_entries_var", fallback=False)
-    reset_artist_entries_var = config.getboolean("Settings", "reset_artist_entries_var", fallback=True)
+    reset_add_remove_var = config.getboolean("Settings", "reset_add_remove_var", fallback=True)
     deep_walk_var = config.getboolean("Settings", "deep_walk_var", fallback=False)
 
     # Video Editor
@@ -169,7 +169,7 @@ def load_configuration(self):
             remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
             remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
             remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-            default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+            default_tab, suppress_var, reset_video_entries_var, reset_add_remove_var, remove_most_symbols_var,
             remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
             remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
             default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var,
@@ -1213,9 +1213,6 @@ def add_category(self):
             self.update_json(self.dictionary_file, "categories", self.categories)
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons()
-            # Clear the category entry and weight entry fields
-            self.category_entry.delete(0, ctk.END)
-            self.weight_entry.delete(0, ctk.END)
 
             # Log the action if logging is enabled
             self.log_and_show(f"Category added: '{new_category}' with weight({weight})")
@@ -1223,9 +1220,12 @@ def add_category(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{new_category}' already exists. Skipping.",
                               create_messagebox=True, error=True)
-            # Clear the category entry and weight entry fields
-            self.category_entry.delete(0, ctk.END)
-            self.weight_entry.delete(0, ctk.END)
+
+    # Reset the category entries
+    if self.reset_add_remove_var.get():
+        # Clear the category entry and weight entry fields
+        self.category_entry.delete(0, ctk.END)
+        self.weight_entry.delete(0, ctk.END)
 
 
 def remove_category(self):
@@ -1245,8 +1245,6 @@ def remove_category(self):
         self.update_json(self.dictionary_file, "categories", self.categories)
         # Refresh the category buttons in the GUI
         self.refresh_category_buttons()
-        # Clear the remove category entry field
-        self.remove_category_entry.delete(0, ctk.END)
 
         # Log the action if logging is enabled
         self.log_and_show(f"Category removed: {category_to_remove}")
@@ -1260,8 +1258,6 @@ def remove_category(self):
             self.update_json(self.dictionary_file, "categories", self.categories)
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons()
-            # Clear the remove category entry field
-            self.remove_category_entry.delete(0, ctk.END)
 
             # Log the action if logging is enabled
             self.log_and_show(f"Category removed: {matching_category}")
@@ -1269,6 +1265,11 @@ def remove_category(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{category_to_remove}' not found in dictionary. Skipping.",
                               create_messagebox=True, error=True)
+
+    # Reset the category entries
+    if self.reset_add_remove_var.get():
+        # Clear the remove category entry field
+        self.remove_category_entry.delete(0, ctk.END)
 
 
 def create_category_button(self, tab, category):
@@ -2441,6 +2442,8 @@ def add_artist_to_file(self):
         try:
             with open(self.artist_file, 'w') as artist_list_file:
                 artist_list_file.write('\n'.join(artist_list))
+
+            # Log the message and display to the gui
             self.log_and_show(f"Added artist to the Artist File: '{add_artist}'")
 
         except IOError:
@@ -2448,7 +2451,7 @@ def add_artist_to_file(self):
                               create_messagebox=True, error=True)
 
     # Reset the artist entries if the action is successful
-    if self.reset_artist_entries_var.get():
+    if self.reset_add_remove_var.get():
         # Clear add artist entry
         self.add_artist_entry.delete(0, ctk.END)
 
@@ -2489,8 +2492,8 @@ def remove_artist_from_file(self):
         self.log_and_show(f"Artist is not in the Artist File: '{remove_artist}'",
                           create_messagebox=True, error=True)
 
-    # Reset the artist entries if the action is successful
-    if self.reset_artist_entries_var.get():
+    # Reset the artist entries
+    if self.reset_add_remove_var.get():
         # Clear remove artist entry
         self.remove_artist_entry.delete(0, ctk.END)
 
@@ -2538,8 +2541,10 @@ def no_go_creation(self):
     except Exception as e:
         self.log_and_show(f"Creating NO GO failed: '{str(e)}'.", create_messagebox=True, error=True)
 
-    # Clear add no-go name entry and reset
-    self.add_no_go_name_entry.delete(0, ctk.END)
+    # Reset the no-go entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Clear add no-go name entry and reset
+        self.add_no_go_name_entry.delete(0, ctk.END)
 
 
 def no_go_removal(self):
@@ -2584,8 +2589,10 @@ def no_go_removal(self):
     except Exception as e:
         self.log_and_show(f"Removing NO GO failed: '{str(e)}'.", create_messagebox=True, error=True)
 
-    # Clear remove no-go name entry and reset
-    self.remove_no_go_name_entry.delete(0, ctk.END)
+    # Reset the no-go entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Clear remove no-go name entry and reset
+        self.remove_no_go_name_entry.delete(0, ctk.END)
 
 
 # Function to exclude folder from Artist Directory search
@@ -2606,8 +2613,12 @@ def add_folder_to_excluded_folders(self):
     if exclude_name_lower in excluded_folders_lower:
         self.log_and_show(f"Folder '{exclude_name}' is already in the excluded folders list.",
                           create_messagebox=True, error=True)
-        # Reset the exclude entry
-        self.add_exclude_name_entry.delete(0, ctk.END)
+
+        # Reset the exclude entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the exclude entry
+            self.add_exclude_name_entry.delete(0, ctk.END)
+
         return  # Exit the function if the exclude_name is already in the list
 
     try:
@@ -2620,13 +2631,15 @@ def add_folder_to_excluded_folders(self):
         # Log and show success message
         self.log_and_show(f"Folder '{exclude_name}' added to excluded folders list.")
 
-        # Reset the exclude entry if the action is successful
-        self.add_exclude_name_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Adding folder '{exclude_name}' to excluded folders list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the exclude entry if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the exclude entry
+        self.add_exclude_name_entry.delete(0, ctk.END)
 
 
 # Function to include folder in Artist Directory search
@@ -2647,8 +2660,12 @@ def remove_folder_from_excluded_folders(self):
     if exclude_name_lower not in excluded_folders_lower:
         self.log_and_show(f"Folder '{exclude_name}' is not in the excluded folders list.",
                           create_messagebox=True, error=True)
-        # Reset the remove entry
-        self.remove_exclude_name_entry.delete(0, ctk.END)
+
+        # Reset the exclude entry if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the remove entry
+            self.remove_exclude_name_entry.delete(0, ctk.END)
+
         return  # Exit the function if the exclude_name is not in the list
 
     try:
@@ -2661,13 +2678,16 @@ def remove_folder_from_excluded_folders(self):
         # Log and show success message
         self.log_and_show(f"Folder '{exclude_name}' removed from excluded folders list.")
 
-        # Reset the remove entry if the action is successful
-        self.remove_exclude_name_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Removing folder '{exclude_name}' from excluded folders list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the exclude entries if the action is successful
+    if self.reset_add_remove_var.get():
+
+        # Reset the remove entry if the action is successful
+        self.remove_exclude_name_entry.delete(0, ctk.END)
 
 
 # Function to add text to custom_text_to_remove list
@@ -2688,8 +2708,12 @@ def add_custom_text_to_remove(self):
     if custom_text_lower in custom_texts_lower:
         self.log_and_show(f"Custom Text '{custom_text}' is already in the custom text to remove list.",
                           create_messagebox=True, error=True)
-        # Reset the add custom text to remove entry
-        self.add_ctr_name_entry.delete(0, ctk.END)
+
+        # Reset the custom text entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the add custom text to remove entry
+            self.add_ctr_name_entry.delete(0, ctk.END)
+
         return  # Exit the function if the custom_text is already in the list
 
     try:
@@ -2702,13 +2726,15 @@ def add_custom_text_to_remove(self):
         # Log and show success message
         self.log_and_show(f"Custom Text '{custom_text}' added to custom text to remove list.")
 
-        # Reset the custom text to remove entry if the action is successful
-        self.add_ctr_name_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Adding Custom Text '{custom_text}' to custom text to remove list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the custom text entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the custom text to remove entry if the action is successful
+        self.add_ctr_name_entry.delete(0, ctk.END)
 
 
 # Function to remove text from custom_text_to_remove list
@@ -2729,8 +2755,12 @@ def remove_custom_text_to_remove(self):
     if custom_text_lower not in custom_texts_lower:
         self.log_and_show(f"Custom Text '{custom_text}' is not in the custom text to remove list.",
                           create_messagebox=True, error=True)
-        # Reset the remove custom_text_to_remove entry
-        self.remove_ctr_name_entry.delete(0, ctk.END)
+
+        # Reset the custom text entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the remove custom_text_to_remove entry
+            self.remove_ctr_name_entry.delete(0, ctk.END)
+
         return  # Exit the function if the custom_text is not in the list
 
     try:
@@ -2744,13 +2774,15 @@ def remove_custom_text_to_remove(self):
         # Log and show success message
         self.log_and_show(f"Custom Text '{custom_text}' removed from custom text to remove list.")
 
-        # Reset the remove custom_text_to_remove entry if the action is successful
-        self.remove_ctr_name_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Removing Custom Text '{custom_text}' from custom text to remove list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the custom text entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the remove custom_text_to_remove entry if the action is successful
+        self.remove_ctr_name_entry.delete(0, ctk.END)
 
 
 # Function to add extension to file_extensions list
@@ -2775,8 +2807,12 @@ def add_file_extension(self):
     if file_extension_lower in file_extensions_lower:
         self.log_and_show(f"File Extension '{file_extension}' is already in the file extensions list.",
                           create_messagebox=True, error=True)
-        # Reset the add extension to remove entry
-        self.add_file_extension_entry.delete(0, ctk.END)
+
+        # Reset the file extension entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the add extension to remove entry
+            self.add_file_extension_entry.delete(0, ctk.END)
+
         return  # Exit the function if the file_extension is already in the list
 
     try:
@@ -2789,13 +2825,15 @@ def add_file_extension(self):
         # Log and show success message
         self.log_and_show(f"File Extension '{file_extension}' added to file extensions list.")
 
-        # Reset the file extensions entry if the action is successful
-        self.add_file_extension_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Adding File Extension '{file_extension}' to file extensions list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the file extension entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the file extensions entry if the action is successful
+        self.add_file_extension_entry.delete(0, ctk.END)
 
 
 # Function to remove extension from file_extensions list
@@ -2820,8 +2858,12 @@ def remove_file_extension(self):
     if file_extension_lower not in file_extensions_lower:
         self.log_and_show(f"File Extension '{file_extension}' is not in the file extensions list.",
                           create_messagebox=True, error=True)
-        # Reset the remove file_extensions entry
-        self.remove_file_extension_entry.delete(0, ctk.END)
+
+        # Reset the file extension entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the remove file_extensions entry
+            self.remove_file_extension_entry.delete(0, ctk.END)
+
         return  # Exit the function if the file_extension is not in the list
 
     try:
@@ -2835,13 +2877,15 @@ def remove_file_extension(self):
         # Log and show success message
         self.log_and_show(f"File Extension '{file_extension}' removed from file extensions list.")
 
-        # Reset the remove file_extensions entry if the action is successful
-        self.remove_file_extension_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Removing File Extension '{file_extension}' from file extensions list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the file extension entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the remove file_extensions entry if the action is successful
+        self.remove_file_extension_entry.delete(0, ctk.END)
 
 
 # Function to add extension to valid_extensions list
@@ -2866,8 +2910,12 @@ def add_valid_extension(self):
     if valid_extension_lower in valid_extensions_lower:
         self.log_and_show(f"File Extension '{valid_extension}' is already in the valid extensions list.",
                           create_messagebox=True, error=True)
-        # Reset the add extension to remove entry
-        self.add_valid_extension_entry.delete(0, ctk.END)
+
+        # Reset the valid extension entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the add extension to remove entry
+            self.add_valid_extension_entry.delete(0, ctk.END)
+
         return  # Exit the function if the valid_extension is already in the list
 
     try:
@@ -2880,13 +2928,15 @@ def add_valid_extension(self):
         # Log and show success message
         self.log_and_show(f"File Extension '{valid_extension}' added to valid extensions list.")
 
-        # Reset the valid extensions entry if the action is successful
-        self.add_valid_extension_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Adding File Extension '{valid_extension}' to valid extensions list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the valid extension entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the valid extensions entry if the action is successful
+        self.add_valid_extension_entry.delete(0, ctk.END)
 
 
 # Function to remove extension from valid_extensions list
@@ -2911,8 +2961,12 @@ def remove_valid_extension(self):
     if valid_extension_lower not in valid_extensions_lower:
         self.log_and_show(f"File Extension '{valid_extension}' is not in the valid extensions list.",
                           create_messagebox=True, error=True)
-        # Reset the remove valid_extensions entry
-        self.remove_valid_extension_entry.delete(0, ctk.END)
+
+        # Reset the valid extension entries if the action is successful
+        if self.reset_add_remove_var.get():
+            # Reset the remove valid_extensions entry
+            self.remove_valid_extension_entry.delete(0, ctk.END)
+
         return  # Exit the function if the valid_extension is not in the list
 
     try:
@@ -2926,13 +2980,15 @@ def remove_valid_extension(self):
         # Log and show success message
         self.log_and_show(f"File Extension '{valid_extension}' removed from valid extensions list.")
 
-        # Reset the remove valid_extensions entry if the action is successful
-        self.remove_valid_extension_entry.delete(0, ctk.END)
-
     except Exception as e:
         # Log and show error message if an exception occurs
         self.log_and_show(f"Removing File Extension '{valid_extension}' from valid extensions list failed: {str(e)}",
                           create_messagebox=True, error=True)
+
+    # Reset the valid extension entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Reset the remove valid_extensions entry if the action is successful
+        self.remove_valid_extension_entry.delete(0, ctk.END)
 
 
 # Function to add a custom tab name to the dictionary
@@ -2968,9 +3024,6 @@ def add_custom_tab_name(self):
             self.update_json(self.dictionary_file, "weight_to_tab_name", self.weight_to_tab_name)
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons()
-            # Clear the category entry and weight entry fields
-            self.custom_tab_name_entry.delete(0, ctk.END)
-            self.weight_entry1.delete(0, ctk.END)
 
             # Log the action if logging is enabled
             self.log_and_show(f"Custom Tab Name added: '{new_custom_tab_name}' for weight({weight})")
@@ -2978,6 +3031,9 @@ def add_custom_tab_name(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{new_custom_tab_name}' already exists. Skipping.",
                               create_messagebox=True, error=True)
+
+        # Reset the custom tab name entries if the action is successful
+        if self.reset_add_remove_var.get():
             # Clear the custom_tab_name entry and weight entry fields
             self.custom_tab_name_entry.delete(0, ctk.END)
             self.weight_entry1.delete(0, ctk.END)
@@ -3004,8 +3060,6 @@ def remove_custom_tab_name(self):
         self.update_json(self.dictionary_file, "weight_to_tab_name", self.weight_to_tab_name)
         # Refresh the category buttons in the GUI
         self.refresh_category_buttons()
-        # Clear the remove custom tab name entry field
-        self.remove_custom_tab_name_entry.delete(0, ctk.END)
 
         # Log the action if logging is enabled
         self.log_and_show(f"Custom Tab Name removed: {ctn_to_remove}")
@@ -3020,8 +3074,6 @@ def remove_custom_tab_name(self):
             self.update_json(self.dictionary_file, "weight_to_tab_name", self.weight_to_tab_name)
             # Refresh the category buttons in the GUI
             self.refresh_category_buttons()
-            # Clear the remove custom tab name entry field
-            self.remove_custom_tab_name_entry.delete(0, ctk.END)
 
             # Log the action if logging is enabled
             self.log_and_show(f"Custom Tab Name removed: {matching_ctn}")
@@ -3029,6 +3081,11 @@ def remove_custom_tab_name(self):
             # Log the action if logging is enabled
             self.log_and_show(f"'{ctn_to_remove}' not found in dictionary. Skipping.",
                               create_messagebox=True, error=True)
+
+    # Reset the custom tab name entries if the action is successful
+    if self.reset_add_remove_var.get():
+        # Clear the remove custom tab name entry field
+        self.remove_custom_tab_name_entry.delete(0, ctk.END)
 
 
 # Function to refresh the add/remove tabview

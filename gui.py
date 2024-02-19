@@ -269,10 +269,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_valid_extension_entry = None
         self.remove_valid_extension_button = None
         self.remove_valid_extension_entry = None
-        self.clear_artist_frame = None
-        self.clear_artist_button = None
-        self.reset_artist_frame = None
-        self.reset_artist_checkbox = None
+        self.clear_add_remove_frame = None
+        self.clear_add_remove_button = None
+        self.reset_add_remove_frame = None
+        self.reset_add_remove_checkbox = None
         self.add_remove_message_label_frame = None
         self.add_remove_message_label = None
 
@@ -339,7 +339,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_plus_var, remove_equal_var, remove_curly_brace_var, remove_square_bracket_var, remove_pipe_var,
          remove_backslash_var, remove_angle_bracket_var, remove_question_mark_var, remove_parenthesis_var,
          remove_hashtag_var, show_messageboxes_var, show_confirmation_messageboxes_var, fallback_confirmation_var,
-         default_tab, suppress_var, reset_video_entries_var, reset_artist_entries_var, remove_most_symbols_var,
+         default_tab, suppress_var, reset_video_entries_var, reset_add_remove_var, remove_most_symbols_var,
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
          default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var,
@@ -432,7 +432,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_file_search_var = ctk.BooleanVar(value=artist_file_search_var)
         self.reset_var = ctk.BooleanVar(value=reset_var)
         self.reset_video_entries_var = ctk.BooleanVar(value=reset_video_entries_var)
-        self.reset_artist_entries_var = ctk.BooleanVar(value=reset_artist_entries_var)
+        self.reset_add_remove_var = ctk.BooleanVar(value=reset_add_remove_var)
         self.deep_walk_var = ctk.BooleanVar(value=deep_walk_var)
 
         # Video Editor - Set instance variables with the values from the configuration file
@@ -794,7 +794,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                  variable=self.remove_non_ascii_symbols_var)
         self.remove_non_ascii_symbols_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
-        # Checkbox to enable/disable reset entries
+        # Checkbox to enable/disable remove numbers
         self.remove_numbers_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                                        text="Remove numbers",
                                                        variable=self.remove_number_var)
@@ -1588,27 +1588,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_valid_extension_entry = ctk.CTkEntry(self.valid_extension_entry_frame, width=370)
         self.remove_valid_extension_entry.grid(row=0, column=4, padx=5)
 
-        # Frame for clear artist button
-        self.clear_artist_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
-                                               fg_color="transparent")
-        self.clear_artist_frame.grid(row=2, column=0, padx=10)
+        # Frame for clear add/remove button
+        self.clear_add_remove_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.clear_add_remove_frame.grid(row=2, column=0, padx=10)
 
-        # Clear Button
-        self.clear_artist_button = ctk.CTkButton(self.clear_artist_frame,
-                                                 text="Clear",
-                                                 command=lambda: self.clear_selection(frame_name="add_remove_window"))
-        self.clear_artist_button.grid(row=0, column=0, padx=10, pady=10)
+        # Clear add/remove Button
+        self.clear_add_remove_button = ctk.CTkButton(self.clear_add_remove_frame,
+                                                     text="Clear",
+                                                     command=lambda: self.clear_selection(
+                                                         frame_name="add_remove_window"))
+        self.clear_add_remove_button.grid(row=0, column=0, padx=10, pady=10)
 
-        # Frame for reset artist checkbox
-        self.reset_artist_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
-                                               fg_color="transparent")
-        self.reset_artist_frame.grid(row=3, column=0, padx=10, pady=10)
+        # Frame for reset add/remove checkbox
+        self.reset_add_remove_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
+                                                   fg_color="transparent")
+        self.reset_add_remove_frame.grid(row=3, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable reset artist entries
-        self.reset_artist_checkbox = ctk.CTkCheckBox(self.reset_artist_frame,
-                                                     text="Reset entries",
-                                                     variable=self.reset_artist_entries_var)
-        self.reset_artist_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        # Checkbox to enable/disable reset add/remove entries
+        self.reset_add_remove_checkbox = ctk.CTkCheckBox(self.reset_add_remove_frame,
+                                                         text="Reset entries",
+                                                         variable=self.reset_add_remove_var)
+        self.reset_add_remove_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
         # Frame to display messages on the add/remove frame
         self.add_remove_message_label_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
