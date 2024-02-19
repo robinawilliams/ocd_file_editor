@@ -3173,6 +3173,10 @@ def artist_identifier(self):
                     # Construct the artist file path
                     artist_file_path = os.path.join(root, file_name)
 
+                    # Skip the current file being compared
+                    if artist_file_path == self.file_renamer_selected_file:
+                        continue
+
                     # Verify the file exists and the keyword is in the absolute path
                     if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
                             and self.keyword_var.lower() in artist_file_path.lower():
