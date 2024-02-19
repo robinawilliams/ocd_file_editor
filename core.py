@@ -2520,6 +2520,17 @@ def no_go_creation(self):
         file_name = f"NO GO - {no_go_name}"
         file_path = os.path.join(no_go_directory, file_name)
 
+        # Check if the file already exists case-insensitively to prevent overwriting
+        if any(filename.lower() == file_name.lower() for filename in os.listdir(no_go_directory)):
+            # Log the action and display a message
+            self.log_and_show(f"'{file_name}' already exists. Skipping creation.", create_messagebox=True, error=True)
+
+            # Reset the no-go entries if the action is successful
+            if self.reset_add_remove_var.get():
+                # Clear add no-go name entry and reset
+                self.add_no_go_name_entry.delete(0, ctk.END)
+            return
+
         # Create NO-GO empty file
         with open(file_path, 'w'):
             pass
