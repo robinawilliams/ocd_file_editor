@@ -13,6 +13,7 @@ import string  # Module for various string manipulation functions and constants
 from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
 from moviepy.editor import VideoFileClip  # Video editing module for working with video files
 from moviepy.video.fx import all as vfx  # Importing all video effects (vfx) from the moviepy library
+from gui import SelectOptionWindow  # Import the SelectOptionWindow for Ask Confirmation purposes
 
 """
 Messaging
@@ -1120,6 +1121,9 @@ def suggest_output_directory(self):
         base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Case insensitive comparison
 
+        # Extract the artist from the filename
+        matching_artists = []
+
         # Use the filtered list to match the artist_folder
         for artist_folder in artist_folders:
             if artist_folder.lower() in base_name_lower:
@@ -1128,12 +1132,38 @@ def suggest_output_directory(self):
 
                 # Verify the folder exists
                 if os.path.exists(artist_folder_path) and os.path.isdir(artist_folder_path):
-                    # Return the result
-                    return artist_folder_path
+                    matching_artists.append(artist_folder_path)
 
-        # If no matching artist folder is found, return none
-        self.log_and_show("Cannot suggest output directory. Falling back to default output directory.")
-        return None
+        # Check if there are multiple matches
+        if len(matching_artists) > 1:
+            # Prompt the user to choose from the list using SelectOptionWindow
+            artist_selection_window = SelectOptionWindow(title="Choose Artist",
+                                                         prompt="Multiple matching artists found. Choose an artist:",
+                                                         item_list=matching_artists,
+                                                         label_text="Select Artist")
+
+            # Wait for the user to respond before proceeding
+            artist_selection_window.wait_window()
+
+            # Retrieve the selected artist
+            chosen_artist = artist_selection_window.get_selected_option()
+
+            if chosen_artist in matching_artists:
+                self.log_and_show(f"User chose the suggested output directory: {chosen_artist}")
+                return chosen_artist
+            else:
+                self.log_and_show("Invalid choice. Falling back to default location.")
+                return None
+
+        elif len(matching_artists) == 1:
+            # If only one match found, return that
+            artist_folder_path = matching_artists[0]
+            return artist_folder_path
+
+        else:
+            # If no matching artist folder is found, return none
+            self.log_and_show("Cannot suggest output directory. Falling back to default output directory.")
+            return None
 
     except Exception as e:
         # Handle any unexpected exceptions and log an error message

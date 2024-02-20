@@ -1,10 +1,155 @@
+import os  # Operating System module for interacting with the operating system
+import sys  # Handling standard error and output redirects
 import customtkinter as ctk  # Customtkinter for a modern gui
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
-import sys  # Handling standard error and output redirects
 import atexit  # Module for registering functions to be called when the program is closing
 import logging  # Logging module for capturing log messages
 from tkinter import messagebox  # Tkinter module for GUI message boxes
 import core  # Main logic for the program
+
+
+# Create a custom window class named SelectOptionWindow, inheriting from ctk.CTkToplevel
+class SelectOptionWindow(ctk.CTkToplevel):
+    def __init__(self, title, prompt, item_list, label_text, *args, **kwargs):
+        """
+        Initialize the SelectOptionWindow.
+
+        Parameters:
+        - title (str): The title of the window.
+        - prompt (str): The text to be displayed as a prompt in the window.
+        - item_list (list): List of items for the scrollable radiobutton frame.
+        - label_text (str): Text to be displayed as a label for the radiobutton frame.
+        - *args, **kwargs: Additional arguments that can be passed to the parent class constructor.
+        """
+        super().__init__(*args, **kwargs)
+
+        # Set Window geometry
+        self.geometry("400x350")
+
+        # Set the window title
+        self.title(title)
+
+        # Prompt Label to display the provided prompt text
+        self.prompt_label = ctk.CTkLabel(self, text=prompt)
+        self.prompt_label.pack(pady=5)
+
+        # Create scrollable radiobutton frame
+        self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self, width=500,
+                                                                       item_list=item_list,
+                                                                       label_text=label_text)
+        self.scrollable_radiobutton_frame.pack(padx=10, pady=10)
+
+        # Ok Button to confirm the selection
+        self.ok_button = ctk.CTkButton(self, text="Ok", command=self.ok_clicked)
+        self.ok_button.pack(side=ctk.LEFT, padx=10)
+
+        # Cancel Button to cancel the selection
+        self.cancel_button = ctk.CTkButton(self, text="Cancel", command=self.cancel_clicked)
+        self.cancel_button.pack(side=ctk.RIGHT, padx=10)
+
+        # Variable to store the selected option
+        self.selected_option = None
+
+    # Method to be executed when the Ok Button is clicked
+    def ok_clicked(self):
+        # Set the selected option to the selected item
+        self.selected_option = self.scrollable_radiobutton_frame.get_selected_item()
+        # Close the window
+        self.destroy()
+
+    # Method to be executed when the Cancel Button is clicked
+    def cancel_clicked(self):
+        # Close the window
+        self.destroy()
+
+    # Method to get the selected option from the window
+    def get_selected_option(self):
+        # Return the selected option
+        return self.selected_option
+
+
+# Create a scrollable radio button frame
+class ScrollableRadiobuttonFrame(ctk.CTkScrollableFrame):
+    """A scrollable frame containing radio buttons.
+
+    Args:
+        master (tk.Widget): The parent widget.
+        item_list (list): A list of items to be used as options for the radio buttons.
+        command (callable, optional): A function to be called when a radio button is selected.
+        **kwargs: Additional keyword arguments to be passed to the superclass constructor.
+    """
+
+    def __init__(self, master, item_list, command=None, **kwargs):
+        # Initialize the ScrollableRadiobuttonFrame with a list of items and an optional command
+        super().__init__(master, **kwargs)
+
+        # Set the command to be executed on radio button selection
+        self.command = command
+
+        # Create a StringVar to track the selected radio button value
+        self.radiobutton_variable = ctk.StringVar()
+
+        # List to store radio button instances
+        self.radiobutton_list = []
+
+        # Iterate through the item list and add each item as a radio button
+        for i, item in enumerate(item_list):
+            self.add_item(item)
+
+        # Set the default radio button
+        if item_list:
+            # Set the variable to the value of the first item
+            self.radiobutton_variable.set(item_list[0])
+
+    def add_item(self, item):
+        """Add a new radio button with the specified item.
+
+        Args:
+            item (str): The text for the radio button.
+        """
+        # Check if a slash is present in the item for gui friendly formatting
+        if '/' in item:
+            # Split the item into basename and absolute file path
+            basename = os.path.basename(item)
+            file_path = os.path.abspath(item)
+        else:
+            basename = item
+            file_path = item
+
+        # Create a radio button with the specified basename, value as the absolute file path, and variable if applicable
+        radiobutton = ctk.CTkRadioButton(self, text=basename, value=file_path, variable=self.radiobutton_variable)
+
+        # Configure the radio button to execute a command on selection, if provided
+        if self.command is not None:
+            radiobutton.configure(command=self.command)
+
+        # Place the radio button in the grid with appropriate row and column settings
+        radiobutton.grid(row=len(self.radiobutton_list), column=0, pady=(0, 10))
+
+        # Add the radio button to the list for tracking
+        self.radiobutton_list.append(radiobutton)
+
+    def remove_item(self, item):
+        """Remove the specified item from the list of radio buttons.
+
+        Args:
+            item (str): The text of the item to be removed.
+        """
+        # Iterate through the radio buttons to find and remove the specified item
+        for radiobutton in self.radiobutton_list:
+            if item == radiobutton.cget("text"):
+                radiobutton.destroy()
+                self.radiobutton_list.remove(radiobutton)
+                return
+
+    def get_selected_item(self):
+        """Get the value of the selected radio button.
+
+        Returns:
+            str: The value of the selected radio button.
+        """
+        # Retrieve the value of the selected radio button
+        return self.radiobutton_variable.get()
 
 
 class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
@@ -61,7 +206,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_remove_button = None
         self.settings_button = None
 
-        # Initialize OCD File Renamer GUI elements
+        # Initialize select_option_window to None for open_select_option_window functionality
+        self.select_option_window = None
+
+        # Initialize File Renamer GUI elements
         self.file_renamer_frame = None
         self.file_renamer_canvas = None
         self.file_renamer_scrollbar = None
@@ -1877,6 +2025,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.log_file_entry.grid(row=1, column=1, padx=10, pady=10)
 
     # Callback for updating the scroll region when the inner frame is configured
+    # noinspection PyUnusedLocal
     def on_frame_configure(self, event=None):
         # Reset the scroll region to encompass the inner frame
         self.file_renamer_canvas.configure(scrollregion=self.file_renamer_canvas.bbox("all"))
@@ -1888,6 +2037,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_canvas.itemconfig(self.file_renamer_scrollable_frame_window, width=canvas_width)
 
     # Callback function to handle logging state
+    # noinspection PyUnusedLocal
     def handle_logging_activation(self, *args):
         # If logging is true, call the logging_setup function
         if self.activate_logging_var.get():
@@ -1945,6 +2095,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.frame_name = frame_name
         else:
             self.settings_frame.grid_forget()
+
+    def open_select_option_window(self, title, prompt, item_list, label_text):
+        # Check if the window does not exist or if it has been destroyed
+        if self.select_option_window is None or not self.select_option_window.winfo_exists():
+            # Create a new instance of SelectOptionWindow if the window is None or destroyed
+            self.select_option_window = SelectOptionWindow(title=title, prompt=prompt, item_list=item_list,
+                                                           label_text=label_text)
+        else:
+            # If the window exists, bring it to focus
+            self.select_option_window.focus()
 
     """
     Event handlers for button clicks to switch frames
@@ -2150,6 +2310,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Add a category to the processing queue
         core.add_to_queue(self, category)
 
+    # noinspection PyUnusedLocal
     def update_file_display(self, event=None):
         # Update the display with the currently selected file
         core.update_file_display(self)
@@ -2221,6 +2382,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def create_category_button(self, tab, category):
         return core.create_category_button(self, tab, category)
 
+    # noinspection PyUnusedLocal
     def refresh_category_buttons(self, *args):
         # Refresh the category buttons in the GUI
         core.refresh_category_buttons(self)
@@ -2366,6 +2528,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create add/remove tabview
         core.create_add_remove_tabview(self)
 
+    # noinspection PyUnusedLocal
     def refresh_buttons_and_tabs(self, *args):
         self.refresh_category_buttons()
         self.refresh_add_remove_tabview()
