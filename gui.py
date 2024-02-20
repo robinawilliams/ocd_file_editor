@@ -187,6 +187,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.left_radio = None
         self.right_radio = None
         self.flip_radio = None
+        self.mirror_radio = None
         self.no_rotation_radio = None
         self.decibel_frame = None
         self.decibel_label = None
@@ -1182,10 +1183,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                              value="flip")
         self.flip_radio.grid(row=0, column=3, padx=10, pady=5)
 
+        # Mirror rotation radio button
+        self.mirror_radio = ctk.CTkRadioButton(self.rotation_frame, text="Mirror", variable=self.rotation_var,
+                                               value="mirror")
+        self.mirror_radio.grid(row=0, column=4, padx=10, pady=5)
+
         # None rotation radio button
         self.no_rotation_radio = ctk.CTkRadioButton(self.rotation_frame, text="None", variable=self.rotation_var,
                                                     value="none")
-        self.no_rotation_radio.grid(row=0, column=4, padx=10, pady=5)
+        self.no_rotation_radio.grid(row=0, column=5, padx=10, pady=5)
 
         # Decibel frame
         self.decibel_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -2273,7 +2279,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         core.remove_successful_line_from_file(self, file_path, line_to_remove)
 
     def rotate_video(self, clip, rotation_angle):
-        # Method to rotate a video clip by a specified angle.
+        # Method to rotate/mirror a video clip by a specified angle.
         return core.rotate_video(self, clip, rotation_angle)
 
     def increase_volume(self, clip, increase_db):

@@ -12,6 +12,7 @@ import sys  # System-specific parameters and functions
 import string  # Module for various string manipulation functions and constants
 from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
 from moviepy.editor import VideoFileClip  # Video editing module for working with video files
+from moviepy.video.fx import all as vfx  # Importing all video effects (vfx) from the moviepy library
 
 """
 Messaging
@@ -2100,11 +2101,17 @@ def remove_successful_line_from_file(self, file_path, line_to_remove):
         self.log_and_show(f"An error occurred while removing line from file: {e}", create_messagebox=True, error=True)
 
 
-# Method to rotate a video clip by a specified angle.
+# Method to rotate/mirror a video clip by a specified angle.
 def rotate_video(self, clip, rotation_angle):
     try:
-        # Rotate the video clip by the specified angle.
-        rotated_clip = clip.rotate(rotation_angle)
+        if rotation_angle == "mirror":
+            # Mirror the video clip along the horizontal axis.
+            # noinspection PyUnresolvedReferences
+            rotated_clip = clip.fx(vfx.mirror_x)
+
+        else:
+            # Rotate the video clip by the specified angle.
+            rotated_clip = clip.rotate(rotation_angle)
 
         # Log rotation success if logging is activated.
         self.log_and_show(f"Rotation successful {rotation_angle}")
@@ -2322,6 +2329,8 @@ def process_video_edits(self):
                     rotation_angle = -90
                 elif rotation == "flip":
                     rotation_angle = 180
+                elif rotation == "mirror":
+                    rotation_angle = "mirror"
 
             # Create the output path with the operation suffix
             output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
