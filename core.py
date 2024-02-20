@@ -2321,7 +2321,7 @@ def process_video_edits(self):
                 elif rotation == "right":
                     rotation_angle = -90
                 elif rotation == "flip":
-                    rotation_angle = -180
+                    rotation_angle = 180
 
             # Create the output path with the operation suffix
             output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
