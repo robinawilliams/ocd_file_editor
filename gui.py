@@ -33,7 +33,7 @@ class SelectOptionWindow(ctk.CTkToplevel):
         super().__init__(*args, **kwargs)
 
         # Set Window geometry
-        self.geometry("400x350")
+        self.geometry("500x450")
 
         # Set the window title
         self.title(title)
@@ -3258,10 +3258,40 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Check if suggest output directory is true
                 if self.suggest_output_directory_var.get():
                     # Call the suggest output directory function to determine initial directory
-                    initial_directory = self.suggest_output_directory()
+                    initial_directory_check = self.suggest_output_directory()
 
-                    # If suggest output directory returns none, use the default initial output directory
-                    if not initial_directory:
+                    # If suggest output directory returns a single result, set it to initial_directory
+                    if initial_directory_check and not isinstance(initial_directory_check, list):
+                        initial_directory = initial_directory_check
+
+                    # If suggest output directory returns a list, then use SelectOptionWindow
+                    elif isinstance(initial_directory_check, list):
+                        # Prompt the user to choose from the list using SelectOptionWindow
+                        artist_selection_window = SelectOptionWindow(title="Suggest Output Directory",
+                                                                     prompt="Multiple matching artists found. Choose "
+                                                                            "an artist:",
+                                                                     item_list=initial_directory_check,
+                                                                     label_text="Choose Artist")
+
+                        # Wait for the user to respond before proceeding
+                        artist_selection_window.wait_window()
+
+                        # Retrieve the selected artist
+                        chosen_artist = artist_selection_window.get_selected_option()
+
+                        if chosen_artist in initial_directory_check:
+                            initial_directory = chosen_artist
+                            self.log_and_show(f"User chose the suggested output directory: {chosen_artist}")
+                        else:
+                            # If the choice is not in the matching_artists, use the default initial output directory
+                            initial_directory = self.initial_output_directory
+
+                    # If suggest output directory returns None, set initial_directory to self.initial_output_directory
+                    elif initial_directory_check is None:
+                        initial_directory = self.initial_output_directory
+
+                    # Catchall, use the default initial output directory
+                    else:
                         initial_directory = self.initial_output_directory
                 else:
                     # If suggest output directory is false, use the default initial directory
@@ -3346,25 +3376,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Check if there are multiple matches
             if len(matching_artists) > 1:
-                # Prompt the user to choose from the list using SelectOptionWindow
-                artist_selection_window = SelectOptionWindow(title="Suggest Output Directory",
-                                                             prompt="Multiple matching artists found. Choose an artist:"
-                                                                    "",
-                                                             item_list=matching_artists,
-                                                             label_text="Choose Artist")
-
-                # Wait for the user to respond before proceeding
-                artist_selection_window.wait_window()
-
-                # Retrieve the selected artist
-                chosen_artist = artist_selection_window.get_selected_option()
-
-                if chosen_artist in matching_artists:
-                    self.log_and_show(f"User chose the suggested output directory: {chosen_artist}")
-                    return chosen_artist
-                else:
-                    # Return none if the choice is not in the matching_artists
-                    return None
+                # If multiple matches, return the list
+                return matching_artists
 
             elif len(matching_artists) == 1:
                 # If only one match found, return that
@@ -3650,17 +3663,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Call the suggest output directory to get a suggested output directory
                     suggested_output_directory = self.suggest_output_directory()
 
-                    # If suggest output directory returns a result, use that as the output directory
+                    # If suggest output directory returns a result, use SelectOptionWindow to determine output directory
                     if suggested_output_directory:
-                        # Ask for confirmation of new output directory if match found
-                        confirmation = self.ask_confirmation("Suggest Output Directory",
-                                                             f"Suggested output directory found. Do you want to use: "
-                                                             f"{suggested_output_directory}?")
-                        if confirmation:
-                            self.output_directory = suggested_output_directory
-                            self.log_and_show(f"User chose the suggested output directory: {self.output_directory}")
+                        # Prompt the user to choose from the list using SelectOptionWindow
+                        directory_selection_window = SelectOptionWindow(title="Suggest Output Directory",
+                                                                        prompt="Suggested output directory found."
+                                                                               "\nDo you want use the suggested output "
+                                                                               "directory?"
+                                                                               "\nCancel to use default output "
+                                                                               "directory.",
+                                                                        item_list=suggested_output_directory,
+                                                                        label_text="Choose Directory")
+                        
+                        # Wait for the user to respond before proceeding
+                        directory_selection_window.wait_window()
+
+                        # Retrieve the selected directory
+                        chosen_directory = directory_selection_window.get_selected_option()
+
+                        if chosen_directory in suggested_output_directory:
+                            self.output_directory = chosen_directory
+                            self.log_and_show(f"User chose the suggested output directory: {chosen_directory}")
                         else:
-                            # If the user did not select the suggested output directory, use the previously set output
+                            # If the user did not select the suggested directory, use the previously set output
                             # directory
                             self.log_and_show(
                                 "User did not choose the suggested output directory. Falling back to default "
