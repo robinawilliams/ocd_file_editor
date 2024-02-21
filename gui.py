@@ -205,6 +205,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize configuration file variable
         self.config_file_path = ""
 
+        # Initialize buttons
+        self.cat_tabview = None
+        self.buttons = None
+        self.most_buttons = None
+        self.all_buttons = None
+
+        # Initialize select_option_window to None for open_select_option_window functionality
+        self.select_option_window = None
+
         # Initialize Main GUI elements
         # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
@@ -214,9 +223,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_button = None
         self.add_remove_button = None
         self.settings_button = None
-
-        # Initialize select_option_window to None for open_select_option_window functionality
-        self.select_option_window = None
 
         # Initialize File Renamer GUI elements
         self.file_renamer_frame = None
