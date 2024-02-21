@@ -3363,7 +3363,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     self.log_and_show(f"User chose the suggested output directory: {chosen_artist}")
                     return chosen_artist
                 else:
-                    self.log_and_show("Invalid choice. Falling back to default location.")
+                    # Return none if the choice is not in the matching_artists
                     return None
 
             elif len(matching_artists) == 1:
