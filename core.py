@@ -1137,10 +1137,10 @@ def suggest_output_directory(self):
         # Check if there are multiple matches
         if len(matching_artists) > 1:
             # Prompt the user to choose from the list using SelectOptionWindow
-            artist_selection_window = SelectOptionWindow(title="Choose Artist",
+            artist_selection_window = SelectOptionWindow(title="Suggest Output Directory",
                                                          prompt="Multiple matching artists found. Choose an artist:",
                                                          item_list=matching_artists,
-                                                         label_text="Select Artist")
+                                                         label_text="Choose Artist")
 
             # Wait for the user to respond before proceeding
             artist_selection_window.wait_window()
