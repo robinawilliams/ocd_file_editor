@@ -890,7 +890,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_common_categories_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
                                                                  text="Add Artist Common Categories",
                                                                  variable=self.artist_common_categories_var)
-        self.artist_common_categories_checkbox.grid(row=0, column=3, padx=5, pady=5)
+        self.artist_common_categories_checkbox.grid(row=0, column=4, padx=5, pady=5)
 
         # Send to Module frame
         self.send_to_module_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
