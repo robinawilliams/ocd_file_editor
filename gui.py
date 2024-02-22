@@ -2431,16 +2431,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Get categories dictionary
                 self.categories = data.get("categories", {})
 
-                # Get custom_text_to_remove dictionary
+                # Get custom_text_to_remove list
                 self.custom_text_to_remove = data.get("custom_text_to_remove", [])
 
-                # Get excluded_folders dictionary
+                # Get excluded_folders list
                 self.excluded_folders = data.get("excluded_folders", [])
 
-                # Get file_extensions dictionary
+                # Get file_extensions list
                 self.file_extensions = data.get("file_extensions", [])
 
-                # Get valid_extensions dictionary
+                # Get valid_extensions list
                 self.valid_extensions = data.get("valid_extensions", [])
 
                 # Get weight_to_tab_name dictionary
@@ -2804,33 +2804,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             except OSError as e:
                 # If an error occurs while opening the file, log the error
                 self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
-
-    # Method to add a category to the queue
-    def add_to_queue(self, category):
-        if self.file_renamer_selected_file:
-            # Check if the category is not already in the queue
-            if category not in self.queue:
-                # Add the category to the queue
-                self.queue.append(category)
-                self.log_and_show(f"Word added to queue: {category}", not_logging=True)
-
-            # Check if the category is already in the queue
-            elif category in self.queue:
-                # Ask for confirmation of removing the category from the queue
-                confirmation = self.ask_confirmation("Queue Conflict",
-                                                     f"{category} is already in the queue. Do you want to remove it?")
-
-                if confirmation:
-                    # Remove the category from the queue
-                    self.queue.remove(category)
-                    self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
-
-            # Update file display
-            self.update_file_display()
-        else:
-            # If no input selected, log the action and display a message in the GUI
-            self.log_and_show("Please select an input first and then add a word to the queue.",
-                              create_messagebox=True, error=True)
 
     # Method to update the file display based on selected options
     # noinspection PyUnusedLocal
@@ -3622,6 +3595,33 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.cat_tabview.set(self.default_tab)
         except ValueError:
             return
+
+    # Method to add a category to the queue
+    def add_to_queue(self, category):
+        if self.file_renamer_selected_file:
+            # Check if the category is not already in the queue
+            if category not in self.queue:
+                # Add the category to the queue
+                self.queue.append(category)
+                self.log_and_show(f"Word added to queue: {category}", not_logging=True)
+
+            # Check if the category is already in the queue
+            elif category in self.queue:
+                # Ask for confirmation of removing the category from the queue
+                confirmation = self.ask_confirmation("Queue Conflict",
+                                                     f"{category} is already in the queue. Do you want to remove it?")
+
+                if confirmation:
+                    # Remove the category from the queue
+                    self.queue.remove(category)
+                    self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
+
+            # Update file display
+            self.update_file_display()
+        else:
+            # If no input selected, log the action and display a message in the GUI
+            self.log_and_show("Please select an input first and then add a word to the queue.",
+                              create_messagebox=True, error=True)
 
     """
     File Renaming
