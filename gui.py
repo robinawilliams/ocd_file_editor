@@ -397,6 +397,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_selected_file = ""
         self.video_editor_last_used_file = ""
         self.video_editor_output_directory = ""
+        self.acc_selected_artist = ""
 
         # List of tabs for the add_remove_tabview
         self.tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Remove", "Exclude",
@@ -592,11 +593,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_remove_frame = None
         self.add_remove_label = None
         self.add_remove_tabview = None
+        self.add_remove_artist_top_frame = None
+        self.add_remove_artist_label_frame = None
+        self.add_remove_artist_label = None
         self.add_remove_artist_entry_frame = None
         self.add_artist_button = None
         self.add_artist_entry = None
         self.remove_artist_button = None
         self.remove_artist_entry = None
+        self.add_remove_acc_label_frame = None
+        self.add_remove_acc_label = None
+        self.acc_browse_frame = None
+        self.browse_artist_button = None
+        self.acc_display_text = None
+        self.acc_display_entry = None
+        self.add_remove_acc_entry_frame = None
+        self.add_acc_button = None
+        self.add_acc_entry = None
+        self.remove_acc_button = None
+        self.remove_acc_entry = None
         self.category_frame = None
         self.add_category_button = None
         self.category_entry = None
@@ -1639,10 +1654,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create an add_remove_tabview on add_remove_frame row 1
         self.create_add_remove_tabview()
 
-        # Add and remove artist list frame
-        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.tabs.get("Artist"), corner_radius=0,
+        # Add and remove artist top frame
+        self.add_remove_artist_top_frame = ctk.CTkFrame(self.tabs.get("Artist"), corner_radius=0,
+                                                        fg_color="transparent")
+        self.add_remove_artist_top_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Add and remove artist label frame
+        self.add_remove_artist_label_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
                                                           fg_color="transparent")
-        self.add_remove_artist_entry_frame.grid(row=0, column=0, padx=10, pady=10)
+        self.add_remove_artist_label_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Add/Remove Artist Label
+        self.add_remove_artist_label = ctk.CTkLabel(self.add_remove_artist_label_frame, text="Add/Remove Artist",
+                                                    font=ctk.CTkFont(size=15, weight="bold"))
+        self.add_remove_artist_label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        # Add and remove artist entry frame
+        self.add_remove_artist_entry_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                                          fg_color="transparent")
+        self.add_remove_artist_entry_frame.grid(row=1, column=0, padx=10, pady=10)
 
         # Add artist button
         self.add_artist_button = ctk.CTkButton(self.add_remove_artist_entry_frame, text="Add Artist",
@@ -1661,6 +1691,57 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Remove artist entry
         self.remove_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=370)
         self.remove_artist_entry.grid(row=0, column=3, padx=5)
+
+        # Add/Remove artist common categories label frame
+        self.add_remove_acc_label_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                                       fg_color="transparent")
+        self.add_remove_acc_label_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Add/Remove artist common categories Label
+        self.add_remove_acc_label = ctk.CTkLabel(self.add_remove_acc_label_frame, text="Add/Remove Artist "
+                                                                                       "Common Categories",
+                                                 font=ctk.CTkFont(size=15, weight="bold"))
+        self.add_remove_acc_label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        # Browse frame for artist common categories
+        self.acc_browse_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                             fg_color="transparent")
+        self.acc_browse_frame.grid(row=3, column=0, padx=10, pady=10)
+
+        # Browse artist common categories button
+        self.browse_artist_button = ctk.CTkButton(self.acc_browse_frame, text="Browse Artist",
+                                                  command=self.browse_artist)
+        self.browse_artist_button.grid(row=0, column=0, padx=5)
+
+        # Artist Common Categories Display
+        self.acc_display_text = ctk.StringVar()
+        self.acc_display_text.set("Select an Artist using the 'Browse Artist' button...")
+        self.acc_display_entry = ctk.CTkEntry(self.acc_browse_frame, width=900,
+                                              textvariable=self.acc_display_text)
+        self.acc_display_entry.grid(row=0, column=1, padx=5)
+
+        # Add and remove artist common categories entry frame
+        self.add_remove_acc_entry_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                                       fg_color="transparent")
+        self.add_remove_acc_entry_frame.grid(row=4, column=0, padx=10, pady=10)
+
+        # Add artist common categories button
+        self.add_acc_button = ctk.CTkButton(self.add_remove_acc_entry_frame, text="Add A.C.C.",
+                                            command=self.add_artist_common_category)
+        self.add_acc_button.grid(row=0, column=0, padx=5)
+
+        # Add artist common categories entry
+        self.add_acc_entry = ctk.CTkEntry(self.add_remove_acc_entry_frame, width=370)
+        self.add_acc_entry.grid(row=0, column=1, padx=5)
+
+        # Remove artist common categories button
+        self.remove_acc_button = ctk.CTkButton(self.add_remove_acc_entry_frame, text="Remove A.C.C.",
+                                               command=self.remove_artist_common_category)
+        self.remove_acc_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Remove artist common categories entry
+        self.remove_acc_entry = ctk.CTkEntry(self.add_remove_acc_entry_frame, width=370)
+        self.remove_acc_entry.grid(row=0, column=3, padx=5)
 
         self.category_frame = ctk.CTkFrame(self.tabs.get("Category"), corner_radius=0, fg_color="transparent")
         self.category_frame.grid(row=3, column=0, padx=10, pady=10)
@@ -3014,6 +3095,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Clear remove artist entry
                 self.remove_artist_entry.delete(0, ctk.END)
 
+                # Clear acc artist
+                self.acc_selected_artist = ""
+                self.acc_display_text.set("")
+
+                # Clear add acc entry
+                self.add_acc_entry.delete(0, ctk.END)
+
+                # Clear remove acc entry
+                self.remove_acc_entry.delete(0, ctk.END)
+
             elif active_tag == "Category":
                 # Clear add category entry
                 self.category_entry.delete(0, ctk.END)
@@ -3682,7 +3773,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                                "directory.",
                                                                         item_list=suggested_output_directory,
                                                                         label_text="Choose Directory")
-                        
+
                         # Wait for the user to respond before proceeding
                         directory_selection_window.wait_window()
 
@@ -4715,13 +4806,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Add the add_artist to the list
             artist_list.append(add_artist)
 
-            # Write the updated list back to the artist_file
+            # Write the updated list back to the artist_file and artist_common_categories dictionary
             try:
                 with open(self.artist_file, 'w') as artist_list_file:
                     artist_list_file.write('\n'.join(artist_list))
 
-                # Log the message and display to the gui
-                self.log_and_show(f"Added artist to the Artist File: '{add_artist}'")
+                # Add the artist as a key to the artist_common_categories dictionary with an empty list as the value
+                self.artist_common_categories[add_artist] = []
+
+                # Update the JSON file with the modified artist_common_categories dictionary
+                self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+                # Log the message and display to the GUI
+                self.log_and_show(f"Added artist to the Artist File and artist_common_categories: '{add_artist}'")
 
             except IOError:
                 self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
@@ -4755,11 +4852,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Remove the remove_artist from the list
             artist_list = [artist for artist in artist_list if artist.lower() != remove_artist.lower()]
 
-            # Write the updated list back to the artist_file
+            # Write the updated list back to the artist_file and artist_common_categories dictionary
             try:
                 with open(self.artist_file, 'w') as artist_list_file:
                     artist_list_file.write('\n'.join(artist_list))
-                self.log_and_show(f"Removed artist from the Artist File: '{remove_artist}'")
+                self.log_and_show(f"Removed artist from the Artist File & artist_common_categories: '{remove_artist}'")
+
+                # Remove the artist from the artist_common_categories dictionary
+                if remove_artist in self.artist_common_categories:
+                    del self.artist_common_categories[remove_artist]
+                    # Update the JSON file with the modified artist_common_categories dictionary
+                    self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+                else:
+                    self.log_and_show(f"Artist not found in artist_common_categories: '{remove_artist}'", error=True)
 
             except IOError:
                 self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
@@ -5362,6 +5467,112 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.reset_add_remove_var.get():
             # Clear the remove custom tab name entry field
             self.remove_custom_tab_name_entry.delete(0, ctk.END)
+
+    def browse_artist(self):
+        # Remove the default acc display entry text
+        self.acc_display_entry.delete(0, ctk.END)
+
+        # Get the keys of self.artist_common_categories and convert them to a list
+        artist_list = list(self.artist_common_categories.keys())
+
+        # Call the SelectOptionWindow with the list
+        acc_artist_selection_window = SelectOptionWindow(title="Artist Selection",
+                                                         prompt="Which artist would you like to modify?:",
+                                                         item_list=artist_list,
+                                                         label_text="Choose Artist")
+
+        # Wait for the user to respond before proceeding
+        acc_artist_selection_window.wait_window()
+
+        # Retrieve the selected artist
+        chosen_artist = acc_artist_selection_window.get_selected_option()
+
+        if chosen_artist in artist_list:
+            # Set the selected artist
+            self.acc_selected_artist = chosen_artist
+
+            # Update acc display
+            self.update_acc_display()
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"Artist selected via Browse: "
+                              f"{chosen_artist}")
+        else:
+            # If the choice is not in the artist_list, return
+            self.log_and_show(f"No artist selected", not_logging=True)
+            return
+
+    # Method to update the acc display based on selected options
+    def update_acc_display(self):
+        if self.acc_selected_artist:
+            # Set the name to the acc display
+            self.acc_display_text.set(self.acc_selected_artist)
+
+    # TODO Prevent duplicate entries
+    def add_artist_common_category(self):
+        if not self.acc_selected_artist:
+            # If the acc_selected_artist is an empty string, log an error message and return
+            self.log_and_show("No artist selected. Please select an artist and try again.",
+                              create_messagebox=True, error=True)
+            return
+
+        # Get the new common category from the add_acc_entry widget
+        new_common_category = self.add_acc_entry.get().strip()
+
+        if not new_common_category:
+            # If the new common category is an empty string, log an error message and return
+            self.log_and_show("Add A.C.C. cannot be empty.",
+                              create_messagebox=True, error=True)
+            return
+
+        if new_common_category:
+            # Append the new_common_category to the selected artist's list
+            self.artist_common_categories[self.acc_selected_artist].append(new_common_category)
+
+            # Update the JSON file with the modified dictionary
+            self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+            # Log the action if logging is enabled
+            self.log_and_show(f"A.C.C. added: '{new_common_category}'")
+
+            # Reset the acc entry if the action is successful
+            if self.reset_add_remove_var.get():
+                # Clear the add_acc_entry entry
+                self.add_acc_entry.delete(0, ctk.END)
+
+    def remove_artist_common_category(self):
+        if not self.acc_selected_artist:
+            # If the acc_selected_artist is an empty string, log an error message and return
+            self.log_and_show("No artist selected. Please select an artist and try again.",
+                              create_messagebox=True, error=True)
+            return
+
+        # Get the common category from the remove_acc_entry widget
+        remove_common_category = self.remove_acc_entry.get().strip()
+
+        if not remove_common_category:
+            # If the remove common category is an empty string, log an error message and return
+            self.log_and_show("Remove A.C.C. cannot be empty.",
+                              create_messagebox=True, error=True)
+            return
+
+        if remove_common_category:
+            # Remove the common category from the selected artist's list
+            if remove_common_category in self.artist_common_categories[self.acc_selected_artist]:
+                self.artist_common_categories[self.acc_selected_artist].remove(remove_common_category)
+            else:
+                # Log an error message if the common category is not found
+                self.log_and_show(f"'{remove_common_category}' not found for {self.acc_selected_artist}.",
+                                  create_messagebox=True, error=True)
+                return
+
+            # Update the JSON file with the modified dictionary
+            self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+            # Reset the remove_acc entry if the action is successful
+            if self.reset_add_remove_var.get():
+                # Clear the remove_acc_entry entry
+                self.remove_acc_entry.delete(0, ctk.END)
 
     # Method to refresh the add/remove tabview
     def refresh_add_remove_tabview(self):
