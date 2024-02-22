@@ -3671,6 +3671,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                     # If suggest output directory returns a result, use SelectOptionWindow to determine output directory
                     if suggested_output_directory:
+                        # If suggest output directory is a single result, convert it to a list (sanitize)
+                        if suggested_output_directory and not isinstance(suggested_output_directory, list):
+                            suggested_output_directory = [suggested_output_directory]
+
                         # Prompt the user to choose from the list using SelectOptionWindow
                         directory_selection_window = SelectOptionWindow(title="Suggest Output Directory",
                                                                         prompt="Suggested output directory found."
@@ -3697,10 +3701,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                 "User did not choose the suggested output directory. Falling back to default "
                                 "directory.")
 
-                    else:
-                        # If suggest output directory does not return a result, use the previously set output directory
+                    elif suggested_output_directory is None:
+                        # If suggest output directory returns none, use the previously set output directory
                         # Log the result and update the GUI
                         self.log_and_show(f"Suggest output directory returned no result. Using {self.output_directory}")
+
+                    # Catchall, use the previously set output directory
+                    else:
+                        # Log the result and update the GUI
+                        self.log_and_show(f"Suggest output directory could not function due to invalid return"
+                                          f" '{suggested_output_directory}'."
+                                          f"\nUsing {self.output_directory}")
 
                     new_path = os.path.join(self.output_directory, os.path.basename(name))
 
