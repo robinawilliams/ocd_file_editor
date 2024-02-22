@@ -187,6 +187,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.valid_extensions = []
         self.weight_to_tab_name = {}
         self.categories = {}
+        self.artist_common_categories = {}
         self.name_normalizer_selected_file = ""
         self.name_normalizer_last_used_file = ""
         self.name_normalizer_output_directory = ""
@@ -215,7 +216,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.select_option_window = None
 
         # Initialize Main GUI elements
-        # TODO Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
+        # Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
         self.navigation_frame_label = None
         self.file_renamer_button = None
@@ -257,6 +258,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suggest_output_directory_checkbox = None
         self.move_up_directory_checkbox = None
         self.move_text_checkbox = None
+        self.artist_common_categories_checkbox = None
         self.send_to_module_frame = None
         self.send_to_video_editor_button = None
         self.send_to_name_normalizer_button = None
@@ -507,7 +509,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
          remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
          remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
          default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var,
-         default_add_remove_tab) = (
+         default_add_remove_tab, artist_common_categories_var) = (
             self.load_configuration())
 
         # Filepaths Directories - Set instance variables with the values from the configuration file
@@ -544,6 +546,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.sort_reverse_order_var = ctk.BooleanVar(value=sort_reverse_order_var)
         self.suggest_output_directory_var = ctk.BooleanVar(value=suggest_output_directory_var)
         self.artist_identifier_var = ctk.BooleanVar(value=artist_identifier_var)
+        self.artist_common_categories_var = ctk.BooleanVar(value=artist_common_categories_var)
         self.move_up_directory_var = ctk.BooleanVar(value=move_up_directory_var)
         self.move_text_var = ctk.BooleanVar(value=move_text_var)
         self.open_on_file_drop_var = ctk.BooleanVar(value=open_on_file_drop_var)
@@ -882,6 +885,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var)
         self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
+
+        # Checkbox to enable/disable add artist common categories
+        self.artist_common_categories_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
+                                                                 text="Add Artist Common Categories",
+                                                                 variable=self.artist_common_categories_var)
+        self.artist_common_categories_checkbox.grid(row=0, column=3, padx=5, pady=5)
 
         # Send to Module frame
         self.send_to_module_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
@@ -2335,6 +2344,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         sort_reverse_order_var = config.getboolean("Settings", "sort_reverse_order_var", fallback=False)
         suggest_output_directory_var = config.getboolean("Settings", "suggest_output_directory_var", fallback=False)
         artist_identifier_var = config.getboolean("Settings", "artist_identifier_var", fallback=False)
+        artist_common_categories_var = config.getboolean("Settings", "artist_common_categories_var", fallback=False)
         move_up_directory_var = config.getboolean("Settings", "move_up_directory_var", fallback=False)
         move_text_var = config.getboolean('Settings', 'move_text_var', fallback=False)
         open_on_file_drop_var = config.getboolean("Settings", "open_on_file_drop_var", fallback=False)
@@ -2415,9 +2425,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 remove_number_var, default_minute, default_second, no_go_directory, no_go_artist_file, dictionary_file,
                 remove_non_ascii_symbols_var, artist_identifier_var, sort_tab_names_var, sort_reverse_order_var,
                 default_most_number, scaling, default_ctn_weight, remove_custom_text_var, replace_mode_var,
-                default_add_remove_tab)
+                default_add_remove_tab, artist_common_categories_var)
 
-    # Method to load the json file (exclude_file and weight_to_tab_name dictionaries)
+    # Method to load the json file dictionaries/lists
     def initialize_json(self):
         # Load data from the dictionary_file
         try:
@@ -2427,6 +2437,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             with open(self.dictionary_file, "r") as json_file:
                 data = json.load(json_file)
+
+                # Get artist_common_categories dictionary
+                self.artist_common_categories = data.get("artist_common_categories", {})
 
                 # Get categories dictionary
                 self.categories = data.get("categories", {})
@@ -2779,6 +2792,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Open the input if the corresponding option is set
             if self.open_on_file_drop_var.get():
                 self.open_file(selected_file)
+
+            # Add artist common categories to the queue
+            if self.artist_common_categories_var.get():
+                self.add_common_categories_to_queue()
 
         # Log the action and display the message in the gui
         self.log_and_show(f"Input selected via drop: {filename}")
@@ -3173,6 +3190,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.queue = []
                 # Update display
                 self.update_file_display()
+
+                # Add artist common categories to the queue
+                if self.artist_common_categories_var.get():
+                    self.add_common_categories_to_queue()
 
                 # Log the action if logging is enabled
                 self.log_and_show(f"Input selected via Browse: "
@@ -3598,30 +3619,50 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to add a category to the queue
     def add_to_queue(self, category):
-        if self.file_renamer_selected_file:
-            # Check if the category is not already in the queue
-            if category not in self.queue:
-                # Add the category to the queue
-                self.queue.append(category)
-                self.log_and_show(f"Word added to queue: {category}", not_logging=True)
-
-            # Check if the category is already in the queue
-            elif category in self.queue:
-                # Ask for confirmation of removing the category from the queue
-                confirmation = self.ask_confirmation("Queue Conflict",
-                                                     f"{category} is already in the queue. Do you want to remove it?")
-
-                if confirmation:
-                    # Remove the category from the queue
-                    self.queue.remove(category)
-                    self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
-
-            # Update file display
-            self.update_file_display()
-        else:
+        if not self.file_renamer_selected_file:
             # If no input selected, log the action and display a message in the GUI
             self.log_and_show("Please select an input first and then add a word to the queue.",
                               create_messagebox=True, error=True)
+            return
+
+        # Check if the category is not already in the queue
+        if category not in self.queue:
+            # Add the category to the queue
+            self.queue.append(category)
+            self.log_and_show(f"Word added to queue: {category}", not_logging=True)
+
+        # Check if the category is already in the queue
+        elif category in self.queue:
+            # Ask for confirmation of removing the category from the queue
+            confirmation = self.ask_confirmation("Queue Conflict",
+                                                 f"{category} is already in the queue. Do you want to remove it?")
+
+            if confirmation:
+                # Remove the category from the queue
+                self.queue.remove(category)
+                self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
+
+        # Update file display
+        self.update_file_display()
+
+    # Method to add common categories to the queue based on the artist
+    def add_common_categories_to_queue(self):
+        # Check if the selected file is set
+        if not self.file_renamer_selected_file:
+            return  # Do nothing if the selected file is not set
+
+        # Extract the base name from the selected file
+        base_name = os.path.basename(self.file_renamer_selected_file)
+        base_name_lower = base_name.lower()  # Convert to lowercase for case-insensitive comparison
+
+        # Iterate through common categories and associated values
+        for key, values in self.artist_common_categories.items():
+            # Check if the lowercase key is present in the lowercase base name
+            if base_name_lower.find(key.lower()) != -1:
+                # Iterate through the values associated with the matching key
+                for value in values:
+                    self.add_to_queue(value)  # Add each value to the processing queue
+                return  # Stop processing after the first match
 
     """
     File Renaming

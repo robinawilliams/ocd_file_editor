@@ -37,6 +37,8 @@ reset_output_directory_var = True
 suggest_output_directory_var = False
 ; Identify artists
 artist_identifier_var = False
+; Add artist's common categories to the queue
+artist_common_categories_var = False
 ; Set output directory to one folder above the current directory
 move_up_directory_var = False
 ; Move text between - and __-__
@@ -167,7 +169,7 @@ default_rotation_var = none
 artist_file = list_of_artists.txt
 ; List of NO-GO artists (Tampermonkey Script)
 ;no_go_artist_file = list_of_no_go_artists.txt
-; JSON Dictionary for excluded_folders, weight_to_tab_name, and categories
+; JSON file dictionaries/lists
 dictionary_file = dictionary.json
 
 [Logs]
