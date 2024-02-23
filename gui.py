@@ -5510,22 +5510,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # TODO Prevent duplicate entries
     def add_artist_common_category(self):
-        if not self.acc_selected_artist:
-            # If the acc_selected_artist is an empty string, log an error message and return
-            self.log_and_show("No artist selected. Please select an artist and try again.",
-                              create_messagebox=True, error=True)
-            return
+        try:
+            if not self.acc_selected_artist:
+                raise ValueError("No artist selected. Please select an artist and try again.")
 
-        # Get the new common category from the add_acc_entry widget
-        new_common_category = self.add_acc_entry.get().strip()
+            # Get the new common category from the add_acc_entry widget
+            new_common_category = self.add_acc_entry.get().strip()
 
-        if not new_common_category:
-            # If the new common category is an empty string, log an error message and return
-            self.log_and_show("Add A.C.C. cannot be empty.",
-                              create_messagebox=True, error=True)
-            return
+            if not new_common_category:
+                raise ValueError("Add A.C.C. cannot be empty.")
 
-        if new_common_category:
             # Append the new_common_category to the selected artist's list
             self.artist_common_categories[self.acc_selected_artist].append(new_common_category)
 
@@ -5539,6 +5533,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.reset_add_remove_var.get():
                 # Clear the add_acc_entry entry
                 self.add_acc_entry.delete(0, ctk.END)
+
+        except ValueError as ve:
+            # Log an error message and display it using messagebox
+            self.log_and_show(str(ve), create_messagebox=True, error=True)
+        except Exception as e:
+            # Handle unexpected errors
+            self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
     def remove_artist_common_category(self):
         try:
@@ -5565,12 +5566,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Clear the remove_acc_entry entry
                 self.remove_acc_entry.delete(0, ctk.END)
 
-        except ValueError as e:
+        except ValueError as ve:
             # Log an error message and display it using messagebox
-            self.log_and_show(str(e), create_messagebox=True, error=True)
-        except Exception as ex:
+            self.log_and_show(str(ve), create_messagebox=True, error=True)
+        except Exception as e:
             # Handle unexpected errors
-            self.log_and_show(f"An unexpected error occurred: {str(ex)}", create_messagebox=True, error=True)
+            self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
     # Method to refresh the add/remove tabview
     def refresh_add_remove_tabview(self):
