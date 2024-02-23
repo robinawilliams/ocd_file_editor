@@ -37,6 +37,8 @@ reset_output_directory_var = True
 suggest_output_directory_var = False
 ; Identify artists
 artist_identifier_var = False
+; Ignore known artists when identifying
+ignore_known_artists_var = False
 ; Add artist's common categories to the queue
 artist_common_categories_var = False
 ; Set output directory to one folder above the current directory

@@ -232,6 +232,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             value=config.getboolean("Settings", "suggest_output_directory_var", fallback=False))
         self.artist_identifier_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "artist_identifier_var", fallback=False))
+        self.ignore_known_artists_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "ignore_known_artists_var", fallback=False))
         self.artist_common_categories_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "artist_common_categories_var", fallback=False))
         self.move_up_directory_var = ctk.BooleanVar(
@@ -672,6 +674,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.open_on_file_drop_switch = None
         self.remove_duplicates_switch = None
         self.artist_identifier_switch = None
+        self.ignore_known_artists_switch = None
         self.double_check_switch = None
         self.activate_logging_switch = None
         self.suppress_switch = None
@@ -2012,10 +2015,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.artist_identifier_var)
         self.artist_identifier_switch.grid(row=0, column=2, padx=10, pady=10)
 
-        # Switch to enable/disable create double check reminder
-        self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
-                                                 variable=self.double_check_var)
-        self.double_check_switch.grid(row=0, column=3, padx=10, pady=10)
+        # Switch to enable/disable ignore known artists for artist identifier
+        self.ignore_known_artists_switch = ctk.CTkSwitch(self.switch_frame, text="Ignore Known Artists",
+                                                         variable=self.ignore_known_artists_var)
+        self.ignore_known_artists_switch.grid(row=0, column=3, padx=10, pady=10)
 
         # Switch to enable/disable activate logging
         self.activate_logging_switch = ctk.CTkSwitch(self.switch_frame, text="Activate Logging",
@@ -2034,6 +2037,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.show_messageboxes_switch = ctk.CTkSwitch(self.switch_frame, text="Show Messageboxes",
                                                       variable=self.show_messageboxes_var)
         self.show_messageboxes_switch.grid(row=1, column=2, padx=10, pady=10)
+
+        # Switch to enable/disable create double check reminder
+        self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
+                                                 variable=self.double_check_var)
+        self.double_check_switch.grid(row=1, column=3, padx=10, pady=10)
 
         # Confirmation frame
         self.confirmation_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
@@ -5703,6 +5711,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Extract the artist from the text before '-'
             artist = base_name.split('-')[0].strip()
+
+            # Check if the artist is a directory in the root of self.artist_directory
+            if self.ignore_known_artists_var.get() and artist in os.listdir(self.artist_directory):
+                self.log_and_show(f"Artist Identifier ignoring known artist '{artist}' present as a directory.")
+                return None
 
             # Search for a case-insensitive match for the artist in self.artist_directory
             for root, dirs, files in os.walk(self.artist_directory):
