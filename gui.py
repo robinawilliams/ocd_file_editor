@@ -5508,7 +5508,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Set the name to the acc display
             self.acc_display_text.set(self.acc_selected_artist)
 
-    # TODO Prevent duplicate entries
     def add_artist_common_category(self):
         try:
             if not self.acc_selected_artist:
@@ -5519,6 +5518,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             if not new_common_category:
                 raise ValueError("Add A.C.C. cannot be empty.")
+
+            # Check for case-insensitive duplicates
+            # noinspection PyTypeChecker
+            if new_common_category.lower() in map(str.lower, self.artist_common_categories.get(
+                    self.acc_selected_artist, [])):
+                raise ValueError(f"'{new_common_category}' already exists for {self.acc_selected_artist}.")
 
             # Append the new_common_category to the selected artist's list
             self.artist_common_categories[self.acc_selected_artist].append(new_common_category)
