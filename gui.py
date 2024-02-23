@@ -5541,30 +5541,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.add_acc_entry.delete(0, ctk.END)
 
     def remove_artist_common_category(self):
-        if not self.acc_selected_artist:
-            # If the acc_selected_artist is an empty string, log an error message and return
-            self.log_and_show("No artist selected. Please select an artist and try again.",
-                              create_messagebox=True, error=True)
-            return
+        try:
+            if not self.acc_selected_artist:
+                raise ValueError("No artist selected. Please select an artist and try again.")
 
-        # Get the common category from the remove_acc_entry widget
-        remove_common_category = self.remove_acc_entry.get().strip()
+            # Get the common category from the remove_acc_entry widget
+            remove_common_category = self.remove_acc_entry.get().strip()
 
-        if not remove_common_category:
-            # If the remove common category is an empty string, log an error message and return
-            self.log_and_show("Remove A.C.C. cannot be empty.",
-                              create_messagebox=True, error=True)
-            return
+            if not remove_common_category:
+                raise ValueError("Remove A.C.C. cannot be empty.")
 
-        if remove_common_category:
             # Remove the common category from the selected artist's list
-            if remove_common_category in self.artist_common_categories[self.acc_selected_artist]:
+            if remove_common_category in self.artist_common_categories.get(self.acc_selected_artist, []):
                 self.artist_common_categories[self.acc_selected_artist].remove(remove_common_category)
             else:
-                # Log an error message if the common category is not found
-                self.log_and_show(f"'{remove_common_category}' not found for {self.acc_selected_artist}.",
-                                  create_messagebox=True, error=True)
-                return
+                raise ValueError(f"'{remove_common_category}' not found for {self.acc_selected_artist}.")
 
             # Update the JSON file with the modified dictionary
             self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
@@ -5573,6 +5564,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.reset_add_remove_var.get():
                 # Clear the remove_acc_entry entry
                 self.remove_acc_entry.delete(0, ctk.END)
+
+        except ValueError as e:
+            # Log an error message and display it using messagebox
+            self.log_and_show(str(e), create_messagebox=True, error=True)
+        except Exception as ex:
+            # Handle unexpected errors
+            self.log_and_show(f"An unexpected error occurred: {str(ex)}", create_messagebox=True, error=True)
 
     # Method to refresh the add/remove tabview
     def refresh_add_remove_tabview(self):
