@@ -5497,8 +5497,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                 # Check if there is a '-' in the name
                 if '-' not in base_name:
-                    # If no '-', raise an exception
-                    raise ValueError("No '-' found in the file name. Cannot identify artist.")
+                    # If no '-', return without raising an exception
+                    self.log_and_show("No '-' found in the file name. Cannot identify artist.", error=True)
+                    return
 
                 # Extract the artist from the text before '-'
                 artist = base_name.split('-')[0].strip()
@@ -5529,8 +5530,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Log the action if logging is enabled
                 self.log_and_show(f"Artist selected via {mode}: {artist}")
             else:
-                # If the choice is not in the artist_list, raise an exception
-                raise ValueError("Selected artist not found in the artist list")
+                # If the choice is not in the artist_list, return without raising an exception
+                return
 
         except ValueError as e:
             # Handle ValueError exceptions
