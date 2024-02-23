@@ -5557,11 +5557,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if not remove_common_category:
                 raise ValueError("Remove A.C.C. cannot be empty.")
 
-            # Remove the common category from the selected artist's list
-            if remove_common_category in self.artist_common_categories.get(self.acc_selected_artist, []):
-                self.artist_common_categories[self.acc_selected_artist].remove(remove_common_category)
-            else:
+            # Case-insensitive check for the common category in the selected artist's list
+            common_categories = self.artist_common_categories.get(self.acc_selected_artist, [])
+            # noinspection PyTypeChecker
+            if remove_common_category.lower() not in map(str.lower, common_categories):
                 raise ValueError(f"'{remove_common_category}' not found for {self.acc_selected_artist}.")
+
+            # Remove the common category from the selected artist's list
+            self.artist_common_categories[self.acc_selected_artist] = [
+                category for category in common_categories if category.lower() != remove_common_category.lower()]
 
             # Update the JSON file with the modified dictionary
             self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
