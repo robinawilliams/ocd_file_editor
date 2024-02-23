@@ -2882,39 +2882,39 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # noinspection PyUnusedLocal
     def update_file_display(self, event=None):
         if self.file_renamer_selected_file:
+            # Get custom text and file extension
             custom_text = self.custom_text_entry.get().strip()
+            base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
-            # Use only the base name of the file, not the full path
-            base_file_name = os.path.basename(self.file_renamer_selected_file)
+            # Check if the remove_duplicates_var is set
+            if self.remove_duplicates_var.get():
+                # Remove duplicates from the queue
+                self.queue = list(dict.fromkeys(self.queue))
 
-            # Construct the name
-            new_name_parts = [
-                os.path.splitext(base_file_name)[0],
-                custom_text,
-                " ".join(self.queue),
-                os.path.splitext(base_file_name)[1]
-            ]
+            # Filter and sort categories based on weights
+            weighted_categories = [category for category in self.queue if category in self.categories]
+            weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
-            # Join the parts and remove double spaces and trailing spaces
-            name = " ".join(part for part in new_name_parts if part).strip()
+            # Construct a name using base name, weighted categories, custom text, and extension
+            proposed_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
 
             # Handle name length constraints
-            if len(name) > 255:
+            if len(proposed_name) > 255:
                 self.log_and_show("The proposed file name exceeds 255 characters. "
                                   "Operating system limitations prohibit this.",
                                   create_messagebox=True, error=True)
                 # Truncate the name
-                name = f"...{name[180:]}"
+                proposed_name = f"...{proposed_name[180:]}"
 
-            if len(name) > 250:
+            if len(proposed_name) > 250:
                 self.log_and_show("The proposed file name exceeds 250 characters. Please consider "
                                   "shortening it to comply with operating system limitations.",
                                   create_messagebox=True)
                 # Truncate the name
-                name = f"...{name[180:]}"
+                proposed_name = f"...{proposed_name[180:]}"
 
             # Set the name to the file display
-            self.file_display_text.set(name)
+            self.file_display_text.set(proposed_name)
 
     # Method to undo the last category added to the queue
     def undo_last(self):
