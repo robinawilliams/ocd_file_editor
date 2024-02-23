@@ -607,6 +607,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_artist_button = None
         self.acc_display_text = None
         self.acc_display_entry = None
+        self.detect_artist_button = None
         self.add_remove_acc_entry_frame = None
         self.add_acc_button = None
         self.add_acc_entry = None
@@ -1710,7 +1711,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse artist common categories button
         self.browse_artist_button = ctk.CTkButton(self.acc_browse_frame, text="Browse Artist",
-                                                  command=self.browse_artist)
+                                                  command=lambda: self.browse_artist(mode="Browse"))
         self.browse_artist_button.grid(row=0, column=0, padx=5)
 
         # Artist Common Categories Display
@@ -1719,6 +1720,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.acc_display_entry = ctk.CTkEntry(self.acc_browse_frame, width=900,
                                               textvariable=self.acc_display_text)
         self.acc_display_entry.grid(row=0, column=1, padx=5)
+
+        # Detect artist button
+        self.detect_artist_button = ctk.CTkButton(self.acc_browse_frame, text="Detect Artist",
+                                                  command=lambda: self.browse_artist(mode="Detect"))
+        self.detect_artist_button.grid(row=1, column=0, padx=5, pady=10)
 
         # Add and remove artist common categories entry frame
         self.add_remove_acc_entry_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
@@ -5468,38 +5474,67 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear the remove custom tab name entry field
             self.remove_custom_tab_name_entry.delete(0, ctk.END)
 
-    def browse_artist(self):
-        # Remove the default acc display entry text
-        self.acc_display_entry.delete(0, ctk.END)
+    def browse_artist(self, mode):
+        try:
+            # Remove the default acc display entry text
+            self.acc_display_entry.delete(0, ctk.END)
 
-        # Get the keys of self.artist_common_categories and convert them to a list
-        artist_list = list(self.artist_common_categories.keys())
+            # Get the keys of self.artist_common_categories and convert them to a list
+            artist_list = list(self.artist_common_categories.keys())
 
-        # Call the SelectOptionWindow with the list
-        acc_artist_selection_window = SelectOptionWindow(title="Artist Selection",
-                                                         prompt="Which artist would you like to modify?:",
-                                                         item_list=artist_list,
-                                                         label_text="Choose Artist")
+            if mode == "Detect":
+                # Check if an input is selected on the file renamer frame
+                if not self.file_renamer_selected_file:
+                    # If no input is selected, raise an exception
+                    raise ValueError("No file renamer input selected. Cannot detect artist without it.")
 
-        # Wait for the user to respond before proceeding
-        acc_artist_selection_window.wait_window()
+                # Extract the base name from the selected file
+                base_name = os.path.basename(self.file_renamer_selected_file)
 
-        # Retrieve the selected artist
-        chosen_artist = acc_artist_selection_window.get_selected_option()
+                # Check if there is a '-' in the name
+                if '-' not in base_name:
+                    # If no '-', raise an exception
+                    raise ValueError("No '-' found in the file name. Cannot identify artist.")
 
-        if chosen_artist in artist_list:
-            # Set the selected artist
-            self.acc_selected_artist = chosen_artist
+                # Extract the artist from the text before '-'
+                artist = base_name.split('-')[0].strip()
 
-            # Update acc display
-            self.update_acc_display()
+            elif mode == "Browse":
+                # Call the SelectOptionWindow with the list
+                acc_artist_selection_window = SelectOptionWindow(title="Artist Selection",
+                                                                 prompt="Which artist would you like to modify?:",
+                                                                 item_list=artist_list,
+                                                                 label_text="Choose Artist")
 
-            # Log the action if logging is enabled
-            self.log_and_show(f"Artist selected via Browse: "
-                              f"{chosen_artist}")
-        else:
-            # If the choice is not in the artist_list, return
-            self.log_and_show(f"No artist selected", not_logging=True)
+                # Wait for the user to respond before proceeding
+                acc_artist_selection_window.wait_window()
+
+                # Retrieve the selected artist
+                artist = acc_artist_selection_window.get_selected_option()
+            else:
+                # Handle the case of an invalid mode
+                raise ValueError(f"Invalid mode for browse artist: {mode}")
+
+            if artist in artist_list:
+                # Set the acc selected artist
+                self.acc_selected_artist = artist
+
+                # Update acc display
+                self.update_acc_display()
+
+                # Log the action if logging is enabled
+                self.log_and_show(f"Artist selected via {mode}: {artist}")
+            else:
+                # If the choice is not in the artist_list, raise an exception
+                raise ValueError("Selected artist not found in the artist list")
+
+        except ValueError as e:
+            # Handle ValueError exceptions
+            self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
+            return
+        except Exception as e:
+            # Handle other exceptions
+            self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
             return
 
     # Method to update the acc display based on selected options
@@ -5632,12 +5667,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if not self.file_renamer_selected_file:
             # If no input is selected, return none
             self.log_and_show("No input selected.")
-            return None
-
-        # Check if the artist_identifier_var is True
-        if not self.artist_identifier_var.get():
-            # If artist_identifier_var is False, return none
-            self.log_and_show("Artist Identifier disabled.")
             return None
 
         # Check if self.artist_directory exists
