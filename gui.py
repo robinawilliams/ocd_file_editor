@@ -48,12 +48,15 @@ class SelectOptionWindow(ctk.CTkToplevel):
                                                                        label_text=label_text)
         self.scrollable_radiobutton_frame.pack(padx=10, pady=10)
 
+        self.dialog_button_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
+        self.dialog_button_frame.pack(padx=10, pady=10)
+
         # Ok Button to confirm the selection
-        self.ok_button = ctk.CTkButton(self, text="Ok", command=self.ok_clicked)
+        self.ok_button = ctk.CTkButton(self.dialog_button_frame, text="Ok", command=self.ok_clicked)
         self.ok_button.pack(side=ctk.LEFT, padx=10)
 
         # Cancel Button to cancel the selection
-        self.cancel_button = ctk.CTkButton(self, text="Cancel", command=self.cancel_clicked)
+        self.cancel_button = ctk.CTkButton(self.dialog_button_frame, text="Cancel", command=self.cancel_clicked)
         self.cancel_button.pack(side=ctk.RIGHT, padx=10)
 
         # Variable to store the selected option
@@ -439,7 +442,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_file_button = None
         self.file_display_text = None
         self.file_display_entry = None
-        self.button_frame = None
+        self.cat_button_frame = None
         self.custom_text_frame = None
 
         self.output_directory_browse_button = None
@@ -846,10 +849,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_display_entry.grid(row=0, column=1, padx=5)
 
         # Categories button frame
-        self.button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0, fg_color="transparent")
-        self.button_frame.grid(row=1, column=0, padx=10, pady=5)
+        self.cat_button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
+                                             corner_radius=0, fg_color="transparent")
+        self.cat_button_frame.grid(row=1, column=0, padx=10, pady=5)
 
-        # Create a cat_tabview and initialize category buttons on button_frame
+        # Create a cat_tabview and initialize category buttons on cat_button_frame
         self.create_cat_tabview()
 
         # Frame to group custom text entry and output directory
@@ -3597,7 +3601,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to create the cat_tabview and buttons
     def create_cat_tabview(self):
         # Create cat_tabview
-        self.cat_tabview = ctk.CTkTabview(self.button_frame)
+        self.cat_tabview = ctk.CTkTabview(self.cat_button_frame)
         self.cat_tabview.grid(row=0, column=0)
 
         # Create a tab for all categories
