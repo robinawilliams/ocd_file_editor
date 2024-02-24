@@ -1005,6 +1005,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                  variable=self.artist_common_categories_var)
         self.artist_common_categories_checkbox.grid(row=0, column=4, padx=5, pady=5)
 
+        # Bind the callback function to the artist_common_categories_var variable
+        self.artist_common_categories_var.trace_add("write", self.handle_common_categories_state)
+
         # Send to Module frame
         self.send_to_module_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
                                                  corner_radius=0,
@@ -2846,7 +2849,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Add artist common categories to the queue
             if self.artist_common_categories_var.get():
-                self.add_common_categories_to_queue()
+                self.add_remove_common_categories_to_queue()
 
         # Log the action and display the message in the gui
         self.log_and_show(f"Input selected via drop: {filename}")
@@ -3253,7 +3256,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                 # Add artist common categories to the queue
                 if self.artist_common_categories_var.get():
-                    self.add_common_categories_to_queue()
+                    self.add_remove_common_categories_to_queue()
 
                 # Log the action if logging is enabled
                 self.log_and_show(f"Input selected via Browse: "
@@ -3697,14 +3700,65 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             if confirmation:
                 # Remove the category from the queue
-                self.queue.remove(category)
-                self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
+                self.remove_from_queue(category)
 
         # Update file display
         self.update_file_display()
 
-    # Method to add common categories to the queue based on the artist
-    def add_common_categories_to_queue(self):
+    # Method to remove a category from the queue
+    def remove_from_queue(self, category, suppress=False):
+        """
+        remove_from_queue(category, suppress=False)
+
+        Removes a word from the queue based on the specified category.
+
+        Parameters:
+        - category (str): The category of the word to be removed from the queue.
+        - suppress (bool): If True, suppresses log and show messages when the word is not in the queue.
+
+        Returns:
+        None
+
+        If no input file is selected, logs an error and shows a message in the GUI.
+
+        If the specified category is not in the queue, logs an error and shows a message unless suppress is True.
+
+        Updates the file display after removing the word from the queue.
+        """
+        if not self.file_renamer_selected_file:
+            # If no input selected, log the action and display a message in the GUI
+            self.log_and_show("Please select an input first and then remove a word from the queue.",
+                              create_messagebox=True, error=True)
+            return
+
+        # Check if the category is not already in the queue
+        if category not in self.queue:
+            # Check if the message is suppressed
+            if not suppress:
+                # If not suppressed, log and show the message
+                self.log_and_show(f"Word not in queue: {category}",
+                                  create_messagebox=True, error=True, not_logging=True)
+            return
+
+        # Remove the category from the queue
+        self.queue.remove(category)
+        self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
+
+        # Update file display
+        self.update_file_display()
+
+    # Method to handle common categories state
+    def handle_common_categories_state(self, *_):
+        # Check if the artist common categories variable is true 
+        if self.artist_common_categories_var.get():
+            # Call the add_remove_common_categories_to_queue method
+            self.add_remove_common_categories_to_queue()
+        else:
+            # Call the add_remove_common_categories_to_queue method with the remove parameter
+            self.add_remove_common_categories_to_queue(remove=True)
+    
+    # Method to add/remove common categories to the queue based on the artist
+    def add_remove_common_categories_to_queue(self, remove=False):
         # Check if the selected file is set
         if not self.file_renamer_selected_file:
             return  # Do nothing if the selected file is not set
@@ -3719,7 +3773,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if base_name_lower.find(key.lower()) != -1:
                 # Iterate through the values associated with the matching key
                 for value in values:
-                    self.add_to_queue(value)  # Add each value to the processing queue
+                    if remove:
+                        self.remove_from_queue(value, suppress=True)  # Remove each value remove the processing queue
+                    else:
+                        self.add_to_queue(value)  # Add each value to the processing queue
                 return  # Stop processing after the first match
 
     """
