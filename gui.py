@@ -388,7 +388,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.history = []
         self.nn_history = []
         self.queue = []
-        self.tabs = {}
+        self.cat_tabs = {}
+        self.add_remove_tabs = {}
+        self.settings_tabs = {}
         self.excluded_folders = []
         self.custom_text_to_remove = []
         self.file_extensions = []
@@ -404,16 +406,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_output_directory = ""
         self.acc_selected_artist = ""
 
-        # List of tabs for the add_remove_tabview
-        self.tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Remove", "Exclude",
-                          "File Extensions", "NO GO", "Valid Extensions"]
+        # List of tab names for the add_remove_tabview
+        self.add_remove_tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Remove", "Exclude",
+                                     "File Extensions", "NO GO", "Valid Extensions"]
+
+        # List of tab names for the settings_tabview
+        self.settings_tab_names = ["Appearance", "Artist", "File Operations", "Logging", "Messaging", "Tabs"]
 
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
         self.original_stdout = sys.stdout
         self.original_stderr = sys.stderr
-
-        # Initialize configuration file variable
-        self.config_file_path = ""
 
         # Initialize buttons
         self.cat_tabview = None
@@ -421,6 +423,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.most_buttons = None
         self.all_buttons = None
 
+        # TODO Currently not being used
         # Initialize select_option_window to None for open_select_option_window functionality
         self.select_option_window = None
 
@@ -668,14 +671,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Initialize Settings GUI elements
         self.settings_frame = None
-        self.settings_top_frame = None
         self.settings_label = None
-        self.switch_frame = None
-        self.open_on_file_drop_switch = None
+        self.settings_tabview = None
         self.remove_duplicates_switch = None
+        self.artist_switch_frame = None
         self.artist_identifier_switch = None
         self.ignore_known_artists_switch = None
+        self.file_ops_frame = None
+        self.open_on_file_drop_switch = None
         self.double_check_switch = None
+        self.logging_switch_frame = None
         self.activate_logging_switch = None
         self.suppress_switch = None
         self.show_messageboxes_switch = None
@@ -1662,10 +1667,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_remove_label.grid(row=0, column=0, padx=10, pady=10)
 
         # Create an add_remove_tabview on add_remove_frame row 1
-        self.create_add_remove_tabview()
+        self.add_remove_tabview, self.add_remove_tabs = self.create_tabview(self.add_remove_frame,
+                                                                            self.add_remove_tab_names,
+                                                                            self.default_add_remove_tab)
 
+        """Artist Tab"""
         # Add and remove artist top frame
-        self.add_remove_artist_top_frame = ctk.CTkFrame(self.tabs.get("Artist"), corner_radius=0,
+        self.add_remove_artist_top_frame = ctk.CTkFrame(self.add_remove_tabs.get("Artist"), corner_radius=0,
                                                         fg_color="transparent")
         self.add_remove_artist_top_frame.grid(row=0, column=0, padx=10, pady=10)
 
@@ -1758,7 +1766,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_acc_entry = ctk.CTkEntry(self.add_remove_acc_entry_frame, width=370)
         self.remove_acc_entry.grid(row=0, column=3, padx=5)
 
-        self.category_frame = ctk.CTkFrame(self.tabs.get("Category"), corner_radius=0, fg_color="transparent")
+        """Category Tab"""
+        self.category_frame = ctk.CTkFrame(self.add_remove_tabs.get("Category"), corner_radius=0,
+                                           fg_color="transparent")
         self.category_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Add Category Button
@@ -1795,7 +1805,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_category_entry = ctk.CTkEntry(self.category_frame, width=310)
         self.remove_category_entry.grid(row=0, column=5, padx=5)
 
-        self.ctn_frame = ctk.CTkFrame(self.tabs.get("Custom Tab Name"), corner_radius=0, fg_color="transparent")
+        """Custom Tab Name Tab"""
+        self.ctn_frame = ctk.CTkFrame(self.add_remove_tabs.get("Custom Tab Name"), corner_radius=0,
+                                      fg_color="transparent")
         self.ctn_frame.grid(row=6, column=0, padx=10, pady=10)
 
         # Add Custom Tab Name Button
@@ -1832,8 +1844,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_custom_tab_name_entry = ctk.CTkEntry(self.ctn_frame, width=310)
         self.remove_custom_tab_name_entry.grid(row=0, column=5, padx=5)
 
+        """Custom Text to Remove Tab"""
         # Custom Text to Remove frame
-        self.ctr_entry_frame = ctk.CTkFrame(self.tabs.get("Custom Text to Remove"), corner_radius=0,
+        self.ctr_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Custom Text to Remove"), corner_radius=0,
                                             fg_color="transparent")
         self.ctr_entry_frame.grid(row=12, column=0, padx=10, pady=10)
 
@@ -1855,8 +1868,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_ctr_name_entry = ctk.CTkEntry(self.ctr_entry_frame, width=370)
         self.remove_ctr_name_entry.grid(row=0, column=4, padx=5)
 
+        """Exclude Tab"""
         # Exclude frame
-        self.exclude_entry_frame = ctk.CTkFrame(self.tabs.get("Exclude"), corner_radius=0,
+        self.exclude_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Exclude"), corner_radius=0,
                                                 fg_color="transparent")
         self.exclude_entry_frame.grid(row=10, column=0, padx=10, pady=10)
 
@@ -1878,8 +1892,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_exclude_name_entry = ctk.CTkEntry(self.exclude_entry_frame, width=370)
         self.remove_exclude_name_entry.grid(row=0, column=4, padx=5)
 
+        """File Extensions Tab"""
         # File Extension frame
-        self.file_extension_entry_frame = ctk.CTkFrame(self.tabs.get("File Extensions"), corner_radius=0,
+        self.file_extension_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("File Extensions"), corner_radius=0,
                                                        fg_color="transparent")
         self.file_extension_entry_frame.grid(row=8, column=0, padx=10, pady=10)
 
@@ -1901,8 +1916,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_file_extension_entry = ctk.CTkEntry(self.file_extension_entry_frame, width=370)
         self.remove_file_extension_entry.grid(row=0, column=4, padx=5)
 
+        """NO-GO Tab"""
         # NO-GO frame
-        self.no_go_entry_frame = ctk.CTkFrame(self.tabs.get("NO GO"), corner_radius=0,
+        self.no_go_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("NO GO"), corner_radius=0,
                                               fg_color="transparent")
         self.no_go_entry_frame.grid(row=8, column=0, padx=10, pady=10)
 
@@ -1924,8 +1940,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_no_go_name_entry = ctk.CTkEntry(self.no_go_entry_frame, width=370)
         self.remove_no_go_name_entry.grid(row=0, column=4, padx=5)
 
+        """Valid Extensions Tab"""
         # Valid Extension frame
-        self.valid_extension_entry_frame = ctk.CTkFrame(self.tabs.get("Valid Extensions"), corner_radius=0,
+        self.valid_extension_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Valid Extensions"), corner_radius=0,
                                                         fg_color="transparent")
         self.valid_extension_entry_frame.grid(row=8, column=0, padx=10, pady=10)
 
@@ -1986,119 +2003,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_frame = ctk.CTkFrame(self, corner_radius=0, fg_color="transparent")
         self.settings_frame.grid_columnconfigure(0, weight=1)
 
-        # Settings top frame
-        self.settings_top_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.settings_top_frame.grid(row=0, column=0, padx=10, pady=10)
-
         # Settings label
-        self.settings_label = ctk.CTkLabel(self.settings_top_frame, text="Settings",
+        self.settings_label = ctk.CTkLabel(self.settings_frame, text="Settings",
                                            font=ctk.CTkFont(size=15, weight="bold"))
         self.settings_label.grid(row=0, column=0, padx=5, pady=5, columnspan=5)
 
-        # Switch frame
-        self.switch_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.switch_frame.grid(row=1, column=0, padx=10, pady=10)
+        # Create a settings_tabview on settings_frame row 1
+        self.settings_tabview, self.settings_tabs = self.create_tabview(self.settings_frame,
+                                                                        self.settings_tab_names)
 
-        # Switch to enable/disable open on drop behavior
-        self.open_on_file_drop_switch = ctk.CTkSwitch(self.switch_frame, text="Open File on Drag and Drop",
-                                                      variable=self.open_on_file_drop_var)
-        self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
-
-        # Switch to enable/disable remove duplicates
-        self.remove_duplicates_switch = ctk.CTkSwitch(self.switch_frame,
-                                                      text="Remove Duplicates",
-                                                      variable=self.remove_duplicates_var)
-        self.remove_duplicates_switch.grid(row=0, column=1, padx=10, pady=10)
-
-        # Switch to enable/disable artist identifier
-        self.artist_identifier_switch = ctk.CTkSwitch(self.switch_frame, text="Artist Identifier",
-                                                      variable=self.artist_identifier_var)
-        self.artist_identifier_switch.grid(row=0, column=2, padx=10, pady=10)
-
-        # Switch to enable/disable ignore known artists for artist identifier
-        self.ignore_known_artists_switch = ctk.CTkSwitch(self.switch_frame, text="Ignore Known Artists",
-                                                         variable=self.ignore_known_artists_var)
-        self.ignore_known_artists_switch.grid(row=0, column=3, padx=10, pady=10)
-
-        # Switch to enable/disable activate logging
-        self.activate_logging_switch = ctk.CTkSwitch(self.switch_frame, text="Activate Logging",
-                                                     variable=self.activate_logging_var)
-        self.activate_logging_switch.grid(row=1, column=0, padx=10, pady=10)
-
-        # Bind the callback function to the activate logging variable
-        self.activate_logging_var.trace_add("write", self.handle_logging_activation)
-
-        # Switch to enable/disable suppress standard outputs/errors
-        self.suppress_switch = ctk.CTkSwitch(self.switch_frame, text="Suppress Standard Output/Error",
-                                             variable=self.suppress_var)
-        self.suppress_switch.grid(row=1, column=1, padx=10, pady=10)
-
-        # Switch to enable/disable show messageboxes
-        self.show_messageboxes_switch = ctk.CTkSwitch(self.switch_frame, text="Show Messageboxes",
-                                                      variable=self.show_messageboxes_var)
-        self.show_messageboxes_switch.grid(row=1, column=2, padx=10, pady=10)
-
-        # Switch to enable/disable create double check reminder
-        self.double_check_switch = ctk.CTkSwitch(self.switch_frame, text="Create Double Check Reminder",
-                                                 variable=self.double_check_var)
-        self.double_check_switch.grid(row=1, column=3, padx=10, pady=10)
-
-        # Confirmation frame
-        self.confirmation_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.confirmation_frame.grid(row=2, column=0, padx=10)
-
-        # Switch to enable/disable show confirmation messageboxes
-        self.show_confirmation_messageboxes_switch = ctk.CTkSwitch(self.confirmation_frame,
-                                                                   text="Show Confirmation Messageboxes",
-                                                                   variable=self.show_confirmation_messageboxes_var)
-        self.show_confirmation_messageboxes_switch.grid(row=0, column=0, padx=10, pady=10)
-
-        # Fallback confirmation state when confirmation messageboxes are suppressed
-        self.fallback_confirmation_label = ctk.CTkLabel(self.confirmation_frame, text="Fallback confirmation state:")
-        self.fallback_confirmation_label.grid(row=0, column=1, padx=10, pady=5)
-
-        # Fallback true radio button
-        self.true_radio = ctk.CTkRadioButton(self.confirmation_frame, text="True",
-                                             variable=self.fallback_confirmation_var, value=True)
-        self.true_radio.grid(row=0, column=2, padx=10, pady=5)
-
-        # Fallback false radio button
-        self.false_radio = ctk.CTkRadioButton(self.confirmation_frame, text="False",
-                                              variable=self.fallback_confirmation_var,
-                                              value=False)
-        self.false_radio.grid(row=0, column=3, padx=10, pady=5)
-
-        # Tab name frame
-        self.tab_name_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.tab_name_frame.grid(row=3, column=0, padx=10, pady=10)
-
-        # Switch to enable/disable use_custom_tab_names_var
-        self.use_custom_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Use Custom Tab Names",
-                                                         variable=self.use_custom_tab_names_var)
-        self.use_custom_tab_names_switch.grid(row=0, column=0, padx=10)
-
-        # Bind the callback function to use_custom_tab_names_var
-        self.use_custom_tab_names_var.trace_add("write", self.refresh_category_buttons)
-
-        # Switch to enable/disable sort tab names
-        self.sort_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names",
-                                                   variable=self.sort_tab_names_var)
-        self.sort_tab_names_switch.grid(row=0, column=1, padx=10)
-
-        # Bind the callback function to sort_tab_names_var
-        self.sort_tab_names_var.trace_add("write", self.refresh_buttons_and_tabs)
-
-        # Switch to enable/disable sort_reverse_order_var
-        self.sort_tab_names_reverse_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names (A-Z / Z-A)",
-                                                           variable=self.sort_reverse_order_var)
-        self.sort_tab_names_reverse_switch.grid(row=0, column=2, padx=10)
-
-        # Bind the callback function to sort_reverse_order_var
-        self.sort_reverse_order_var.trace_add("write", self.refresh_buttons_and_tabs)
-
+        """Appearance Tab"""
         # GUI settings frame
-        self.gui_settings_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.gui_settings_frame.grid(row=4, column=0, padx=10, pady=10)
+        self.gui_settings_frame = ctk.CTkFrame(self.settings_tabs.get("Appearance"), corner_radius=0,
+                                               fg_color="transparent")
+        self.gui_settings_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Select light or dark label
         self.appearance_mode_label = ctk.CTkLabel(self.gui_settings_frame, text="Appearance:")
@@ -2126,9 +2044,127 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set default value for scaling
         self.scaling_optionemenu.set(f"{self.scaling}%")
 
+        """Artist Tab"""
+        # Artist switch frame
+        self.artist_switch_frame = ctk.CTkFrame(self.settings_tabs.get("Artist"), corner_radius=0,
+                                                fg_color="transparent")
+        self.artist_switch_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Switch to enable/disable artist identifier
+        self.artist_identifier_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Artist Identifier",
+                                                      variable=self.artist_identifier_var)
+        self.artist_identifier_switch.grid(row=0, column=0, padx=10, pady=10)
+
+        # Switch to enable/disable ignore known artists for artist identifier
+        self.ignore_known_artists_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Ignore Known Artists",
+                                                         variable=self.ignore_known_artists_var)
+        self.ignore_known_artists_switch.grid(row=0, column=1, padx=10, pady=10)
+
+        """File Operations Tab"""
+        # File Operations frame
+        self.file_ops_frame = ctk.CTkFrame(self.settings_tabs.get("File Operations"), corner_radius=0,
+                                           fg_color="transparent")
+        self.file_ops_frame.grid(row=0, column=0, padx=10)
+
+        # Switch to enable/disable open on drop behavior
+        self.open_on_file_drop_switch = ctk.CTkSwitch(self.file_ops_frame, text="Open File on Drag and Drop",
+                                                      variable=self.open_on_file_drop_var)
+        self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
+
+        # Switch to enable/disable remove duplicates
+        self.remove_duplicates_switch = ctk.CTkSwitch(self.file_ops_frame,
+                                                      text="Remove Duplicates",
+                                                      variable=self.remove_duplicates_var)
+        self.remove_duplicates_switch.grid(row=0, column=1, padx=10, pady=10)
+
+        # Switch to enable/disable create double check reminder
+        self.double_check_switch = ctk.CTkSwitch(self.file_ops_frame, text="Create Double Check Reminder",
+                                                 variable=self.double_check_var)
+        self.double_check_switch.grid(row=0, column=2, padx=10, pady=10)
+
+        """Logging Tab"""
+        # Logging switch frame
+        self.logging_switch_frame = ctk.CTkFrame(self.settings_tabs.get("Logging"), corner_radius=0,
+                                                 fg_color="transparent")
+        self.logging_switch_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Switch to enable/disable activate logging
+        self.activate_logging_switch = ctk.CTkSwitch(self.logging_switch_frame, text="Activate Logging",
+                                                     variable=self.activate_logging_var)
+        self.activate_logging_switch.grid(row=0, column=0, padx=10, pady=10)
+
+        # Bind the callback function to the activate logging variable
+        self.activate_logging_var.trace_add("write", self.handle_logging_activation)
+
+        # Switch to enable/disable suppress standard outputs/errors
+        self.suppress_switch = ctk.CTkSwitch(self.logging_switch_frame, text="Suppress Standard Output/Error",
+                                             variable=self.suppress_var)
+        self.suppress_switch.grid(row=0, column=1, padx=10, pady=10)
+
+        """Messaging Tab"""
+        # Confirmation frame
+        self.confirmation_frame = ctk.CTkFrame(self.settings_tabs.get("Messaging"), corner_radius=0,
+                                               fg_color="transparent")
+        self.confirmation_frame.grid(row=0, column=0, padx=10)
+
+        # Switch to enable/disable show messageboxes
+        self.show_messageboxes_switch = ctk.CTkSwitch(self.confirmation_frame, text="Show Messageboxes",
+                                                      variable=self.show_messageboxes_var)
+        self.show_messageboxes_switch.grid(row=0, column=0, padx=10, pady=10)
+
+        # Switch to enable/disable show confirmation messageboxes
+        self.show_confirmation_messageboxes_switch = ctk.CTkSwitch(self.confirmation_frame,
+                                                                   text="Show Confirmation Messageboxes",
+                                                                   variable=self.show_confirmation_messageboxes_var)
+        self.show_confirmation_messageboxes_switch.grid(row=0, column=1, padx=10, pady=10)
+
+        # Fallback confirmation state when confirmation messageboxes are suppressed
+        self.fallback_confirmation_label = ctk.CTkLabel(self.confirmation_frame, text="Fallback confirmation state:")
+        self.fallback_confirmation_label.grid(row=1, column=0, padx=10, pady=5)
+
+        # Fallback true radio button
+        self.true_radio = ctk.CTkRadioButton(self.confirmation_frame, text="True",
+                                             variable=self.fallback_confirmation_var, value=True)
+        self.true_radio.grid(row=1, column=1, padx=10, pady=5)
+
+        # Fallback false radio button
+        self.false_radio = ctk.CTkRadioButton(self.confirmation_frame, text="False",
+                                              variable=self.fallback_confirmation_var,
+                                              value=False)
+        self.false_radio.grid(row=1, column=2, padx=10, pady=5)
+
+        """Tabs"""
+        # Tab name frame
+        self.tab_name_frame = ctk.CTkFrame(self.settings_tabs.get("Tabs"), corner_radius=0, fg_color="transparent")
+        self.tab_name_frame.grid(row=3, column=0, padx=10, pady=10)
+
+        # Switch to enable/disable use_custom_tab_names_var
+        self.use_custom_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Use Custom Tab Names",
+                                                         variable=self.use_custom_tab_names_var)
+        self.use_custom_tab_names_switch.grid(row=0, column=0, padx=10)
+
+        # Bind the callback function to use_custom_tab_names_var
+        self.use_custom_tab_names_var.trace_add("write", self.refresh_category_buttons)
+
+        # Switch to enable/disable sort tab names
+        self.sort_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names",
+                                                   variable=self.sort_tab_names_var)
+        self.sort_tab_names_switch.grid(row=0, column=1, padx=10)
+
+        # Bind the callback function to sort_tab_names_var
+        self.sort_tab_names_var.trace_add("write", self.refresh_buttons_and_tabs)
+
+        # Switch to enable/disable sort_reverse_order_var
+        self.sort_tab_names_reverse_switch = ctk.CTkSwitch(self.tab_name_frame, text="Sort Tab Names (A-Z / Z-A)",
+                                                           variable=self.sort_reverse_order_var)
+        self.sort_tab_names_reverse_switch.grid(row=0, column=2, padx=10)
+
+        # Bind the callback function to sort_reverse_order_var
+        self.sort_reverse_order_var.trace_add("write", self.refresh_buttons_and_tabs)
+
         # Master Entry frame
         self.master_entry_frame = ctk.CTkFrame(self.settings_frame, corner_radius=0, fg_color="transparent")
-        self.master_entry_frame.grid(row=5, column=0, padx=10, pady=10)
+        self.master_entry_frame.grid(row=2, column=0, padx=10, pady=10)
 
         # Initial Directory frame
         self.initial_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
@@ -2304,6 +2340,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             self.settings_frame.grid_forget()
 
+    # TODO Currently not being used
     def open_select_option_window(self, title, prompt, item_list, label_text):
         # Check if the window does not exist or if it has been destroyed
         if self.select_option_window is None or not self.select_option_window.winfo_exists():
@@ -3609,11 +3646,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Create a tab for all categories
         all_cat_tab = self.cat_tabview.add("All")
-        self.tabs["All"] = all_cat_tab  # Store the reference to the tab
+        self.cat_tabs["All"] = all_cat_tab  # Store the reference to the tab
 
         # Create a tab for "Most Categories" with weights 1-9
         most_cat_tab = self.cat_tabview.add("Most")
-        self.tabs["Most"] = most_cat_tab  # Store the reference to the tab
+        self.cat_tabs["Most"] = most_cat_tab  # Store the reference to the tab
 
         # Sort the weight tab_names
         if self.sort_tab_names_var.get():
@@ -3635,7 +3672,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             tab = self.cat_tabview.add(tab_name)
 
-            self.tabs[weight] = tab  # Store the reference to the tab
+            self.cat_tabs[weight] = tab  # Store the reference to the tab
 
             # Filter categories based on weight and sort case-insensitively
             weight_categories = sorted([category for category, w in self.categories.items() if w == weight],
@@ -5691,48 +5728,82 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Handle unexpected errors
             self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
+    # TODO Currently not being used
     # Method to refresh the add/remove tabview
-    def refresh_add_remove_tabview(self):
+    def refresh_tabview(self, existing_tabview, parent_frame, tab_names, default_tab=None):
+        """
+        Refresh the tabview with new tabs.
+
+        Parameters:
+        - existing_tabview: The existing tabview to be destroyed.
+        - parent_frame: The parent frame to which the new tabview will be added.
+        - tab_names: List of tab names.
+        - default_tab: Optional. The default tab to be set after creating the new tabview.
+
+        Returns:
+        - tabview: The created tabview.
+        - tabs: Dictionary containing references to the created tabs.
+        """
         # Destroy existing tabs
-        if hasattr(self, 'add_remove_tabview') and self.add_remove_tabview:
-            self.add_remove_tabview.destroy()
+        if existing_tabview:
+            existing_tabview.destroy()
 
-        # Create the add_remove_tabview
-        self.create_add_remove_tabview()
+        # Create the new tabview
+        new_tabview, new_tabs = self.create_tabview(parent_frame, tab_names, default_tab)
 
-    # Method to create add/remove tabview
-    def create_add_remove_tabview(self):
-        # Create add_remove_tabview
-        self.add_remove_tabview = ctk.CTkTabview(self.add_remove_frame)
-        self.add_remove_tabview.grid(row=1, column=0)
+        return new_tabview, new_tabs
 
-        # Sort the add/remove tab_names
+    # Method to create tabview
+    def create_tabview(self, parent_frame, tab_names, default_tab=None):
+        """
+        Create a tabview with customizable parameters.
+
+        Parameters:
+        - parent_frame: The parent frame to which the tabview will be added.
+        - tab_names: List of tab names to be displayed in the tabview.
+        - default_tab: Optional. The default tab to be set after creating the new tabview.
+
+        Returns:
+        - tabview: The created tabview.
+        - tabs: Dictionary containing references to the created tabs.
+        """
+        # Create tabview
+        tabview = ctk.CTkTabview(parent_frame)
+        tabview.grid(row=1, column=0)
+
+        # Sort the tab_names
         if self.sort_tab_names_var.get():
             # Determine the order to sort (forward or backward)
             sort_reverse_order_var = True if self.sort_reverse_order_var.get() else False
 
-            # Create a tab for each sorted tab_name
-            tab_names = sorted(list(set(self.tab_names)), reverse=sort_reverse_order_var)
+            # Determine the order to sort (forward or backward)
+            tab_names = sorted(list(set(tab_names)), reverse=sort_reverse_order_var)
         else:
-            # Create a tab for each tab_name
-            tab_names = list(set(self.tab_names))
+            tab_names = list(set(tab_names))
+
+        tabs = {}  # Dictionary to store tab references
 
         for tab_name in tab_names:
             # Use the tab_name naming scheme
             tab_name = f"{tab_name}"
 
             # Create the tab
-            tab = self.add_remove_tabview.add(tab_name)
+            tab = tabview.add(tab_name)
 
             # Store the reference to the tab
-            self.tabs[tab_name] = tab
+            tabs[tab_name] = tab
 
-        # Set the default tab
-        self.add_remove_tabview.set(self.default_add_remove_tab)
+        if default_tab:
+            # Set the default tab
+            tabview.set(default_tab)
+
+        return tabview, tabs
 
     def refresh_buttons_and_tabs(self, *_):
         self.refresh_category_buttons()
-        self.refresh_add_remove_tabview()
+
+        # TODO Currently not being used
+        # self.refresh_tabview()
 
     # Method to attempt to identify Artists
     def artist_identifier(self):
