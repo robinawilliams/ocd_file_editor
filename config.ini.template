@@ -21,8 +21,8 @@ default_second = 00
 default_most_number = 9
 ; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, add_remove_window, settings_window)
 default_frame = file_renamer_window
-; Default tab to open with (All, Most)
-default_tab = All
+; Default tab to open cat_tabview with (All, Most)
+default_cat_tab = All
 ; Default add/remove tab to open with (Artist, Category, Custom Tab Name, Custom Text to Remove, Exclude, File Extensions, NO GO, Valid Extensions)
 default_add_remove_tab = Artist
 ; Use custom tab names

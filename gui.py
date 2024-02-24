@@ -210,7 +210,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_minute = config.get('Settings', 'default_minute', fallback=0)
         self.default_second = config.get('Settings', 'default_second', fallback=0)
         self.default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
-        self.default_tab = config.get('Settings', 'default_tab', fallback="All")
+        self.default_cat_tab = config.get('Settings', 'default_cat_tab', fallback="All")
         self.default_add_remove_tab = config.get('Settings', 'default_add_remove_tab', fallback="Artist")
         self.file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
         self.default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
@@ -3709,9 +3709,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Attempt to set the default tab
         try:
-            # Check if self.default_tab is in the tab names
-            if self.default_tab and self.cat_tabview.index(self.default_tab) is not None:
-                self.cat_tabview.set(self.default_tab)
+            # Check if self.default_cat_tab is in the tab names
+            if self.default_cat_tab and self.cat_tabview.index(self.default_cat_tab) is not None:
+                self.cat_tabview.set(self.default_cat_tab)
         except ValueError:
             return
 
