@@ -2232,8 +2232,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.log_file_entry.grid(row=1, column=1, padx=10, pady=10)
 
     # Callback for updating the scroll region when the inner frame is configured
-    # noinspection PyUnusedLocal
-    def on_frame_configure(self, event=None):
+    def on_frame_configure(self, *_):
         # Reset the scroll region to encompass the inner frame
         self.file_renamer_canvas.configure(scrollregion=self.file_renamer_canvas.bbox("all"))
 
@@ -2244,8 +2243,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_canvas.itemconfig(self.file_renamer_scrollable_frame_window, width=canvas_width)
 
     # Callback function to handle logging state
-    # noinspection PyUnusedLocal
-    def handle_logging_activation(self, *args):
+    def handle_logging_activation(self, *_):
         # If logging is true, call the logging_setup function
         if self.activate_logging_var.get():
             try:
@@ -2876,8 +2874,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
     # Method to update the file display based on selected options
-    # noinspection PyUnusedLocal
-    def update_file_display(self, event=None, *args):
+    def update_file_display(self, *_):
         if self.file_renamer_selected_file:
             # Get custom text and file extension
             custom_text = self.custom_text_entry.get().strip()
@@ -3588,8 +3585,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def create_category_button(self, tab, category):
         return ctk.CTkButton(tab, text=category, command=lambda c=category: self.add_to_queue(c))
 
-    # noinspection PyUnusedLocal
-    def refresh_category_buttons(self, *args):
+    def refresh_category_buttons(self, *_):
         # Destroy existing tabs and buttons
         if hasattr(self, 'cat_tabview') and self.cat_tabview:
             self.cat_tabview.destroy()
@@ -4560,7 +4556,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return None
 
     # Method to process video edits based on user inputs.
-    # noinspection PyTypeChecker
     def process_video_edits(self):
         try:
             # Get input parameters from user interface.
@@ -5571,10 +5566,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if not new_common_category:
                 raise ValueError("Add A.C.C. cannot be empty.")
 
+            # Convert all items to lower case
+            lower_artist_common_categories = map(lambda x: x.lower(),
+                                                 self.artist_common_categories.get(self.acc_selected_artist, []))
+
             # Check for case-insensitive duplicates
-            # noinspection PyTypeChecker
-            if new_common_category.lower() in map(str.lower, self.artist_common_categories.get(
-                    self.acc_selected_artist, [])):
+            if new_common_category.lower() in lower_artist_common_categories:
                 raise ValueError(f"'{new_common_category}' already exists for {self.acc_selected_artist}.")
 
             # Append the new_common_category to the selected artist's list
@@ -5611,8 +5608,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Case-insensitive check for the common category in the selected artist's list
             common_categories = self.artist_common_categories.get(self.acc_selected_artist, [])
-            # noinspection PyTypeChecker
-            if remove_common_category.lower() not in map(str.lower, common_categories):
+
+            # Convert all items to lowercase for case-insensitive comparison
+            lower_common_categories = [category.lower() for category in common_categories]
+
+            if remove_common_category.lower() not in lower_common_categories:
                 raise ValueError(f"'{remove_common_category}' not found for {self.acc_selected_artist}.")
 
             # Remove the common category from the selected artist's list
@@ -5673,8 +5673,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set the default tab
         self.add_remove_tabview.set(self.default_add_remove_tab)
 
-    # noinspection PyUnusedLocal
-    def refresh_buttons_and_tabs(self, *args):
+    def refresh_buttons_and_tabs(self, *_):
         self.refresh_category_buttons()
         self.refresh_add_remove_tabview()
 
