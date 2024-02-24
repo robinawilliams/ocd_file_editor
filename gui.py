@@ -950,6 +950,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.placement_choice = ctk.StringVar()
         self.placement_choice.set(self.default_placement_var)
 
+        # Trace the changes in the StringVar
+        self.placement_choice.trace_add("write", self.update_file_display)
+
         # Radio button for prefix
         self.prefix_radio = ctk.CTkRadioButton(self.placement_frame, text="Prefix",
                                                variable=self.placement_choice,
@@ -2880,7 +2883,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to update the file display based on selected options
     # noinspection PyUnusedLocal
-    def update_file_display(self, event=None):
+    def update_file_display(self, event=None, *args):
         if self.file_renamer_selected_file:
             # Get custom text and file extension
             custom_text = self.custom_text_entry.get().strip()
@@ -3447,8 +3450,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             elif len(matching_artists) == 1:
                 # If only one match found, return that
-                artist_folder_path = matching_artists[0]
-                return artist_folder_path
+                return matching_artists[0]
 
             else:
                 # If no matching artist folder is found, return none
