@@ -1492,10 +1492,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.decibel_var.set(self.default_decibel)
 
         # Trace the changes in the StringVar
-        self.decibel_var.trace_add("write", lambda *args: self.validate_entry(
-            self.decibel_var,
-            self.default_decibel,
-            desired_type=float))
+        self.decibel_var.trace_add("write",
+                                   lambda name, index, mode, var=self.decibel_var, default=self.default_decibel,
+                                   desired_type=float: self.validate_entry(var, default, desired_type))
 
         # Decibel entry
         self.decibel_entry = ctk.CTkEntry(self.decibel_frame, textvariable=self.decibel_var, width=50)
@@ -1516,10 +1515,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Trace the changes in the StringVar
         self.audio_normalization_var.trace_add("write",
-                                               lambda *args: self.validate_entry(
-                                                   self.audio_normalization_var,
-                                                   self.default_audio_normalization,
-                                                   desired_type=float))
+                                               lambda name, index, mode, var=self.audio_normalization_var,
+                                               default=self.default_audio_normalization,
+                                               desired_type=float: self.validate_entry(var, default, desired_type))
 
         # Audio Normalization entry
         self.audio_normalization_entry = ctk.CTkEntry(self.audio_normalization_frame,
@@ -1541,10 +1539,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.minute_var.set(self.default_minute)
 
         # Trace the changes in the StringVar
-        self.minute_var.trace_add("write", lambda *args: self.validate_entry(
-            self.minute_var,
-            self.default_minute,
-            desired_type=int))
+        self.minute_var.trace_add("write",
+                                  lambda name, index, mode, var=self.minute_var, default=self.default_minute,
+                                  desired_type=int: self.validate_entry(var, default, desired_type))
 
         # Minute entry
         self.minute_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.minute_var, width=50)
@@ -1559,10 +1556,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.second_var.set(self.default_second)
 
         # Trace the changes in the StringVar
-        self.second_var.trace_add("write", lambda *args: self.validate_entry(
-            self.second_var,
-            self.default_second,
-            desired_type=int))
+        self.second_var.trace_add("write",
+                                  lambda name, index, mode, var=self.second_var, default=self.default_second,
+                                  desired_type=int: self.validate_entry(var, default, desired_type))
 
         # Second entry
         self.second_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var, width=50)
@@ -1779,10 +1775,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.weight_var.set(self.default_weight)
 
         # Trace the changes in the StringVar
-        self.weight_var.trace_add("write", lambda *args: self.validate_entry(
-            self.weight_var,
-            self.default_weight,
-            desired_type=int))
+        self.weight_var.trace_add("write",
+                                  lambda name, index, mode, var=self.weight_var, default=self.default_weight,
+                                  desired_type=int: self.validate_entry(var, default, desired_type))
 
         # Weight Entry
         self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=35)
@@ -1817,10 +1812,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.weight_var1.set(self.default_ctn_weight)
 
         # Trace the changes in the StringVar
-        self.weight_var1.trace_add("write", lambda *args: self.validate_entry(
-            self.weight_var1,
-            self.default_ctn_weight,
-            desired_type=int))
+        self.weight_var1.trace_add("write",
+                                   lambda name, index, mode, var=self.weight_var1, default=self.default_ctn_weight,
+                                   desired_type=int: self.validate_entry(var, default, desired_type))
 
         # Weight Entry1
         self.weight_entry1 = ctk.CTkEntry(self.ctn_frame, textvariable=self.weight_var1, width=35)
