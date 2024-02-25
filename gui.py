@@ -2469,7 +2469,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         Parameters:
         - message: The message to be logged and displayed.
-        - frame_name: The name of the frame where the message should be displayed.
         - create_messagebox: Boolean indicating whether to create and display a messagebox.
         - error: Boolean indicating whether the message is an error message.
         - not_logging: Boolean indicating whether to skip logging.
@@ -4547,7 +4546,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         try:
             if not file_path.lower().endswith('.txt'):
                 # If the file does not have a .txt extension, return without performing any operation.
-                self.log_and_show("The provided file is not a txt file.", error=True)
+                self.log_and_show("The provided file is not a txt file. Skipping removal of successful line.",
+                                  error=True)
                 return
 
             # Read all lines from the file.
@@ -4560,6 +4560,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 for line in lines:
                     if line.strip() != line_to_remove:
                         file.write(line)
+
+            self.log_and_show(f"Successful line removed from {file_path}")
 
         except Exception as e:
             # Log the exception using the logging module.
