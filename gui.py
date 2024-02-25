@@ -4855,7 +4855,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         # Clear selection for the video_editor_window
                         self.clear_selection(frame_name="video_editor_window")
 
-                    if self.remove_successful_lines_var.get():
+                    # Check if remove successful lines is true and the input is a txt file
+                    if (self.remove_successful_lines_var.get() and
+                            self.video_editor_selected_file.lower().endswith('.txt')):
                         # Remove the successfully processed line from the input file
                         self.remove_successful_line_from_file(self.video_editor_selected_file, input_path)
 
