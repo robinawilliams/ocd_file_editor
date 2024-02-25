@@ -4550,17 +4550,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show("The provided file is not a txt file.", error=True)
                 return
 
-            if self.remove_successful_lines_var.get():
-                # Read all lines from the file.
-                with open(file_path, 'r') as file:
-                    lines = file.readlines()
+            # Read all lines from the file.
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
 
-                # Open the file in write mode to remove the specified line.
-                with open(file_path, 'w') as file:
-                    # Write lines back to the file, excluding the successful line to remove.
-                    for line in lines:
-                        if line.strip() != line_to_remove:
-                            file.write(line)
+            # Open the file in write mode to remove the specified line.
+            with open(file_path, 'w') as file:
+                # Write lines back to the file, excluding the successful line to remove.
+                for line in lines:
+                    if line.strip() != line_to_remove:
+                        file.write(line)
 
         except Exception as e:
             # Log the exception using the logging module.
@@ -4856,8 +4855,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         # Clear selection for the video_editor_window
                         self.clear_selection(frame_name="video_editor_window")
 
-                    # Remove the successfully processed line from the input file
-                    if self.video_editor_selected_file:
+                    if self.remove_successful_lines_var.get():
+                        # Remove the successfully processed line from the input file
                         self.remove_successful_line_from_file(self.video_editor_selected_file, input_path)
 
                     # Log the action if logging is enabled
