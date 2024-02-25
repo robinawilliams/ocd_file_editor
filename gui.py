@@ -4769,14 +4769,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Process each input path
         for input_path in input_paths:
             try:
-                # Check if the file name length exceeds 255 characters
-                if len(input_path) > 255:
+                # Initialize the temp copy exists variable to False
+                temp_copy_exists = False
+
+                # Check if the file name length exceeds the upper limit of characters
+                if len(os.path.basename(input_path)) > 254:
                     self.log_and_show(f"File over 255 warning!!! Fix: {input_path}", error=True)
 
                     # Create a temporary copy of the file
                     temp_dir = os.path.dirname(input_path)
                     temp_copy_path = os.path.join(temp_dir, 'temp.mp4')
                     shutil.copyfile(input_path, temp_copy_path)
+                    temp_copy_exists = True
                 else:
                     temp_copy_path = input_path
 
@@ -4869,7 +4873,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Reset redirect MoviePy output for video edits
                 self.redirect_output()
 
-                if len(input_path) > 255:
+                if temp_copy_exists:
                     # Delete the temporary copy
                     os.remove(temp_copy_path)
 
