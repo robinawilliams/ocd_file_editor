@@ -705,9 +705,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_initial_output_directory_button = None
         self.initial_output_directory_entry = None
         self.double_check_reminder_directory_frame = None
-        self.browse_double_check_reminder_directory_button = None
+        self.browse_reminder_directory_button = None
         self.double_check_reminder_directory_entry = None
-        self.browse_no_go_reminder_directory_button = None
+        self.browse_no_go_directory_button = None
         self.no_go_reminder_directory_entry = None
         self.artist_directory_frame = None
         self.browse_artist_directory_button = None
@@ -2172,7 +2172,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse Initial Directory button
         self.browse_initial_directory_button = ctk.CTkButton(self.initial_directory_frame, text="Initial Directory",
-                                                             command=self.browse_initial_directory)
+                                                             command=lambda: self.browse_directory(
+                                                                 self.initial_directory_entry, 'initial_directory'))
         self.browse_initial_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Initial Directory entry
@@ -2183,7 +2184,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse Initial Output Directory button
         self.browse_initial_output_directory_button = ctk.CTkButton(self.initial_directory_frame,
                                                                     text="Initial Output Directory",
-                                                                    command=self.browse_initial_output_directory)
+                                                                    command=lambda:
+                                                                    self.browse_directory(
+                                                                        self.initial_output_directory_entry,
+                                                                        'initial_output_directory')
+                                                                    )
         self.browse_initial_output_directory_button.grid(row=1, column=0, padx=5, pady=5)
 
         # Initial Directory entry
@@ -2196,23 +2201,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                   fg_color="transparent")
         self.double_check_reminder_directory_frame.grid(row=1, column=0, padx=10, pady=10)
 
-        # Browse Double Check Reminder Directory button
-        self.browse_double_check_reminder_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
-                                                                           text="Double Check Reminder Directory",
-                                                                           command=self.
-                                                                           browse_double_check_reminder_directory)
-        self.browse_double_check_reminder_directory_button.grid(row=0, column=0, padx=5, pady=5)
+        # Browse Double Check Directory button
+        self.browse_reminder_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
+                                                              text="Double Check Reminder Directory",
+                                                              command=lambda: self.browse_directory(
+                                                                  self.double_check_reminder_directory_entry, 
+                                                                  'double_check_directory'))
+        self.browse_reminder_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Double Check Reminder entry
         self.double_check_reminder_directory_entry = ctk.CTkEntry(self.double_check_reminder_directory_frame, width=775)
         self.double_check_reminder_directory_entry.insert(0, self.double_check_directory)
         self.double_check_reminder_directory_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        # Browse NO GO Reminder Directory button
-        self.browse_no_go_reminder_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
-                                                                    text="NO GO Directory",
-                                                                    command=self.browse_no_go_directory)
-        self.browse_no_go_reminder_directory_button.grid(row=1, column=0, padx=5, pady=5)
+        # Browse NO GO Directory button
+        self.browse_no_go_directory_button = ctk.CTkButton(self.double_check_reminder_directory_frame,
+                                                           text="NO GO Directory",
+                                                           command=lambda: self.browse_directory(
+                                                               self.no_go_reminder_directory_entry, 'no_go_directory'))
+        self.browse_no_go_directory_button.grid(row=1, column=0, padx=5, pady=5)
 
         # NO GO Reminder entry
         self.no_go_reminder_directory_entry = ctk.CTkEntry(self.double_check_reminder_directory_frame, width=775)
@@ -2225,7 +2232,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Browse Artist Directory button
         self.browse_artist_directory_button = ctk.CTkButton(self.artist_directory_frame, text="Artist Directory",
-                                                            command=self.browse_artist_directory)
+                                                            command=lambda: self.browse_directory(
+                                                                self.artist_directory_entry, 'artist_directory'))
         self.browse_artist_directory_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Artist Directory entry
@@ -3229,50 +3237,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.artist_file_entry.delete(0, ctk.END)
             self.artist_file_entry.insert(0, self.artist_file)
 
-    # Method to browse and select a directory to use for the artist search
-    def browse_artist_directory(self):
-        self.artist_directory = filedialog.askdirectory(initialdir=self.initial_directory)
+    # Method to browse and select a directory for the settings_window
+    def browse_directory(self, entry_widget, target_attribute):
+        selected_directory = filedialog.askdirectory(initialdir=getattr(self, target_attribute))
 
-        if self.artist_directory:
-            # Clear the entry and set it to the artist directory
-            self.artist_directory_entry.delete(0, ctk.END)
-            self.artist_directory_entry.insert(0, self.artist_directory)
-
-    # Method to browse and select the initial directory when the user browses location
-    def browse_initial_directory(self):
-        self.initial_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-
-        if self.initial_directory:
-            # Clear the entry and set it to the initial directory when the user browses location
-            self.initial_directory_entry.delete(0, ctk.END)
-            self.initial_directory_entry.insert(0, self.initial_directory)
-
-    # Method to browse and select the initial directory when the user browses output location
-    def browse_initial_output_directory(self):
-        self.initial_output_directory = filedialog.askdirectory(initialdir=self.initial_output_directory)
-
-        if self.initial_output_directory:
-            # Clear the entry and set it to the initial directory when the user browses output location
-            self.initial_output_directory_entry.delete(0, ctk.END)
-            self.initial_output_directory_entry.insert(0, self.initial_output_directory)
-
-    # Method to browse and select a directory to save double check reminders in
-    def browse_double_check_reminder_directory(self):
-        self.double_check_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-
-        if self.double_check_directory:
-            # Clear the entry and set it to the artist directory
-            self.double_check_reminder_directory_entry.delete(0, ctk.END)
-            self.double_check_reminder_directory_entry.insert(0, self.double_check_directory)
-
-    # Method to browse and select a directory to save NO GO reminders in
-    def browse_no_go_directory(self):
-        self.no_go_directory = filedialog.askdirectory(initialdir=self.initial_directory)
-
-        if self.no_go_directory:
-            # Clear the entry and set it to the artist directory
-            self.no_go_reminder_directory_entry.delete(0, ctk.END)
-            self.no_go_reminder_directory_entry.insert(0, self.no_go_directory)
+        if selected_directory:
+            # Clear the entry and set it to the selected directory
+            entry_widget.delete(0, 'end')
+            entry_widget.insert(0, selected_directory)
+            # Update the corresponding attribute in your class
+            setattr(self, target_attribute, selected_directory)
 
     # Method to browse and select an input
     def browse_input(self):
