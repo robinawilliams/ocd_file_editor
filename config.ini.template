@@ -79,8 +79,6 @@ remove_parenthesis_var = False
 remove_hashtag_trail_var = False
 ; Remove '#'
 remove_hashtag_var = False
-; Remove New
-remove_new_var = False
 ; Remove custom text
 remove_custom_text_var = False
 ; Replace mode text (case-sensitive[False] vs case-insensitive[True])

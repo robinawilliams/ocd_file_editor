@@ -285,8 +285,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_hashtag_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_hashtag_var",
                                                                          fallback=False))
 
-        self.remove_new_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_new_var", fallback=False))
-
         self.remove_custom_text_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_custom_text_var",
                                                                              fallback=False))
 
@@ -495,7 +493,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_non_ascii_symbols_checkbox = None
         self.remove_numbers_checkbox = None
         self.checkbox_frame2 = None
-        self.remove_new_checkbox = None
         self.remove_dash_checkbox = None
         self.remove_endash_checkbox = None
         self.remove_emdash_checkbox = None
@@ -1112,41 +1109,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame2.grid(row=3, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable remove new
-        self.remove_new_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
-                                                   text="Remove new",
-                                                   variable=self.remove_new_var)
-        self.remove_new_checkbox.grid(row=0, column=0, padx=10, pady=10)
-
         # Checkbox to enable/disable remove dashes
         self.remove_dash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                     text="Remove dashes",
                                                     variable=self.remove_dash_var)
-        self.remove_dash_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        self.remove_dash_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable remove endashes
         self.remove_endash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                       text="Remove endashes",
                                                       variable=self.remove_endash_var)
-        self.remove_endash_checkbox.grid(row=0, column=2, padx=10, pady=10)
+        self.remove_endash_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
         # Checkbox to enable/disable remove emdashes
         self.remove_emdash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                       text="Remove emdashes",
                                                       variable=self.remove_emdash_var)
-        self.remove_emdash_checkbox.grid(row=0, column=3, padx=10, pady=10)
+        self.remove_emdash_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
         # Checkbox to enable/disable remove hashtags
         self.remove_hashtag_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                        text="Remove hashtags",
                                                        variable=self.remove_hashtag_var)
-        self.remove_hashtag_checkbox.grid(row=0, column=4, padx=10, pady=10)
+        self.remove_hashtag_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
         # Checkbox to enable/disable remove commas
         self.remove_comma_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                      text="Remove commas",
                                                      variable=self.remove_comma_var)
-        self.remove_comma_checkbox.grid(row=0, column=5, padx=10, pady=10)
+        self.remove_comma_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Button Frame 3
         self.checkbox_frame3 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -4384,14 +4375,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.remove_number_var.get():
                 # Remove all numbers from the name
                 name = ''.join(char for char in name if not char.isdigit())
-
-            if self.remove_new_var.get():
-                if 'New_' in name:
-                    # Replace underscore with a space if it immediately trails the word "New". Catchall
-                    name = name.replace('New_', '', 1)
-                else:
-                    # Remove the first occurrence of "New "
-                    name = name.replace('New ', '', 1)
 
             if self.remove_hashtag_trail_var.get():
                 # Find the first occurrence of '#'
