@@ -5462,7 +5462,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove entry if the action is successful
             self.remove_exclude_name_entry.delete(0, ctk.END)
 
-    # Method to add text to custom_text_to_replace list
+    # Method to add text to custom_text_to_replace dictionary
     def add_custom_text_to_replace(self):
         # Get the custom text to be added from the entry widget
         custom_text = self.add_ctr_name_entry.get().strip()
@@ -5481,7 +5481,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Check if the custom_text is already in the custom_text_to_replace dictionary (case-insensitive)
         if custom_text_lower in custom_texts_lower:
-            self.log_and_show(f"Custom Text '{custom_text}' is already in the custom text to replace list.",
+            self.log_and_show(f"Custom Text '{custom_text}' is already in the custom text to replace dictionary.",
                               create_messagebox=True, error=True)
 
             # Reset the custom text entries if the action is successful
@@ -5512,7 +5512,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         except Exception as e:
             # Log and show error message if an exception occurs
-            self.log_and_show(f"Adding Custom Text '{custom_text}' to custom text to replace list failed: {str(e)}",
+            self.log_and_show(f"Adding Custom Text '{custom_text}' to custom text to replace dictionary failed:"
+                              f" {str(e)}",
                               create_messagebox=True, error=True)
 
         # Reset the custom text entries if the action is successful
@@ -5523,7 +5524,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear replacement text to replace entry
             self.replacement_text_entry.delete(0, ctk.END)
 
-    # Method to remove text from custom_text_to_replace list
+    # Method to remove text from custom_text_to_replace dictionary
     def remove_custom_text_to_replace(self):
         # Get the custom text to be removed from the entry widget
         custom_text = self.remove_ctr_name_entry.get().strip()
@@ -5539,7 +5540,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Check if the custom_text is in the custom_text_to_replace dictionary (case-insensitive)
         if custom_text_lower not in custom_texts_lower:
-            self.log_and_show(f"Custom Text '{custom_text}' is not in the custom text to replace list.",
+            self.log_and_show(f"Custom Text '{custom_text}' is not in the custom text to replace dictionary.",
                               create_messagebox=True, error=True)
 
             # Reset the custom text entry if the action is successful
@@ -5559,11 +5560,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.update_json(self.dictionary_file, "custom_text_to_replace", self.custom_text_to_replace)
 
             # Log and show success message
-            self.log_and_show(f"Custom Text '{custom_text}' removed from custom text to replace list.")
+            self.log_and_show(f"Custom Text '{custom_text}' removed from custom text to replace dictionary.")
 
         except Exception as e:
             # Log and show error message if an exception occurs
-            self.log_and_show(f"Removing Custom Text '{custom_text}' from custom text to replace list failed: {str(e)}",
+            self.log_and_show(f"Removing Custom Text '{custom_text}' from custom text to replace dictionary failed: "
+                              f"{str(e)}",
                               create_messagebox=True, error=True)
 
         # Reset the custom text entry if the action is successful
