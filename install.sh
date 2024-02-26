@@ -86,7 +86,7 @@ copy_template() {
 }
 
 copy_template "config.ini" "config.ini.template"
-copy_template "list_of_artists.txt" "list_of_artists.txt.template"
+copy_template "dictionary.json" "dictionary.json.template"
 
 # Run GUI in the background
 if ! python gui.py & disown; then
