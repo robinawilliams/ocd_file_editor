@@ -4754,6 +4754,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to rotate/mirror a video clip by a specified angle.
     def rotate_video(self, clip, rotation_angle):
+        """
+        Rotate or mirror a video clip.
+
+        Parameters:
+            clip (VideoClip): The input video clip to be rotated or mirrored.
+            rotation_angle (Union[int, str]): The angle by which to rotate the video
+                (e.g., 90, 180, 270) or "mirror" to mirror the video along the horizontal axis.
+
+        Returns:
+            VideoClip or None: The rotated or mirrored video clip if successful, or None in case of an error.
+        """
         try:
             if rotation_angle == "mirror":
                 # Mirror the video clip along the horizontal axis.
@@ -4779,6 +4790,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to increase the volume of a video clip by a specified dB value.
     def increase_volume(self, clip, increase_db):
+        """
+        Increase the volume of a video clip.
+
+        Parameters:
+            clip (VideoClip): The input video clip to be modified.
+            increase_db (float): The amount by which to increase the volume in decibels.
+
+        Returns:
+            VideoClip or None: The modified video clip with increased volume if successful,
+            or None in case of an error.
+        """
         try:
             # Modify the volume of the video clip by converting dB to linear scale.
             modified_clip = clip.volumex(10 ** (increase_db / 20.0))
@@ -4798,6 +4820,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to normalize the audio of a video clip by applying a volume multiplier.
     def normalize_audio(self, clip, volume_multiplier):
+        """
+        Normalize the audio of a video clip.
+
+        Parameters:
+            clip (VideoClip): The input video clip with audio to be normalized.
+            volume_multiplier (float): The multiplier to adjust the audio volume.
+
+        Returns:
+            VideoClip or None: The video clip with normalized audio if successful,
+            or None in case of an error.
+        """
         try:
             # Normalize the audio of the video clip by applying the specified volume multiplier.
             normalized_clip = clip.volumex(volume_multiplier)
@@ -4817,6 +4850,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to trim a video by a specified time value.
     def trim_video(self, clip, total_time):
+        """
+        Trim a video clip to the specified duration.
+
+        Parameters:
+            clip (VideoClip): The input video clip to be trimmed.
+            total_time (tuple or float): If a float, the duration to keep in seconds.
+                                         If a tuple, it represents the range of time to keep (start, end).
+
+        Returns:
+            VideoClip or None: The trimmed video clip if successful, or None in case of an error.
+        """
         try:
             # Trim the clip to remove the specified duration.
             trimmed_clip = clip.subclip(total_time)
@@ -4836,6 +4880,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to process video edits based on user inputs.
     def process_video_edits(self):
+        """
+        Process video edits based on user-specified operations (rotation, audio increase, audio normalization, trim).
+
+        This function retrieves input parameters from the user interface, such as rotation, decibel,
+        audio normalization, minutes, and seconds. It then checks the provided input file or directory,
+        validates parameters, and performs video edits based on the selected operations. The edited video is saved to
+        the specified output directory, and the successful operation is logged. If a temporary copy is created due to
+        a filename length exceeding 254 characters, it is deleted after processing.
+
+        Returns:
+            None
+        """
         try:
             # Get input parameters from user interface.
             rotation = str(self.rotation_var.get())
