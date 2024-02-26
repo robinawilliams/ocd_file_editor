@@ -1,6 +1,6 @@
 [Settings]
 ; Starting size for window
-geometry = 1280x850
+geometry = 1280x900
 ; Starting scaling for window
 scaling = 100
 ; Column size for the gui
