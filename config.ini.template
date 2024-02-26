@@ -23,7 +23,7 @@ default_most_number = 9
 default_frame = file_renamer_window
 ; Default tab to open cat_tabview with (All, Most)
 default_cat_tab = All
-; Default add/remove tab to open with (Artist, Category, Custom Tab Name, Custom Text to Remove, Exclude, File Extensions, NO GO, Valid Extensions)
+; Default add/remove tab to open with (Artist, Category, Custom Tab Name, Custom Text to Replace, Exclude, File Extensions, NO GO, Valid Extensions)
 default_add_remove_tab = Artist
 ; Use custom tab names
 use_custom_tab_names_var = False
