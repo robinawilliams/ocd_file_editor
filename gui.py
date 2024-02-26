@@ -3327,11 +3327,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Open a dialog to browse and select an input containing a line delimited list of artists
     def browse_artist_file(self):
-        self.artist_file = filedialog.askopenfilename(
+        artist_file = filedialog.askopenfilename(
             initialdir=self.initial_directory,
             filetypes=[("Text Files", "*.txt")])
 
-        if self.artist_file:
+        if artist_file:
+            # Set the file to the artist file variable
+            self.artist_file = artist_file
+
             # Clear the entry and set it to the artist file
             self.artist_file_entry.delete(0, ctk.END)
             self.artist_file_entry.insert(0, self.artist_file)
