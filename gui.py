@@ -4222,6 +4222,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to remove duplicate artists from the filename
     def remove_artist_duplicates_from_filename(self, file_name):
+        """
+        Remove artist names from the given file name by processing the list of artists
+        read from the artist_file and modifying the file name accordingly.
+
+        Parameters:
+            file_name (str): The original file name.
+
+        Returns:
+            str: The modified file name with artist names removed.
+        """
         # Read the list of artists from the artist_file
         with open(self.artist_file, 'r') as artist_list_file:
             artist_list = [artist.strip() for artist in artist_list_file]
@@ -4259,6 +4269,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return new_file_name
 
     def preview_name(self, file_path):
+        """
+        Preview the modified file name based on various user settings.
+
+        Parameters:
+            file_path (str): The path of the file.
+
+        Returns:
+            str: The modified file name.
+        """
         # Split the file path into directory path and filename
         dir_path, filename = os.path.split(file_path)
         name, ext = os.path.splitext(filename)
@@ -4547,6 +4566,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to process and rename files and moving files to a specified directory
     def rename_and_move_file(self, file_path):
+        """
+        Rename the given file based on the user-defined settings and move it to a specified directory if provided.
+
+        Parameters:
+            file_path (str): The path of the file to be renamed.
+
+        Returns:
+            tuple: A tuple containing the original file path and the final file path after renaming and, if applicable,
+            moving.
+        """
         # Call the preview name function to get the name
         new_path = self.preview_name(file_path)
 
@@ -4599,6 +4628,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to performing various name normalization operations on certain files within a specified folder
     def process_name_normalizer(self, mode):
+        """
+        Process the name normalization based on the specified mode.
+
+        Parameters:
+            mode (str): The mode indicating whether to preview or take action on the file(s).
+
+        Returns:
+            None
+        """
         # Check if the specified input exists
         if (not os.path.exists(self.name_normalizer_selected_file)
                 and not os.path.isfile(self.name_normalizer_selected_file)):
