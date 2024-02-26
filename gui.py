@@ -4963,14 +4963,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 with open(self.artist_file, 'w') as artist_list_file:
                     artist_list_file.write('\n'.join(artist_list))
 
-                # Add the artist as a key to the artist_common_categories dictionary with an empty list as the value
-                self.artist_common_categories[add_artist] = []
+                # Ask for confirmation of the Artist Common Categories record creation
+                confirmation = self.ask_confirmation("Create Record", "Would you like to create a record for this "
+                                                                      "artist in the common categories dictionary?")
 
-                # Update the JSON file with the modified artist_common_categories dictionary
-                self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+                if confirmation:
+                    # Add the artist as a key to the artist_common_categories dictionary with an empty list as the value
+                    self.artist_common_categories[add_artist] = []
+
+                    # Update the JSON file with the modified artist_common_categories dictionary
+                    self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+                    self.log_and_show(f"Created dictionary record for: '{add_artist}'")
 
                 # Log the message and display to the GUI
-                self.log_and_show(f"Added artist to the Artist File and artist_common_categories: '{add_artist}'")
+                self.log_and_show(f"Added artist to the Artist File: '{add_artist}'")
 
             except IOError:
                 self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
@@ -5006,17 +5013,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Write the updated list back to the artist_file and artist_common_categories dictionary
             try:
-                with open(self.artist_file, 'w') as artist_list_file:
-                    artist_list_file.write('\n'.join(artist_list))
-                self.log_and_show(f"Removed artist from the Artist File & artist_common_categories: '{remove_artist}'")
-
                 # Remove the artist from the artist_common_categories dictionary
                 if remove_artist in self.artist_common_categories:
                     del self.artist_common_categories[remove_artist]
                     # Update the JSON file with the modified artist_common_categories dictionary
                     self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+                    self.log_and_show(f"Dictionary record removed for: '{remove_artist}'")
                 else:
                     self.log_and_show(f"Artist not found in artist_common_categories: '{remove_artist}'", error=True)
+
+                with open(self.artist_file, 'w') as artist_list_file:
+                    artist_list_file.write('\n'.join(artist_list))
+                self.log_and_show(f"Removed artist from the Artist File: '{remove_artist}'")
 
             except IOError:
                 self.log_and_show(f"Writing to Artist File failed: '{self.artist_file}'.",
