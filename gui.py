@@ -392,7 +392,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_remove_tabs = {}
         self.settings_tabs = {}
         self.excluded_folders = []
-        self.custom_text_to_remove = []
+        self.custom_text_to_replace = {}
         self.file_extensions = []
         self.valid_extensions = []
         self.weight_to_tab_name = {}
@@ -1857,14 +1857,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_custom_tab_name_entry.grid(row=0, column=5, padx=5)
 
         """Custom Text to Remove Tab"""
-        # Custom Text to Remove frame
-        self.ctr_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Custom Text to Remove"), corner_radius=0,
+        # Custom Text to Replace frame
+        self.ctr_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Custom Text to Replace"), corner_radius=0,
                                             fg_color="transparent")
         self.ctr_entry_frame.grid(row=12, column=0, padx=10, pady=10)
 
         # Add ctr button
         self.add_ctr_button = ctk.CTkButton(self.ctr_entry_frame, text="Add CTR",
-                                            command=self.add_custom_text_to_remove)
+                                            command=self.add_custom_text_to_replace)
         self.add_ctr_button.grid(row=0, column=0, padx=5)
 
         # Add ctr entry
@@ -1873,7 +1873,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Remove ctr button
         self.remove_ctr_button = ctk.CTkButton(self.ctr_entry_frame, text="Remove CTR",
-                                               command=self.remove_custom_text_to_remove)
+                                               command=self.remove_custom_text_to_replace)
         self.remove_ctr_button.grid(row=0, column=3, padx=5)
 
         # Remove ctr entry
@@ -2610,8 +2610,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Get categories dictionary
                 self.categories = data.get("categories", {})
 
-                # Get custom_text_to_remove list
-                self.custom_text_to_remove = data.get("custom_text_to_remove", [])
+                # Get custom_text_to_replace list
+                self.custom_text_to_replace = data.get("custom_text_to_replace", {})
 
                 # Get excluded_folders list
                 self.excluded_folders = data.get("excluded_folders", [])
@@ -4325,19 +4325,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         name = name.replace(text_to_remove, '')
 
             if self.remove_custom_text_var.get():
-                # Remove custom text from the custom_text_to_remove list
+                # Remove custom text from the custom_text_to_replace dictionary
                 if self.replace_mode_var.get():
-                    for text_to_remove in self.custom_text_to_remove:
+                    for text_to_remove, replacement in self.custom_text_to_replace.items():
                         # Check if the text to remove is present in name (case-insensitive)
                         pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
 
-                        # Remove all instances of the text to remove from name
-                        name = pattern.sub('', name)
+                        # Replace the text with the specified replacement or remove if replacement is an empty string
+                        name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
                 else:
                     # Check if the text to remove is present in name (case-sensitive)
-                    for text_to_remove in self.custom_text_to_remove:
-                        # Remove all instances of the text to remove from name
-                        name = name.replace(text_to_remove, '')
+                    for text_to_remove, replacement in self.custom_text_to_replace.items():
+                        # Replace the text with the specified replacement or remove if replacement is an empty string
+                        name = name.replace(text_to_remove, replacement) if replacement != "" else name.replace(
+                            text_to_remove, '')
 
             if self.remove_custom_text_var.get() or text_to_remove:
                 # Replace consecutive spaces with a single space when custom text is removed
@@ -4543,7 +4544,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Check if remove_duplicates_var is set
                     if self.remove_duplicates_var.get():
                         # Call the remove_artist_duplicates_from_filename function to modify name
-                        name = self.remove_artist_duplicates_from_filename(name)
+                        name = self.remove_artist_duplicates_from_filename(str(name))
                 except FileNotFoundError:
                     self.log_and_show(f"File not found: {self.artist_file}", create_messagebox=True, error=True)
                 except Exception as e:
@@ -5448,8 +5449,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove entry if the action is successful
             self.remove_exclude_name_entry.delete(0, ctk.END)
 
-    # Method to add text to custom_text_to_remove list
-    def add_custom_text_to_remove(self):
+    # Method to add text to custom_text_to_replace list
+    def add_custom_text_to_replace(self):
         # Get the custom text to be added from the entry widget
         custom_text = self.add_ctr_name_entry.get().strip()
 
@@ -5460,9 +5461,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Convert both the input custom text and existing custom texts to lowercase
         custom_text_lower = custom_text.lower()
-        custom_texts_lower = [text.lower() for text in self.custom_text_to_remove]
+        custom_texts_lower = [text.lower() for text in self.custom_text_to_replace]
 
-        # Check if the custom_text is already in the custom_text_to_remove list (case-insensitive)
+        # Check if the custom_text is already in the custom_text_to_replace dictionary (case-insensitive)
         if custom_text_lower in custom_texts_lower:
             self.log_and_show(f"Custom Text '{custom_text}' is already in the custom text to remove list.",
                               create_messagebox=True, error=True)
@@ -5472,14 +5473,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Reset the add custom text to remove entry
                 self.add_ctr_name_entry.delete(0, ctk.END)
 
-            return  # Exit the function if the custom_text is already in the list
+            return  # Exit the function if the custom_text is already in the dictionary
 
         try:
-            # Add the custom_text to the custom_text_to_remove list
-            self.custom_text_to_remove.append(custom_text)
+            # Add the custom_text to the custom_text_to_replace dictionary with an empty string as the value
+            self.custom_text_to_replace[custom_text] = ""
 
-            # Update the JSON file with the new custom_text_to_remove list
-            self.update_json(self.dictionary_file, "custom_text_to_remove", self.custom_text_to_remove)
+            # Update the JSON file with the new custom_text_to_replace dictionary
+            self.update_json(self.dictionary_file, "custom_text_to_replace", self.custom_text_to_replace)
 
             # Log and show success message
             self.log_and_show(f"Custom Text '{custom_text}' added to custom text to remove list.")
@@ -5494,8 +5495,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the custom text to remove entry if the action is successful
             self.add_ctr_name_entry.delete(0, ctk.END)
 
-    # Method to remove text from custom_text_to_remove list
-    def remove_custom_text_to_remove(self):
+    # Method to remove text from custom_text_to_replace list
+    def remove_custom_text_to_replace(self):
         # Get the custom text to be removed from the entry widget
         custom_text = self.remove_ctr_name_entry.get().strip()
 
@@ -5504,29 +5505,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show("Remove CTR cannot be empty.", create_messagebox=True, error=True)
             return  # Exit the function if no custom_text is provided
 
-        # Convert both the input custom text and existing custom texts to lowercase
+        # Convert the input custom text and existing keys in the dictionary to lowercase
         custom_text_lower = custom_text.lower()
-        custom_texts_lower = [text.lower() for text in self.custom_text_to_remove]
+        custom_texts_lower = [text.lower() for text in self.custom_text_to_replace.keys()]
 
-        # Check if the custom_text is in the custom_text_to_remove list (case-insensitive)
+        # Check if the custom_text is in the custom_text_to_replace dictionary (case-insensitive)
         if custom_text_lower not in custom_texts_lower:
             self.log_and_show(f"Custom Text '{custom_text}' is not in the custom text to remove list.",
                               create_messagebox=True, error=True)
 
-            # Reset the custom text entries if the action is successful
+            # Reset the custom text entry if the action is successful
             if self.reset_add_remove_var.get():
-                # Reset the remove custom_text_to_remove entry
+                # Reset the remove custom_text_to_replace entry
                 self.remove_ctr_name_entry.delete(0, ctk.END)
 
-            return  # Exit the function if the custom_text is not in the list
+            return  # Exit the function if the custom_text is not in the dictionary
 
         try:
-            # Remove the custom_text from the custom_text_to_remove list (case-insensitive)
-            self.custom_text_to_remove = [text for text in self.custom_text_to_remove if
-                                          text.lower() != custom_text_lower]
+            # Remove the custom_text key from the custom_text_to_replace dictionary (case-insensitive)
+            for key in list(self.custom_text_to_replace.keys()):
+                if key.lower() == custom_text_lower:
+                    del self.custom_text_to_replace[key]
 
-            # Update the JSON file with the new custom_text_to_remove list
-            self.update_json(self.dictionary_file, "custom_text_to_remove", self.custom_text_to_remove)
+            # Update the JSON file with the new custom_text_to_replace dictionary
+            self.update_json(self.dictionary_file, "custom_text_to_replace", self.custom_text_to_replace)
 
             # Log and show success message
             self.log_and_show(f"Custom Text '{custom_text}' removed from custom text to remove list.")
@@ -5536,9 +5538,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"Removing Custom Text '{custom_text}' from custom text to remove list failed: {str(e)}",
                               create_messagebox=True, error=True)
 
-        # Reset the custom text entries if the action is successful
+        # Reset the custom text entry if the action is successful
         if self.reset_add_remove_var.get():
-            # Reset the remove custom_text_to_remove entry if the action is successful
+            # Reset the remove custom_text_to_replace entry if the action is successful
             self.remove_ctr_name_entry.delete(0, ctk.END)
 
     # Method to add extension to file_extensions list
