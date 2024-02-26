@@ -2590,7 +2590,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 return False
 
     """
-    Configuration
+    Json Handling
     """
 
     # Method to load the json file dictionaries/lists
@@ -2670,6 +2670,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         except Exception as e:
             self.log_and_show(f"Updating JSON failed: {file_to_update}, {str(e)}", error=True)
 
+    """
+    Logging
+    """
+
     def logging_setup(self):
         # Create the log file if it doesn't exist
         if not os.path.exists(self.file_renamer_log):
@@ -2708,6 +2712,33 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
     File Operations
     """
+
+    # Method to remove a successful line from a file.
+    def remove_successful_line_from_file(self, file_path, line_to_remove):
+        try:
+            if not file_path.lower().endswith('.txt'):
+                # If the file does not have a .txt extension, return without performing any operation.
+                self.log_and_show("The provided file is not a txt file. Skipping removal of successful line.",
+                                  error=True)
+                return
+
+            # Read all lines from the file.
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+
+            # Open the file in write mode to remove the specified line.
+            with open(file_path, 'w') as file:
+                # Write lines back to the file, excluding the successful line to remove.
+                for line in lines:
+                    if line.strip() != line_to_remove:
+                        file.write(line)
+
+            self.log_and_show(f"Successful line removed from {file_path}")
+
+        except Exception as e:
+            # Log the exception using the logging module.
+            self.log_and_show(f"An error occurred while removing line from file: {e}", create_messagebox=True,
+                              error=True)
 
     # Method to move the selected input to the trash
     def move_file_to_trash(self):
@@ -4037,6 +4068,46 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return name + extension
 
+    # Method to generate a non-conflicting filename
+    def get_non_conflicting_filename(self, path):
+        # Log the action and display a message
+        self.log_and_show(f"Conflict detected on: '{os.path.basename(path)}'")
+
+        try:
+            # Split the given path into the base filename and its extension.
+            base, ext = os.path.splitext(os.path.basename(path))
+
+            # Extract the counter from the original filename if it exists.
+            counter = 1
+            match = re.match(r'(.+) \((\d+)\)', base)
+            if match:
+                base, counter = match.groups()
+                counter = int(counter)
+
+            # Check if the file already exists at the given path.
+            while os.path.exists(os.path.join(os.path.dirname(path), f"{base} ({counter}){ext}")):
+                # If the file exists, update the counter.
+                counter += 1
+
+            # Construct the new base filename with the updated counter.
+            new_base = f"{base} ({counter})"
+
+            # Construct the new path by joining the directory and the new base filename.
+            new_path = os.path.join(os.path.dirname(path), f"{new_base}{ext}")
+
+            # Log action and display a message
+            self.log_and_show(f"Using non-conflicting file name: {new_base}{ext}")
+
+            # Return the generated non-conflicting filename.
+            return new_path
+        except Exception as e:
+            # Log error and display an error message when get non-conflicting file name fails.
+            self.log_and_show(f"Getting non-conflicting file name failed: {str(e)}", create_messagebox=True,
+                              error=True)
+
+            # Return None in case of an error.
+            return None
+
     @staticmethod
     def move_text(name):
         # Move the text between - and __-__ in the name
@@ -4543,72 +4614,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
     Video Editor
     """
-
-    # Method to generate a non-conflicting filename
-    def get_non_conflicting_filename(self, path):
-        # Log the action and display a message
-        self.log_and_show(f"Conflict detected on: '{os.path.basename(path)}'")
-
-        try:
-            # Split the given path into the base filename and its extension.
-            base, ext = os.path.splitext(os.path.basename(path))
-
-            # Extract the counter from the original filename if it exists.
-            counter = 1
-            match = re.match(r'(.+) \((\d+)\)', base)
-            if match:
-                base, counter = match.groups()
-                counter = int(counter)
-
-            # Check if the file already exists at the given path.
-            while os.path.exists(os.path.join(os.path.dirname(path), f"{base} ({counter}){ext}")):
-                # If the file exists, update the counter.
-                counter += 1
-
-            # Construct the new base filename with the updated counter.
-            new_base = f"{base} ({counter})"
-
-            # Construct the new path by joining the directory and the new base filename.
-            new_path = os.path.join(os.path.dirname(path), f"{new_base}{ext}")
-
-            # Log action and display a message
-            self.log_and_show(f"Using non-conflicting file name: {new_base}{ext}")
-
-            # Return the generated non-conflicting filename.
-            return new_path
-        except Exception as e:
-            # Log error and display an error message when get non-conflicting file name fails.
-            self.log_and_show(f"Getting non-conflicting file name failed: {str(e)}", create_messagebox=True, error=True)
-
-            # Return None in case of an error.
-            return None
-
-    # Method to remove a successful line from a file.
-    def remove_successful_line_from_file(self, file_path, line_to_remove):
-        try:
-            if not file_path.lower().endswith('.txt'):
-                # If the file does not have a .txt extension, return without performing any operation.
-                self.log_and_show("The provided file is not a txt file. Skipping removal of successful line.",
-                                  error=True)
-                return
-
-            # Read all lines from the file.
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
-
-            # Open the file in write mode to remove the specified line.
-            with open(file_path, 'w') as file:
-                # Write lines back to the file, excluding the successful line to remove.
-                for line in lines:
-                    if line.strip() != line_to_remove:
-                        file.write(line)
-
-            self.log_and_show(f"Successful line removed from {file_path}")
-
-        except Exception as e:
-            # Log the exception using the logging module.
-            self.log_and_show(f"An error occurred while removing line from file: {e}", create_messagebox=True,
-                              error=True)
 
     # Method to rotate/mirror a video clip by a specified angle.
     def rotate_video(self, clip, rotation_angle):
