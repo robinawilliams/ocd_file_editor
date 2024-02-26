@@ -2998,15 +2998,24 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.log_and_show(f"Input selected via drop: {filename}")
 
     def open_file(self, file_to_open):
-        # Get the filename from the file path
-        filename = os.path.basename(file_to_open)
+        """
+        Opens the specified file using the default system program.
 
+        Parameters:
+        - file_to_open (str): The path of the file to be opened.
+
+        Returns:
+        - None
+        """
         # Check if the input exists
         if not os.path.exists(file_to_open):
             # If the provided input does not exist, log an error and return
-            self.log_and_show(f"Cannot open input as it does not exist: {filename}",
+            self.log_and_show(f"Cannot open input as it does not exist: {file_to_open}",
                               create_messagebox=True, error=True)
             return
+
+        # Get the filename from the file path
+        filename = os.path.basename(file_to_open)
 
         # If the input path is not empty, try to open the input using the default system program
         if file_to_open:
