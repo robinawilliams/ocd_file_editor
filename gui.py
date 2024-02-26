@@ -8,13 +8,13 @@ import configparser  # Module for working with configuration files
 import shutil  # Module for high-level file operations (copying, moving, etc.)
 import string  # Module for various string manipulation functions and constants
 import customtkinter as ctk  # Customtkinter for a modern gui
+import logging  # Logging module for capturing log messages
+import atexit  # Module for registering functions to be called when the program is closing
 from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
 from moviepy.editor import VideoFileClip  # Video editing module for working with video files
 from moviepy.video.fx import all as vfx  # Importing all video effects (vfx) from the moviepy library
-import logging  # Logging module for capturing log messages
-import atexit  # Module for registering functions to be called when the program is closing
 
 
 # Create a custom window class named SelectOptionWindow, inheriting from ctk.CTkToplevel
@@ -3605,6 +3605,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def add_category(self):
+        """
+        Add a new category to the dictionary with the specified weight,
+        save the updated categories to the file, and refresh the category buttons in the GUI.
+
+        Returns:
+            None
+        """
         # Get the new category from the add category entry widget
         new_category = self.category_entry.get().strip()
 
@@ -3651,6 +3658,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.weight_entry.delete(0, ctk.END)
 
     def remove_category(self):
+        """
+        Remove a category from the dictionary, save the updated categories to the file,
+        and refresh the category buttons in the GUI.
+
+        Returns:
+            None
+        """
         # Get the category to be removed from the remove category entry widget
         category_to_remove = self.remove_category_entry.get().strip()
 
@@ -3695,9 +3709,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.remove_category_entry.delete(0, ctk.END)
 
     def create_category_button(self, tab, category):
+        """
+        Create a category button within a specified tab.
+
+        Parameters:
+            tab: The tab in which the button will be created.
+            category (str): The category for which the button is created.
+
+        Returns:
+            ctk.CTkButton: The created category button.
+        """
         return ctk.CTkButton(tab, text=category, command=lambda c=category: self.add_to_queue(c))
 
     def refresh_category_buttons(self, *_):
+        """
+        Refresh the category buttons by destroying existing tabs and buttons,
+        loading categories, and creating new tabs and buttons.
+
+        Parameters:
+            *_: Variable number of positional arguments (ignored in the function)
+
+        Returns:
+            None
+        """
         # Destroy existing tabs and buttons
         if hasattr(self, 'cat_tabview') and self.cat_tabview:
             self.cat_tabview.destroy()
@@ -3712,6 +3746,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to create the cat_tabview and buttons
     def create_cat_tabview(self):
+        """
+        Create the category tabview and populate it with buttons based on category weights.
+
+        Returns:
+            None
+        """
         # Create cat_tabview
         self.cat_tabview = ctk.CTkTabview(self.cat_button_frame)
         self.cat_tabview.grid(row=0, column=0)
@@ -3789,6 +3829,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to add a category to the queue
     def add_to_queue(self, category):
+        """
+        Add a category to the processing queue.
+
+        Parameters:
+            category (str): The category to be added to the queue.
+
+        Returns:
+            None
+        """
         if not self.file_renamer_selected_file:
             # If no input selected, log the action and display a message in the GUI
             self.log_and_show("Please select an input first and then add a word to the queue.",
@@ -3858,7 +3907,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to handle common categories state
     def handle_common_categories_state(self, *_):
-        # Check if the artist common categories variable is true 
+        """
+        Handle the state change of the artist common categories variable.
+
+        Parameters:
+            *_: Variable number of positional arguments (ignored in the function)
+
+        Returns:
+            None
+        """
+        # Check if the artist common categories variable is true
         if self.artist_common_categories_var.get():
             # Call the add_remove_common_categories_to_queue method
             self.add_remove_common_categories_to_queue()
@@ -3868,6 +3926,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to add/remove common categories to the queue based on the artist
     def add_remove_common_categories_to_queue(self, remove=False):
+        """
+        Add or remove common categories to/from the processing queue based on the selected file.
+
+        Parameters:
+            remove (bool): Flag indicating whether to remove common categories from the queue. Default is False.
+
+        Returns:
+            None
+        """
         # Check if the selected file is set
         if not self.file_renamer_selected_file:
             return  # Do nothing if the selected file is not set
@@ -3883,7 +3950,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Iterate through the values associated with the matching key
                 for value in values:
                     if remove:
-                        self.remove_from_queue(value, suppress=True)  # Remove each value remove the processing queue
+                        self.remove_from_queue(value, suppress=True)  # Remove each value from the processing queue
                     else:
                         self.add_to_queue(value)  # Add each value to the processing queue
                 return  # Stop processing after the first match
@@ -4070,6 +4137,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to generate a non-conflicting filename
     def get_non_conflicting_filename(self, path):
+        """
+        Get a non-conflicting filename by appending a counter to the base filename if conflicts are detected.
+
+        Args:
+        - path (str): The original file path.
+
+        Returns:
+        - str: The non-conflicting filename or None if an error occurs.
+
+        Raises:
+        - OSError: If an error occurs while checking for file existence or constructing the new filename.
+
+        Examples:
+        self.get_non_conflicting_filename("/path/to/file.txt")
+        '/path/to/file (1).txt'
+
+        self.get_non_conflicting_filename("/path/to/file (1).txt")
+        '/path/to/file (2).txt'
+        """
         # Log the action and display a message
         self.log_and_show(f"Conflict detected on: '{os.path.basename(path)}'")
 
@@ -4110,6 +4196,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     @staticmethod
     def move_text(name):
+        """
+        Move the text between '-' and '__-__' in the given name.
+
+        Args:
+        - name (str): The original name containing the text to be moved.
+
+        Returns:
+        - str: The modified name with the text moved.
+
+        Example:
+        self.move_text("Artist - words to move__-__file.mp3")
+        'Artist file words to move.mp3'
+        """
         # Move the text between - and __-__ in the name
         match = re.match(r"^(.*) - (.*?)__-__ (.*)\.(\w+)$", name)
         if match:
