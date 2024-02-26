@@ -721,6 +721,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.configuration_file_frame = None
         self.open_configuration_file_button = None
         self.configuration_file_entry = None
+        self.dictionary_file_frame = None
+        self.open_dictionary_file_button = None
+        self.dictionary_file_entry = None
         self.open_log_file_button = None
         self.log_file_entry = None
         self.logging_browse_frame = None
@@ -2177,6 +2180,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.configuration_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
         self.configuration_file_entry.insert(0, self.config_file_path)
         self.configuration_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Dictionary File Frame
+        self.dictionary_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                                  fg_color="transparent")
+        self.dictionary_file_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Browse Dictionary File button
+        self.open_dictionary_file_button = ctk.CTkButton(self.dictionary_file_frame, text="Open Dictionary File",
+                                                         command=lambda: self.open_file(
+                                                             self.dictionary_file))
+        self.open_dictionary_file_button.grid(row=0, column=0, padx=5)
+
+        # Dictionary File entry
+        self.dictionary_file_entry = ctk.CTkEntry(self.dictionary_file_frame, width=890)
+        self.dictionary_file_entry.insert(0, self.dictionary_file)
+        self.dictionary_file_entry.grid(row=0, column=1, padx=10, pady=10)
 
         """Logging Tab"""
         # Logging frame
