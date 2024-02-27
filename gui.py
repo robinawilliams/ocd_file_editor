@@ -3032,21 +3032,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to update the file display based on selected options
     def update_file_display(self, *_):
         if self.file_renamer_selected_file:
-            # Get custom text and file extension
-            custom_text = self.custom_text_entry.get().strip()
-            base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
-
-            # Check if the remove_duplicates_var is set
-            if self.remove_duplicates_var.get():
-                # Remove duplicates from the queue
-                self.queue = list(dict.fromkeys(self.queue))
-
-            # Filter and sort categories based on weights
-            weighted_categories = [category for category in self.queue if category in self.categories]
-            weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
-
-            # Construct a name using base name, weighted categories, custom text, and extension
-            proposed_name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
+            # Gather the data and construct the name
+            proposed_name = self.gather_and_construct()
 
             # Handle name length constraints
             if len(proposed_name) > 255:
@@ -3978,29 +3965,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def rename_files(self):
         # Check if an input is selected and either the queue is not empty or custom text is provided
         if self.file_renamer_selected_file and (self.queue or self.custom_text_entry.get().strip()):
-
-            # Get custom text and file extension
-            custom_text = self.custom_text_entry.get().strip()
-            base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
-
-            # Check if the remove_duplicates_var is set
-            if self.remove_duplicates_var.get():
-                # Remove duplicates from the queue
-                self.queue = list(dict.fromkeys(self.queue))
-
-            # Filter and sort categories based on weights
-            weighted_categories = [category for category in self.queue if category in self.categories]
-            weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
-
-            # Construct a name using base name, weighted categories, custom text, and extension
-            name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
+            # Gather the data and construct the name
+            name = self.gather_and_construct()
 
             # If move_text_var is set, move the text between - and __-__
             if self.move_text_var.get():
                 name = self.move_text(name)
-
-            # Remove extra whitespaces from the name
-            name = " ".join(name.split()).strip()
 
             # If output directory is not explicitly set, default to the same directory as the file
             if not self.output_directory:
@@ -4125,11 +4095,31 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Log the action if logging is enabled
             self.log_and_show("No input selected. Nothing to rename.", create_messagebox=True, error=True)
 
+    def gather_and_construct(self):
+        # Get custom text, basename, and file extension
+        custom_text = self.custom_text_entry.get().strip()
+        base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
+
+        # Check if the remove_duplicates_var is set
+        if self.remove_duplicates_var.get():
+            # Remove duplicates from the queue
+            self.queue = list(dict.fromkeys(self.queue))
+
+        # Filter and sort categories based on weights
+        weighted_categories = [category for category in self.queue if category in self.categories]
+        weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
+
+        # Construct a name using base name, weighted categories, custom text, and extension
+        name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
+
+        return name
+
     def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
         # Construct the name based on placement choice (prefix, suffix, or special_character)
         categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
         categories_text = ' '.join(categories).strip()
 
+        # Place the queue at the beginning of the name
         if self.placement_choice.get() == "prefix":
             name = f"{custom_text} {categories_text} {base_name}".strip()
         # Place the queue at the first instance of the special character
@@ -4148,6 +4138,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 name = f"{base_name} {categories_text} {custom_text}".strip()
         else:  # Default to suffix
             name = f"{base_name} {categories_text} {custom_text}".strip()
+
+        # Remove extra whitespaces from the name
+        name = " ".join(name.split()).strip()
 
         return name + extension
 
@@ -4251,8 +4244,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             str: The modified file name with artist names removed.
 
         Example:
-            self.remove_artist_duplicates_from_filename('Bruno Mars - 24k Magic Bruno Mars - Album Version Bruno Mars.mp3')
-            'Bruno Mars - 24k Magic - Album Version .mp3'
+            self.remove_artist_duplicates_from_filename('Artist - A Title Artist - Album Version Artist.mp3')
+            'Artist - A Title - Album Version .mp3'
         """
         # Read the list of artists from the artist_file
         with open(self.artist_file, 'r') as artist_list_file:
