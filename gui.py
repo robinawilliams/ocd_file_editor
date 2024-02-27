@@ -5247,15 +5247,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to create a NO-GO file
     def no_go_creation(self):
-        # Attempt to get the contents from self.add_no_go_name_entry
-        no_go_name = self.add_no_go_name_entry.get().strip()
-
-        # Check if no_go_name is provided
-        if not no_go_name:
-            self.log_and_show("Add NO GO cannot be empty.", create_messagebox=True, error=True)
-            return  # Exit the function if no artist is provided
-
         try:
+            # Attempt to get the contents from self.add_no_go_name_entry
+            no_go_name = self.add_no_go_name_entry.get().strip()
+
+            # Check if no_go_name is provided
+            if not no_go_name:
+                self.log_and_show("Add NO GO cannot be empty.", create_messagebox=True, error=True)
+                return  # Exit the function if no artist is provided
+
             # Expand the user's home directory in the NO-GO path
             no_go_directory = os.path.expanduser(self.no_go_directory)
 
@@ -5306,25 +5306,36 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.add_no_go_name_entry.delete(0, ctk.END)
 
     def no_go_removal(self):
-        # Attempt to get the contents from self.remove_no_go_name_entry
-        remove_no_go_name = self.remove_no_go_name_entry.get().strip()
-
-        # Check if remove_no_go_name is provided
-        if not remove_no_go_name:
-            self.log_and_show("Remove NO GO cannot be empty.", create_messagebox=True, error=True)
-            return  # Exit the function if no artist is provided
-
         try:
+            # Attempt to get the contents from self.remove_no_go_name_entry
+            remove_no_go_name = self.remove_no_go_name_entry.get().strip()
+
             # Expand the user's home directory in the NO-GO path
             no_go_directory = os.path.expanduser(self.no_go_directory)
+
+            # Check if the NO-GO file exists
+            no_go_file_name = f"NO GO - {remove_no_go_name}"
+
+            # Check if remove_no_go_name is provided
+            if not remove_no_go_name:
+                self.log_and_show("Remove NO GO cannot be empty.", create_messagebox=True, error=True)
+                return  # Exit the function if no artist is provided
 
             # Ensure the NO-GO directory exists
             if not os.path.exists(no_go_directory):
                 self.log_and_show("NO GO directory does not exist.", create_messagebox=True, error=True)
                 return  # Exit the function if NO GO directory does not exist
 
-            # Check if the NO-GO file exists
-            no_go_file_name = f"NO GO - {remove_no_go_name}"
+            # Ensure the NO-GO artist file exists
+            if not os.path.exists(self.no_go_artist_file):
+                self.log_and_show(f"{self.no_go_artist_file} does not exist. Skipping NO GO removal from the text "
+                                  f"file.", error=True)
+
+                # Set the remove variable to false
+                remove = False
+            else:
+                # Set the remove variable to true
+                remove = True
 
             # Check if the file exists case-insensitively
             matching_files = [filename for filename in os.listdir(no_go_directory) if
@@ -5341,16 +5352,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 self.log_and_show(f"NO GO file '{no_go_file_name}' not found.", create_messagebox=True, error=True)
 
-            # Check and remove the entry from self.no_go_artist_file tampermonkey (case-insensitive)
-            with open(self.no_go_artist_file, "r") as file:
-                lines = file.readlines()
+            if remove:
+                # Check and remove the entry from self.no_go_artist_file tampermonkey (case-insensitive)
+                with open(self.no_go_artist_file, "r") as file:
+                    lines = file.readlines()
 
-            with open(self.no_go_artist_file, "w") as file:
-                for line in lines:
-                    if line.strip().lower() != remove_no_go_name.lower():
-                        file.write(line)
+                with open(self.no_go_artist_file, "w") as file:
+                    for line in lines:
+                        if line.strip().lower() != remove_no_go_name.lower():
+                            file.write(line)
 
-            self.log_and_show(f"NO GO entry '{remove_no_go_name}' removed from {self.no_go_artist_file} successfully.")
+                self.log_and_show(f"NO GO entry '{remove_no_go_name}' removed from {self.no_go_artist_file}"
+                                  f" successfully.")
 
         except Exception as e:
             self.log_and_show(f"Removing NO GO failed: '{str(e)}'.", create_messagebox=True, error=True)
