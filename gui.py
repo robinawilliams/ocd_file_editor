@@ -5264,13 +5264,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 os.makedirs(no_go_directory)
 
             # Create a file for the NO-GO
-            file_name = f"NO GO - {no_go_name}"
-            file_path = os.path.join(no_go_directory, file_name)
+            no_go_file_name = f"NO GO - {no_go_name}"
+            no_go_file_path = os.path.join(no_go_directory, no_go_file_name)
 
             # Check if the file already exists case-insensitively to prevent overwriting
-            if any(filename.lower() == file_name.lower() for filename in os.listdir(no_go_directory)):
+            if any(filename.lower() == no_go_file_name.lower() for filename in os.listdir(no_go_directory)):
                 # Log the action and display a message
-                self.log_and_show(f"'{file_name}' already exists. Skipping creation.", create_messagebox=True,
+                self.log_and_show(f"'{no_go_file_name}' already exists. Skipping creation.", create_messagebox=True,
                                   error=True)
 
                 # Reset the no-go entries if the action is successful
@@ -5280,7 +5280,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 return
 
             # Create NO-GO empty file
-            with open(file_path, 'w'):
+            with open(no_go_file_path, 'w'):
                 pass
 
             # Add to text file for Tampermonkey Script use
@@ -5324,12 +5324,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 return  # Exit the function if NO GO directory does not exist
 
             # Check if the NO-GO file exists
-            # TODO Compare case-insensitively
             no_go_file_name = f"NO GO - {remove_no_go_name}"
-            no_go_file_path = os.path.join(no_go_directory, no_go_file_name)
-            if os.path.isfile(no_go_file_path):
-                os.remove(no_go_file_path)
-                self.log_and_show(f"NO GO file '{no_go_file_name}' removed successfully.")
+
+            # Check if the file exists case-insensitively
+            matching_files = [filename for filename in os.listdir(no_go_directory) if
+                              filename.lower() == no_go_file_name.lower()]
+
+            if matching_files:
+                # Get the first match and construct the filepath
+                matched_filename = matching_files[0]
+                matched_file_path = os.path.join(no_go_directory, matched_filename)
+
+                # Remove the matched filepath
+                os.remove(matched_file_path)
+                self.log_and_show(f"NO GO file '{matched_filename}' removed successfully.")
             else:
                 self.log_and_show(f"NO GO file '{no_go_file_name}' not found.", create_messagebox=True, error=True)
 
