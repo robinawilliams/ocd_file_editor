@@ -451,6 +451,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         self.output_directory_browse_button = None
         self.output_directory_entry = None
+        self.prefix_text_entry = None
         self.custom_text_entry = None
         self.rename_button = None
         self.button_group_frame = None
@@ -886,21 +887,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
         # Output Directory Entry
-        self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=360)
+        self.output_directory_entry = ctk.CTkEntry(self.custom_text_frame, width=340)
         self.output_directory_entry.grid(row=0, column=1, padx=5, pady=5)
 
+        # Prefix Text Entry
+        self.prefix_text_entry = ctk.CTkEntry(self.custom_text_frame, width=70)
+        self.prefix_text_entry.insert(0, "Prefix...")
+        self.prefix_text_entry.grid(row=0, column=2, padx=10, pady=10)
+
+        # Bind the update_file_display function to the prefix text entry change event
+        self.prefix_text_entry.bind("<KeyRelease>", self.update_file_display)
+
         # Custom Text Entry
-        self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=360)
+        self.custom_text_entry = ctk.CTkEntry(self.custom_text_frame, width=290)
         self.custom_text_entry.insert(0, "Enter your custom text here...")
-        self.custom_text_entry.grid(row=0, column=2, padx=10, pady=10)
+        self.custom_text_entry.grid(row=0, column=3, padx=10, pady=10)
 
         # Bind the update_file_display function to the custom text entry change event
         self.custom_text_entry.bind("<KeyRelease>", self.update_file_display)
 
         # Rename File Button
-        self.rename_button = ctk.CTkButton(self.custom_text_frame, text="Rename File",
+        self.rename_button = ctk.CTkButton(self.custom_text_frame, text="Rename",
                                            command=self.rename_files)
-        self.rename_button.grid(row=0, column=3, padx=5, pady=5)
+        self.rename_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Frame to group miscellaneous buttons
         self.button_group_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame, corner_radius=0,
@@ -2758,6 +2767,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     self.file_renamer_selected_file = ""
                     self.queue = []
                     self.file_display_text.set("")
+                    self.prefix_text_entry.delete(0, ctk.END)
                     self.custom_text_entry.delete(0, ctk.END)
                     self.output_directory = ""
                     self.output_directory_entry.delete(0, ctk.END)
@@ -2981,7 +2991,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             self.file_renamer_selected_file = selected_file
 
-            # Remove the default custom text entry text
+            # Remove the default entries text
+            self.prefix_text_entry.delete(0, ctk.END)
             self.custom_text_entry.delete(0, ctk.END)
 
             self.queue = []
@@ -3208,7 +3219,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.queue = []
             self.file_display_text.set("")
 
-            # Clear custom text entry and reset output directory
+            # Clear text entries and reset output directory
+            self.prefix_text_entry.delete(0, ctk.END)
             self.custom_text_entry.delete(0, ctk.END)
             self.output_directory = ""
             self.output_directory_entry.delete(0, ctk.END)
@@ -3353,6 +3365,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to browse and select an input
     def browse_input(self):
         if self.frame_name == "file_renamer_window":
+            # Remove the default prefix text entry text
+            self.prefix_text_entry.delete(0, ctk.END)
             # Remove the default custom text entry text
             self.custom_text_entry.delete(0, ctk.END)
 
@@ -3581,6 +3595,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_selected_file = ""
         self.queue = []
         self.file_display_text.set("")
+        self.prefix_text_entry.delete(0, ctk.END)
         self.custom_text_entry.delete(0, ctk.END)
         self.file_renamer_last_used_file = new_path
 
@@ -3964,7 +3979,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def rename_files(self):
         # Check if an input is selected and either the queue is not empty or custom text is provided
-        if self.file_renamer_selected_file and (self.queue or self.custom_text_entry.get().strip()):
+        if self.file_renamer_selected_file and (
+                self.queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
             # Gather the data and construct the name
             name = self.gather_and_construct()
 
@@ -4086,7 +4102,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
         # If an input is selected and either the queue is empty or no custom text is provided show error
-        elif self.file_renamer_selected_file and not (self.queue or self.custom_text_entry.get().strip()):
+        elif self.file_renamer_selected_file and not (
+                self.queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
             # Log the action if logging is enabled
             self.log_and_show("Input selected but nothing added to the queue. Nothing to rename.",
                               create_messagebox=True, error=True)
@@ -4096,7 +4113,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show("No input selected. Nothing to rename.", create_messagebox=True, error=True)
 
     def gather_and_construct(self):
-        # Get custom text, basename, and file extension
+        # Get custom text, prefix_text, basename, and file extension
+        prefix_text = self.prefix_text_entry.get().strip()
         custom_text = self.custom_text_entry.get().strip()
         base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
@@ -4110,23 +4128,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
         # Construct a name using base name, weighted categories, custom text, and extension
-        name = self.construct_new_name(base_name, weighted_categories, custom_text, extension)
+        name = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text, extension)
 
         return name
 
-    def construct_new_name(self, base_name, weighted_categories, custom_text, extension):
+    def construct_new_name(self, base_name, weighted_categories, prefix_text, custom_text, extension):
         # Construct the name based on placement choice (prefix, suffix, or special_character)
         categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
         categories_text = ' '.join(categories).strip()
 
         # Place the queue at the beginning of the name
         if self.placement_choice.get() == "prefix":
-            name = f"{custom_text} {categories_text} {base_name}".strip()
+            name = f"{prefix_text} {custom_text} {categories_text} {base_name}".strip()
         # Place the queue at the first instance of the special character
         elif self.placement_choice.get() == "special_character":
             parts = base_name.split(self.special_character_var, 1)
             if len(parts) == 2:
-                name = f"{parts[0].rstrip()} {categories_text} {custom_text} {parts[1].lstrip()}".strip()
+                name = f"{prefix_text} {parts[0].rstrip()} {categories_text} {custom_text} {parts[1].lstrip()}".strip()
                 try:
                     # Remove the tail __-__ if found
                     name = name.replace("__-__", "")
@@ -4134,10 +4152,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Log the action if logging is enabled
                     self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
             else:
-                # If there's no special character found, default to suffix
-                name = f"{base_name} {categories_text} {custom_text}".strip()
+                # If there's no special character found, fallback to edge case custom formatting
+                name = f"{prefix_text} {categories_text} {custom_text} {base_name}".strip()
         else:  # Default to suffix
-            name = f"{base_name} {categories_text} {custom_text}".strip()
+            name = f"{prefix_text} {base_name} {categories_text} {custom_text}".strip()
 
         # Remove extra whitespaces from the name
         name = " ".join(name.split()).strip()
