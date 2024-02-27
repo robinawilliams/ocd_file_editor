@@ -4240,13 +4240,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_artist_duplicates_from_filename(self, file_name):
         """
         Remove artist names from the given file name by processing the list of artists
-        read from the artist_file and modifying the file name accordingly.
+        read from the artist_file and modifying the file name accordingly. The intent is to give the user the option
+        to maintain the rest of the original file name after the artist search, or remove the now duplicate entries
+        for a clean file name.
 
         Parameters:
             file_name (str): The original file name.
 
         Returns:
             str: The modified file name with artist names removed.
+
+        Example:
+            self.remove_artist_duplicates_from_filename('Bruno Mars - 24k Magic Bruno Mars - Album Version Bruno Mars.mp3')
+            'Bruno Mars - 24k Magic - Album Version .mp3'
         """
         # Read the list of artists from the artist_file
         with open(self.artist_file, 'r') as artist_list_file:
