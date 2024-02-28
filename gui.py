@@ -422,10 +422,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.most_buttons = None
         self.all_buttons = None
 
-        # TODO Currently not being used
-        # Initialize select_option_window to None for open_select_option_window functionality
-        self.select_option_window = None
-
         # Initialize Main GUI elements
         # Housekeeping Note: Some attributes are initialized as None and later assigned specific GUI elements
         self.navigation_frame = None
@@ -2425,17 +2421,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.frame_name = frame_name
         else:
             self.settings_frame.grid_forget()
-
-    # TODO Currently not being used
-    def open_select_option_window(self, title, prompt, item_list, label_text):
-        # Check if the window does not exist or if it has been destroyed
-        if self.select_option_window is None or not self.select_option_window.winfo_exists():
-            # Create a new instance of SelectOptionWindow if the window is None or destroyed
-            self.select_option_window = SelectOptionWindow(title=title, prompt=prompt, item_list=item_list,
-                                                           label_text=label_text)
-        else:
-            # If the window exists, bring it to focus
-            self.select_option_window.focus()
 
     """
     Event handlers for button clicks to switch frames
@@ -6049,31 +6034,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Handle unexpected errors
             self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
-    # TODO Currently not being used
-    # Method to refresh the add/remove tabview
-    def refresh_tabview(self, existing_tabview, parent_frame, tab_names, default_tab=None):
-        """
-        Refresh the tabview with new tabs.
-
-        Parameters:
-        - existing_tabview: The existing tabview to be destroyed.
-        - parent_frame: The parent frame to which the new tabview will be added.
-        - tab_names: List of tab names.
-        - default_tab: Optional. The default tab to be set after creating the new tabview.
-
-        Returns:
-        - tabview: The created tabview.
-        - tabs: Dictionary containing references to the created tabs.
-        """
-        # Destroy existing tabs
-        if existing_tabview:
-            existing_tabview.destroy()
-
-        # Create the new tabview
-        new_tabview, new_tabs = self.create_tabview(parent_frame, tab_names, default_tab)
-
-        return new_tabview, new_tabs
-
     # Method to create tabview
     def create_tabview(self, parent_frame, tab_names, default_tab=None):
         """
@@ -6122,9 +6082,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def refresh_buttons_and_tabs(self, *_):
         self.refresh_category_buttons()
-
-        # TODO Currently not being used
-        # self.refresh_tabview()
 
     # Method to attempt to identify Artists
     def artist_identifier(self):
