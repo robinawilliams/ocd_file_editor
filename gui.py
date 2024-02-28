@@ -3063,18 +3063,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Handle name length constraints
             if char_length > 255:
-                self.log_and_show("The proposed file name exceeds 255 characters. "
-                                  "Operating system limitations prohibit this.",
-                                  create_messagebox=True, error=True)
+                # Check if there is an entry in the queue list
+                if len(self.queue) == 0:
+                    self.log_and_show("The proposed file name exceeds 255 characters. "
+                                      "Operating system limitations prohibit this.", create_messagebox=True, error=True)
+                elif len(self.queue) > 0:
+                    # Prompt the user to choose from the list using SelectOptionWindow
+                    category_to_remove = SelectOptionWindow(title="Name Length Error",
+                                                            prompt="The proposed file name exceeds 255 characters. "
+                                                                   "\nOperating system limitations prohibit this. "
+                                                                   "\nPlease choose a category to remove:",
+                                                            item_list=self.queue,
+                                                            label_text="Choose Category")
 
-                if self.truncate_var.get():
-                    # Truncate the name for the display
-                    display_text = f"...{proposed_name[180:]}"
+                    # Wait for the user to respond before proceeding
+                    category_to_remove.wait_window()
 
-            if char_length > 250:
-                self.log_and_show("The proposed file name exceeds 250 characters. Please consider "
-                                  "shortening it to comply with operating system limitations.",
-                                  create_messagebox=True)
+                    # Retrieve the selected category
+                    chosen_category = category_to_remove.get_selected_option()
+
+                    if chosen_category:
+                        # Remove the category from the queue
+                        self.queue.remove(chosen_category)
+                        self.log_and_show(f"Word removed from queue: {chosen_category}", not_logging=True)
+
                 if self.truncate_var.get():
                     # Truncate the name for the display
                     display_text = f"...{proposed_name[180:]}"
