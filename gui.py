@@ -254,6 +254,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                     fallback=True))
         self.fallback_confirmation_var = ctk.BooleanVar(value=config.getboolean("Settings", "fallback_confirmation_var",
                                                                                 fallback=False))
+        self.truncate_var = ctk.BooleanVar(value=config.getboolean("Settings", "truncate_var", fallback=True))
 
         # Name Normalizer
         self.remove_all_symbols_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_all_symbols_var",
@@ -692,6 +693,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.fallback_confirmation_label = None
         self.true_radio = None
         self.false_radio = None
+        self.truncate_text_switch = None
         self.tab_name_frame = None
         self.use_custom_tab_names_switch = None
         self.sort_tab_names_switch = None
@@ -2292,6 +2294,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               value=False)
         self.false_radio.grid(row=1, column=2, padx=10, pady=5)
 
+        # Switch to enable/disable truncate text
+        self.truncate_text_switch = ctk.CTkSwitch(self.confirmation_frame, text="Truncate Text",
+                                                  variable=self.truncate_var)
+        self.truncate_text_switch.grid(row=2, column=0, padx=10, pady=5)
+
         """Reminders Tab"""
         # Reminders frame
         self.reminders_frame = ctk.CTkFrame(self.settings_tabs.get("Reminders"), corner_radius=0,
@@ -3051,23 +3058,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Set the proposed name to the char_length variable
             char_length = len(proposed_name)
 
+            # Set the proposed name to the display text
+            display_text = proposed_name
+
             # Handle name length constraints
-            if len(proposed_name) > 255:
+            if char_length > 255:
                 self.log_and_show("The proposed file name exceeds 255 characters. "
                                   "Operating system limitations prohibit this.",
                                   create_messagebox=True, error=True)
-                # Truncate the name for the display
-                proposed_name = f"...{proposed_name[180:]}"
 
-            if len(proposed_name) > 250:
+                if self.truncate_var.get():
+                    # Truncate the name for the display
+                    display_text = f"...{proposed_name[180:]}"
+
+            if char_length > 250:
                 self.log_and_show("The proposed file name exceeds 250 characters. Please consider "
                                   "shortening it to comply with operating system limitations.",
                                   create_messagebox=True)
-                # Truncate the name
-                proposed_name = f"...{proposed_name[180:]}"
+                if self.truncate_var.get():
+                    # Truncate the name for the display
+                    display_text = f"...{proposed_name[180:]}"
 
             # Set the name to the file display
-            self.file_display_text.set(proposed_name)
+            self.file_display_text.set(display_text)
 
             # Set the length of the name to the name_length_text
             self.name_length_text.set(char_length)

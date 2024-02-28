@@ -61,6 +61,8 @@ show_messageboxes_var = True
 show_confirmation_messageboxes_var = True
 ; Fallback confirmation for confirmation messageboxes when suppressed
 fallback_confirmation_var = False
+; Truncate text in the file display
+truncate_var = True
 ; Remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
 remove_all_symbols_var = False
 ; Remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
