@@ -442,6 +442,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_file_button = None
         self.file_display_text = None
         self.file_display_entry = None
+        self.name_length_text = None
+        self.name_length_label = None
         self.cat_button_frame = None
         self.custom_text_frame = None
 
@@ -861,9 +863,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_display_text = ctk.StringVar()
         self.file_display_text.set("Select a file using the 'Browse File' button or drag and drop it into the "
                                    "program...")
-        self.file_display_entry = ctk.CTkEntry(self.file_renamer_top_frame, width=890,
+        self.file_display_entry = ctk.CTkEntry(self.file_renamer_top_frame, width=850,
                                                textvariable=self.file_display_text)
         self.file_display_entry.grid(row=0, column=1, padx=5)
+
+        # Name Length Display
+        self.name_length_text = ctk.IntVar()
+        self.name_length_label = ctk.CTkLabel(self.file_renamer_top_frame, textvariable=self.name_length_text)
+        self.name_length_label.grid(row=0, column=2, padx=5)
 
         # Categories button frame
         self.cat_button_frame = ctk.CTkFrame(self.file_renamer_scrollable_frame,
@@ -3041,12 +3048,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Gather the data and construct the name
             proposed_name = self.gather_and_construct()
 
+            # Set the proposed name to the char_length variable
+            char_length = len(proposed_name)
+
             # Handle name length constraints
             if len(proposed_name) > 255:
                 self.log_and_show("The proposed file name exceeds 255 characters. "
                                   "Operating system limitations prohibit this.",
                                   create_messagebox=True, error=True)
-                # Truncate the name
+                # Truncate the name for the display
                 proposed_name = f"...{proposed_name[180:]}"
 
             if len(proposed_name) > 250:
@@ -3058,6 +3068,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Set the name to the file display
             self.file_display_text.set(proposed_name)
+
+            # Set the length of the name to the name_length_text
+            self.name_length_text.set(char_length)
 
     # Method to undo the last category added to the queue
     def undo_last(self):
