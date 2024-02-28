@@ -241,8 +241,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.move_text_var = ctk.BooleanVar(value=config.getboolean('Settings', 'move_text_var', fallback=False))
         self.open_on_file_drop_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "open_on_file_drop_var", fallback=False))
-        self.remove_duplicates_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "remove_duplicates_var", fallback=True))
+        self.remove_artist_duplicates_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=True))
         self.double_check_var = ctk.BooleanVar(value=config.getboolean("Settings", "double_check_var", fallback=False))
         self.activate_logging_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "activate_logging_var", fallback=False))
@@ -672,8 +672,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_tabview = None
         self.remove_duplicates_switch = None
         self.artist_switch_frame = None
+        self.artist_identifier_label = None
         self.artist_identifier_switch = None
         self.ignore_known_artists_switch = None
+        self.artist_search_label = None
         self.file_ops_frame = None
         self.file_ops_switch_frame = None
         self.open_on_file_drop_switch = None
@@ -2073,15 +2075,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                 fg_color="transparent")
         self.artist_switch_frame.grid(row=0, column=0, padx=10, pady=10)
 
+        # Artist identifier label
+        self.artist_identifier_label = ctk.CTkLabel(self.artist_switch_frame, text="Artist Identifier")
+        self.artist_identifier_label.grid(row=0, column=0, padx=10, pady=5)
+
         # Switch to enable/disable artist identifier
         self.artist_identifier_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Artist Identifier",
                                                       variable=self.artist_identifier_var)
-        self.artist_identifier_switch.grid(row=0, column=0, padx=10, pady=10)
+        self.artist_identifier_switch.grid(row=1, column=0, padx=10, pady=10)
 
         # Switch to enable/disable ignore known artists for artist identifier
         self.ignore_known_artists_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Ignore Known Artists",
                                                          variable=self.ignore_known_artists_var)
-        self.ignore_known_artists_switch.grid(row=0, column=1, padx=10, pady=10)
+        self.ignore_known_artists_switch.grid(row=1, column=1, padx=10, pady=10)
+
+        # Artist Search label
+        self.artist_search_label = ctk.CTkLabel(self.artist_switch_frame, text="Artist Search")
+        self.artist_search_label.grid(row=2, column=0, padx=10, pady=5)
+
+        # Switch to enable/disable remove duplicates
+        self.remove_duplicates_switch = ctk.CTkSwitch(self.artist_switch_frame,
+                                                      text="Remove Artist Duplicates From Filename",
+                                                      variable=self.remove_artist_duplicates_var)
+        self.remove_duplicates_switch.grid(row=3, column=0, padx=10, pady=10)
 
         # Artist browse frame
         self.artist_browse_frame = ctk.CTkFrame(self.artist_frame, corner_radius=0,
@@ -2130,12 +2146,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.open_on_file_drop_switch = ctk.CTkSwitch(self.file_ops_switch_frame, text="Open File on Drag and Drop",
                                                       variable=self.open_on_file_drop_var)
         self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
-
-        # Switch to enable/disable remove duplicates
-        self.remove_duplicates_switch = ctk.CTkSwitch(self.file_ops_switch_frame,
-                                                      text="Remove Duplicates",
-                                                      variable=self.remove_duplicates_var)
-        self.remove_duplicates_switch.grid(row=0, column=1, padx=10, pady=10)
 
         # Master Entry frame
         self.master_entry_frame = ctk.CTkFrame(self.file_ops_frame, corner_radius=0, fg_color="transparent")
@@ -4103,11 +4113,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         custom_text = self.custom_text_entry.get().strip()
         base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
-        # Check if the remove_duplicates_var is set
-        if self.remove_duplicates_var.get():
-            # Remove duplicates from the queue
-            self.queue = list(dict.fromkeys(self.queue))
-
         # Filter and sort categories based on weights
         weighted_categories = [category for category in self.queue if category in self.categories]
         weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
@@ -4539,8 +4544,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Add artist prefix to the filename if artist_prefix is not empty
                     name = f"{artist_prefix} - {name}" if artist_prefix else name
 
-                    # Check if remove_duplicates_var is set
-                    if self.remove_duplicates_var.get():
+                    # Check if remove_artist_duplicates_var is set
+                    if self.remove_artist_duplicates_var.get():
                         # Call the remove_artist_duplicates_from_filename function to modify name
                         name = self.remove_artist_duplicates_from_filename(str(name))
                 except FileNotFoundError:

@@ -47,8 +47,8 @@ move_up_directory_var = False
 move_text_var = False
 ; Open file when drag and dropped into window
 open_on_file_drop_var = False
-; Remove duplicates in the queue
-remove_duplicates_var = False
+; Remove artist duplicates from the filename
+remove_artist_duplicates_var = False
 ; Create a double check reminder file
 double_check_var = False
 ; Activate logging
