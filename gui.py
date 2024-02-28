@@ -4078,7 +4078,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         self.log_and_show(f"No Artist Identifier result")
 
                 # Rename the file
-                os.rename(self.file_renamer_selected_file, new_path)
+                os.rename(self.file_renamer_selected_file, str(new_path))
                 self.log_and_show(f"File: '{os.path.basename(self.file_renamer_selected_file)}' renamed successfully. "
                                   f"\nSaved to: \n{new_path}")
                 self.handle_rename_success(new_path)
@@ -4087,7 +4087,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 if "Invalid cross-device link" in str(e):
                     # Attempt to use shutil.move if "Invalid cross-device link" error
                     try:
-                        shutil.move(self.file_renamer_selected_file, new_path)
+                        shutil.move(self.file_renamer_selected_file, str(new_path))
                         self.log_and_show(
                             f"File: '{os.path.basename(self.file_renamer_selected_file)}' renamed and moved "
                             f"successfully."
