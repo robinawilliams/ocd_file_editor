@@ -8,6 +8,8 @@ import configparser  # Module for working with configuration files
 import shutil  # Module for high-level file operations (copying, moving, etc.)
 import string  # Module for various string manipulation functions and constants
 import customtkinter as ctk  # Customtkinter for a modern gui
+import threading  # Importing threading module for concurrent execution
+import queue  # Importing queue module for implementing a simple FIFO queue
 import logging  # Logging module for capturing log messages
 import atexit  # Module for registering functions to be called when the program is closing
 from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
@@ -405,6 +407,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_last_used_file = ""
         self.video_editor_output_directory = ""
         self.acc_selected_artist = ""
+
+        # Initialize the queue for FIFO queue module functionality
+        self.queue = queue.Queue()
 
         # List of tab names for the add_remove_tabview
         self.add_remove_tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Replace", "Exclude",
@@ -5262,65 +5267,99 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         try:
             if os.path.isfile(self.name_normalizer_selected_file):
-                # If a single file is provided, directly process it
-                original_path, new_path = self.rename_and_move_file(self.name_normalizer_selected_file)
-
-                # Check if the tuple is the same to prevent no operations from being added to history
-                if original_path != new_path:
-                    # Append the operation to the history
-                    self.nn_history.append({
-                        'original_paths': [original_path],
-                        'new_paths': [new_path]
-                    })
+                # If a single file is provided, use threading to directly process it
+                threading.Thread(target=self.process_single_file, args=(self.name_normalizer_selected_file,)).start()
             else:
-                # Get folder contents and save to memory
-
-                # Initialize an empty list to store file paths
-                file_paths = []
-                original_paths = []
-                new_paths = []
-
-                # Log the os.walk state
-                if self.deep_walk_var.get():
-                    deep_walk_status = "including subdirectories"
-                else:
-                    deep_walk_status = "excluding subdirectories"
-                self.log_and_show(
-                    f"Info: os.walk, {deep_walk_status}, started on '{self.name_normalizer_selected_file}'")
-
-                # Traverse through the folder using os.walk
-                for root, dirs, files in os.walk(self.name_normalizer_selected_file):
-                    # Include subdirectories if the deep_walk_var is True or the root folder is selected
-                    if self.deep_walk_var.get() or root == self.name_normalizer_selected_file:
-                        for file in files:
-                            # Append the full file path to the list
-                            file_paths.append(str(os.path.join(root, file)))
-
-                        # Iterate through file paths and rename/move files
-                        for file_path in file_paths:
-                            original_path, new_path = self.rename_and_move_file(file_path)
-                            # Check if the tuple is the same to prevent no operations from being added to history
-                            if original_path != new_path:
-                                original_paths.append(original_path)
-                                new_paths.append(new_path)
-
-                        # Append the batch operation to the name normalizer history
-                        self.nn_history.append({
-                            'original_paths': original_paths,
-                            'new_paths': new_paths
-                        })
-
-            # Log the action if logging is enabled
-            self.log_and_show("File(s) have been processed successfully.")
-
-            # Reset GUI input fields if reset is True
-            if self.reset_var.get():
-                # Clear selection for the name_normalizer_window
-                self.clear_selection(frame_name="name_normalizer_window")
+                # Get folder contents and use threading to process the files
+                threading.Thread(target=self.process_folder, args=(self.name_normalizer_selected_file,)).start()
 
         except Exception as e:
             # Display error message if an exception occurs
             self.log_and_show(f"An error occurred: {e}", create_messagebox=True, error=True)
+
+    # Method to process a single file in the Name Normalizer module
+    def process_single_file(self, file_path):
+        original_path, new_path = self.rename_and_move_file(file_path)
+
+        # Check if the tuple is the same to prevent no operations from being added to history
+        if original_path != new_path:
+            # Append the operation to the history
+            self.queue.put({
+                'original_paths': [original_path],
+                'new_paths': [new_path]
+            })
+
+        # Log the action if logging is enabled
+        self.log_and_show("File has been processed successfully.")
+
+        # Reset GUI input fields if reset is True
+        if self.reset_var.get():
+            # Clear selection for the name_normalizer_window
+            self.clear_selection(frame_name="name_normalizer_window")
+
+        # Schedule the next check after 100 milliseconds (adjust as needed)
+        self.after(100, self.check_queue)
+
+    # Method to process the files of the folder(s) in the Name Normalizer module
+    def process_folder(self, folder_path):
+        # Initialize an empty list to store file paths
+        file_paths = []
+        original_paths = []
+        new_paths = []
+
+        # Log the os.walk state
+        if self.deep_walk_var.get():
+            deep_walk_status = "including subdirectories"
+        else:
+            deep_walk_status = "excluding subdirectories"
+
+        self.log_and_show(
+            f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'")
+
+        # Traverse through the folder using os.walk
+        for root, dirs, files in os.walk(folder_path):
+            # Include subdirectories if the deep_walk_var is True or the root folder is selected
+            if self.deep_walk_var.get() or root == folder_path:
+                for file in files:
+                    # Append the full file path to the list
+                    file_paths.append(str(os.path.join(root, file)))
+
+                # Iterate through file paths and rename/move files
+                for file_path in file_paths:
+                    original_path, new_path = self.rename_and_move_file(file_path)
+                    # Check if the tuple is the same to prevent no operations from being added to history
+                    if original_path != new_path:
+                        original_paths.append(original_path)
+                        new_paths.append(new_path)
+
+                # Append the batch operation to the name normalizer history
+                self.queue.put({
+                    'original_paths': original_paths,
+                    'new_paths': new_paths
+                })
+
+        # Log the action if logging is enabled
+        self.log_and_show("File(s) have been processed successfully.")
+
+        # Reset GUI input fields if reset is True
+        if self.reset_var.get():
+            # Clear selection for the name_normalizer_window
+            self.clear_selection(frame_name="name_normalizer_window")
+
+        # Schedule the next check after 100 milliseconds (adjust as needed)
+        self.after(100, self.check_queue)
+
+    # Method to periodically check the queue when for threading
+    def check_queue(self):
+        try:
+            while True:
+                result = self.queue.get_nowait()
+                self.nn_history.append(result)
+        except queue.Empty:
+            pass
+
+        # Schedule the next check after 100 milliseconds (adjust as needed)
+        self.after(100, self.check_queue)
 
     """
     Video Editor
