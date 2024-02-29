@@ -387,7 +387,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.output_directory = ""
         self.history = []
         self.nn_history = []
-        self.queue = []
+        self.file_renamer_queue = []
         self.cat_tabs = {}
         self.add_remove_tabs = {}
         self.settings_tabs = {}
@@ -2775,7 +2775,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     send2trash.send2trash(self.file_renamer_selected_file)
                     # Reset selected file, queue, and clear display elements
                     self.file_renamer_selected_file = ""
-                    self.queue = []
+                    self.file_renamer_queue = []
                     self.file_display_text.set("")
                     self.prefix_text_entry.delete(0, ctk.END)
                     self.custom_text_entry.delete(0, ctk.END)
@@ -2835,7 +2835,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Set the selected file to the file renamer last used file and update display
                 self.file_renamer_selected_file = self.file_renamer_last_used_file
 
-                self.queue = []
+                self.file_renamer_queue = []
                 self.update_file_display()
 
                 # Log the action if logging is enabled
@@ -3005,7 +3005,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.prefix_text_entry.delete(0, ctk.END)
             self.custom_text_entry.delete(0, ctk.END)
 
-            self.queue = []
+            self.file_renamer_queue = []
             self.update_file_display()
 
             # Open the input if the corresponding option is set
@@ -3069,16 +3069,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Handle name length constraints
             if char_length > 255:
                 # Check if there is an entry in the queue list
-                if len(self.queue) == 0:
+                if len(self.file_renamer_queue) == 0:
                     self.log_and_show("The proposed file name exceeds 255 characters. "
                                       "Operating system limitations prohibit this.", create_messagebox=True, error=True)
-                elif len(self.queue) > 0:
+                elif len(self.file_renamer_queue) > 0:
                     # Prompt the user to choose from the list using SelectOptionWindow
                     category_to_remove = SelectOptionWindow(title="Name Length Error",
                                                             prompt="The proposed file name exceeds 255 characters. "
                                                                    "\nOperating system limitations prohibit this. "
                                                                    "\nPlease choose a category to remove:",
-                                                            item_list=self.queue,
+                                                            item_list=self.file_renamer_queue,
                                                             label_text="Choose Category")
 
                     # Wait for the user to respond before proceeding
@@ -3089,7 +3089,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                     if chosen_category:
                         # Remove the category from the queue
-                        self.queue.remove(chosen_category)
+                        self.file_renamer_queue.remove(chosen_category)
                         self.log_and_show(f"Word removed from queue: {chosen_category}", not_logging=True)
 
                 if self.truncate_var.get():
@@ -3104,9 +3104,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to undo the last category added to the queue
     def undo_last(self):
-        if self.queue:
+        if self.file_renamer_queue:
             # Remove the last category from the queue and update display
-            self.queue.pop()
+            self.file_renamer_queue.pop()
             self.update_file_display()
             self.log_and_show("Last category removed", not_logging=True)
         else:
@@ -3254,7 +3254,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def clear_selection(self, frame_name):
         if frame_name == "file_renamer_window":
             self.file_renamer_selected_file = ""
-            self.queue = []
+            self.file_renamer_queue = []
             self.file_display_text.set("")
 
             # Clear text entries and reset output directory
@@ -3414,7 +3414,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.file_renamer_selected_file = file_path
 
                 # Clear the queue
-                self.queue = []
+                self.file_renamer_queue = []
                 # Update display
                 self.update_file_display()
 
@@ -3631,7 +3631,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Reset selected file, queue and update file renamer last used file
         self.file_renamer_selected_file = ""
-        self.queue = []
+        self.file_renamer_queue = []
         self.file_display_text.set("")
         self.prefix_text_entry.delete(0, ctk.END)
         self.custom_text_entry.delete(0, ctk.END)
@@ -3908,13 +3908,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Check if the category is not already in the queue
-        if category not in self.queue:
+        if category not in self.file_renamer_queue:
             # Add the category to the queue
-            self.queue.append(category)
+            self.file_renamer_queue.append(category)
             self.log_and_show(f"Word added to queue: {category}", not_logging=True)
 
         # Check if the category is already in the queue
-        elif category in self.queue:
+        elif category in self.file_renamer_queue:
             # Ask for confirmation of removing the category from the queue
             confirmation = self.ask_confirmation("Queue Conflict",
                                                  f"{category} is already in the queue. Do you want to remove it?")
@@ -3953,7 +3953,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Check if the category is not already in the queue
-        if category not in self.queue:
+        if category not in self.file_renamer_queue:
             # Check if the message is suppressed
             if not suppress:
                 # If not suppressed, log and show the message
@@ -3962,7 +3962,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Remove the category from the queue
-        self.queue.remove(category)
+        self.file_renamer_queue.remove(category)
         self.log_and_show(f"Word removed from queue: {category}", not_logging=True)
 
         # Update file display
@@ -4025,7 +4025,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def rename_files(self):
         # Check if an input is selected and either the queue is not empty or custom text is provided
         if self.file_renamer_selected_file and (
-                self.queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
+                self.file_renamer_queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
             # Gather the data from the gui
             (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
@@ -4152,7 +4152,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # If an input is selected and either the queue is empty or no custom text is provided show error
         elif self.file_renamer_selected_file and not (
-                self.queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
+                self.file_renamer_queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
             # Log the action if logging is enabled
             self.log_and_show("Input selected but nothing added to the queue. Nothing to rename.",
                               create_messagebox=True, error=True)
@@ -4175,7 +4175,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
         # Filter and sort categories based on weights
-        weighted_categories = [category for category in self.queue if category in self.categories]
+        weighted_categories = [category for category in self.file_renamer_queue if category in self.categories]
         weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
         # Return a tuple containing the data
@@ -4196,7 +4196,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         str: The constructed new file name.
         """
         # Construct the name based on placement choice (prefix, suffix, or special_character)
-        categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
+        categories = weighted_categories + [category for category in self.file_renamer_queue if category not in weighted_categories]
         categories_text = ' '.join(categories).strip()
 
         # Place the queue at the beginning of the name
