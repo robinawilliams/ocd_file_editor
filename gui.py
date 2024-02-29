@@ -4402,18 +4402,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.remove_custom_text_var.get():
                 # Remove custom text from the custom_text_to_replace dictionary
                 if self.replace_mode_var.get():
-                    for text_to_remove, replacement in self.custom_text_to_replace.items():
+                    for text_to_replace, replacement in self.custom_text_to_replace.items():
                         # Check if the text to remove is present in name (case-insensitive)
-                        pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
+                        pattern = re.compile(re.escape(text_to_replace), re.IGNORECASE)
 
                         # Replace the text with the specified replacement or remove if replacement is an empty string
                         name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
                 else:
                     # Check if the text to remove is present in name (case-sensitive)
-                    for text_to_remove, replacement in self.custom_text_to_replace.items():
+                    for text_to_replace, replacement in self.custom_text_to_replace.items():
                         # Replace the text with the specified replacement or remove if replacement is an empty string
-                        name = name.replace(text_to_remove, replacement) if replacement != "" else name.replace(
-                            text_to_remove, '')
+                        name = name.replace(text_to_replace, replacement) if replacement != "" else name.replace(
+                            text_to_replace, '')
 
             if self.remove_custom_text_var.get() or text_to_remove:
                 # Replace consecutive spaces with a single space when custom text is removed
