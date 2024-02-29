@@ -4025,7 +4025,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def rename_files(self):
         # Check if an input is selected and either the queue is not empty or custom text is provided
         if self.file_renamer_selected_file and (
-                self.file_renamer_queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
+                self.file_renamer_queue or self.prefix_text_entry.get().strip() or
+                self.custom_text_entry.get().strip()):
             # Gather the data from the gui
             (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
@@ -4152,7 +4153,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # If an input is selected and either the queue is empty or no custom text is provided show error
         elif self.file_renamer_selected_file and not (
-                self.file_renamer_queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
+                self.file_renamer_queue or self.prefix_text_entry.get().strip() or
+                self.custom_text_entry.get().strip()):
             # Log the action if logging is enabled
             self.log_and_show("Input selected but nothing added to the queue. Nothing to rename.",
                               create_messagebox=True, error=True)
@@ -4196,7 +4198,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         str: The constructed new file name.
         """
         # Construct the name based on placement choice (prefix, suffix, or special_character)
-        categories = weighted_categories + [category for category in self.file_renamer_queue if category not in weighted_categories]
+        categories = weighted_categories + [
+            category for category in self.file_renamer_queue if category not in weighted_categories]
         categories_text = ' '.join(categories).strip()
 
         # Place the queue at the beginning of the name
