@@ -3052,8 +3052,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to update the file display based on selected options
     def update_file_display(self, *_):
         if self.file_renamer_selected_file:
-            # Gather the data and construct the name
-            proposed_name = self.gather_and_construct()
+            # Gather the data from the gui
+            (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
+
+            # Construct the name
+            proposed_name = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
+                                                    extension)
 
             # Set the proposed name to the char_length variable
             char_length = len(proposed_name)
@@ -4014,8 +4018,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Check if an input is selected and either the queue is not empty or custom text is provided
         if self.file_renamer_selected_file and (
                 self.queue or self.prefix_text_entry.get().strip() or self.custom_text_entry.get().strip()):
-            # Gather the data and construct the name
-            name = self.gather_and_construct()
+            # Gather the data from the gui
+            (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
+
+            # Construct the name
+            name = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
+                                           extension)
 
             # If move_text_var is set, move the text between - and __-__
             if self.move_text_var.get():
@@ -4145,7 +4153,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Log the action if logging is enabled
             self.log_and_show("No input selected. Nothing to rename.", create_messagebox=True, error=True)
 
-    def gather_and_construct(self):
+    def gather_and_sort(self):
+        """
+        Gather information from the gui and sort categories based on weights.
+
+        Returns:
+        tuple: A tuple containing base_name, weighted_categories, prefix_text, custom_text, and extension.
+        """
+
         # Get custom text, prefix_text, basename, and file extension
         prefix_text = self.prefix_text_entry.get().strip()
         custom_text = self.custom_text_entry.get().strip()
@@ -4155,12 +4170,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         weighted_categories = [category for category in self.queue if category in self.categories]
         weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
 
-        # Construct a name using base name, weighted categories, custom text, and extension
-        name = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text, extension)
-
-        return name
+        # Return a tuple containing the data
+        return base_name, weighted_categories, prefix_text, custom_text, extension
 
     def construct_new_name(self, base_name, weighted_categories, prefix_text, custom_text, extension):
+        """
+        Construct a new file name based on specified parameters.
+
+        Args:
+        base_name (str): The original base name of the file.
+        weighted_categories (list): List of categories sorted based on weights.
+        prefix_text (str): Custom prefix text.
+        custom_text (str): Custom text.
+        extension (str): File extension.
+
+        Returns:
+        str: The constructed new file name.
+        """
         # Construct the name based on placement choice (prefix, suffix, or special_character)
         categories = weighted_categories + [category for category in self.queue if category not in weighted_categories]
         categories_text = ' '.join(categories).strip()
