@@ -3775,7 +3775,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
             ctk.CTkButton: The created category button.
         """
-        return ctk.CTkButton(tab, text=category, command=lambda c=category: self.add_to_queue(c))
+        # Set the category to the button text variable for potential formatting
+        button_text = category
+
+        if self.truncate_var.get():
+            # Truncate the text after x characters for GUI friendly formatting.
+            button_text = f"{category[:13]}..." if len(button_text) > 16 else category
+
+        return ctk.CTkButton(tab, text=button_text, command=lambda c=category: self.add_to_queue(c))
 
     def refresh_category_buttons(self, *_):
         """
