@@ -131,8 +131,8 @@ remove_backslash_var = False
 remove_angle_bracket_var = False
 ; Remove question marks
 remove_question_mark_var = False
-; Remove double spaces
-remove_double_space_var = False
+; Remove extra whitespaces
+remove_extra_whitespace_var = False
 ; Titlefy the name
 title_var = False
 ; Artist File Search
