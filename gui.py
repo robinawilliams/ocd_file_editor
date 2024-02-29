@@ -230,19 +230,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             value=config.getboolean("Settings", "sort_reverse_order_var", fallback=False))
         self.suggest_output_directory_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "suggest_output_directory_var", fallback=False))
-        self.artist_identifier_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "artist_identifier_var", fallback=False))
+        self.artist_search_var = ctk.BooleanVar(value=config.getboolean("Settings", "artist_search_var",
+                                                                        fallback=False))
         self.ignore_known_artists_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "ignore_known_artists_var", fallback=False))
         self.artist_common_categories_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "artist_common_categories_var", fallback=False))
+        self.remove_artist_duplicates_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=True))
         self.move_up_directory_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "move_up_directory_var", fallback=False))
         self.move_text_var = ctk.BooleanVar(value=config.getboolean('Settings', 'move_text_var', fallback=False))
         self.open_on_file_drop_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "open_on_file_drop_var", fallback=False))
-        self.remove_artist_duplicates_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=True))
         self.double_check_var = ctk.BooleanVar(value=config.getboolean("Settings", "double_check_var", fallback=False))
         self.activate_logging_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "activate_logging_var", fallback=False))
@@ -361,8 +361,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         self.title_var = ctk.BooleanVar(value=config.getboolean("Settings", "title_var", fallback=False))
 
-        self.artist_file_search_var = ctk.BooleanVar(value=config.getboolean("Settings", "artist_file_search_var",
-                                                                             fallback=False))
+        self.artist_identifier_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "artist_identifier_var", fallback=False))
 
         self.reset_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_var", fallback=False))
 
@@ -531,7 +531,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.replace_mode_switch = None
         self.checkbox_frame8 = None
         self.remove_double_space_checkbox = None
-        self.artist_search_checkbox = None
+        self.artist_identifier_checkbox = None
         self.deep_walk_checkbox = None
         self.reset_checkbox = None
         self.output_directory_frame = None
@@ -676,10 +676,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_tabview = None
         self.remove_duplicates_switch = None
         self.artist_switch_frame = None
-        self.artist_identifier_label = None
-        self.artist_identifier_switch = None
-        self.ignore_known_artists_switch = None
         self.artist_search_label = None
+        self.artist_search_switch = None
+        self.ignore_known_artists_switch = None
+        self.artist_identifier_label = None
         self.file_ops_frame = None
         self.file_ops_switch_frame = None
         self.open_on_file_drop_switch = None
@@ -1342,11 +1342,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               variable=self.title_var)
         self.title_checkbox.grid(row=0, column=1, padx=10, pady=10)
 
-        # Checkbox to enable/disable Artist Search
-        self.artist_search_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
-                                                      text="Artist Search",
-                                                      variable=self.artist_file_search_var)
-        self.artist_search_checkbox.grid(row=0, column=2, padx=10, pady=10)
+        # Checkbox to enable/disable Artist Identifier
+        self.artist_identifier_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
+                                                          text="Artist Identifier",
+                                                          variable=self.artist_identifier_var)
+        self.artist_identifier_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
         # Checkbox to enable/disable include subdirectories
         self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
@@ -2085,23 +2085,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                 fg_color="transparent")
         self.artist_switch_frame.grid(row=0, column=0, padx=10, pady=10)
 
-        # Artist identifier label
-        self.artist_identifier_label = ctk.CTkLabel(self.artist_switch_frame, text="Artist Identifier")
-        self.artist_identifier_label.grid(row=0, column=0, padx=10, pady=5)
+        # Artist Search label
+        self.artist_search_label = ctk.CTkLabel(self.artist_switch_frame, text="Artist Search")
+        self.artist_search_label.grid(row=0, column=0, padx=10, pady=5)
 
-        # Switch to enable/disable artist identifier
-        self.artist_identifier_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Artist Identifier",
-                                                      variable=self.artist_identifier_var)
-        self.artist_identifier_switch.grid(row=1, column=0, padx=10, pady=10)
+        # Switch to enable/disable artist search
+        self.artist_search_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Artist Search",
+                                                  variable=self.artist_search_var)
+        self.artist_search_switch.grid(row=1, column=0, padx=10, pady=10)
 
-        # Switch to enable/disable ignore known artists for artist identifier
+        # Switch to enable/disable ignore known artists for artist search
         self.ignore_known_artists_switch = ctk.CTkSwitch(self.artist_switch_frame, text="Ignore Known Artists",
                                                          variable=self.ignore_known_artists_var)
         self.ignore_known_artists_switch.grid(row=1, column=1, padx=10, pady=10)
 
-        # Artist Search label
-        self.artist_search_label = ctk.CTkLabel(self.artist_switch_frame, text="Artist Search")
-        self.artist_search_label.grid(row=2, column=0, padx=10, pady=5)
+        # Artist Identifier label
+        self.artist_identifier_label = ctk.CTkLabel(self.artist_switch_frame, text="Artist Identifier")
+        self.artist_identifier_label.grid(row=2, column=0, padx=10, pady=5)
 
         # Switch to enable/disable remove duplicates
         self.remove_duplicates_switch = ctk.CTkSwitch(self.artist_switch_frame,
@@ -4102,14 +4102,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Get a non-conflicting filename
                     new_path = self.get_non_conflicting_filename(new_path)
 
-                # Check if Artist Identifier is true
-                if self.artist_identifier_var.get():
-                    # Use artist identifier to find other instances of artists
-                    identified = self.artist_identifier()
+                # Check if Artist Search is true
+                if self.artist_search_var.get():
+                    # Use artist search to find other instances of artists in files outside the current folder
+                    identified = self.artist_search()
 
                     if identified:
                         # Log the result and display a messagebox to the user
-                        self.log_and_show(f"Artist Identifier: "
+                        self.log_and_show(f"Artist Search: "
                                           f"\nFile name: "
                                           f"\n{os.path.basename(identified)} "
                                           f"\nFile path: "
@@ -4117,7 +4117,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                           create_messagebox=True)
                     else:
                         # Log the action
-                        self.log_and_show(f"No Artist Identifier result")
+                        self.log_and_show(f"No Artist Search result")
 
                 # Rename the file
                 os.rename(self.file_renamer_selected_file, str(new_path))
@@ -4830,7 +4830,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         name = ' '.join(name.split())
         return name
 
-    def artist_search(self, name):
+    def artist_identifier(self, name):
         try:
             # Read the list of artists from the artist_file
             with open(self.artist_file, 'r') as artist_list_file:
@@ -4858,7 +4858,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         except FileNotFoundError:
             self.log_and_show(f"File not found: {self.artist_file}", create_messagebox=True, error=True)
         except Exception as e:
-            self.log_and_show(f"Artist search failed {self.artist_file}: {e}", create_messagebox=True,
+            self.log_and_show(f"Artist Identifier failed {self.artist_file}: {e}", create_messagebox=True,
                               error=True)
         return name
 
@@ -4888,7 +4888,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         Remove artist names from the given file name by processing the list of artists
         read from the artist_file and modifying the file name accordingly. The intent is to give the user the option
-        to maintain the rest of the original file name after the artist search, or remove the now duplicate entries
+        to maintain the rest of the original file name after the Artist Identifier, or remove the now duplicate entries
         for a clean file name.
 
         Parameters:
@@ -5102,9 +5102,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Remove extra white space
                 name = self.remove_extra_whitespace(name)
 
-            if self.artist_file_search_var.get():
+            if self.artist_identifier_var.get():
                 # Process artist names to place identified artist(s) at the beginning
-                name = self.artist_search(name)
+                name = self.artist_identifier(name)
 
             if self.tail_var.get():
                 # Add tail
@@ -5214,13 +5214,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                               create_messagebox=True, error=True)
             return
 
-        # Check if artist file search is enabled
-        if self.artist_file_search_var.get():
+        # Check if artist identifier is enabled
+        if self.artist_identifier_var.get():
             # Check if artist file is not provided
             if not self.artist_file:
                 # Log and display an error message
                 self.log_and_show(
-                    "No artist file provided. Please provide one and try again, or turn off Artist Search.",
+                    "No artist file provided. Please provide one and try again, or turn off Artist Identifier.",
                     create_messagebox=True, error=True)
                 return
             # Check if artist file does not exist
@@ -5228,7 +5228,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Log and display an error message
                 self.log_and_show(f"The artist file does not exist: '{self.artist_file}'"
                                   f"\nPlease ensure the provided Artist File exists, "
-                                  f"\nor turn off Artist Search to proceed.\nSee FAQ",
+                                  f"\nor turn off Artist Identifier to proceed.\nSee FAQ",
                                   create_messagebox=True, error=True)
                 return
 
@@ -6636,8 +6636,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def refresh_buttons_and_tabs(self, *_):
         self.refresh_category_buttons()
 
-    # Method to attempt to identify Artists
-    def artist_identifier(self):
+    # Method to search for other instances of Artists in files outside the current folder
+    def artist_search(self):
         # Check if an input is selected
         if not self.file_renamer_selected_file:
             # If no input is selected, return none
@@ -6647,7 +6647,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Check if self.artist_directory exists
         if not os.path.exists(self.artist_directory):
             # If artist directory does not exist, display an error message and return none
-            self.log_and_show(f"Artist Identifier cannot function as intended since the Artist Directory"
+            self.log_and_show(f"Artist Search cannot function as intended since the Artist Directory"
                               f" does not exist."
                               f"\nPlease ensure Artist Directory: '{self.artist_directory}' exists.",
                               create_messagebox=True, error=True)
@@ -6660,7 +6660,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Check if there is a '-' in the name
             if '-' not in base_name:
                 # If no '-', return none
-                self.log_and_show("No '-' found in the file name. Cannot identify artist.")
+                self.log_and_show("No '-' found in the file name. Cannot identify artist for Artist Search "
+                                  "functionality.")
                 return None
 
             # Extract the artist from the text before '-'
@@ -6668,7 +6669,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Check if the artist is a directory in the root of self.artist_directory
             if self.ignore_known_artists_var.get() and artist in os.listdir(self.artist_directory):
-                self.log_and_show(f"Artist Identifier ignoring known artist '{artist}' present as a directory.")
+                self.log_and_show(f"Artist Search ignoring known artist '{artist}' present as a directory.")
                 return None
 
             # Search for a case-insensitive match for the artist in self.artist_directory
@@ -6697,7 +6698,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         except Exception as e:
             # Handle any unexpected exceptions and log an error message
-            self.log_and_show(f"Unexpected error identifying artist: {e}",
+            self.log_and_show(f"Unexpected error identifying artist for Artist Search: {e}",
                               create_messagebox=True, error=True)
             return None
 
