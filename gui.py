@@ -355,7 +355,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                                "remove_question_mark_var",
                                                                                fallback=False))
 
-        self.remove_double_space_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_double_space_var",
+        self.remove_extra_whitespace_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "remove_extra_whitespace_var",
                                                                               fallback=False))
 
         self.title_var = ctk.BooleanVar(value=config.getboolean("Settings", "title_var", fallback=False))
@@ -1329,10 +1330,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame8.grid(row=9, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable remove double spaces
+        # Checkbox to enable/disable remove extra whitespace
         self.remove_double_space_checkbox = ctk.CTkCheckBox(self.checkbox_frame8,
-                                                            text="Remove double spaces",
-                                                            variable=self.remove_double_space_var)
+                                                            text="Remove extra whitespace",
+                                                            variable=self.remove_extra_whitespace_var)
         self.remove_double_space_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable Titlefy the name
@@ -4301,6 +4302,587 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Name Normalizer
     """
 
+    def remove_custom_user_text(self, name):
+        """
+        Remove custom user-specified text from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with custom user text removed.
+        """
+        try:
+            # Get the text to remove from the entry
+            text_to_remove = self.custom_text_removal_entry.get().strip()
+        except Exception as e:
+            self.log_and_show(f"An error occurred getting the custom text to remove: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name
+
+        # Check if text to remove is provided
+        if text_to_remove:
+            if self.replace_mode_var.get():
+                # Check if the text to remove is present in name (case-insensitive)
+                pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
+
+                # Remove all instances of the text to remove from name
+                name = pattern.sub('', name)
+
+                # Replace consecutive spaces with a single space when custom text is removed
+                name = re.sub(r'\s+', ' ', name)
+            else:
+                # Check if the text to remove is present in name (case-sensitive)
+                if text_to_remove in name:
+                    # Remove all instances of the text to remove from name
+                    name = name.replace(text_to_remove, '')
+
+                    # Replace consecutive spaces with a single space when custom text is removed
+                    name = re.sub(r'\s+', ' ', name)
+
+        return name
+
+    def remove_custom_text(self, name):
+        """
+        Remove custom text from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with custom text removed or replaced.
+        """
+        # Remove custom text from the custom_text_to_replace dictionary
+        if self.replace_mode_var.get():
+            for text_to_replace, replacement in self.custom_text_to_replace.items():
+                # Check if the text to remove is present in name (case-insensitive)
+                pattern = re.compile(re.escape(text_to_replace), re.IGNORECASE)
+
+                # Replace the text with the specified replacement or remove if replacement is an empty string
+                name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
+        else:
+            # Check if the text to remove is present in name (case-sensitive)
+            for text_to_replace, replacement in self.custom_text_to_replace.items():
+                # Replace the text with the specified replacement or remove if replacement is an empty string
+                name = name.replace(text_to_replace, replacement) if replacement != "" else name.replace(
+                    text_to_replace, '')
+
+        # Replace consecutive spaces with a single space when custom text is removed
+        name = re.sub(r'\s+', ' ', name)
+
+        return name
+
+    @staticmethod
+    def remove_non_ascii_symbols(name):
+        """
+        Remove non-ASCII symbols from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with non-ASCII symbols removed.
+        """
+        # Get all printable ASCII characters
+        standard_chars = set(string.printable)
+
+        # Replace non-ASCII characters with their ASCII equivalents (ignore slashes)
+        name = ''.join(unidecode(char) if char not in standard_chars and char not in ['⁄', '／']
+                       else char if char not in ['⁄', '／'] else ' ' for char in name)
+        return name
+
+    @staticmethod
+    def remove_symbols(name, remove_chars):
+        """
+        Remove specified symbols from the provided name.
+
+        Args:
+        name (str): The original name.
+        remove_chars (str): The characters to be removed from the name.
+
+        Returns:
+        str: The modified name with specified symbols removed.
+        """
+        for char in remove_chars:
+            name = name.replace(char, "")
+        return name
+
+    @staticmethod
+    def remove_numbers(name):
+        """
+        Remove all numbers from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with numbers removed.
+        """
+        name = ''.join(char for char in name if not char.isdigit())
+        return name
+
+    @staticmethod
+    def remove_text_trailing(name, symbol):
+        """
+        Remove text in parentheses and trailing text.
+
+        Args:
+        name (str): The original name.
+        symbol (str): The symbol indicating the beginning of the trailing text.
+
+        Returns:
+        str: The modified name with trailing text removed.
+        """
+        index = name.find(symbol)
+        if index != -1:
+            name = name[:index].strip()
+        return name
+
+    @staticmethod
+    def remove_dashes(name):
+        """
+        Remove dashes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with dashes removed.
+        """
+        name = re.sub(r'-', '', name)
+        return name
+
+    @staticmethod
+    def remove_endashes(name):
+        """
+        Remove endashes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with endashes removed.
+        """
+        name = re.sub(r'–', '', name)
+        return name
+
+    @staticmethod
+    def remove_emdashes(name):
+        """
+        Remove emdashes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with emdashes removed.
+        """
+        name = re.sub(r'—', '', name)
+        return name
+
+    @staticmethod
+    def remove_ampersands(name):
+        """
+        Remove ampersands from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with ampersands removed.
+        """
+        name = re.sub(r'&', '', name)
+        return name
+
+    @staticmethod
+    def remove_at_symbols(name):
+        """
+        Remove at symbols from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with at symbols removed.
+        """
+        name = re.sub(r'@', '', name)
+        return name
+
+    @staticmethod
+    def remove_underscores(name):
+        """
+        Remove underscores from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with underscores replaced by spaces.
+        """
+        name = name.replace('_', ' ')
+        return name
+
+    @staticmethod
+    def remove_commas(name):
+        """
+        Remove commas from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with commas removed.
+        """
+        name = name.replace(',', '')
+        return name
+
+    @staticmethod
+    def remove_single_quotes(name):
+        """
+        Remove single quotes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with single quotes removed.
+        """
+        name = name.replace('\'', '')
+        return name
+
+    @staticmethod
+    def remove_double_quotes(name):
+        """
+        Remove double quotes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with double quotes removed.
+        """
+        name = name.replace('\"', '')
+        return name
+
+    @staticmethod
+    def remove_colons(name):
+        """
+        Remove colons from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with colons removed.
+        """
+        name = name.replace(':', '')
+        return name
+
+    @staticmethod
+    def remove_semicolons(name):
+        """
+        Remove semicolons from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with semicolons removed.
+        """
+        name = name.replace(';', '')
+        return name
+
+    @staticmethod
+    def remove_percents(name):
+        """
+        Remove percents from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with percents removed.
+        """
+        name = name.replace('%', '')
+        return name
+
+    @staticmethod
+    def remove_carets(name):
+        """
+        Remove carets from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with carets removed.
+        """
+        name = name.replace('^', '')
+        return name
+
+    @staticmethod
+    def remove_parenthesis(name):
+        """
+        Remove parenthesis from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with parenthesis removed.
+        """
+        name = name.replace('(', '').replace(')', '')
+        return name
+
+    @staticmethod
+    def remove_hashtags(name):
+        """
+        Remove hashtags from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with hashtags removed.
+        """
+        name = name.replace('#', '')
+        return name
+
+    @staticmethod
+    def remove_dollar_signs(name):
+        """
+        Remove dollar signs from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with dollar signs removed.
+        """
+        name = name.replace('$', '')
+        return name
+
+    @staticmethod
+    def remove_asterisks(name):
+        """
+        Remove asterisks from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with asterisks removed.
+        """
+        name = name.replace('*', '')
+        return name
+
+    @staticmethod
+    def remove_plus_signs(name):
+        """
+        Remove plus signs from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with plus signs removed.
+        """
+        name = name.replace('+', '')
+        return name
+
+    @staticmethod
+    def remove_equal_signs(name):
+        """
+        Remove equal signs from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with equal signs removed.
+        """
+        name = name.replace('=', '')
+        return name
+
+    @staticmethod
+    def remove_curly_braces(name):
+        """
+        Remove curly braces from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with curly braces removed.
+        """
+        name = name.replace('{', '').replace('}', '')
+        return name
+
+    @staticmethod
+    def remove_square_brackets(name):
+        """
+        Remove square brackets from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with square brackets removed.
+        """
+        name = name.replace('[', '').replace(']', '')
+        return name
+
+    @staticmethod
+    def remove_pipes(name):
+        """
+        Remove pipes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with pipes removed.
+        """
+        name = name.replace('|', '')
+        return name
+
+    @staticmethod
+    def remove_backslashes(name):
+        """
+        Remove backslashes from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with backslashes removed.
+        """
+        name = name.replace('\\', '')
+        return name
+
+    @staticmethod
+    def remove_angle_brackets(name):
+        """
+        Remove angle brackets from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with angle brackets removed.
+        """
+        name = name.replace('<', '').replace('>', '')
+        return name
+
+    @staticmethod
+    def remove_question_marks(name):
+        """
+        Remove question marks from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with question marks removed.
+        """
+        name = name.replace('?', '')
+        return name
+
+    @staticmethod
+    def title_the_name(name):
+        """
+        Make the file name a title while preserving lowercase letters after apostrophes in contractions.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with title case.
+        """
+        words = name.split()
+        formatted_words = []
+        for word in words:
+            if "'" in word:
+                # If the word is a contraction with ', capitalize the first part and keep the rest in lowercase
+                parts = word.split("'")
+                formatted_word = "'".join([parts[0].capitalize()] + [part.lower() for part in parts[1:]])
+            else:
+                # Capitalize the word as usual
+                formatted_word = word.capitalize()
+
+            formatted_words.append(formatted_word)
+        # Join the words back into a formatted name
+        name = ' '.join(formatted_words)
+        return name
+
+    @staticmethod
+    def remove_extra_whitespace(name):
+        """
+        Sanitize the filename by removing extra whitespaces.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with extra whitespaces removed.
+        """
+        name = ' '.join(name.split())
+        return name
+
+    def artist_search(self, name):
+        try:
+            # Read the list of artists from the artist_file
+            with open(self.artist_file, 'r') as artist_list_file:
+                artists = [artist.strip() for artist in artist_list_file]
+
+            # Search for artist names and add them as prefixes
+            artist_prefix = ''
+            for artist in artists:
+                # Make the search case-insensitive
+                regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
+                if regex.search(name):
+                    artist_prefix += f"{artist} "
+
+            # Remove extra spaces and dashes at the beginning and end
+            artist_prefix = artist_prefix.strip()
+            name = name.strip("-")
+
+            # Add artist prefix to the filename if artist_prefix is not empty
+            name = f"{artist_prefix} - {name}" if artist_prefix else name
+
+            # Check if remove_artist_duplicates_var is set
+            if self.remove_artist_duplicates_var.get():
+                # Call the remove_artist_duplicates_from_filename function to modify name
+                name = self.remove_artist_duplicates_from_filename(str(name))
+        except FileNotFoundError:
+            self.log_and_show(f"File not found: {self.artist_file}", create_messagebox=True, error=True)
+        except Exception as e:
+            self.log_and_show(f"Artist search failed {self.artist_file}: {e}", create_messagebox=True,
+                              error=True)
+        return name
+
+    @staticmethod
+    def add_tail(name):
+        """
+        Add a tail to the end of the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with the added tail.
+        """
+        # Add tail to the end of the name
+        name += "__-__ "
+
+        # Catchall for situations where only "artist -__-__" is present after operation
+        name = re.sub(r' -__-__', '', name).strip()
+
+        # Catchall for situations where the tail is already present "__-____-__"
+        name = re.sub(r'__-____-__', '__-__', name).strip()
+        return name
+
     # Method to remove duplicate artists from the filename
     def remove_artist_duplicates_from_filename(self, file_name):
         """
@@ -4346,7 +4928,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # No dash found, return the original filename
             return file_name
 
-        # Sanitize file name. Remove double spaces.
+        # Sanitize file name. Remove extra whitespace.
         new_file_name = ' '.join(new_file_name.split()).strip()
 
         # Check for double dashes and remove the second dash
@@ -4375,256 +4957,158 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Check if the input has one of the video file extensions
         if ext.lower() in self.file_extensions:
-            # Remove custom text
-            try:
-                # Get the text to remove from the entry
-                text_to_remove = self.custom_text_removal_entry.get().strip()
-            except Exception as e:
-                self.log_and_show(f"An error occurred getting the custom text to replace: {str(e)}",
-                                  create_messagebox=True,
-                                  error=True)
-                text_to_remove = None
-
-            # Check if text to remove is provided
-            if text_to_remove:
-                if self.replace_mode_var.get():
-                    # Check if the text to remove is present in name (case-insensitive)
-                    pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
-
-                    # Remove all instances of the text to remove from name
-                    name = pattern.sub('', name)
-                else:
-                    # Check if the text to remove is present in name (case-sensitive)
-                    if text_to_remove in name:
-                        # Remove all instances of the text to remove from name
-                        name = name.replace(text_to_remove, '')
+            # Remove custom text provided by the user
+            name = self.remove_custom_user_text(name)
 
             if self.remove_custom_text_var.get():
                 # Remove custom text from the custom_text_to_replace dictionary
-                if self.replace_mode_var.get():
-                    for text_to_replace, replacement in self.custom_text_to_replace.items():
-                        # Check if the text to remove is present in name (case-insensitive)
-                        pattern = re.compile(re.escape(text_to_replace), re.IGNORECASE)
-
-                        # Replace the text with the specified replacement or remove if replacement is an empty string
-                        name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
-                else:
-                    # Check if the text to remove is present in name (case-sensitive)
-                    for text_to_replace, replacement in self.custom_text_to_replace.items():
-                        # Replace the text with the specified replacement or remove if replacement is an empty string
-                        name = name.replace(text_to_replace, replacement) if replacement != "" else name.replace(
-                            text_to_replace, '')
-
-            if self.remove_custom_text_var.get() or text_to_remove:
-                # Replace consecutive spaces with a single space when custom text is removed
-                name = re.sub(r'\s+', ' ', name)
+                name = self.remove_custom_text(name)
 
             if self.remove_non_ascii_symbols_var.get():
-                # Get all printable ASCII characters
-                standard_chars = set(string.printable)
-
-                # Replace non-ASCII characters with their ASCII equivalents (ignore slashes)
-                name = ''.join(unidecode(char) if char not in standard_chars and char not in ['⁄', '／']
-                               else char if char not in ['⁄', '／'] else ' ' for char in name)
+                # Remove non-ASCII characters
+                name = self.remove_non_ascii_symbols(name)
 
             if self.remove_all_symbols_var.get():
                 # Define the characters to be removed
-                remove_chars = ",;:@$%^&#*+=(){}[]|\\<>\'\"?_-–—"
+                all_symbols = ",;:@$%^&#*+=(){}[]|\\<>\'\"?_-–—"
 
-                # Replace each unwanted character with an empty string
-                for char in remove_chars:
-                    name = name.replace(char, "")
+                # Remove the symbols
+                name = self.remove_symbols(name, all_symbols)
 
             if self.remove_most_symbols_var.get():
                 # Define the characters to be removed
-                remove_chars = ",;:@$%^&*+={}[]|\\<>\"?-–—"
+                most_symbols = ",;:@$%^&*+={}[]|\\<>\"?-–—"
 
-                # Replace each unwanted character with an empty string
-                for char in remove_chars:
-                    name = name.replace(char, "")
+                # Remove the symbols
+                name = self.remove_symbols(name, most_symbols)
 
             if self.remove_number_var.get():
                 # Remove all numbers from the name
-                name = ''.join(char for char in name if not char.isdigit())
+                name = self.remove_numbers(name)
 
             if self.remove_hashtag_trail_var.get():
-                # Find the first occurrence of '#'
-                index = name.find('#')
-
-                # Remove the # and everything afterward
-                if index != -1:
-                    name = name[:index].strip()
+                # Remove the # and trailing text
+                name = self.remove_text_trailing(name, "#")
 
             if self.remove_parenthesis_trail_var.get():
-                # Find the first occurrence of beginning parenthesis
-                index = name.find('(')
-
-                # Remove the ( and everything afterward
-                if index != -1:
-                    name = name[:index].strip()
+                # Remove the ( and trailing text
+                name = self.remove_text_trailing(name, "(")
 
             if self.remove_dash_var.get():
                 # Remove dashes
-                name = re.sub(r'-', '', name)
+                name = self.remove_dashes(name)
 
             if self.remove_endash_var.get():
                 # Remove endashes
-                name = re.sub(r'–', '', name)
+                name = self.remove_endashes(name)
 
             if self.remove_emdash_var.get():
                 # Remove emdashes
-                name = re.sub(r'—', '', name)
+                name = self.remove_emdashes(name)
 
             if self.remove_ampersand_var.get():
                 # Remove ampersands
-                name = re.sub(r'&', '', name)
+                name = self.remove_ampersands(name)
 
             if self.remove_at_var.get():
                 # Remove at symbols
-                name = re.sub(r'@', '', name)
+                name = self.remove_at_symbols(name)
 
             if self.remove_underscore_var.get():
                 # Remove underscores
-                name = name.replace('_', ' ')
+                name = self.remove_underscores(name)
 
             if self.remove_comma_var.get():
                 # Remove commas
-                name = name.replace(',', '')
+                name = self.remove_commas(name)
 
             if self.remove_single_quote_var.get():
                 # Remove single quotes
-                name = name.replace('\'', '')
+                name = self.remove_single_quotes(name)
 
             if self.remove_double_quote_var.get():
                 # Remove double quotes
-                name = name.replace('\"', '')
+                name = self.remove_double_quotes(name)
 
             if self.remove_colon_var.get():
                 # Remove colons
-                name = name.replace(':', '')
+                name = self.remove_colons(name)
 
             if self.remove_semicolon_var.get():
                 # Remove semicolons
-                name = name.replace(';', '')
+                name = self.remove_semicolons(name)
 
             if self.remove_percent_var.get():
                 # Remove percents
-                name = name.replace('%', '')
+                name = self.remove_percents(name)
 
             if self.remove_caret_var.get():
                 # Remove carets
-                name = name.replace('^', '')
+                name = self.remove_carets(name)
 
             if self.remove_parenthesis_var.get():
                 # Remove parenthesis
-                name = name.replace('(', '').replace(')', '')
+                name = self.remove_parenthesis(name)
 
             if self.remove_hashtag_var.get():
                 # Remove hashtags
-                name = name.replace('#', '')
+                name = self.remove_hashtags(name)
 
             if self.remove_dollar_var.get():
                 # Remove dollars
-                name = name.replace('$', '')
+                name = self.remove_dollar_signs(name)
 
             if self.remove_asterisk_var.get():
                 # Remove asterisks
-                name = name.replace('*', '')
+                name = self.remove_asterisks(name)
 
             if self.remove_plus_var.get():
                 # Remove plus signs
-                name = name.replace('+', '')
+                name = self.remove_plus_signs(name)
 
             if self.remove_equal_var.get():
                 # Remove equal signs
-                name = name.replace('=', '')
+                name = self.remove_equal_signs(name)
 
             if self.remove_curly_brace_var.get():
                 # Remove curly braces
-                name = name.replace('{', '').replace('}', '')
+                name = self.remove_curly_braces(name)
 
             if self.remove_square_bracket_var.get():
                 # Remove square brackets
-                name = name.replace('[', '').replace(']', '')
+                name = self.remove_square_brackets(name)
 
             if self.remove_pipe_var.get():
                 # Remove pipes
-                name = name.replace('|', '')
+                name = self.remove_pipes(name)
 
             if self.remove_backslash_var.get():
                 # Remove backslashes
-                name = name.replace('\\', '')
+                name = self.remove_backslashes(name)
 
             if self.remove_angle_bracket_var.get():
                 # Remove angle brackets
-                name = name.replace('<', '').replace('>', '')
+                name = self.remove_angle_brackets(name)
 
             if self.remove_question_mark_var.get():
                 # Remove question marks
-                name = name.replace('?', '')
+                name = self.remove_question_marks(name)
 
             if self.title_var.get():
                 # Make file name a title while preserving lowercase letters after apostrophes in contractions
-                words = name.split()
-                formatted_words = []
+                name = self.title_the_name(name)
 
-                for word in words:
-                    if "'" in word:
-                        # If the word is a contraction with ', capitalize the first part and keep the rest in lowercase
-                        parts = word.split("'")
-                        formatted_word = "'".join([parts[0].capitalize()] + [part.lower() for part in parts[1:]])
-                    else:
-                        # Capitalize the word as usual
-                        formatted_word = word.capitalize()
+            if self.remove_extra_whitespace_var.get():
+                # Remove extra white space
+                name = self.remove_extra_whitespace(name)
 
-                    formatted_words.append(formatted_word)
-
-                # Join the words back into a formatted name
-                name = ' '.join(formatted_words)
-
-            if self.remove_double_space_var.get():
-                # Sanitize the filename by removing double spaces
-                name = ' '.join(name.split())
-
-            # Process artist names if artist_file_search_var is True
             if self.artist_file_search_var.get():
-                try:
-                    # Read the list of artists from the artist_file
-                    with open(self.artist_file, 'r') as artist_list_file:
-                        artists = [artist.strip() for artist in artist_list_file]
+                # Process artist names to place identified artist(s) at the beginning
+                name = self.artist_search(name)
 
-                    # Search for artist names and add them as prefixes
-                    artist_prefix = ''
-                    for artist in artists:
-                        # Make the search case-insensitive
-                        regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
-                        if regex.search(name):
-                            artist_prefix += f"{artist} "
-
-                    # Remove extra spaces and dashes at the beginning and end
-                    artist_prefix = artist_prefix.strip()
-                    name = name.strip("-")
-
-                    # Add artist prefix to the filename if artist_prefix is not empty
-                    name = f"{artist_prefix} - {name}" if artist_prefix else name
-
-                    # Check if remove_artist_duplicates_var is set
-                    if self.remove_artist_duplicates_var.get():
-                        # Call the remove_artist_duplicates_from_filename function to modify name
-                        name = self.remove_artist_duplicates_from_filename(str(name))
-                except FileNotFoundError:
-                    self.log_and_show(f"File not found: {self.artist_file}", create_messagebox=True, error=True)
-                except Exception as e:
-                    self.log_and_show(f"Artist search failed {self.artist_file}: {e}", create_messagebox=True,
-                                      error=True)
-
-            # Add tail if tail_var is True
             if self.tail_var.get():
-                name += "__-__ "
-
-                # Remove " -__-__" if present. Catchall for situations where only the artist name is left and -artist
-                # and -tail are used.
-                name = re.sub(r' -__-__', '', name).strip()
+                # Add tail
+                name = self.add_tail(name)
 
             # Add the file extension back to the name
             name += ext
