@@ -411,6 +411,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize the queue for FIFO queue module functionality
         self.queue = queue.Queue()
 
+        # Flag to indicate whether processing should be interrupted
+        self.interrupt_processing_var = False
+
         # List of tab names for the add_remove_tabview
         self.add_remove_tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Replace", "Exclude",
                                      "File Extensions", "NO GO", "Valid Extensions"]
@@ -546,6 +549,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.custom_text_removal_entry = None
         self.normalize_folder_frame = None
         self.normalize_preview_button = None
+        self.interrupt_button = None
         self.normalize_button = None
         self.send_to_module_frame1 = None
         self.send_to_file_renamer_button1 = None
@@ -1416,10 +1420,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       command=lambda: self.process_name_normalizer(mode="preview"))
         self.normalize_preview_button.grid(row=0, column=3, padx=5, pady=5)
 
+        # Interrupt button
+        self.interrupt_button = ctk.CTkButton(self.normalize_folder_frame, text="Interrupt",
+                                              command=self.interrupt_processing)
+        self.interrupt_button.grid(row=0, column=4, padx=5, pady=5)
+
         # Normalize button
         self.normalize_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize",
                                               command=lambda: self.process_name_normalizer(mode="action"))
-        self.normalize_button.grid(row=0, column=4, padx=5, pady=5)
+        self.normalize_button.grid(row=0, column=5, padx=5, pady=5)
 
         # Send to Module frame
         self.send_to_module_frame1 = ctk.CTkFrame(self.name_normalizer_frame,
@@ -5332,19 +5341,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         original_paths.append(original_path)
                         new_paths.append(new_path)
 
+                    # Check if processing should be interrupted
+                    if self.interrupt_processing_var:
+                        break  # Break out of the loop
+
                 # Append the batch operation to the name normalizer history
                 self.queue.put({
                     'original_paths': original_paths,
                     'new_paths': new_paths
                 })
 
-        # Log the action if logging is enabled
-        self.log_and_show("File(s) have been processed successfully.")
+        if self.interrupt_processing_var:
+            # Log the action if logging is enabled
+            self.log_and_show("User interrupted the process. File(s) have not been processed successfully.", error=True)
+        else:
+            # Log the action if logging is enabled
+            self.log_and_show("File(s) have been processed successfully.")
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
             # Clear selection for the name_normalizer_window
             self.clear_selection(frame_name="name_normalizer_window")
+
+        # Reset the variable back to false
+        self.interrupt_processing_var = False
 
         # Schedule the next check after 100 milliseconds (adjust as needed)
         self.after(100, self.check_queue)
@@ -5360,6 +5380,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Schedule the next check after 100 milliseconds (adjust as needed)
         self.after(100, self.check_queue)
+
+    # Method to interrupt processing
+    def interrupt_processing(self):
+        self.interrupt_processing_var = True
 
     """
     Video Editor
