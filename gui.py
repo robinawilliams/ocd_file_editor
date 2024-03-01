@@ -2441,10 +2441,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         Cleanup method to be called on program exit.
 
-        Stops logging if it is currently running.
+        Stops logging if it is currently running. Interrupt processing if threads are running.
 
         Note: Ensure this method is appropriately connected to an exit event or cleanup routine.
         """
+        # Interrupt threads that are processing
+        self.interrupt_processing()
+
         # Stop logging if currently running
         if self.activate_logging_var.get():
             self.stop_logging()
