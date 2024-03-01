@@ -559,6 +559,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.name_normalizer_last_used_file_button = None
         self.name_normalizer_message_label_frame = None
         self.name_normalizer_message_label = None
+        self.slider_progressbar_frame = None
+        self.progressbar_1 = None
 
         # Initialize Video Editor GUI elements
         self.video_editor_frame = None
@@ -1456,6 +1458,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Name Normalizer message Label
         self.name_normalizer_message_label = ctk.CTkLabel(self.name_normalizer_message_label_frame, text="")
         self.name_normalizer_message_label.grid(row=0, column=0, padx=10, pady=10)
+
+        # Progressbar frame
+        self.slider_progressbar_frame = ctk.CTkFrame(self.name_normalizer_message_label_frame,
+                                                     corner_radius=0,
+                                                     fg_color="transparent")
+        self.slider_progressbar_frame.grid(row=1, column=0, padx=10)
+        self.slider_progressbar_frame.grid_columnconfigure(0, weight=1)
+        self.slider_progressbar_frame.grid_rowconfigure(4, weight=1)
 
         """
         video_editor_window
@@ -2684,6 +2694,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             # If the desired type is neither int nor float, set it to the default value
             var.set(default_value)
+
+    def start_progress(self):
+        self.progressbar_1 = ctk.CTkProgressBar(self.slider_progressbar_frame,
+                                                orientation="horizontal",
+                                                mode="indeterminate")
+        self.progressbar_1.grid(row=0, column=0, padx=10, pady=10)
+
+        # Start the progress bar
+        self.progressbar_1.start()
+
+    def stop_progress(self):
+        # Stop the progress bar
+        self.progressbar_1.stop()
+
+        # Destroy the progress bar widget
+        self.progressbar_1.destroy()
 
     def log_and_show(self, message, create_messagebox=False, error=False, not_logging=False):
         """
@@ -5522,6 +5548,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to process a single file in the Name Normalizer module
     def process_single_file(self, file_path):
+        # Start the progress bar for the Name Normalizer function
+        self.start_progress()
+        
         original_path, new_path = self.rename_and_move_file(file_path)
 
         # Check if the tuple is the same to prevent no operations from being added to history
@@ -5535,16 +5564,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Log the action if logging is enabled
         self.log_and_show("File has been processed successfully.")
 
+        # Stop the progress bar for the Name Normalizer function
+        self.stop_progress()
+
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
             # Clear selection for the name_normalizer_window
             self.clear_selection(frame_name="name_normalizer_window")
 
-        # Schedule the next check after 100 milliseconds (adjust as needed)
+        # Schedule the next check after 100 milliseconds
         self.after(100, self.check_queue)
 
     # Method to process the files of the folder(s) in the Name Normalizer module
     def process_folder(self, folder_path):
+        # Start the progress bar for the Name Normalizer function
+        self.start_progress()
+
         # Initialize an empty list to store file paths
         file_paths = []
         original_paths = []
@@ -5592,6 +5627,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Log the action if logging is enabled
             self.log_and_show("File(s) have been processed successfully.")
 
+        # Stop the progress bar for the Name Normalizer function
+        self.stop_progress()
+
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
             # Clear selection for the name_normalizer_window
@@ -5600,10 +5638,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Reset the variable back to false
         self.interrupt_processing_var = False
 
-        # Schedule the next check after 100 milliseconds (adjust as needed)
+        # Schedule the next check after 100 milliseconds
         self.after(100, self.check_queue)
 
-    # Method to periodically check the queue when for threading
+    # Method to periodically check the queue when threading
     def check_queue(self):
         try:
             while True:
@@ -5612,7 +5650,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         except queue.Empty:
             pass
 
-        # Schedule the next check after 100 milliseconds (adjust as needed)
+        # Schedule the next check after 100 milliseconds
         self.after(100, self.check_queue)
 
     # Method to interrupt processing
