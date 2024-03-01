@@ -4532,7 +4532,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return None
 
     @staticmethod
-    def move_text(name):
+    def move_text(name: str) -> str:
         """
         Move the text between '-' and '__-__' in the given name.
 
@@ -4557,7 +4557,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Name Normalizer
     """
 
-    def remove_custom_user_text(self, name):
+    def remove_custom_user_text(self, name: str) -> str:
         """
         Remove custom user-specified text from the provided name.
 
@@ -4598,7 +4598,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return name
 
-    def remove_custom_text(self, name):
+    def remove_custom_text(self, name: str) -> str:
         """
         Remove custom text from the provided name.
 
@@ -4629,7 +4629,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_non_ascii_symbols(name):
+    def remove_non_ascii_symbols(name: str) -> str:
         """
         Remove non-ASCII symbols from the provided name.
 
@@ -4664,7 +4664,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_numbers(name):
+    def remove_numbers(name: str) -> str:
         """
         Remove all numbers from the provided name.
 
@@ -4695,7 +4695,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_dashes(name):
+    def remove_dashes(name: str) -> str:
         """
         Remove dashes from the provided name.
 
@@ -4709,7 +4709,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_endashes(name):
+    def remove_endashes(name: str) -> str:
         """
         Remove endashes from the provided name.
 
@@ -4723,7 +4723,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_emdashes(name):
+    def remove_emdashes(name: str) -> str:
         """
         Remove emdashes from the provided name.
 
@@ -4737,7 +4737,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_ampersands(name):
+    def remove_ampersands(name: str) -> str:
         """
         Remove ampersands from the provided name.
 
@@ -4751,7 +4751,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_at_symbols(name):
+    def remove_at_symbols(name: str) -> str:
         """
         Remove at symbols from the provided name.
 
@@ -4765,7 +4765,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_underscores(name):
+    def remove_underscores(name: str) -> str:
         """
         Remove underscores from the provided name.
 
@@ -4779,7 +4779,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_commas(name):
+    def remove_commas(name: str) -> str:
         """
         Remove commas from the provided name.
 
@@ -4793,7 +4793,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_single_quotes(name):
+    def remove_single_quotes(name: str) -> str:
         """
         Remove single quotes from the provided name.
 
@@ -4807,7 +4807,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_double_quotes(name):
+    def remove_double_quotes(name: str) -> str:
         """
         Remove double quotes from the provided name.
 
@@ -4821,7 +4821,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_colons(name):
+    def remove_colons(name: str) -> str:
         """
         Remove colons from the provided name.
 
@@ -4835,7 +4835,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_semicolons(name):
+    def remove_semicolons(name: str) -> str:
         """
         Remove semicolons from the provided name.
 
@@ -4849,7 +4849,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_percents(name):
+    def remove_percents(name: str) -> str:
         """
         Remove percents from the provided name.
 
@@ -4863,7 +4863,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_carets(name):
+    def remove_carets(name: str) -> str:
         """
         Remove carets from the provided name.
 
@@ -4877,7 +4877,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_parenthesis(name):
+    def remove_parenthesis(name: str) -> str:
         """
         Remove parenthesis from the provided name.
 
@@ -4891,7 +4891,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_hashtags(name):
+    def remove_hashtags(name: str) -> str:
         """
         Remove hashtags from the provided name.
 
@@ -4905,7 +4905,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_dollar_signs(name):
+    def remove_dollar_signs(name: str) -> str:
         """
         Remove dollar signs from the provided name.
 
@@ -4919,7 +4919,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_asterisks(name):
+    def remove_asterisks(name: str) -> str:
         """
         Remove asterisks from the provided name.
 
@@ -4933,7 +4933,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_plus_signs(name):
+    def remove_plus_signs(name: str) -> str:
         """
         Remove plus signs from the provided name.
 
@@ -4947,7 +4947,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_equal_signs(name):
+    def remove_equal_signs(name: str) -> str:
         """
         Remove equal signs from the provided name.
 
@@ -4961,7 +4961,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_curly_braces(name):
+    def remove_curly_braces(name: str) -> str:
         """
         Remove curly braces from the provided name.
 
@@ -4975,7 +4975,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_square_brackets(name):
+    def remove_square_brackets(name: str) -> str:
         """
         Remove square brackets from the provided name.
 
@@ -4989,7 +4989,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_pipes(name):
+    def remove_pipes(name: str) -> str:
         """
         Remove pipes from the provided name.
 
@@ -5003,7 +5003,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_backslashes(name):
+    def remove_backslashes(name: str) -> str:
         """
         Remove backslashes from the provided name.
 
@@ -5017,7 +5017,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_angle_brackets(name):
+    def remove_angle_brackets(name: str) -> str:
         """
         Remove angle brackets from the provided name.
 
@@ -5031,7 +5031,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_question_marks(name):
+    def remove_question_marks(name: str) -> str:
         """
         Remove question marks from the provided name.
 
@@ -5045,7 +5045,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def title_the_name(name):
+    def title_the_name(name: str) -> str:
         """
         Make the file name a title while preserving lowercase letters after apostrophes in contractions.
 
@@ -5072,7 +5072,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def remove_extra_whitespace(name):
+    def remove_extra_whitespace(name: str) -> str:
         """
         Sanitize the filename by removing extra whitespaces.
 
@@ -5118,7 +5118,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     @staticmethod
-    def add_tail(name):
+    def add_tail(name: str) -> str:
         """
         Add a tail to the end of the provided name.
 
@@ -5139,7 +5139,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return name
 
     # Method to remove duplicate artists from the filename
-    def remove_artist_duplicates_from_filename(self, file_name):
+    def remove_artist_duplicates_from_filename(self, file_name: str) -> str:
         """
         Remove artist names from the given file name by processing the list of artists
         read from the artist_file and modifying the file name accordingly. The intent is to give the user the option
