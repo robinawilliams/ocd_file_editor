@@ -1643,7 +1643,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Process video button
         self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
-                                                        command=self.process_video_edits)
+                                                        command=self.gather_and_validate_entries)
         self.process_video_edits_button.grid(row=0, column=2, padx=5, pady=5)
 
         # Frame to display messages on the video editor frame
@@ -5746,16 +5746,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return None in case of an error.
             return None
 
-    # Method to process video edits based on user inputs.
-    def process_video_edits(self):
+    # Method to gather and validate inputs from the GUI for video edits
+    def gather_and_validate_entries(self):
         """
-        Process video edits based on user-specified operations (rotation, audio increase, audio normalization, trim).
+        Gather and validate user inputs for video editing operations.
 
         This function retrieves input parameters from the user interface, such as rotation, decibel,
         audio normalization, minutes, and seconds. It then checks the provided input file or directory,
-        validates parameters, and performs video edits based on the selected operations. The edited video is saved to
-        the specified output directory, and the successful operation is logged. If a temporary copy is created due to
-        a filename length exceeding 254 characters, it is deleted after processing.
+        validates parameters, and performs video edits based on the selected operations.
 
         Returns:
             None
@@ -5773,39 +5771,32 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 create_messagebox=True, error=True)
             return
 
-        # Check if minutes is 00 and set variable to None
-        if minutes == 0:
-            minutes = None
-            adjusted_minutes = 0
-        else:
-            adjusted_minutes = minutes
-
-        # Check if seconds is 00 and set variable to None
-        if seconds == 0:
-            seconds = None
-            adjusted_seconds = 0
-        else:
-            adjusted_seconds = seconds
+        # Adjust minutes and seconds
+        adjusted_minutes = minutes if minutes != 0 else 0
+        adjusted_seconds = seconds if seconds != 0 else 0
 
         # Convert time to seconds
         total_time = adjusted_minutes * 60 + adjusted_seconds
 
         # If there is nothing to trim, set trim to False
         trim = total_time != 0
+        rotation = None if rotation == "none" else rotation
+        decibel = None if decibel == 0.0 else decibel
+        audio_normalization = None if audio_normalization == 0.0 else audio_normalization
 
-        # Check if rotation is none and set to variable to None
-        if rotation == "none":
-            rotation = None
+        # Determine the rotation operation tag
+        rotation_angle = None  # Default rotation angle
+        if rotation and rotation != "none":
+            if rotation == "left":
+                rotation_angle = 90
+            elif rotation == "right":
+                rotation_angle = -90
+            elif rotation == "flip":
+                rotation_angle = 180
+            elif rotation == "mirror":
+                rotation_angle = "mirror"
 
-        # Check if decibel is 0.0 and set to variable to None
-        if decibel == 0.0:
-            decibel = None
-
-        # Check if rotation is 0.0 and set variable to None
-        if audio_normalization == 0.0:
-            audio_normalization = None
-
-        # Check if an input source is provided
+        # Input validation
         if not self.video_editor_selected_file:
             self.log_and_show("Input must be specified (video file, line separated txt, or directory.",
                               create_messagebox=True, error=True)
@@ -5818,8 +5809,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Check if the necessary parameters for video editing are provided
-        if (self.video_editor_selected_file and decibel is None and rotation is None and audio_normalization is None
-                and minutes is None and seconds is None):
+        if not any((decibel, rotation, audio_normalization, minutes, seconds)):
             self.log_and_show("You need to specify an operation (audio increase, video rotation, "
                               "audio normalization, trim, or some combination of them)",
                               create_messagebox=True, error=True)
@@ -5834,9 +5824,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Define which input paths based on user input (Video file, .txt file, or directory)
         try:
             # Video file
-            if os.path.isfile(self.video_editor_selected_file) and any(
-                    self.video_editor_selected_file.lower().endswith(ext)
-                    for ext in self.valid_extensions):
+            if os.path.isfile(self.video_editor_selected_file) and self.video_editor_selected_file.lower().endswith(
+                    tuple(self.valid_extensions)):
                 input_paths = [self.video_editor_selected_file]
             # .txt file
             elif os.path.isfile(self.video_editor_selected_file) and self.video_editor_selected_file.lower().endswith(
@@ -5855,12 +5844,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     self.log_and_show(f"User confirmed the directory for {self.video_editor_selected_file}.")
 
                     # Get the absolute file paths of all files within the directory with valid extensions
-                    input_paths = []
-                    for root, dirs, files in os.walk(self.video_editor_selected_file):
-                        for file in files:
-                            file_path = os.path.join(root, file)
-                            if os.path.splitext(file_path)[1].lower() in self.valid_extensions:
-                                input_paths.append(file_path)
+                    input_paths = [os.path.join(root, file) for root, _, files in
+                                   os.walk(self.video_editor_selected_file)
+                                   for file in files if os.path.splitext(file)[1].lower() in self.valid_extensions]
                 else:
                     # If the user does not confirm the directory, return
                     return
@@ -5872,6 +5858,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"Processing input failed: {str(e)}", create_messagebox=True, error=True)
             return
 
+        # Process the input(s)
+        self.process_video_paths(audio_normalization, decibel, input_paths, rotation_angle, total_time, trim)
+
+    def process_video_paths(self, audio_normalization: float, decibel: float, input_paths: list,
+                            rotation_angle, total_time: int, trim: bool):
+        """
+        Process a list of video paths with specified video editing operations.
+
+        Args:
+        - audio_normalization (float): Audio normalization adjustment in decibels.
+        - decibel (float): Audio volume adjustment in decibels.
+        - input_paths (list): List of input video file paths to be processed.
+        - rotation_angle (float): Rotation angle in degrees.
+        - total_time (int): Total time duration for video trimming.
+        - trim (bool): Flag indicating whether to trim the video.
+
+        Notes:
+        - Redirects MoviePy output for video edits.
+        - Applies specified video editing operations to each input video.
+        - Logs the outcome of each operation.
+        - Resets redirect MoviePy output for video edits after processing.
+        - If a temporary copy is created due to filename length constraints, it is deleted after 
+        processing.
+        """
         # Redirect MoviePy output for video edits
         self.redirect_output()
 
@@ -5897,18 +5907,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 filename, extension = os.path.splitext(os.path.basename(temp_copy_path))
                 output_dir = os.path.dirname(temp_copy_path)
 
-                # Determine the rotation operation tag
-                rotation_angle = None  # Default rotation angle
-                if rotation and rotation != "none":
-                    if rotation == "left":
-                        rotation_angle = 90
-                    elif rotation == "right":
-                        rotation_angle = -90
-                    elif rotation == "flip":
-                        rotation_angle = 180
-                    elif rotation == "mirror":
-                        rotation_angle = "mirror"
-
                 # Create the output path with the operation suffix
                 output_path = os.path.join(output_dir, f"{filename}_EDITED{extension}")
 
@@ -5916,9 +5914,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 if self.video_editor_output_directory:
                     output_path = os.path.join(self.video_editor_output_directory, os.path.basename(output_path))
 
-                # Check if the new_path exists
+                # Get a non-conflicting name for the output path if it exists
                 if os.path.exists(output_path):
-                    # Get a non-conflicting name for the output path
                     output_path = self.get_non_conflicting_filename(output_path)
 
                 # Load the original video clip
@@ -5928,31 +5925,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Apply operations in sequence, checking for success
                 if rotation_angle is not None and successful_operations:
                     processed_clip = self.rotate_video(original_clip, rotation_angle)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
+                    successful_operations = processed_clip is not None
+                    original_clip = processed_clip if successful_operations else original_clip
 
                 if decibel and successful_operations:
                     processed_clip = self.increase_volume(original_clip, decibel)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
+                    successful_operations = processed_clip is not None
+                    original_clip = processed_clip if successful_operations else original_clip
 
                 if audio_normalization and successful_operations:
                     processed_clip = self.normalize_audio(original_clip, audio_normalization)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
+                    successful_operations = processed_clip is not None
+                    original_clip = processed_clip if successful_operations else original_clip
 
                 if trim and successful_operations:
                     processed_clip = self.trim_video(original_clip, total_time)
-                    if processed_clip:
-                        original_clip = processed_clip
-                    else:
-                        successful_operations = False
+                    successful_operations = processed_clip is not None
+                    original_clip = processed_clip if successful_operations else original_clip
 
                 # Write the final modified clip to the output path if all operations were successful
                 if successful_operations:
@@ -5981,11 +5970,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Close the original clip to free resources
                 original_clip.close()
 
-                # Reset redirect MoviePy output for video edits
-                self.redirect_output()
-
+                # Delete the temporary copy if it was created
                 if temp_copy_exists:
-                    # Delete the temporary copy
                     os.remove(temp_copy_path)
 
             except OSError as e:
@@ -5993,6 +5979,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show(f"OSError: {str(e)} Skipping this file and moving to the next one.",
                                   create_messagebox=True, error=True)
                 continue
+
+        # Reset redirect MoviePy output for video edits
+        self.redirect_output()
 
     """
     add_remove_window
