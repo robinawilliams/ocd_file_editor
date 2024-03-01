@@ -4020,10 +4020,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         base_name = os.path.basename(self.file_renamer_selected_file)
         base_name_lower = base_name.lower()  # Convert to lowercase for case-insensitive comparison
 
+        # Check if there is a '-' in the name
+        if '-' not in base_name_lower:
+            # If no '-', return
+            self.log_and_show("No '-' found in the file name. Cannot identify artist for Artist Common Categories "
+                              "functionality.")
+            return
+
+        # Extract the artist from the text before '-'
+        artist = base_name_lower.split('-')[0].strip()
+
         # Iterate through common categories and associated values
         for key, values in self.artist_common_categories.items():
             # Check if the lowercase key is present in the lowercase base name
-            if base_name_lower.find(key.lower()) != -1:
+            if artist.find(key.lower()) != -1:
                 # Iterate through the values associated with the matching key
                 for value in values:
                     if remove:
