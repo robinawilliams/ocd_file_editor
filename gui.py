@@ -2393,17 +2393,39 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Callback for updating the scroll region when the inner frame is configured
     def on_frame_configure(self, *_):
+        """
+        Callback function to handle the frame configuration for scrolling.
+
+        Args:
+        *_: Variable number of arguments. Ignored in the implementation.
+        """
         # Reset the scroll region to encompass the inner frame
         self.file_renamer_canvas.configure(scrollregion=self.file_renamer_canvas.bbox("all"))
 
     # Callback for updating the scrollable frame's width when the canvas is configured
     def on_canvas_configure(self, event):
+        """
+        Callback function to handle the canvas configuration.
+
+        Adjusts the width of the scrollable frame to match the canvas width.
+
+        Args:
+        event (tk.Event): The event object containing information about the canvas configuration change.
+        """
         # Set the scrollable frame's width to match the canvas
         canvas_width = event.width - self.file_renamer_scrollbar.winfo_width()
         self.file_renamer_canvas.itemconfig(self.file_renamer_scrollable_frame_window, width=canvas_width)
 
     # Callback function to handle logging state
     def handle_logging_activation(self, *_):
+        """
+        Callback function to handle logging activation.
+
+        Activates or deactivates logging based on the value of the activate_logging_var variable.
+
+        Args:
+        *_: Variable number of arguments. Ignored in the implementation.
+        """
         # If logging is true, call the logging_setup function
         if self.activate_logging_var.get():
             try:
@@ -2416,12 +2438,27 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method called on exit for cleanup operations
     def cleanup_on_exit(self):
+        """
+        Cleanup method to be called on program exit.
+
+        Stops logging if it is currently running.
+
+        Note: Ensure this method is appropriately connected to an exit event or cleanup routine.
+        """
         # Stop logging if currently running
         if self.activate_logging_var.get():
             self.stop_logging()
 
     # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, frame_name):
+        """
+        Switches between frames based on the provided frame_name and sets button colors accordingly.
+
+        Args:
+        frame_name (str): The name of the frame to be selected.
+
+        Note: Ensure this method is connected to a button press or navigation event.
+        """
         # Set button color for the selected button
         self.file_renamer_button.configure(
             fg_color=("gray75", "gray25") if frame_name == "file_renamer_window" else "transparent")
@@ -2466,21 +2503,51 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def file_renamer_button_event(self):
+        """
+        Event handler for the file renamer button.
+
+        Calls the select_frame_by_name method to switch to the 'file_renamer_window' frame.
+        """
         self.select_frame_by_name("file_renamer_window")
 
     def name_normalizer_button_event(self):
+        """
+        Event handler for the name normalizer button.
+
+        Calls the select_frame_by_name method to switch to the 'name_normalizer_window' frame.
+        """
         self.select_frame_by_name("name_normalizer_window")
 
     def video_editor_button_event(self):
+        """
+        Event handler for the video editor button.
+
+        Calls the select_frame_by_name method to switch to the 'video_editor_window' frame.
+        """
         self.select_frame_by_name("video_editor_window")
 
     def add_remove_button_event(self):
+        """
+        Event handler for the add/remove button.
+
+        Calls the select_frame_by_name method to switch to the 'add_remove_window' frame.
+        """
         self.select_frame_by_name("add_remove_window")
 
     def settings_button_event(self):
+        """
+        Event handler for the settings button.
+
+        Calls the select_frame_by_name method to switch to the 'settings_window' frame.
+        """
         self.select_frame_by_name("settings_window")
 
     def update_background_color(self):
+        """
+        Updates the canvas background color based on the current appearance mode.
+
+        Note: Ensure this method is called appropriately, such as in response to a mode change event.
+        """
         # Update canvas background color based on the current appearance mode
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Light":
@@ -2490,6 +2557,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method for changing appearance mode (Light or Dark)
     def change_appearance_mode_event(self, new_appearance_mode):
+        """
+        Event handler for changing the appearance mode.
+
+        Updates the appearance mode using ctk.set_appearance_mode() and calls update_background_color()
+        to adjust the background color based on the new appearance mode.
+
+        Args:
+        new_appearance_mode (str): The new appearance mode ('Light' or 'Dark').
+        """
         # Update background color when appearance mode changes
         ctk.set_appearance_mode(new_appearance_mode)
         self.update_background_color()
@@ -2497,6 +2573,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method for changing UI scaling
     @staticmethod
     def change_scaling_event(new_scaling: str):
+        """
+        Event handler for changing widget scaling.
+
+        Converts the new_scaling percentage to a float, sets the widget scaling using ctk.set_widget_scaling().
+
+        Args:
+        new_scaling (str): The new widget scaling percentage.
+        """
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 
@@ -2505,6 +2589,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def update_text_color(self):
+        """
+        Updates text color based on the current appearance mode.
+
+        Note: Ensure this method is called appropriately, such as in response to a mode change event.
+        """
         # Update text color based on the current appearance mode
         current_mode = ctk.get_appearance_mode()
         if current_mode == "Light":
@@ -2520,6 +2609,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to display messages with optional error formatting
     def show_message(self, message, error=False, frame_name=None):
+        """
+        Displays a message on the actively selected frame or all frames.
+
+        Args:
+        message (str): The message to be displayed.
+        error (bool): If True, formats the message with red text for error indication. Default is False.
+        frame_name (str or None): The name of the frame to display the message on. If None, displays on all frames.
+
+        Note: Ensure this method is called appropriately to show messages in your GUI.
+        """
         # Update text color when displaying a message
         self.update_text_color()
 
@@ -2537,7 +2636,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             labels = [self.file_renamer_message_label, self.name_normalizer_message_label,
                       self.video_editor_message_label, self.add_remove_message_label]
 
-        # Truncate the message after x characters for GUI friendly formatting.
+        # Truncate the message after x characters for GUI-friendly formatting.
         truncated_message = f"{message[:115]}..." if len(message) > 115 else message
 
         for label in labels:
@@ -2548,6 +2647,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     @staticmethod
     def validate_entry(var, default_value, desired_type):
+        """
+        Validates and updates the value of a Tkinter variable based on the desired type.
+
+        Args:
+        var (tkinter.Variable): The Tkinter variable to be validated and updated.
+        default_value: The default value to set if validation fails.
+        desired_type (type): The desired type for the variable (int or float).
+
+        Note: Ensure this method is used to validate and update Tkinter variable values.
+        """
         # Ensure the value is of the desired type
         current_value = var.get()
 
@@ -2629,6 +2738,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to load the json file dictionaries/lists
     def initialize_json(self):
+        """
+        Initializes class attributes by loading data from the specified JSON file.
+
+        Note: Ensure this method is called appropriately during the initialization of your class.
+        """
         # Load data from the dictionary_file
         try:
             if not os.path.isfile(self.dictionary_file):
@@ -2674,6 +2788,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to update the json dictionary
     def update_json(self, file_to_update, dictionary_name, updated_data):
+        """
+        Updates a specific dictionary in a JSON file with new data.
+
+        Args:
+        file_to_update (str): The path to the JSON file to be updated.
+        dictionary_name (str): The name of the dictionary key to be updated.
+        updated_data: The new data to be assigned to the specified dictionary key.
+
+        Note: Ensure this method is called appropriately to update JSON files in your application.
+        """
         try:
             if not os.path.isfile(file_to_update):
                 # Return early if the file doesn't exist
@@ -2709,6 +2833,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def logging_setup(self):
+        """
+        Set up logging for the File Renamer application.
+
+        Note: Ensure this method is called appropriately during the initialization of your application.
+        """
         # Create the log file if it doesn't exist
         if not os.path.exists(self.file_renamer_log):
             with open(self.file_renamer_log, 'w'):
@@ -2721,12 +2850,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         logging.info("Logging started.")
 
     def stop_logging(self):
+        """
+        Stop logging for the File Renamer application.
+
+        Note: Ensure this method is called appropriately during the cleanup or termination of your application.
+        """
         # Notate that logging stopped if the log file exists
         if os.path.exists(self.file_renamer_log):
             logging.info("Logging stopped.")
 
     # Redirect output (Fix for MoviePy overriding user's logging choice)
     def redirect_output(self):
+        """
+        Redirects standard output and error based on logging and suppression settings.
+
+        Note: Ensure this method is called appropriately to manage the redirection of output.
+        """
         # If logging state is active, redirect the outputs to the log file instead of the console
         if self.activate_logging_var.get():
             # Redirect standard output and error to the log file
@@ -2749,6 +2888,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to remove a successful line from a file.
     def remove_successful_line_from_file(self, file_path, line_to_remove):
+        """
+        Removes a specified line from a text file.
+
+        Args:
+        file_path (str): The path to the text file.
+        line_to_remove (str): The line to be removed from the file.
+
+        Note: Ensure this method is called appropriately to remove a line from the specified text file.
+        """
         try:
             if not file_path.lower().endswith('.txt'):
                 # If the file does not have a .txt extension, return without performing any operation.
@@ -2776,6 +2924,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to move the selected input to the trash
     def move_file_to_trash(self):
+        """
+        Move the selected file to the system's trash.
+
+        Note: Ensure this method is called appropriately to move the selected file to the trash.
+        """
         try:
             if self.file_renamer_selected_file:
                 # Ask for confirmation before moving to trash
@@ -2805,6 +2958,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to create double check reminders
     def double_check_reminder(self, new_path):
+        """
+        Create a double-check reminder for the folder immediately above the specified location.
+
+        Args:
+        new_path (str): The path for which the double-check reminder is to be created.
+
+        Note: Ensure this method is called appropriately to create double-check reminders.
+        """
         try:
             # Get the name of the folder immediately above the current location
             folder_name = os.path.basename(os.path.dirname(new_path))
@@ -2843,6 +3004,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to load the last used file
     def load_last_used_file(self):
+        """
+        Load the last used file based on the current frame and update the display accordingly.
+
+        Notes:
+        - Handles last used file loading for different frames (file_renamer, name_normalizer, video_editor).
+        - Logs the action if logging is enabled.
+        """
         if self.frame_name == "file_renamer_window":
             # Check if the file_renamer_last_used_file variable is provided and the input exists
             if self.file_renamer_last_used_file and os.path.exists(self.file_renamer_last_used_file):
@@ -2892,6 +3060,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                   create_messagebox=True, error=True)
 
     def send_to_module(self, destination):
+        """
+        Send the selected file to the specified module and perform necessary updates.
+
+        Args:
+        - destination (str): The name of the destination module ("file_renamer_module", "name_normalizer_module",
+        "video_editor_module").
+
+        Notes:
+        - Clears the selection for the source module.
+        - Updates the display based on the selected file and the destination module.
+        - Logs the action if logging is enabled.
+        - Switches frames to the specified destination module.
+
+        """
         if self.frame_name == "file_renamer_window":
             selected_file = self.file_renamer_selected_file
         elif self.frame_name == "name_normalizer_window":
@@ -2993,13 +3175,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to handle an input being dropped onto the application window
     def on_file_drop(self, event):
+        """
+        Handle the event when a file is dropped onto the application window.
+
+        Args:
+        - event (Event): The event object representing the file drop.
+
+        Notes:
+        - Initializes the selected file variable to the dropped file.
+        - Extracts the file name from the path for GUI-friendly presentation.
+        - Assigns the selected file variable to the correct file depending on the active frame.
+        - Clears and updates the corresponding entry widgets and variables.
+        - Opens the input file if the corresponding option is set.
+        - Adds artist common categories to the queue if the option is set.
+        - Logs the action and displays the message in the GUI.
+
+        """
         # Initialize the selected file variable to the dropped file
         selected_file = event.data.strip('{}')
 
-        # Extract the file name from the path for gui friendly presentation
+        # Extract the file name from the path for GUI-friendly presentation
         filename = os.path.basename(selected_file)
 
-        # Assign the selected file variable to the correct file depending on active frame
+        # Assign the selected file variable to the correct file depending on the active frame
         if self.frame_name == "name_normalizer_window":
             self.name_normalizer_selected_file = selected_file
 
@@ -3030,7 +3228,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.artist_common_categories_var.get():
                 self.add_remove_common_categories_to_queue()
 
-        # Log the action and display the message in the gui
+        # Log the action and display the message in the GUI
         self.log_and_show(f"Input selected via drop: {filename}")
 
     def open_file(self, file_to_open):
@@ -3066,8 +3264,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to update the file display based on selected options
     def update_file_display(self, *_):
+        """
+        Update the file display based on the selected file and user input.
+
+        Args:
+        - *_: Variable number of arguments (unused in this method).
+
+        Notes:
+        - Gathers data from the GUI including base name, weighted categories, prefix text, custom text, and extension.
+        - Constructs the proposed name using gathered information.
+        - Sets the proposed name to the char_length variable.
+        - Sets the proposed name to the display text.
+        - Handles name length constraints, truncating if necessary.
+        - Updates the file display and name length variables.
+
+        """
         if self.file_renamer_selected_file:
-            # Gather the data from the gui
+            # Gather the data from the GUI
             (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
             # Construct the name
@@ -3118,6 +3331,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     # Method to undo the last category added to the queue
     def undo_last(self):
+        """
+        Undo the last category added to the file renamer queue.
+
+        Notes:
+        - Removes the last category from the queue and updates the file display.
+        - Logs the action if logging is enabled.
+
+        """
         if self.file_renamer_queue:
             # Remove the last category from the queue and update display
             self.file_renamer_queue.pop()
