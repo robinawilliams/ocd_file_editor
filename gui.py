@@ -3368,7 +3368,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Check if there is an entry in the queue list
             if len(self.file_renamer_queue) == 0:
                 self.log_and_show("The proposed file name exceeds 255 characters. "
-                                  "Operating system limitations prohibit this.", create_messagebox=True, error=True)
+                                  "Operating system limitations prohibit this. Please remove some of your custom text"
+                                  " and try again.",
+                                  create_messagebox=True, error=True)
             elif len(self.file_renamer_queue) > 0:
                 # Prompt the user to choose from the list using SelectOptionWindow
                 chosen_category = self.selection_window(title="Name Length Error",
@@ -4325,8 +4327,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
             # Construct the name
-            (name, name_length) = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
+            (name, char_length) = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
                                                           extension)
+
+            # Handle name length constraints
+            if char_length > 255:
+                self.name_length_handler(char_length)
+                return
 
             # If move_text_var is set, move the text between - and __-__
             if self.move_text_var.get():
