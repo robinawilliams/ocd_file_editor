@@ -3343,8 +3343,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
             # Construct the name
-            proposed_name = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
-                                                    extension)
+            (proposed_name, char_length) = self.construct_new_name(base_name, weighted_categories, prefix_text,
+                                                                   custom_text, extension)
 
             # Set the proposed name to the char_length variable
             char_length = len(proposed_name)
@@ -4325,8 +4325,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
             # Construct the name
-            name = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
-                                           extension)
+            (name, name_length) = self.construct_new_name(base_name, weighted_categories, prefix_text, custom_text,
+                                                          extension)
 
             # If move_text_var is set, move the text between - and __-__
             if self.move_text_var.get():
@@ -4483,7 +4483,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         extension (str): File extension.
 
         Returns:
-        str: The constructed new file name.
+        tuple: A tuple containing the constructed new file name and its length.
         """
         # Construct the name based on placement choice (prefix, suffix, or special_character)
         categories = weighted_categories + [
@@ -4513,7 +4513,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Remove extra whitespaces from the name
         name = " ".join(name.split()).strip()
 
-        return name + extension
+        # Construct the name by adding the base_name and extension
+        name = name + extension
+
+        # Get the length of the name
+        name_length = len(name)
+
+        return name, name_length
 
     # Method to generate a non-conflicting filename
     def get_non_conflicting_filename(self, path):
