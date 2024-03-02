@@ -5244,10 +5244,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Remove custom text provided by the user
             name = self.remove_custom_user_text(name)
 
-            if self.remove_custom_text_var.get():
-                # Remove custom text from the custom_text_to_replace dictionary
-                name = self.remove_custom_text(name)
-
             if self.remove_non_ascii_symbols_var.get():
                 # Remove non-ASCII characters
                 name = self.remove_non_ascii_symbols(name)
@@ -5382,13 +5378,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Make file name a title while preserving lowercase letters after apostrophes in contractions
                 name = self.title_the_name(name)
 
-            if self.remove_extra_whitespace_var.get():
-                # Remove extra white space
-                name = self.remove_extra_whitespace(name)
+            if self.remove_custom_text_var.get():
+                # Remove custom text from the custom_text_to_replace dictionary
+                name = self.remove_custom_text(name)
 
             if self.artist_identifier_var.get():
                 # Process artist names to place identified artist(s) at the beginning
                 name = self.artist_identifier(name)
+
+            if self.remove_extra_whitespace_var.get():
+                # Remove extra white space
+                name = self.remove_extra_whitespace(name)
 
             if self.tail_var.get():
                 # Add tail
