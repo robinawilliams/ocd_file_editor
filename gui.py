@@ -2463,7 +2463,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.stop_logging()
 
     # Method to dynamically switch between frames based on the selected name
-    def select_frame_by_name(self, frame_name):
+    def select_frame_by_name(self, frame_name: str):
         """
         Switches between frames based on the provided frame_name and sets button colors accordingly.
 
@@ -2569,7 +2569,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.file_renamer_canvas.configure(bg='#2B2B2B')
 
     # Method for changing appearance mode (Light or Dark)
-    def change_appearance_mode_event(self, new_appearance_mode):
+    def change_appearance_mode_event(self, new_appearance_mode: str):
         """
         Event handler for changing the appearance mode.
 
@@ -2596,6 +2596,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
+
+    @staticmethod
+    def selection_window(title: str, prompt: str, item_list: list, label_text: str) -> str:
+        """
+        Display a selection window prompting the user to choose from a list of options.
+
+        Args:
+        - title (str): Title of the selection window.
+        - prompt (str): Prompt message displayed in the window.
+        - item_list (list): List of items to choose from.
+        - label_text (str): Label text for the selection.
+
+        Returns:
+        - str: The selected option from the user.
+
+        """
+        # Prompt the user to choose from the list using SelectOptionWindow
+        selection_window = SelectOptionWindow(title=title,
+                                              prompt=prompt,
+                                              item_list=item_list,
+                                              label_text=label_text)
+
+        # Wait for the user to respond before proceeding
+        selection_window.wait_window()
+
+        # Retrieve the selected directory
+        selected_option = selection_window.get_selected_option()
+
+        return selected_option
 
     """
     Messaging
@@ -2916,7 +2945,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     # Method to remove a successful line from a file.
-    def remove_successful_line_from_file(self, file_path, line_to_remove):
+    def remove_successful_line_from_file(self, file_path: str, line_to_remove: str):
         """
         Removes a specified line from a text file.
 
@@ -2986,7 +3015,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
     # Method to create double check reminders
-    def double_check_reminder(self, new_path):
+    def double_check_reminder(self, new_path: str):
         """
         Create a double-check reminder for the folder immediately above the specified location.
 
@@ -3088,7 +3117,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show("No last used Video Editor input found.",
                                   create_messagebox=True, error=True)
 
-    def send_to_module(self, destination):
+    def send_to_module(self, destination: str):
         """
         Send the selected file to the specified module and perform necessary updates.
 
@@ -3260,7 +3289,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Log the action and display the message in the GUI
         self.log_and_show(f"Input selected via drop: {filename}")
 
-    def open_file(self, file_to_open):
+    def open_file(self, file_to_open: str):
         """
         Opens the specified file using the default system program.
 
@@ -3330,18 +3359,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                       "Operating system limitations prohibit this.", create_messagebox=True, error=True)
                 elif len(self.file_renamer_queue) > 0:
                     # Prompt the user to choose from the list using SelectOptionWindow
-                    category_to_remove = SelectOptionWindow(title="Name Length Error",
+                    chosen_category = self.selection_window(title="Name Length Error",
                                                             prompt="The proposed file name exceeds 255 characters. "
                                                                    "\nOperating system limitations prohibit this. "
                                                                    "\nPlease choose a category to remove:",
                                                             item_list=self.file_renamer_queue,
                                                             label_text="Choose Category")
-
-                    # Wait for the user to respond before proceeding
-                    category_to_remove.wait_window()
-
-                    # Retrieve the selected category
-                    chosen_category = category_to_remove.get_selected_option()
 
                     if chosen_category:
                         # Remove the category from the queue
@@ -3758,17 +3781,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # If suggest output directory returns a list, then use SelectOptionWindow
                     elif isinstance(initial_directory_check, list):
                         # Prompt the user to choose from the list using SelectOptionWindow
-                        artist_selection_window = SelectOptionWindow(title="Suggest Output Directory",
+                        chosen_artist = self.selection_window(title="Suggest Output Directory",
                                                                      prompt="Multiple matching artists found. Choose "
                                                                             "an artist:",
                                                                      item_list=initial_directory_check,
                                                                      label_text="Choose Artist")
-
-                        # Wait for the user to respond before proceeding
-                        artist_selection_window.wait_window()
-
-                        # Retrieve the selected artist
-                        chosen_artist = artist_selection_window.get_selected_option()
 
                         if chosen_artist in initial_directory_check:
                             initial_directory = chosen_artist
@@ -3886,7 +3903,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return None
 
     # Method to handle actions after successful input renaming
-    def handle_rename_success(self, new_path):
+    def handle_rename_success(self, new_path: str):
         # Store information about the rename operation in the history
         self.history.append({
             'original_path': self.file_renamer_selected_file,
@@ -4334,7 +4351,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                             suggested_output_directory = [suggested_output_directory]
 
                         # Prompt the user to choose from the list using SelectOptionWindow
-                        directory_selection_window = SelectOptionWindow(title="Suggest Output Directory",
+                        chosen_directory = self.selection_window(title="Suggest Output Directory",
                                                                         prompt="Suggested output directory found."
                                                                                "\nDo you want use the suggested output "
                                                                                "directory?"
@@ -4342,12 +4359,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                                "directory.",
                                                                         item_list=suggested_output_directory,
                                                                         label_text="Choose Directory")
-
-                        # Wait for the user to respond before proceeding
-                        directory_selection_window.wait_window()
-
-                        # Retrieve the selected directory
-                        chosen_directory = directory_selection_window.get_selected_option()
 
                         if chosen_directory in suggested_output_directory:
                             self.output_directory = chosen_directory
@@ -6799,18 +6810,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             elif mode == "Browse":
                 # Create a window to allow the user to select an artist from the list
-                acc_artist_selection_window = SelectOptionWindow(
+                artist = self.selection_window(
                     title="Artist Selection",
                     prompt="Which artist would you like to modify?:",
                     item_list=artist_list,
                     label_text="Choose Artist"
                 )
-
-                # Wait for the user to make a selection in the window
-                acc_artist_selection_window.wait_window()
-
-                # Retrieve the selected artist
-                artist = acc_artist_selection_window.get_selected_option()
 
                 # Update the selected artist if a valid choice is made, otherwise, return
                 if artist in artist_list:
