@@ -3002,6 +3002,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     self.file_renamer_selected_file = ""
                     self.file_renamer_queue = []
                     self.file_display_text.set("")
+                    self.name_length_text.set("")
                     self.prefix_text_entry.delete(0, ctk.END)
                     self.custom_text_entry.delete(0, ctk.END)
                     self.output_directory = ""
@@ -3543,6 +3544,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.file_renamer_selected_file = ""
             self.file_renamer_queue = []
             self.file_display_text.set("")
+            self.name_length_text.set("")
 
             # Clear text entries and reset output directory
             self.prefix_text_entry.delete(0, ctk.END)
@@ -3914,6 +3916,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_selected_file = ""
         self.file_renamer_queue = []
         self.file_display_text.set("")
+        self.name_length_text.set("")
         self.prefix_text_entry.delete(0, ctk.END)
         self.custom_text_entry.delete(0, ctk.END)
         self.file_renamer_last_used_file = new_path
