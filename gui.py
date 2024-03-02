@@ -3346,41 +3346,41 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             (proposed_name, char_length) = self.construct_new_name(base_name, weighted_categories, prefix_text,
                                                                    custom_text, extension)
 
-            # Set the proposed name to the char_length variable
-            char_length = len(proposed_name)
-
-            # Set the proposed name to the display text
-            display_text = proposed_name
-
-            # Handle name length constraints
-            if char_length > 255:
-                # Check if there is an entry in the queue list
-                if len(self.file_renamer_queue) == 0:
-                    self.log_and_show("The proposed file name exceeds 255 characters. "
-                                      "Operating system limitations prohibit this.", create_messagebox=True, error=True)
-                elif len(self.file_renamer_queue) > 0:
-                    # Prompt the user to choose from the list using SelectOptionWindow
-                    chosen_category = self.selection_window(title="Name Length Error",
-                                                            prompt="The proposed file name exceeds 255 characters. "
-                                                                   "\nOperating system limitations prohibit this. "
-                                                                   "\nPlease choose a category to remove:",
-                                                            item_list=self.file_renamer_queue,
-                                                            label_text="Choose Category")
-
-                    if chosen_category:
-                        # Remove the category from the queue
-                        self.file_renamer_queue.remove(chosen_category)
-                        self.log_and_show(f"Word removed from queue: {chosen_category}", not_logging=True)
-
-                if self.truncate_var.get():
-                    # Truncate the name for the display
-                    display_text = f"...{proposed_name[180:]}"
-
-            # Set the name to the file display
-            self.file_display_text.set(display_text)
+            # Set the proposed name to the file display
+            self.file_display_text.set(proposed_name)
 
             # Set the length of the name to the name_length_text
             self.name_length_text.set(char_length)
+
+            # Handle name length constraints
+            if char_length > 255:
+                self.name_length_handler(char_length)
+
+    def name_length_handler(self, char_length: int):
+        """
+        Handle name length constraints for the proposed file name.
+
+        Args:
+        - char_length (int): Length of the proposed file name.
+
+        """
+        if char_length > 255:
+            # Check if there is an entry in the queue list
+            if len(self.file_renamer_queue) == 0:
+                self.log_and_show("The proposed file name exceeds 255 characters. "
+                                  "Operating system limitations prohibit this.", create_messagebox=True, error=True)
+            elif len(self.file_renamer_queue) > 0:
+                # Prompt the user to choose from the list using SelectOptionWindow
+                chosen_category = self.selection_window(title="Name Length Error",
+                                                        prompt="The proposed file name exceeds 255 characters. "
+                                                               "\nOperating system limitations prohibit this. "
+                                                               "\nPlease choose a category to remove:",
+                                                        item_list=self.file_renamer_queue,
+                                                        label_text="Choose Category")
+
+                if chosen_category:
+                    # Remove the category from the queue
+                    self.remove_from_queue(chosen_category)
 
     # Method to undo the last category added to the queue
     def undo_last(self):
@@ -4451,12 +4451,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Log the action if logging is enabled
             self.log_and_show("No input selected. Nothing to rename.", create_messagebox=True, error=True)
 
-    def gather_and_sort(self):
+    def gather_and_sort(self) -> tuple:
         """
         Gather information from the gui and sort categories based on weights.
 
         Returns:
-        tuple: A tuple containing base_name, weighted_categories, prefix_text, custom_text, and extension.
+        tuple: A tuple containing base_name, categories_text, prefix_text, custom_text, and extension.
         """
 
         # Get custom text, prefix_text, basename, and file extension
@@ -4464,20 +4464,31 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         custom_text = self.custom_text_entry.get().strip()
         base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
-        # Filter and sort categories based on weights
+        # Filter categories that are both in file_renamer_queue and categories
         weighted_categories = [category for category in self.file_renamer_queue if category in self.categories]
-        weighted_categories.sort(key=lambda category: self.categories.get(category, 0))  # Use 0 as default weight
+
+        # Sort the weighted_categories based on their weights in the categories dictionary
+        # Use default weight if one isn't present
+        weighted_categories.sort(key=lambda category: self.categories.get(category, self.default_weight))
+
+        # Create a new list containing non-weighted categories from file_renamer_queue
+        categories = weighted_categories + [category for category in self.file_renamer_queue if
+                                            category not in weighted_categories]
+
+        # Join the categories list into a space-separated string and strip any leading or trailing whitespaces
+        categories_text = ' '.join(categories).strip()
 
         # Return a tuple containing the data
-        return base_name, weighted_categories, prefix_text, custom_text, extension
+        return base_name, categories_text, prefix_text, custom_text, extension
 
-    def construct_new_name(self, base_name, weighted_categories, prefix_text, custom_text, extension):
+    def construct_new_name(self, base_name: str, categories_text: str, prefix_text: str, custom_text: str,
+                           extension: str) -> tuple:
         """
         Construct a new file name based on specified parameters.
 
         Args:
         base_name (str): The original base name of the file.
-        weighted_categories (list): List of categories sorted based on weights.
+        categories_text (str): Space-separated string containing categories sorted based on weights.
         prefix_text (str): Custom prefix text.
         custom_text (str): Custom text.
         extension (str): File extension.
@@ -4485,11 +4496,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         tuple: A tuple containing the constructed new file name and its length.
         """
-        # Construct the name based on placement choice (prefix, suffix, or special_character)
-        categories = weighted_categories + [
-            category for category in self.file_renamer_queue if category not in weighted_categories]
-        categories_text = ' '.join(categories).strip()
-
         # Place the queue at the beginning of the name
         if self.placement_choice.get() == "prefix":
             name = f"{prefix_text} {custom_text} {categories_text} {base_name}".strip()
