@@ -591,6 +591,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.colon_label = None
         self.second_var = None
         self.second_entry = None
+        self.trim_label1 = None
+        self.minute_var1 = None
+        self.minute_entry1 = None
+        self.colon_label1 = None
+        self.second_var1 = None
+        self.second_entry1 = None
         self.video_editor_output_directory_frame = None
         self.browse_video_editor_output_directory_button = None
         self.video_editor_output_directory_entry = None
@@ -1617,6 +1623,40 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Second entry
         self.second_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var, width=50)
         self.second_entry.grid(row=0, column=3, padx=10, pady=10)
+
+        # Trim label
+        self.trim_label1 = ctk.CTkLabel(self.trim_frame, text="-")
+        self.trim_label1.grid(row=0, column=4, padx=10, pady=5)
+
+        # Initialize minute variable1
+        self.minute_var1 = ctk.StringVar()
+        self.minute_var1.set(self.default_minute)
+
+        # Trace the changes in the StringVar
+        self.minute_var1.trace_add("write",
+                                   lambda name, index, mode, var=self.minute_var1, default=self.default_minute,
+                                          desired_type=int: self.validate_entry(var, default, desired_type))
+
+        # Minute entry1
+        self.minute_entry1 = ctk.CTkEntry(self.trim_frame, textvariable=self.minute_var1, width=50)
+        self.minute_entry1.grid(row=0, column=5, padx=10, pady=10)
+
+        # Trim label1
+        self.colon_label1 = ctk.CTkLabel(self.trim_frame, text=":")
+        self.colon_label1.grid(row=0, column=6)
+
+        # Initialize second variable
+        self.second_var1 = ctk.StringVar()
+        self.second_var1.set(self.default_second)
+
+        # Trace the changes in the StringVar
+        self.second_var1.trace_add("write",
+                                   lambda name, index, mode, var=self.second_var1, default=self.default_second,
+                                          desired_type=int: self.validate_entry(var, default, desired_type))
+
+        # Second entry1
+        self.second_entry1 = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var1, width=50)
+        self.second_entry1.grid(row=0, column=7, padx=10, pady=10)
 
         # Video Editor Output directory frame
         self.video_editor_output_directory_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -3574,11 +3614,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear audio normalization entry
             self.audio_normalization_entry.delete(0, ctk.END)
 
-            # Clear minute entry
+            # Clear minute entries
             self.minute_entry.delete(0, ctk.END)
+            self.minute_entry1.delete(0, ctk.END)
 
-            # Clear second entry
+            # Clear second entries
             self.second_entry.delete(0, ctk.END)
+            self.second_entry1.delete(0, ctk.END)
 
         elif frame_name == "add_remove_window":
             # Get the active tab from the add_remove_tabview
@@ -5791,24 +5833,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return None
 
     # Method to trim a video by a specified time value.
-    def trim_video(self, clip, total_time):
+    def trim_video(self, clip, front_trim=0, back_trim=0):
         """
-        Trim a video clip to the specified duration.
+        Trim a video clip by removing specified durations from the front and/or back.
 
         Parameters:
             clip (VideoClip): The input video clip to be trimmed.
-            total_time (tuple or float): If a float, the duration to keep in seconds.
-                                         If a tuple, it represents the range of time to keep (start, end).
+            front_trim (float): Duration to trim from the front in seconds.
+            back_trim (float): Duration to trim from the back in seconds.
 
         Returns:
             VideoClip or None: The trimmed video clip if successful, or None in case of an error.
         """
         try:
-            # Trim the clip to remove the specified duration.
-            trimmed_clip = clip.subclip(total_time)
+            # Calculate the start and end times for trimming
+            start_time = front_trim
+            end_time = clip.duration - back_trim if back_trim > 0 else None
+
+            # Trim the clip
+            trimmed_clip = clip.subclip(start_time, end_time)
 
             # Log normalization success if logging is activated.
-            self.log_and_show(f"Trimming successful {total_time}")
+            self.log_and_show(f"Trimming successful. Front: {front_trim} seconds, Back: {back_trim} seconds")
 
             # Return the trimmed video clip.
             return trimmed_clip
@@ -5839,6 +5885,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             audio_normalization = float(self.audio_normalization_entry.get().strip())
             minutes = int(self.minute_entry.get().strip())
             seconds = int(self.second_entry.get().strip())
+            minutes1 = int(self.minute_entry1.get().strip())
+            seconds1 = int(self.second_entry1.get().strip())
         except ValueError as e:
             self.log_and_show(
                 f"Value error: Please enter a valid value (integer or float) into the entry field. {str(e)}",
@@ -5850,7 +5898,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         adjusted_seconds = seconds if seconds != 0 else 0
 
         # Convert time to seconds
-        total_time = adjusted_minutes * 60 + adjusted_seconds
+        total_start_time = adjusted_minutes * 60 + adjusted_seconds
+
+        # Adjust minutes1 and seconds1
+        adjusted_minutes1 = minutes1 if minutes1 != 0 else 0
+        adjusted_seconds1 = seconds1 if seconds1 != 0 else 0
+
+        # Convert time to seconds
+        total_end_time = adjusted_minutes1 * 60 + adjusted_seconds1
+
+        total_time = total_start_time + total_end_time
 
         # If there is nothing to trim, set trim to False
         trim = total_time != 0
@@ -5883,7 +5940,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Check if the necessary parameters for video editing are provided
-        if not any((decibel, rotation, audio_normalization, minutes, seconds)):
+        if not any((decibel, rotation, audio_normalization, minutes, seconds, minutes1, seconds1)):
             self.log_and_show("You need to specify an operation (audio increase, video rotation, "
                               "audio normalization, trim, or some combination of them)",
                               create_messagebox=True, error=True)
@@ -5933,10 +5990,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Process the input(s)
-        self.process_video_paths(audio_normalization, decibel, input_paths, rotation_angle, total_time, trim)
+        self.process_video_paths(audio_normalization, decibel, input_paths, rotation_angle, total_start_time,
+                                 total_end_time, trim)
 
     def process_video_paths(self, audio_normalization: float, decibel: float, input_paths: list,
-                            rotation_angle, total_time: int, trim: bool):
+                            rotation_angle, total_start_time: int, total_end_time: int, trim: bool):
         """
         Process a list of video paths with specified video editing operations.
 
@@ -5945,7 +6003,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         - decibel (float): Audio volume adjustment in decibels.
         - input_paths (list): List of input video file paths to be processed.
         - rotation_angle (float): Rotation angle in degrees.
-        - total_time (int): Total time duration for video trimming.
+        - total_start_time (int): Total time duration for video trimming from the start.
+        - total_end_time (int): Total time duration for video trimming from the end.
         - trim (bool): Flag indicating whether to trim the video.
 
         Notes:
@@ -6013,7 +6072,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     original_clip = processed_clip if successful_operations else original_clip
 
                 if trim and successful_operations:
-                    processed_clip = self.trim_video(original_clip, total_time)
+                    if total_start_time and not total_end_time:
+                        processed_clip = self.trim_video(original_clip, front_trim=total_start_time)
+                    elif not total_start_time and total_end_time:
+                        processed_clip = self.trim_video(original_clip, back_trim=total_end_time)
+                    elif total_start_time and total_end_time:
+                        processed_clip = self.trim_video(original_clip, front_trim=total_start_time,
+                                                         back_trim=total_end_time)
+                    else:
+                        processed_clip = None
+
                     successful_operations = processed_clip is not None
                     original_clip = processed_clip if successful_operations else original_clip
 
