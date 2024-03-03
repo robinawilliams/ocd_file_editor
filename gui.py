@@ -6098,8 +6098,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 temp_copy_exists = False
 
                 # Check if the file name length exceeds the upper limit of characters
-                if len(os.path.basename(input_path)) > 254:
-                    self.log_and_show(f"File over 255 warning!!! Fix: {input_path}", error=True)
+                if len(os.path.basename(input_path)) > 228:
+                    self.log_and_show(f"Long file name length detected. Video will be saved as 'temp_EDITED'."
+                                      f"\nOriginal File: {input_path}", error=True)
 
                     # Create a temporary copy of the file
                     temp_dir = os.path.dirname(input_path)
