@@ -5900,7 +5900,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Parameters:
             clip (VideoClip): The input video clip to be trimmed.
             front_trim (float): Duration to trim from the front in seconds.
-            back_trim (float): Duration to trim from the back in seconds.
+            back_trim (float): Time to start the end trim in seconds.
 
         Returns:
             VideoClip or None: The trimmed video clip if successful, or None in case of an error.
@@ -5908,7 +5908,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         try:
             # Calculate the start and end times for trimming
             start_time = front_trim
-            end_time = clip.duration - back_trim if back_trim > 0 else None
+            end_time = back_trim if back_trim > 0 else None
 
             # Trim the clip
             trimmed_clip = clip.subclip(start_time, end_time)
