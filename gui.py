@@ -411,9 +411,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize the queue for FIFO queue module functionality
         self.queue = queue.Queue()
 
+        """Threading"""
         # Flag to indicate whether processing should be interrupted
         self.interrupt_processing_var = False
 
+        """Tab Names"""
         # List of tab names for the add_remove_tabview
         self.add_remove_tab_names = ["Artist", "Category", "Custom Tab Name", "Custom Text to Replace", "Exclude",
                                      "File Extensions", "NO GO", "Valid Extensions"]
@@ -560,7 +562,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.name_normalizer_message_label_frame = None
         self.name_normalizer_message_label = None
         self.slider_progressbar_frame = None
-        self.progressbar_1 = None
+        self.progressbar = ""
 
         # Initialize Video Editor GUI elements
         self.video_editor_frame = None
@@ -612,6 +614,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.send_to_module_frame2 = None
         self.send_to_file_renamer_button = None
         self.send_to_name_normalizer_button1 = None
+        self.slider_progressbar_frame1 = None
+        self.progressbar1 = ""
 
         # Initialize Add/Remove GUI elements
         self.add_remove_frame = None
@@ -1740,6 +1744,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_message_label = ctk.CTkLabel(self.video_editor_message_label_frame, text="")
         self.video_editor_message_label.grid(row=0, column=0, padx=10, pady=10)
 
+        # Progressbar frame1
+        self.slider_progressbar_frame1 = ctk.CTkFrame(self.video_editor_message_label_frame,
+                                                      corner_radius=0,
+                                                      fg_color="transparent")
+        self.slider_progressbar_frame1.grid(row=1, column=0, padx=10)
+        self.slider_progressbar_frame1.grid_columnconfigure(0, weight=1)
+        self.slider_progressbar_frame1.grid_rowconfigure(4, weight=1)
+
         """
         add_remove_window
         """
@@ -2764,21 +2776,40 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # If the desired type is neither int nor float, set it to the default value
             var.set(default_value)
 
-    def start_progress(self):
-        self.progressbar_1 = ctk.CTkProgressBar(self.slider_progressbar_frame,
-                                                orientation="horizontal",
-                                                mode="indeterminate")
-        self.progressbar_1.grid(row=0, column=0, padx=10, pady=10)
+    def start_progress(self, progress_bar_name: str, frame: str):
+        """
+        Start a progress bar.
+
+        Args:
+        - progress_bar_name (str): The name of the progress bar attribute.
+        - frame (str): The name of the frame to which the progress bar will be added.
+
+        """
+        # Create a progress bar
+        setattr(self, progress_bar_name, ctk.CTkProgressBar(frame, orientation="horizontal", mode="indeterminate"))
+        getattr(self, progress_bar_name).grid(row=0, column=0, padx=10, pady=10)
 
         # Start the progress bar
-        self.progressbar_1.start()
+        getattr(self, progress_bar_name).start()
 
-    def stop_progress(self):
-        # Stop the progress bar
-        self.progressbar_1.stop()
+    # Method to stop the progressbar
+    def stop_progress(self, progress_bar_name: str):
+        """
+        Stop and destroy a progress bar.
 
-        # Destroy the progress bar widget
-        self.progressbar_1.destroy()
+        Args:
+        - progress_bar_name (str): The name of the progress bar attribute to stop and destroy.
+
+        """
+        try:
+            # Stop the progress bar
+            getattr(self, progress_bar_name).stop()
+
+            # Destroy the progress bar widget
+            getattr(self, progress_bar_name).destroy()
+        except AttributeError:
+            # Handle the case where the progress bar attribute does not exist
+            self.log_and_show(f"Progress bar '{progress_bar_name}' not found.", create_messagebox=True, error=True)
 
     def log_and_show(self, message, create_messagebox=False, error=False, not_logging=False):
         """
@@ -5624,7 +5655,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to process a single file in the Name Normalizer module
     def process_single_file(self, file_path):
         # Start the progress bar for the Name Normalizer function
-        self.start_progress()
+        self.start_progress(self.progressbar, self.slider_progressbar_frame)
         
         original_path, new_path = self.rename_and_move_file(file_path)
 
@@ -5640,7 +5671,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.log_and_show("File has been processed successfully.")
 
         # Stop the progress bar for the Name Normalizer function
-        self.stop_progress()
+        self.stop_progress(self.progressbar)
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
@@ -5653,7 +5684,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to process the files of the folder(s) in the Name Normalizer module
     def process_folder(self, folder_path):
         # Start the progress bar for the Name Normalizer function
-        self.start_progress()
+        self.start_progress(self.progressbar, self.slider_progressbar_frame)
 
         # Initialize an empty list to store file paths
         file_paths = []
@@ -5703,7 +5734,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show("File(s) have been processed successfully.")
 
         # Stop the progress bar for the Name Normalizer function
-        self.stop_progress()
+        self.stop_progress(self.progressbar)
 
         # Reset GUI input fields if reset is True
         if self.reset_var.get():
@@ -6018,6 +6049,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Redirect MoviePy output for video edits
         self.redirect_output()
 
+        # Start the progress bar for the Name Normalizer function
+        self.start_progress(self.progressbar1, self.slider_progressbar_frame1)
+
         # Process each input path
         for input_path in input_paths:
             try:
@@ -6124,6 +6158,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Reset redirect MoviePy output for video edits
         self.redirect_output()
+
+        # Stop the progress bar for the Name Normalizer function
+        self.stop_progress(self.progressbar1)
 
     """
     add_remove_window
