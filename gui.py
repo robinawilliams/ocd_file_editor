@@ -2660,40 +2660,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         ctk.set_widget_scaling(new_scaling_float)
 
-    @staticmethod
-    def selection_window(title: str, prompt: str, label_text: str, item_list: list, item_text=None) -> str:
-        """
-        Display a selection window prompting the user to choose from a list of options.
-
-        Args:
-        - title (str): Title of the selection window.
-        - prompt (str): Prompt message displayed in the window.
-        - label_text (str): Label text for the selection.
-        - item_list (list): List of items to choose from.
-        - item_text (list, optional): GUI-friendly list of items to choose from.
-
-        Returns:
-        - str: The selected option from the user.
-
-        """
-        # If the gui-friendly text is provided, then use it, else use the item_list
-        item_text = item_text if item_text else item_list
-
-        # Prompt the user to choose from the list using SelectOptionWindow
-        selection_window = SelectOptionWindow(title=title,
-                                              prompt=prompt,
-                                              label_text=label_text,
-                                              item_list=item_list,
-                                              item_text=item_text)
-
-        # Wait for the user to respond before proceeding
-        selection_window.wait_window()
-
-        # Retrieve the selected directory
-        selected_option = selection_window.get_selected_option()
-
-        return selected_option
-
     """
     Messaging
     """
@@ -2906,6 +2872,40 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 # Automatically choose No if fallback state is False.
                 return False
+
+    @staticmethod
+    def selection_window(title: str, prompt: str, label_text: str, item_list: list, item_text=None) -> str:
+        """
+        Display a selection window prompting the user to choose from a list of options.
+
+        Args:
+        - title (str): Title of the selection window.
+        - prompt (str): Prompt message displayed in the window.
+        - label_text (str): Label text for the selection.
+        - item_list (list): List of items to choose from.
+        - item_text (list, optional): GUI-friendly list of items to choose from.
+
+        Returns:
+        - str: The selected option from the user.
+
+        """
+        # If the gui-friendly text is provided, then use it, else use the item_list
+        item_text = item_text if item_text else item_list
+
+        # Prompt the user to choose from the list using SelectOptionWindow
+        selection_window = SelectOptionWindow(title=title,
+                                              prompt=prompt,
+                                              label_text=label_text,
+                                              item_list=item_list,
+                                              item_text=item_text)
+
+        # Wait for the user to respond before proceeding
+        selection_window.wait_window()
+
+        # Retrieve the selected directory
+        selected_option = selection_window.get_selected_option()
+
+        return selected_option
 
     """
     Json Handling
