@@ -411,6 +411,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.queue = queue.Queue()
 
         """Threading"""
+        self.name_processing_thread_single = ""
+        self.name_processing_thread_multiple = ""
+        self.video_processing_thread = ""
+
         # Flag to indicate whether processing should be interrupted
         self.interrupt_name_processing_thread_var = False
         self.interrupt_video_processing_thread_var = False
@@ -5649,10 +5653,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         try:
             if os.path.isfile(self.name_normalizer_selected_file):
                 # If a single file is provided, use threading to directly process it
-                threading.Thread(target=self.process_single_file, args=(self.name_normalizer_selected_file,)).start()
+                self.name_processing_thread_single = threading.Thread(target=self.process_single_file,
+                                                                      args=(self.name_normalizer_selected_file,)
+                                                                      ).start()
             else:
                 # Get folder contents and use threading to process the files
-                threading.Thread(target=self.process_folder, args=(self.name_normalizer_selected_file,)).start()
+                self.name_processing_thread_multiple = threading.Thread(target=self.process_folder,
+                                                                        args=(self.name_normalizer_selected_file,)
+                                                                        ).start()
 
         except Exception as e:
             # Display error message if an exception occurs
@@ -5766,7 +5774,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.after(100, self.check_queue)
 
     # Method to interrupt processing
-    def interrupt_processing(self, thread_name):
+    def interrupt_processing(self, thread_name: str):
+        """
+        Set interruption flags to stop processing for the specified thread.
+
+        Args:
+        - thread_name (str): The name of the thread to interrupt.
+        """
         if thread_name == "name_processing_thread":
             self.interrupt_name_processing_thread_var = True
         elif thread_name == "video_processing_thread":
@@ -6036,8 +6050,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         # Process the input(s)
-        self.process_video_paths(audio_normalization, decibel, input_paths, rotation_angle, total_start_time,
-                                 total_end_time, trim)
+        self.video_processing_thread = threading.Thread(target=self.process_video_paths,
+                                                        args=(audio_normalization, decibel, input_paths, rotation_angle,
+                                                              total_start_time, total_end_time, trim,)).start()
 
     def process_video_paths(self, audio_normalization: float, decibel: float, input_paths: list,
                             rotation_angle, total_start_time: int, total_end_time: int, trim: bool):
