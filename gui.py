@@ -358,8 +358,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                                fallback=False))
 
         self.remove_extra_whitespace_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "remove_extra_whitespace_var",
-                                                                              fallback=False))
+            value=config.getboolean("Settings", "remove_extra_whitespace_var", fallback=False))
 
         self.title_var = ctk.BooleanVar(value=config.getboolean("Settings", "title_var", fallback=False))
 
@@ -413,7 +412,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         """Threading"""
         # Flag to indicate whether processing should be interrupted
-        self.interrupt_processing_var = False
+        self.interrupt_name_processing_thread_var = False
+        self.interrupt_video_processing_thread_var = False
 
         """Tab Names"""
         # List of tab names for the add_remove_tabview
@@ -605,6 +605,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_editor_frame = None
         self.clear_video_editor_selection_button = None
         self.video_editor_last_used_file_button = None
+        self.interrupt_button1 = None
         self.process_video_edits_button = None
         self.video_editor_checkbox_frame = None
         self.remove_successful_lines_checkbox = None
@@ -1434,7 +1435,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Interrupt button
         self.interrupt_button = ctk.CTkButton(self.normalize_folder_frame, text="Interrupt",
-                                              command=self.interrupt_processing)
+                                              command=lambda: self.interrupt_processing("name_processing_thread"))
         self.interrupt_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Normalize button
@@ -1695,10 +1696,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                 command=self.load_last_used_file)
         self.video_editor_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
 
+        # Interrupt button1
+        self.interrupt_button1 = ctk.CTkButton(self.process_video_editor_frame, text="Interrupt",
+                                               command=lambda: self.interrupt_processing("video_processing_thread"))
+        self.interrupt_button1.grid(row=0, column=2, padx=5, pady=5)
+
         # Process video button
         self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
                                                         command=self.gather_and_validate_entries)
-        self.process_video_edits_button.grid(row=0, column=2, padx=5, pady=5)
+        self.process_video_edits_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Frame to display messages on the video editor frame
         self.send_to_module_frame2 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -2508,7 +2514,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Note: Ensure this method is appropriately connected to an exit event or cleanup routine.
         """
         # Interrupt threads that are processing
-        self.interrupt_processing()
+        self.interrupt_processing("all")
 
         # Stop logging if currently running
         if self.activate_logging_var.get():
@@ -3859,10 +3865,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     elif isinstance(initial_directory_check, list):
                         # Prompt the user to choose from the list using SelectOptionWindow
                         chosen_artist = self.selection_window(title="Suggest Output Directory",
-                                                                     prompt="Multiple matching artists found. Choose "
-                                                                            "an artist:",
-                                                                     item_list=initial_directory_check,
-                                                                     label_text="Choose Artist")
+                                                              prompt="Multiple matching artists found. Choose "
+                                                                     "an artist:",
+                                                              item_list=initial_directory_check,
+                                                              label_text="Choose Artist")
 
                         if chosen_artist in initial_directory_check:
                             initial_directory = chosen_artist
@@ -4435,13 +4441,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                         # Prompt the user to choose from the list using SelectOptionWindow
                         chosen_directory = self.selection_window(title="Suggest Output Directory",
-                                                                        prompt="Suggested output directory found."
-                                                                               "\nDo you want use the suggested output "
-                                                                               "directory?"
-                                                                               "\nCancel to use default output "
-                                                                               "directory.",
-                                                                        item_list=suggested_output_directory,
-                                                                        label_text="Choose Directory")
+                                                                 prompt="Suggested output directory found."
+                                                                        "\nDo you want use the suggested output "
+                                                                        "directory?"
+                                                                        "\nCancel to use default output "
+                                                                        "directory.",
+                                                                 item_list=suggested_output_directory,
+                                                                 label_text="Choose Directory")
 
                         if chosen_directory in suggested_output_directory:
                             self.output_directory = chosen_directory
@@ -5656,7 +5662,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def process_single_file(self, file_path):
         # Start the progress bar for the Name Normalizer function
         self.start_progress(self.progressbar, self.slider_progressbar_frame)
-        
+
         original_path, new_path = self.rename_and_move_file(file_path)
 
         # Check if the tuple is the same to prevent no operations from being added to history
@@ -5717,7 +5723,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         new_paths.append(new_path)
 
                     # Check if processing should be interrupted
-                    if self.interrupt_processing_var:
+                    if self.interrupt_name_processing_thread_var:
                         break  # Break out of the loop
 
                 # Append the batch operation to the name normalizer history
@@ -5726,7 +5732,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     'new_paths': new_paths
                 })
 
-        if self.interrupt_processing_var:
+        if self.interrupt_name_processing_thread_var:
             # Log the action if logging is enabled
             self.log_and_show("User interrupted the process. File(s) have not been processed successfully.", error=True)
         else:
@@ -5742,7 +5748,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.clear_selection(frame_name="name_normalizer_window")
 
         # Reset the variable back to false
-        self.interrupt_processing_var = False
+        self.interrupt_name_processing_thread_var = False
 
         # Schedule the next check after 100 milliseconds
         self.after(100, self.check_queue)
@@ -5760,8 +5766,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.after(100, self.check_queue)
 
     # Method to interrupt processing
-    def interrupt_processing(self):
-        self.interrupt_processing_var = True
+    def interrupt_processing(self, thread_name):
+        if thread_name == "name_processing_thread":
+            self.interrupt_name_processing_thread_var = True
+        elif thread_name == "video_processing_thread":
+            self.interrupt_video_processing_thread_var = True
+        elif thread_name == "all":
+            self.interrupt_name_processing_thread_var = True
+            self.interrupt_video_processing_thread_var = True
+        else:
+            self.log_and_show(f"Thread {thread_name} is not running, cannot interrupt.",
+                              create_messagebox=True, error=True)
 
     """
     Video Editor
@@ -6054,6 +6069,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Process each input path
         for input_path in input_paths:
+            # Check if processing should be interrupted
+            if self.interrupt_video_processing_thread_var:
+                # Log the action if logging is enabled
+                self.log_and_show("User interrupted the process. Video(s) have not been processed successfully.",
+                                  error=True)
+                # Reset the variable to false
+                self.interrupt_video_processing_thread_var = False
+                break  # Break out of the loop
+
             try:
                 # Initialize the temp copy exists variable to False
                 temp_copy_exists = False
