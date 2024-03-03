@@ -21,15 +21,16 @@ from moviepy.video.fx import all as vfx  # Importing all video effects (vfx) fro
 
 # Create a custom window class named SelectOptionWindow, inheriting from ctk.CTkToplevel
 class SelectOptionWindow(ctk.CTkToplevel):
-    def __init__(self, title, prompt, item_list, label_text, *args, **kwargs):
+    def __init__(self, title, prompt, label_text, item_list, item_text=None, *args, **kwargs):
         """
         Initialize the SelectOptionWindow.
 
         Parameters:
         - title (str): The title of the window.
         - prompt (str): The text to be displayed as a prompt in the window.
-        - item_list (list): List of items for the scrollable radiobutton frame.
         - label_text (str): Text to be displayed as a label for the radiobutton frame.
+        - item_list (list): List of items for the scrollable radiobutton frame.
+        - item_text (list, optional): GUI-friendly list of items for the scrollable radiobutton frame.
         - *args, **kwargs: Additional arguments that can be passed to the parent class constructor.
         """
         super().__init__(*args, **kwargs)
@@ -44,9 +45,13 @@ class SelectOptionWindow(ctk.CTkToplevel):
         self.prompt_label = ctk.CTkLabel(self, text=prompt)
         self.prompt_label.pack(pady=5)
 
+        # If the gui-friendly text is provided, then use it, else use the item_list
+        item_text = item_text if item_text else item_list
+
         # Create scrollable radiobutton frame
         self.scrollable_radiobutton_frame = ScrollableRadiobuttonFrame(master=self, width=500,
                                                                        item_list=item_list,
+                                                                       item_text=item_text,
                                                                        label_text=label_text)
         self.scrollable_radiobutton_frame.pack(padx=10, pady=10)
 
@@ -88,12 +93,13 @@ class ScrollableRadiobuttonFrame(ctk.CTkScrollableFrame):
 
     Args:
         master (tk.Widget): The parent widget.
-        item_list (list): A list of items to be used as options for the radio buttons.
+        item_list (list): A list of items to be used as variables for the radio buttons.
+        item_text (list): A GUI-friendly list of items to be used as options for the radio buttons.
         command (callable, optional): A function to be called when a radio button is selected.
         **kwargs: Additional keyword arguments to be passed to the superclass constructor.
     """
 
-    def __init__(self, master, item_list, command=None, **kwargs):
+    def __init__(self, master, item_list: list, item_text: list, command=None, **kwargs):
         # Initialize the ScrollableRadiobuttonFrame with a list of items and an optional command
         super().__init__(master, **kwargs)
 
@@ -108,30 +114,25 @@ class ScrollableRadiobuttonFrame(ctk.CTkScrollableFrame):
 
         # Iterate through the item list and add each item as a radio button
         for i, item in enumerate(item_list):
-            self.add_item(item)
+            # GUI-friendly formatting
+            text = item_text[i] if i < len(
+                item_text) else item  # Use the corresponding text if provided or fallback to the item itself
+            self.add_item(item, text)
 
         # Set the default radio button
         if item_list:
             # Set the variable to the value of the first item
             self.radiobutton_variable.set(item_list[0])
 
-    def add_item(self, item):
+    def add_item(self, value: str, text: str):
         """Add a new radio button with the specified item.
 
         Args:
-            item (str): The text for the radio button.
+            value (str): The variable for the radio button.
+            text (str): The text for the radio button.
         """
-        # Check if a slash is present in the item for gui friendly formatting
-        if '/' in item:
-            # Split the item into basename and absolute file path
-            basename = os.path.basename(item)
-            file_path = os.path.abspath(item)
-        else:
-            basename = item
-            file_path = item
-
-        # Create a radio button with the specified basename, value as the absolute file path, and variable if applicable
-        radiobutton = ctk.CTkRadioButton(self, text=basename, value=file_path, variable=self.radiobutton_variable)
+        # Create a radio button with the specified text, value, and variable
+        radiobutton = ctk.CTkRadioButton(self, text=text, value=value, variable=self.radiobutton_variable)
 
         # Configure the radio button to execute a command on selection, if provided
         if self.command is not None:
@@ -143,7 +144,7 @@ class ScrollableRadiobuttonFrame(ctk.CTkScrollableFrame):
         # Add the radio button to the list for tracking
         self.radiobutton_list.append(radiobutton)
 
-    def remove_item(self, item):
+    def remove_item(self, item: str) -> None:
         """Remove the specified item from the list of radio buttons.
 
         Args:
@@ -156,7 +157,7 @@ class ScrollableRadiobuttonFrame(ctk.CTkScrollableFrame):
                 self.radiobutton_list.remove(radiobutton)
                 return
 
-    def get_selected_item(self):
+    def get_selected_item(self) -> str:
         """Get the value of the selected radio button.
 
         Returns:
@@ -2660,25 +2661,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         ctk.set_widget_scaling(new_scaling_float)
 
     @staticmethod
-    def selection_window(title: str, prompt: str, item_list: list, label_text: str) -> str:
+    def selection_window(title: str, prompt: str, label_text: str, item_list: list, item_text=None) -> str:
         """
         Display a selection window prompting the user to choose from a list of options.
 
         Args:
         - title (str): Title of the selection window.
         - prompt (str): Prompt message displayed in the window.
-        - item_list (list): List of items to choose from.
         - label_text (str): Label text for the selection.
+        - item_list (list): List of items to choose from.
+        - item_text (list, optional): GUI-friendly list of items to choose from.
 
         Returns:
         - str: The selected option from the user.
 
         """
+        # If the gui-friendly text is provided, then use it, else use the item_list
+        item_text = item_text if item_text else item_list
+
         # Prompt the user to choose from the list using SelectOptionWindow
         selection_window = SelectOptionWindow(title=title,
                                               prompt=prompt,
+                                              label_text=label_text,
                                               item_list=item_list,
-                                              label_text=label_text)
+                                              item_text=item_text)
 
         # Wait for the user to respond before proceeding
         selection_window.wait_window()
@@ -2785,6 +2791,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         else:
             # If the desired type is neither int nor float, set it to the default value
             var.set(default_value)
+
+    @staticmethod
+    def get_basenames(file_paths: list) -> list:
+        """
+        Get the basenames of a list of file paths.
+
+        Parameters:
+        - file_paths (list): A list of file paths.
+
+        Returns:
+        - list: A list containing the basenames of the input file paths.
+        """
+        basenames = [os.path.basename(path) for path in file_paths]
+        return basenames
 
     def start_progress(self, progress_bar_name: str, frame: str):
         """
@@ -3458,8 +3478,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                         prompt="The proposed file name exceeds 255 characters. "
                                                                "\nOperating system limitations prohibit this. "
                                                                "\nPlease choose a category to remove:",
-                                                        item_list=self.file_renamer_queue,
-                                                        label_text="Choose Category")
+                                                        label_text="Choose Category",
+                                                        item_list=self.file_renamer_queue)
 
                 if chosen_category:
                     # Remove the category from the queue
@@ -3867,12 +3887,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                     # If suggest output directory returns a list, then use SelectOptionWindow
                     elif isinstance(initial_directory_check, list):
+                        # Sanitize the list for display in the GUI
+                        basename_list = self.get_basenames(initial_directory_check)
+
                         # Prompt the user to choose from the list using SelectOptionWindow
                         chosen_artist = self.selection_window(title="Suggest Output Directory",
                                                               prompt="Multiple matching artists found. Choose "
                                                                      "an artist:",
+                                                              label_text="Choose Artist",
                                                               item_list=initial_directory_check,
-                                                              label_text="Choose Artist")
+                                                              item_text=basename_list)
 
                         if chosen_artist in initial_directory_check:
                             initial_directory = chosen_artist
@@ -4442,6 +4466,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         # If suggest output directory is a single result, convert it to a list (sanitize)
                         if suggested_output_directory and not isinstance(suggested_output_directory, list):
                             suggested_output_directory = [suggested_output_directory]
+                        # Sanitize the list for display in the GUI
+                        basename_list = self.get_basenames(suggested_output_directory)
 
                         # Prompt the user to choose from the list using SelectOptionWindow
                         chosen_directory = self.selection_window(title="Suggest Output Directory",
@@ -4450,8 +4476,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                         "directory?"
                                                                         "\nCancel to use default output "
                                                                         "directory.",
+                                                                 label_text="Choose Directory",
                                                                  item_list=suggested_output_directory,
-                                                                 label_text="Choose Directory")
+                                                                 item_text=basename_list)
 
                         if chosen_directory in suggested_output_directory:
                             self.output_directory = chosen_directory
@@ -6980,8 +7007,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 artist = self.selection_window(
                     title="Artist Selection",
                     prompt="Which artist would you like to modify?:",
-                    item_list=artist_list,
-                    label_text="Choose Artist"
+                    label_text="Choose Artist",
+                    item_list=artist_list
                 )
 
                 # Update the selected artist if a valid choice is made, otherwise, return
