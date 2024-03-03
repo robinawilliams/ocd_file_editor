@@ -369,10 +369,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.reset_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_var", fallback=False))
 
         self.reset_video_entries_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_video_entries_var",
-                                                                              fallback=False))
+                                                                              fallback=True))
 
         self.reset_add_remove_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_add_remove_var",
                                                                            fallback=True))
+        self.auto_add_acc_record_var = ctk.BooleanVar(value=config.getboolean("Settings", "auto_add_acc_record_var",
+                                                                              fallback=False))
 
         self.deep_walk_var = ctk.BooleanVar(value=config.getboolean("Settings", "deep_walk_var", fallback=False))
 
@@ -635,6 +637,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.add_artist_entry = None
         self.remove_artist_button = None
         self.remove_artist_entry = None
+        self.auto_add_acc_record_frame = None
+        self.auto_add_acc_record_checkbox = None
+        self.add_remove_acc_record_label_frame = None
+        self.add_remove_acc_record_label = None
+        self.add_remove_acc_record_entry_frame = None
+        self.add_acc_record_button = None
+        self.add_acc_record_entry = None
+        self.remove_acc_record_button = None
+        self.remove_acc_record_entry = None
         self.add_remove_acc_label_frame = None
         self.add_remove_acc_label = None
         self.acc_browse_frame = None
@@ -1819,10 +1830,57 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_artist_entry = ctk.CTkEntry(self.add_remove_artist_entry_frame, width=370)
         self.remove_artist_entry.grid(row=0, column=3, padx=5)
 
+        # Add and remove artist checkbox frame
+        self.auto_add_acc_record_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                                      fg_color="transparent")
+        self.auto_add_acc_record_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable automatically add artist record for common categories
+        self.auto_add_acc_record_checkbox = ctk.CTkCheckBox(self.auto_add_acc_record_frame,
+                                                            text="Automatically add record for Common Categories",
+                                                            variable=self.auto_add_acc_record_var)
+        self.auto_add_acc_record_checkbox.grid(row=0, column=0, padx=10, pady=10)
+
+        # Add and remove artist label frame
+        self.add_remove_acc_record_label_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                                              fg_color="transparent")
+        self.add_remove_acc_record_label_frame.grid(row=3, column=0, padx=10, pady=10)
+
+        # Add/Remove Artist Label
+        self.add_remove_acc_record_label = ctk.CTkLabel(self.add_remove_acc_record_label_frame,
+                                                        text="Add/Remove Artist "
+                                                             "Common Categories "
+                                                             "Record",
+                                                        font=ctk.CTkFont(size=15, weight="bold"))
+        self.add_remove_acc_record_label.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        # Add and remove artist entry frame
+        self.add_remove_acc_record_entry_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
+                                                              fg_color="transparent")
+        self.add_remove_acc_record_entry_frame.grid(row=4, column=0, padx=10, pady=10)
+
+        # Add artist button
+        self.add_acc_record_button = ctk.CTkButton(self.add_remove_acc_record_entry_frame, text="Add Artist C.C.",
+                                                   command=self.add_artist_to_common_categories_dictionary)
+        self.add_acc_record_button.grid(row=0, column=0, padx=5)
+
+        # Add artist entry
+        self.add_acc_record_entry = ctk.CTkEntry(self.add_remove_acc_record_entry_frame, width=370)
+        self.add_acc_record_entry.grid(row=0, column=1, padx=5)
+
+        # Remove artist button
+        self.remove_acc_record_button = ctk.CTkButton(self.add_remove_acc_record_entry_frame, text="Remove Artist C.C.",
+                                                      command=self.remove_artist_from_common_categories_dictionary)
+        self.remove_acc_record_button.grid(row=0, column=2, padx=5, pady=5)
+
+        # Remove artist entry
+        self.remove_acc_record_entry = ctk.CTkEntry(self.add_remove_acc_record_entry_frame, width=370)
+        self.remove_acc_record_entry.grid(row=0, column=3, padx=5)
+
         # Add/Remove artist common categories label frame
         self.add_remove_acc_label_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
                                                        fg_color="transparent")
-        self.add_remove_acc_label_frame.grid(row=2, column=0, padx=10, pady=10)
+        self.add_remove_acc_label_frame.grid(row=5, column=0, padx=10, pady=10)
 
         # Add/Remove artist common categories Label
         self.add_remove_acc_label = ctk.CTkLabel(self.add_remove_acc_label_frame, text="Add/Remove Artist "
@@ -1833,7 +1891,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Browse frame for artist common categories
         self.acc_browse_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
                                              fg_color="transparent")
-        self.acc_browse_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.acc_browse_frame.grid(row=6, column=0, padx=10, pady=10)
 
         # Browse artist common categories button
         self.browse_artist_button = ctk.CTkButton(self.acc_browse_frame, text="Browse Artist",
@@ -1855,7 +1913,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Add and remove artist common categories entry frame
         self.add_remove_acc_entry_frame = ctk.CTkFrame(self.add_remove_artist_top_frame, corner_radius=0,
                                                        fg_color="transparent")
-        self.add_remove_acc_entry_frame.grid(row=4, column=0, padx=10, pady=10)
+        self.add_remove_acc_entry_frame.grid(row=7, column=0, padx=10, pady=10)
 
         # Add artist common categories button
         self.add_acc_button = ctk.CTkButton(self.add_remove_acc_entry_frame, text="Add A.C.C.",
@@ -3713,6 +3771,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                 # Clear remove artist entry
                 self.remove_artist_entry.delete(0, ctk.END)
+
+                # Clear add acc artist record entry
+                self.add_acc_record_entry.delete(0, ctk.END)
+
+                # Clear remove acc artist record entry
+                self.remove_acc_record_entry.delete(0, ctk.END)
 
                 # Clear acc artist
                 self.acc_selected_artist = ""
@@ -6284,18 +6348,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 with open(self.artist_file, 'w') as artist_list_file:
                     artist_list_file.write('\n'.join(artist_list))
 
-                # Ask for confirmation of the Artist Common Categories record creation
-                confirmation = self.ask_confirmation("Create Record", "Would you like to create a record for this "
-                                                                      "artist in the common categories dictionary?")
-
-                if confirmation:
-                    # Add the artist as a key to the artist_common_categories dictionary with an empty list as the value
-                    self.artist_common_categories[add_artist] = []
-
-                    # Update the JSON file with the modified artist_common_categories dictionary
-                    self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
-
-                    self.log_and_show(f"Created dictionary record for: '{add_artist}'")
+                # Check if the auto add acc record variable is set
+                if self.auto_add_acc_record_var.get():
+                    # Create a record for the artist in the common categories dictionary
+                    self.add_artist_to_common_categories_dictionary(add_artist)
 
                 # Log the message and display to the GUI
                 self.log_and_show(f"Added artist to the Artist File: '{add_artist}'")
@@ -6334,15 +6390,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Write the updated list back to the artist_file and artist_common_categories dictionary
             try:
-                # Remove the artist from the artist_common_categories dictionary
-                if remove_artist in self.artist_common_categories:
-                    del self.artist_common_categories[remove_artist]
-                    # Update the JSON file with the modified artist_common_categories dictionary
-                    self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
-
-                    self.log_and_show(f"Dictionary record removed for: '{remove_artist}'")
-                else:
-                    self.log_and_show(f"Artist not found in artist_common_categories: '{remove_artist}'", error=True)
+                # Check if the artist is in the common categories dictionary (case-insensitive)
+                if any(artist.lower() == remove_artist.lower() for artist in self.artist_common_categories):
+                    # Remove the artist record in the common categories dictionary
+                    self.remove_artist_from_common_categories_dictionary(remove_artist)
 
                 with open(self.artist_file, 'w') as artist_list_file:
                     artist_list_file.write('\n'.join(artist_list))
@@ -6359,6 +6410,62 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.reset_add_remove_var.get():
             # Clear remove artist entry
             self.remove_artist_entry.delete(0, ctk.END)
+
+    def add_artist_to_common_categories_dictionary(self, add_artist=None):
+        try:
+            # Set the artist to be added from the entry widget
+            add_artist = add_artist if add_artist else self.add_acc_record_entry.get().strip()
+
+            # Check if no artist is provided
+            if not add_artist:
+                self.log_and_show("Add Artist cannot be empty.", create_messagebox=True, error=True)
+                return  # Exit the function if no artist is provided
+
+            # Check if the add_artist is already in the list (case-insensitive)
+            if any(artist.lower() == add_artist.lower() for artist in self.artist_common_categories):
+                self.log_and_show(f"Dictionary record already exists for: '{add_artist}'",
+                                  create_messagebox=True, error=True)
+            else:
+                # Add the artist as a key to the artist_common_categories dictionary with an empty list as the value
+                self.artist_common_categories[add_artist] = []
+
+                # Update the JSON file with the modified artist_common_categories dictionary
+                self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+                self.log_and_show(f"Created dictionary record for: '{add_artist}'")
+        except Exception as e:
+            self.log_and_show(f"Creating dictionary record failed: '{str(e)}'.", create_messagebox=True, error=True)
+
+        # Reset the artist entries
+        if self.reset_add_remove_var.get():
+            # Clear add acc record entry
+            self.add_acc_record_entry.delete(0, ctk.END)
+
+    def remove_artist_from_common_categories_dictionary(self, remove_artist=None):
+        try:
+            # Set the artist to be added from the entry widget
+            remove_artist = remove_artist if remove_artist else self.remove_acc_record_entry.get().strip()
+
+            # Check if no artist is provided
+            if not remove_artist:
+                self.log_and_show("Remove Artist cannot be empty.", create_messagebox=True, error=True)
+                return  # Exit the function if no artist is provided
+
+            # Check if the remove_artist is in the list (case-insensitive)
+            if any(artist.lower() == remove_artist.lower() for artist in self.artist_common_categories):
+                del self.artist_common_categories[remove_artist]
+                # Update the JSON file with the modified artist_common_categories dictionary
+                self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+                self.log_and_show(f"Dictionary record removed for: '{remove_artist}'")
+            else:
+                self.log_and_show(f"Artist not found in artist_common_categories: '{remove_artist}'", error=True)
+        except Exception as e:
+            self.log_and_show(f"Removing dictionary record failed: '{str(e)}'.", create_messagebox=True, error=True)
+
+        # Reset the artist entries
+        if self.reset_add_remove_var.get():
+            # Clear remove acc record entry
+            self.remove_acc_record_entry.delete(0, ctk.END)
 
     # Method to create a NO-GO file
     def no_go_creation(self):

@@ -143,6 +143,8 @@ reset_var = False
 reset_video_entries_var = False
 ; Reset add/remove entries after each run
 reset_add_remove_var = True
+; Automatically add an Artist record in the Common Categories dictionary
+auto_add_acc_record_var = False
 ; Explore subdirectories when name normalizing files (False just normalizes files in the root directory)
 deep_walk_var = False
 ; Remove the successful line from the input file after video editor processing
