@@ -7058,8 +7058,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     # Method to update the acc display based on selected options
     def update_acc_display(self):
         if self.acc_selected_artist:
-            # Set the name to the acc display
-            self.acc_display_text.set(self.acc_selected_artist)
+            common_categories = (self.artist_common_categories.get(self.acc_selected_artist, []))
+
+            # Set the artist and artist's common categories to the acc display
+            self.acc_display_text.set(f"{self.acc_selected_artist}: {common_categories}")
 
     def add_artist_common_category(self):
         try:
@@ -7088,6 +7090,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Log the action if logging is enabled
             self.log_and_show(f"A.C.C. added: '{new_common_category}'")
+
+            # Update the artist display
+            self.update_acc_display()
 
             # Reset the acc entry if the action is successful
             if self.reset_add_remove_var.get():
@@ -7127,6 +7132,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Update the JSON file with the modified dictionary
             self.update_json(self.dictionary_file, "artist_common_categories", self.artist_common_categories)
+
+            # Update the artist display
+            self.update_acc_display()
 
             # Reset the remove_acc entry if the action is successful
             if self.reset_add_remove_var.get():
