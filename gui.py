@@ -2806,6 +2806,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         basenames = [os.path.basename(path) for path in file_paths]
         return basenames
 
+    @staticmethod
+    def get_lengths(input_list: list) -> list:
+        """
+        Get the lengths of each item in the input list, add one to account for the whitespace, and append it to the
+        item.
+
+        Parameters:
+        - input_list (list): A list of items.
+
+        Returns:
+        - list: A new list with each item appended by its length.
+        """
+        processed_list = [f"{item} (frees {(len(str(item)) + 1)} characters)" for item in
+                          input_list]
+        return processed_list
+
     def start_progress(self, progress_bar_name: str, frame: str):
         """
         Start a progress bar.
@@ -3473,13 +3489,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                   " and try again.",
                                   create_messagebox=True, error=True)
             elif len(self.file_renamer_queue) > 0:
+                # Display the length of the category word + 1
+                categories_with_lengths = self.get_lengths(self.file_renamer_queue)
+
                 # Prompt the user to choose from the list using SelectOptionWindow
                 chosen_category = self.selection_window(title="Name Length Error",
                                                         prompt="The proposed file name exceeds 255 characters. "
                                                                "\nOperating system limitations prohibit this. "
                                                                "\nPlease choose a category to remove:",
                                                         label_text="Choose Category",
-                                                        item_list=self.file_renamer_queue)
+                                                        item_list=self.file_renamer_queue,
+                                                        item_text=categories_with_lengths)
 
                 if chosen_category:
                     # Remove the category from the queue
