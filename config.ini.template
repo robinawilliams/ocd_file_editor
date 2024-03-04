@@ -153,8 +153,6 @@ remove_successful_lines_var = False
 default_placement_var = special_character
 ; Set the special character for the placement (alphanumeric character)
 special_character_var = -
-; Set the keyword for the Artist Identifier
-keyword_var = Sort
 ; Set the default rotation for video editor (left, right, flip, mirror, none)
 default_rotation_var = none
 

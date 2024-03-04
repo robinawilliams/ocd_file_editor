@@ -4605,12 +4605,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     identified = self.artist_search()
 
                     if identified:
+                        # Unpack the tuple
+                        (artist, artist_file_path) = identified
+
                         # Log the result and display a messagebox to the user
-                        self.log_and_show(f"Artist Search: "
-                                          f"\nFile name: "
-                                          f"\n{os.path.basename(identified)} "
-                                          f"\nFile path: "
-                                          f"\n{identified}",
+                        self.log_and_show(f"Artist Search identified {artist} outside the current folder: "
+                                          f"\n\nFile name: {artist}"
+                                          f"\n{os.path.basename(artist_file_path)} "
+                                          f"\n\nFile path: "
+                                          f"\n{artist_file_path}",
                                           create_messagebox=True)
                     else:
                         # Log the action
@@ -7335,10 +7338,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Extract the artist from the text before '-'
             artist = base_name.split('-')[0].strip()
 
-            # Check if the artist is a directory in the root of self.artist_directory
-            if self.ignore_known_artists_var.get() and artist in os.listdir(self.artist_directory):
-                self.log_and_show(f"Artist Search ignoring known artist '{artist}' present as a directory.")
-                return None
+            if self.ignore_known_artists_var.get():
+                # Perform case-insensitive matching for known artists in the artist_directory
+                matching_artists = [directory for directory in os.listdir(self.artist_directory) if
+                                    re.match(artist, directory, re.IGNORECASE)]
+
+                # Remove matching known artists from the artist variable
+                for matching_artist in matching_artists:
+                    artist = artist.replace(matching_artist, '').strip()
+
+                # Check if there is anything left in artist variable
+                if not artist:
+                    self.log_and_show(f"Artist Search: All matching artists removed. No artist left after ignoring "
+                                      f"known artists.")
+                    return None
 
             # Search for a case-insensitive match for the artist in self.artist_directory
             for root, dirs, files in os.walk(self.artist_directory):
@@ -7352,13 +7365,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         if artist_file_path == self.file_renamer_selected_file:
                             continue
 
-                        # Verify the file exists and the keyword is in the absolute path
+                        # Verify the file exists and artist's name is not part of the directory path
                         if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
-                                and self.keyword_var.lower() in artist_file_path.lower():
-                            # Check if the artist's name is not part of the directory path
-                            if artist.lower() not in os.path.dirname(artist_file_path).lower():
-                                # Return the result
-                                return artist_file_path
+                                and artist.lower() not in os.path.dirname(artist_file_path).lower():
+                            # Return the artist and result as a tuple
+                            return artist, artist_file_path
 
             # If no matching artist is found, return none
             self.log_and_show("No matching artist file found.")
