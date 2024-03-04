@@ -2529,7 +2529,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Bind the callback function to sort_reverse_order_var
         self.sort_reverse_order_var.trace_add("write", self.refresh_buttons_and_tabs)
 
-    # Callback for updating the scroll region when the inner frame is configured
     def on_frame_configure(self, *_):
         """
         Callback function to handle the frame configuration for scrolling.
@@ -2540,7 +2539,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Reset the scroll region to encompass the inner frame
         self.file_renamer_canvas.configure(scrollregion=self.file_renamer_canvas.bbox("all"))
 
-    # Callback for updating the scrollable frame's width when the canvas is configured
     def on_canvas_configure(self, event):
         """
         Callback function to handle the canvas configuration.
@@ -2554,7 +2552,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         canvas_width = event.width - self.file_renamer_scrollbar.winfo_width()
         self.file_renamer_canvas.itemconfig(self.file_renamer_scrollable_frame_window, width=canvas_width)
 
-    # Callback function to handle logging state
     def handle_logging_activation(self, *_):
         """
         Callback function to handle logging activation.
@@ -2574,7 +2571,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # If logging is false, call the stop_logging function
             self.stop_logging()
 
-    # Method called on exit for cleanup operations
     def cleanup_on_exit(self):
         """
         Cleanup method to be called on program exit.
@@ -2590,7 +2586,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.activate_logging_var.get():
             self.stop_logging()
 
-    # Method to dynamically switch between frames based on the selected name
     def select_frame_by_name(self, frame_name: str):
         """
         Switches between frames based on the provided frame_name and sets button colors accordingly.
@@ -2696,7 +2691,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         elif current_mode == "Dark":
             self.file_renamer_canvas.configure(bg='#2B2B2B')
 
-    # Method for changing appearance mode (Light or Dark)
     def change_appearance_mode_event(self, new_appearance_mode: str):
         """
         Event handler for changing the appearance mode.
@@ -2711,7 +2705,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         ctk.set_appearance_mode(new_appearance_mode)
         self.update_background_color()
 
-    # Method for changing UI scaling
     @staticmethod
     def change_scaling_event(new_scaling: str):
         """
@@ -2748,7 +2741,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.video_editor_message_label.configure(text_color="#FFFFFF")
             self.add_remove_message_label.configure(text_color="#FFFFFF")
 
-    # Method to display messages with optional error formatting
     def show_message(self, message, error=False, frame_name=None):
         """
         Displays a message on the actively selected frame or all frames.
@@ -2869,7 +2861,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Start the progress bar
         getattr(self, progress_bar_name).start()
 
-    # Method to stop the progressbar
     def stop_progress(self, progress_bar_name: str):
         """
         Stop and destroy a progress bar.
@@ -2976,7 +2967,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Json Handling
     """
 
-    # Method to load the json file dictionaries/lists
     def initialize_json(self):
         """
         Initializes class attributes by loading data from the specified JSON file.
@@ -3026,7 +3016,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         except Exception as e:
             self.log_and_show(f"Initialize exclusion_file failed: {self.dictionary_file}, {str(e)}", error=True)
 
-    # Method to update the json dictionary
     def update_json(self, file_to_update, dictionary_name, updated_data):
         """
         Updates a specific dictionary in a JSON file with new data.
@@ -3099,7 +3088,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if os.path.exists(self.file_renamer_log):
             logging.info("Logging stopped.")
 
-    # Redirect output (Fix for MoviePy overriding user's logging choice)
     def redirect_output(self):
         """
         Redirects standard output and error based on logging and suppression settings.
@@ -3126,7 +3114,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     File Operations
     """
 
-    # Method to remove a successful line from a file.
     def remove_successful_line_from_file(self, file_path: str, line_to_remove: str):
         """
         Removes a specified line from a text file.
@@ -3162,7 +3149,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"An error occurred while removing line from file: {e}", create_messagebox=True,
                               error=True)
 
-    # Method to move the selected input to the trash
     def move_file_to_trash(self):
         """
         Move the selected file to the system's trash.
@@ -3197,7 +3183,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         except OSError as e:
             self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
-    # Method to create double check reminders
     def double_check_reminder(self, new_path: str):
         """
         Create a double-check reminder for the folder immediately above the specified location.
@@ -3243,7 +3228,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"Double check reminder was not created successfully: {str(e)}",
                               create_messagebox=True, error=True)
 
-    # Method to load the last used file
     def load_last_used_file(self):
         """
         Load the last used file based on the current frame and update the display accordingly.
@@ -3414,7 +3398,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                               create_messagebox=True, error=True)
             return
 
-    # Method to handle an input being dropped onto the application window
     def on_file_drop(self, event):
         """
         Handle the event when a file is dropped onto the application window.
@@ -3503,7 +3486,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # If an error occurs while opening the file, log the error
                 self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
-    # Method to update the file display based on selected options
     def update_file_display(self, *_):
         """
         Update the file display based on the selected file and user input.
@@ -3570,7 +3552,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Remove the category from the queue
                     self.remove_from_queue(chosen_category)
 
-    # Method to undo the last category added to the queue
     def undo_last(self):
         """
         Undo the last category added to the file renamer queue.
@@ -3860,8 +3841,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Log action and display message on the applicable frame
         self.log_and_show("Selection cleared", not_logging=True)
 
-    # Open a dialog to browse and select an input containing a line delimited list of artists
     def browse_artist_file(self):
+        """
+        Open a file dialog to browse and select an artist-related file.
+
+        Updates:
+        - Sets the selected file path to the artist_file variable.
+        - Clears the entry and sets it to the artist file path in the GUI.
+        """
         artist_file = filedialog.askopenfilename(
             initialdir=self.initial_directory,
             filetypes=[("Text Files", "*.txt")])
@@ -3874,8 +3861,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.artist_file_entry.delete(0, ctk.END)
             self.artist_file_entry.insert(0, self.artist_file)
 
-    # Method to browse and select a directory for the settings_window
     def browse_directory(self, entry_widget, target_attribute):
+        """
+        Open a directory dialog to browse and select a directory.
+
+        Updates:
+        - Clears the entry in the GUI and sets it to the selected directory.
+        - Updates the corresponding attribute in the class with the selected directory path.
+
+        Parameters:
+        - entry_widget: The entry widget in the GUI where the selected directory path will be displayed.
+        - target_attribute: The attribute in the class to be updated with the selected directory path.
+        """
         selected_directory = filedialog.askdirectory(initialdir=getattr(self, target_attribute))
 
         if selected_directory:
@@ -4037,9 +4034,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.video_editor_output_directory_entry.insert(0, self.video_editor_output_directory)
 
     def suggest_output_directory(self):
+        """
+        Suggests an output directory based on the selected file's artist.
+
+        Returns:
+        - If match(es), returns the list of matching artist folder(s).
+        - If no matching artist folder is found or encountered an error, returns None.
+        """
         # Check if an input is selected
         if not self.file_renamer_selected_file:
-            # If no input is selected, return none
+            # If no input is selected, return None
             self.log_and_show("No input selected. Using default initial directory.")
             return None
 
@@ -4291,7 +4295,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Create the cat_tabview and buttons
         self.create_cat_tabview()
 
-    # Method to create the cat_tabview and buttons
     def create_cat_tabview(self):
         """
         Create the category tabview and populate it with buttons based on category weights.
@@ -4374,7 +4377,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         except ValueError:
             return
 
-    # Method to add a category to the queue
     def add_to_queue(self, category):
         """
         Add a category to the processing queue.
@@ -4410,7 +4412,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Update file display
         self.update_file_display()
 
-    # Method to remove a category from the queue
     def remove_from_queue(self, category, suppress=False):
         """
         remove_from_queue(category, suppress=False)
@@ -4452,7 +4453,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Update file display
         self.update_file_display()
 
-    # Method to handle common categories state
     def handle_common_categories_state(self, *_):
         """
         Handle the state change of the artist common categories variable.
@@ -4471,7 +4471,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Call the add_remove_common_categories_to_queue method with the remove parameter
             self.add_remove_common_categories_to_queue(remove=True)
 
-    # Method to add/remove common categories to the queue based on the artist
     def add_remove_common_categories_to_queue(self, remove=False):
         """
         Add or remove common categories to/from the processing queue based on the selected file.
@@ -4738,7 +4737,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return name, name_length
 
-    # Method to generate a non-conflicting filename
     def get_non_conflicting_filename(self, path):
         """
         Get a non-conflicting filename by appending a counter to the base filename if conflicts are detected.
@@ -5404,7 +5402,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         name = re.sub(r'__-____-__', '__-__', name).strip()
         return name
 
-    # Method to remove duplicate artists from the filename
     def remove_artist_duplicates_from_filename(self, file_name: str) -> str:
         """
         Remove artist names from the given file name by processing the list of artists
@@ -5419,8 +5416,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             str: The modified file name with artist names removed.
 
         Example:
-            self.remove_artist_duplicates_from_filename('Artist - A Title Artist - Album Version Artist.mp3')
-            'Artist - A Title - Album Version .mp3'
+            self.remove_artist_duplicates_from_filename('Artist - A Title Artist - Album Version Artist')
+            'Artist - A Title - Album Version'
         """
         # Read the list of artists from the artist_file
         with open(self.artist_file, 'r') as artist_list_file:
@@ -5649,7 +5646,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             return new_path
 
-    # Method to process and rename files and moving files to a specified directory
     def rename_and_move_file(self, file_path):
         """
         Rename the given file based on the user-defined settings and move it to a specified directory if provided.
@@ -5711,7 +5707,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return a tuple with file path and file path if no result
             return file_path, file_path
 
-    # Method to performing various name normalization operations on certain files within a specified folder
     def process_name_normalizer(self, mode):
         """
         Process the name normalization based on the specified mode.
@@ -7265,7 +7260,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Handle unexpected errors
             self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
-    # Method to create tabview
     def create_tabview(self, parent_frame, tab_names, default_tab=None):
         """
         Create a tabview with customizable parameters.
@@ -7340,7 +7334,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Update the last_cache_update timestamp to the current time
             self.last_cache_update = current_time
 
-    # Method to search for other instances of Artists in files outside the current folder
     def artist_search(self):
         """
         Perform an artist search based on the selected input and artist directory.
