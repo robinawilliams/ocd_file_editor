@@ -3969,12 +3969,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Call the suggest output directory function to determine initial directory
                     initial_directory_check = self.suggest_output_directory()
 
-                    # If suggest output directory returns a single result, set it to initial_directory
-                    if initial_directory_check and not isinstance(initial_directory_check, list):
+                    # If suggest output directory returned a single result, set it to initial_directory
+                    if len(initial_directory_check) == 1:
                         initial_directory = initial_directory_check
 
-                    # If suggest output directory returns a list, then use SelectOptionWindow
-                    elif isinstance(initial_directory_check, list):
+                    # If suggest output directory returned multiple results, then use SelectOptionWindow
+                    elif len(initial_directory_check) > 1:
                         # Sanitize the list for display in the GUI
                         basename_list = self.get_basenames(initial_directory_check)
 
@@ -3992,10 +3992,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         else:
                             # If the choice is not in the matching_artists, use the default initial output directory
                             initial_directory = self.initial_output_directory
-
-                    # If suggest output directory returns None, set initial_directory to self.initial_output_directory
-                    elif initial_directory_check is None:
-                        initial_directory = self.initial_output_directory
 
                     # Catchall, use the default initial output directory
                     else:
@@ -4047,12 +4043,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show("No input selected. Using default initial directory.")
             return None
 
-        # Check if the suggest_output_directory_var is True
-        if not self.suggest_output_directory_var.get():
-            # If suggest_output_directory is False, return none
-            self.log_and_show("Suggest output directory disabled. Using default output directory.")
-            return None
-
         # Check if self.artist_directory exists
         if not os.path.exists(self.artist_directory):
             # If artist directory does not exist, display an error message and return none
@@ -4089,13 +4079,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         matching_artists.append(artist_folder_path)
 
             # Check if there are multiple matches
-            if len(matching_artists) > 1:
-                # If multiple matches, return the list
+            if matching_artists:
+                # Return the list
                 return matching_artists
-
-            elif len(matching_artists) == 1:
-                # If only one match found, return that
-                return matching_artists[0]
 
             else:
                 # If no matching artist folder is found, return none
@@ -4553,9 +4539,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                     # If suggest output directory returns a result, use SelectOptionWindow to determine output directory
                     if suggested_output_directory:
-                        # If suggest output directory is a single result, convert it to a list (sanitize)
-                        if suggested_output_directory and not isinstance(suggested_output_directory, list):
-                            suggested_output_directory = [suggested_output_directory]
                         # Sanitize the list for display in the GUI
                         basename_list = self.get_basenames(suggested_output_directory)
 
@@ -4580,17 +4563,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                 "User did not choose the suggested output directory. Falling back to default "
                                 "directory.")
 
-                    elif suggested_output_directory is None:
+                    else:
                         # If suggest output directory returns none, use the previously set output directory
                         # Log the result and update the GUI
                         self.log_and_show(f"Suggest output directory returned no result. Using {self.output_directory}")
-
-                    # Catchall, use the previously set output directory
-                    else:
-                        # Log the result and update the GUI
-                        self.log_and_show(f"Suggest output directory could not function due to invalid return"
-                                          f" '{suggested_output_directory}'."
-                                          f"\nUsing {self.output_directory}")
 
                     new_path = os.path.join(self.output_directory, os.path.basename(name))
 
@@ -5912,7 +5888,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Video Editor
     """
 
-    # Method to rotate/mirror a video clip by a specified angle.
     def rotate_video(self, clip, rotation_angle):
         """
         Rotate or mirror a video clip.
@@ -5948,7 +5923,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return None in case of an error.
             return None
 
-    # Method to increase the volume of a video clip by a specified dB value.
     def increase_volume(self, clip, increase_db):
         """
         Increase the volume of a video clip.
@@ -5978,7 +5952,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return None in case of an error.
             return None
 
-    # Method to normalize the audio of a video clip by applying a volume multiplier.
     def normalize_audio(self, clip, volume_multiplier):
         """
         Normalize the audio of a video clip.
@@ -6008,7 +5981,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return None in case of an error.
             return None
 
-    # Method to trim a video by a specified time value.
     def trim_video(self, clip, front_trim=0, back_trim=0):
         """
         Trim a video clip by removing specified durations from the front and/or back.
@@ -6042,7 +6014,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return None in case of an error.
             return None
 
-    # Method to gather and validate inputs from the GUI for video edits
     def gather_and_validate_entries(self):
         """
         Gather and validate user inputs for video editing operations.
