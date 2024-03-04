@@ -10,6 +10,7 @@ import string  # Module for various string manipulation functions and constants
 import customtkinter as ctk  # Customtkinter for a modern gui
 import threading  # Importing threading module for concurrent execution
 import queue  # Importing queue module for implementing a simple FIFO queue
+import time  # Import the time module for handling time-related functionality
 import logging  # Logging module for capturing log messages
 import atexit  # Module for registering functions to be called when the program is closing
 from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
@@ -218,7 +219,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
         self.default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
         self.special_character_var = config.get("Settings", "special_character_var", fallback="-")
-        self.keyword_var = config.get("Settings", "keyword_var", fallback="Sort")
 
         self.geometry(config.get('Settings', 'geometry', fallback='1280x850'))
         self.column_numbers = int(config.get('Settings', 'column_numbers', fallback=7))
@@ -384,6 +384,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                                   fallback=False))
         self.default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
         """End Load Configuration"""
+
+        """Cache"""
+        # Set the cache duration to 10 minutes (600 seconds)
+        self.cache_duration = 600
+        self.last_cache_update = 0
+        self.cached_artist_files = []
+        """End Cache"""
 
         # Initialize instance variables for selected files, output directories, queue, and last used files
         self.file_renamer_selected_file = ""
@@ -7307,8 +7314,44 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def refresh_buttons_and_tabs(self, *_):
         self.refresh_category_buttons()
 
+    def update_cache(self):
+        """
+        Update the cache with the list of artist files in the artist directory using os.walk.
+
+        Notes:
+            - If the cache is older than the specified duration (self.cache_duration), a periodic update is triggered.
+            - The updated cache is stored in the 'self.cached_artist_files' variable.
+        """
+        # Update the cache if it's older than the specified duration
+        current_time = time.time()
+        if current_time - self.last_cache_update > self.cache_duration:
+            self.log_and_show("Periodic os.walk for Artist Search functionality started")
+
+            # Reset the cached artist files list
+            self.cached_artist_files = []
+
+            # Traverse the artist directory using os.walk to collect artist file paths
+            for root, dirs, files in os.walk(self.artist_directory):
+                for file_name in files:
+                    artist_file_path = os.path.join(root, file_name)
+                    # Append each artist file path to the cache
+                    self.cached_artist_files.append(artist_file_path)
+
+            # Update the last_cache_update timestamp to the current time
+            self.last_cache_update = current_time
+
     # Method to search for other instances of Artists in files outside the current folder
     def artist_search(self):
+        """
+        Perform an artist search based on the selected input and artist directory.
+
+        Notes:
+        - Requires file name with a dash (-) in it to help reduce false positives with common words. Place the
+        artist on the left hand side of the dash to be considered for use with this function.
+
+        Returns:
+            tuple or None: If a matching artist is found, returns a tuple (artist, artist_file_path), else returns None.
+        """
         # Check if an input is selected
         if not self.file_renamer_selected_file:
             # If no input is selected, return none
@@ -7353,23 +7396,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                       f"known artists.")
                     return None
 
-            # Search for a case-insensitive match for the artist in self.artist_directory
-            for root, dirs, files in os.walk(self.artist_directory):
-                for file_name in files:
-                    # Check if the artist is present in the file name
-                    if artist.lower() in file_name.lower():
-                        # Construct the artist file path
-                        artist_file_path = os.path.join(root, file_name)
+            # Update the cache
+            self.update_cache()
 
-                        # Skip the current file being compared
-                        if artist_file_path == self.file_renamer_selected_file:
-                            continue
+            # Search for a case-insensitive match for the artist in the cached artist files
+            for artist_file_path in self.cached_artist_files:
+                # Check if the artist is present in the file name
+                if artist.lower() in os.path.basename(artist_file_path).lower():
+                    # Skip the current file being compared
+                    if artist_file_path == self.file_renamer_selected_file:
+                        continue
 
-                        # Verify the file exists and artist's name is not part of the directory path
-                        if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
-                                and artist.lower() not in os.path.dirname(artist_file_path).lower():
-                            # Return the artist and result as a tuple
-                            return artist, artist_file_path
+                    # Verify the file exists and artist's name is not part of the directory path
+                    if os.path.exists(artist_file_path) and os.path.isfile(artist_file_path) \
+                            and artist.lower() not in os.path.dirname(artist_file_path).lower():
+                        # Return the artist and result as a tuple
+                        return artist, artist_file_path
 
             # If no matching artist is found, return none
             self.log_and_show("No matching artist file found.")
