@@ -6827,9 +6827,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         Add custom text to the list of text replacements and update the settings.
 
-        This method retrieves custom text and replacement text from entry widgets, checks if the custom text is already in
-        the list case-insensitively, and adds it to the list with the specified replacement text. It then updates the JSON file
-        with the new custom text to replace dictionary.
+        This method retrieves custom text and replacement text from entry widgets, checks if the custom text is
+        already in the list case-insensitively, and adds it to the list with the specified replacement text. It then
+        updates the JSON file with the new custom text to replace dictionary.
 
         Returns:
             None
@@ -6900,8 +6900,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Remove custom text from the list of text replacements and update the settings.
 
         This method retrieves custom text from the entry widget, checks if the custom text is in the dictionary
-        case-insensitively, and removes the corresponding key from the custom_text_to_replace dictionary. It then updates the
-        JSON file with the new custom text to replace dictionary.
+        case-insensitively, and removes the corresponding key from the custom_text_to_replace dictionary. It then
+        updates the JSON file with the new custom text to replace dictionary.
 
         Returns:
             None
@@ -7139,9 +7139,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         Remove a valid file extension from the list of allowed valid file extensions and update the settings.
 
-        This method retrieves a valid file extension from the entry widget, checks if the file extension is in the list
-        case-insensitively, and removes it from the list of valid file extensions. It then updates the JSON file with the new
-        valid file extensions list.
+        This method retrieves a valid file extension from the entry widget, checks if the file extension is in the
+        list case-insensitively, and removes it from the list of valid file extensions. It then updates the JSON file
+        with the new valid file extensions list.
 
         Returns:
             None
@@ -7258,10 +7258,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         Remove a custom tab name from the dictionary and update the settings.
 
-        This method retrieves the custom tab name to be removed from the entry widget, checks for a case-sensitive match
-        in values, and removes the custom tab name from the dictionary. The updated dictionary is then saved to the JSON file,
-        and the category buttons in the GUI are refreshed. If no case-sensitive match is found, it checks for a
-        case-insensitive match, and if found, removes the case-insensitive matched custom tab name from the dictionary.
+        This method retrieves the custom tab name to be removed from the entry widget, checks for a case-sensitive
+        match in values, and removes the custom tab name from the dictionary. The updated dictionary is then saved to
+        the JSON file, and the category buttons in the GUI are refreshed. If no case-sensitive match is found,
+        it checks for a case-insensitive match, and if found, removes the case-insensitive matched custom tab name
+        from the dictionary.
 
         Returns:
             None
