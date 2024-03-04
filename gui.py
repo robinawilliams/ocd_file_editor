@@ -4094,8 +4094,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                               create_messagebox=True, error=True)
             return None
 
-    # Method to handle actions after successful input renaming
     def handle_rename_success(self, new_path: str):
+        """
+        Handles the success of a file renaming operation.
+
+        Parameters:
+        - new_path (str): The new path after the file renaming operation.
+        """
         # Store information about the rename operation in the history
         self.history.append({
             'original_path': self.file_renamer_selected_file,
@@ -4502,6 +4507,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     """
 
     def rename_files(self):
+        """
+        Rename selected files based on user preferences.
+
+        - Gathers data from the GUI, constructs a new name, and handles name length constraints.
+        - Moves text between '-' and '__-__' if the move_text_var is set.
+        - Determines the new path based on user preferences for output directory.
+        - Attempts to rename the file and handles success or errors.
+
+        Raises:
+            OSError: If an error occurs during the file renaming process.
+
+        """
         # Check if an input is selected and either the queue is not empty or custom text is provided
         if self.file_renamer_selected_file and (
                 self.file_renamer_queue or self.prefix_text_entry.get().strip() or
@@ -5325,7 +5342,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         name = ' '.join(name.split())
         return name
 
-    def artist_identifier(self, name):
+    def artist_identifier(self, name: str) -> str:
+        """
+        Identify artists in the given filename and modify the filename accordingly.
+
+        Args:
+            name (str): The original filename to be processed.
+
+        Returns:
+            str: The modified filename with artist information.
+
+        Raises:
+            FileNotFoundError: If the artist file specified is not found.
+            Exception: For any other unexpected errors during the artist identification process.
+
+        """
         try:
             # Read the list of artists from the artist_file
             with open(self.artist_file, 'r') as artist_list_file:
@@ -5758,103 +5789,146 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Display error message if an exception occurs
             self.log_and_show(f"An error occurred: {e}", create_messagebox=True, error=True)
 
-    # Method to process a single file in the Name Normalizer module
     def process_single_file(self, file_path):
-        # Start the progress bar for the Name Normalizer function
-        self.start_progress(self.progressbar, self.slider_progressbar_frame)
+        """
+        Process a single file using the Name Normalizer function.
 
-        original_path, new_path = self.rename_and_move_file(file_path)
+        Args:
+            file_path (str): The path of the file to be processed.
 
-        # Check if the tuple is the same to prevent no operations from being added to history
-        if original_path != new_path:
-            # Append the operation to the history
-            self.queue.put({
-                'original_paths': [original_path],
-                'new_paths': [new_path]
-            })
+        Returns:
+            None
 
-        # Log the action if logging is enabled
-        self.log_and_show("File has been processed successfully.")
+        """
+        try:
+            # Start the progress bar for the Name Normalizer function
+            self.start_progress(self.progressbar, self.slider_progressbar_frame)
 
-        # Stop the progress bar for the Name Normalizer function
-        self.stop_progress(self.progressbar)
+            # Rename and move the file, obtaining original and new paths
+            original_path, new_path = self.rename_and_move_file(file_path)
 
-        # Reset GUI input fields if reset is True
-        if self.reset_var.get():
-            # Clear selection for the name_normalizer_window
-            self.clear_selection(frame_name="name_normalizer_window")
-
-        # Schedule the next check after 100 milliseconds
-        self.after(100, self.check_queue)
-
-    # Method to process the files of the folder(s) in the Name Normalizer module
-    def process_folder(self, folder_path):
-        # Start the progress bar for the Name Normalizer function
-        self.start_progress(self.progressbar, self.slider_progressbar_frame)
-
-        # Initialize an empty list to store file paths
-        file_paths = []
-        original_paths = []
-        new_paths = []
-
-        # Log the os.walk state
-        if self.deep_walk_var.get():
-            deep_walk_status = "including subdirectories"
-        else:
-            deep_walk_status = "excluding subdirectories"
-
-        self.log_and_show(
-            f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'")
-
-        # Traverse through the folder using os.walk
-        for root, dirs, files in os.walk(folder_path):
-            # Include subdirectories if the deep_walk_var is True or the root folder is selected
-            if self.deep_walk_var.get() or root == folder_path:
-                for file in files:
-                    # Append the full file path to the list
-                    file_paths.append(str(os.path.join(root, file)))
-
-                # Iterate through file paths and rename/move files
-                for file_path in file_paths:
-                    original_path, new_path = self.rename_and_move_file(file_path)
-                    # Check if the tuple is the same to prevent no operations from being added to history
-                    if original_path != new_path:
-                        original_paths.append(original_path)
-                        new_paths.append(new_path)
-
-                    # Check if processing should be interrupted
-                    if self.interrupt_name_processing_thread_var:
-                        break  # Break out of the loop
-
-                # Append the batch operation to the name normalizer history
+            # Check if the tuple is the same to prevent no operations from being added to history
+            if original_path != new_path:
+                # Append the operation to the history
                 self.queue.put({
-                    'original_paths': original_paths,
-                    'new_paths': new_paths
+                    'original_paths': [original_path],
+                    'new_paths': [new_path]
                 })
 
-        if self.interrupt_name_processing_thread_var:
             # Log the action if logging is enabled
-            self.log_and_show("User interrupted the process. File(s) have not been processed successfully.", error=True)
-        else:
-            # Log the action if logging is enabled
-            self.log_and_show("File(s) have been processed successfully.")
+            self.log_and_show("File has been processed successfully.")
 
-        # Stop the progress bar for the Name Normalizer function
-        self.stop_progress(self.progressbar)
+            # Stop the progress bar for the Name Normalizer function
+            self.stop_progress(self.progressbar)
 
-        # Reset GUI input fields if reset is True
-        if self.reset_var.get():
-            # Clear selection for the name_normalizer_window
-            self.clear_selection(frame_name="name_normalizer_window")
+            # Reset GUI input fields if reset is True
+            if self.reset_var.get():
+                # Clear selection for the name_normalizer_window
+                self.clear_selection(frame_name="name_normalizer_window")
 
-        # Reset the variable back to false
-        self.interrupt_name_processing_thread_var = False
+            # Schedule the next check after 100 milliseconds
+            self.after(100, self.check_queue)
 
-        # Schedule the next check after 100 milliseconds
-        self.after(100, self.check_queue)
+        except Exception as e:
+            # Handle unexpected exceptions and log an error message
+            self.log_and_show(f"Error processing file {file_path}: {e}", create_messagebox=True, error=True)
+            # Stop the progress bar in case of an error
+            self.stop_progress(self.progressbar)
 
-    # Method to periodically check the queue when threading
+    def process_folder(self, folder_path: str) -> None:
+        """
+        Process all files in a folder using the Name Normalizer function.
+
+        Args:
+            folder_path (str): The path of the folder to be processed.
+
+        Returns:
+            None
+
+        """
+        try:
+            # Start the progress bar for the Name Normalizer function
+            self.start_progress(self.progressbar, self.slider_progressbar_frame)
+
+            # Initialize an empty list to store file paths
+            file_paths = []
+            original_paths = []
+            new_paths = []
+
+            # Log the os.walk state
+            if self.deep_walk_var.get():
+                deep_walk_status = "including subdirectories"
+            else:
+                deep_walk_status = "excluding subdirectories"
+
+            self.log_and_show(
+                f"Info: os.walk, {deep_walk_status}, started on '{folder_path}'")
+
+            # Traverse through the folder using os.walk
+            for root, dirs, files in os.walk(folder_path):
+                # Include subdirectories if the deep_walk_var is True or the root folder is selected
+                if self.deep_walk_var.get() or root == folder_path:
+                    for file in files:
+                        # Append the full file path to the list
+                        file_paths.append(str(os.path.join(root, file)))
+
+                    # Iterate through file paths and rename/move files
+                    for file_path in file_paths:
+                        original_path, new_path = self.rename_and_move_file(file_path)
+                        # Check if the tuple is the same to prevent no operations from being added to history
+                        if original_path != new_path:
+                            original_paths.append(original_path)
+                            new_paths.append(new_path)
+
+                        # Check if processing should be interrupted
+                        if self.interrupt_name_processing_thread_var:
+                            break  # Break out of the loop
+
+                    # Append the batch operation to the name normalizer history
+                    self.queue.put({
+                        'original_paths': original_paths,
+                        'new_paths': new_paths
+                    })
+
+            if self.interrupt_name_processing_thread_var:
+                # Log the action if logging is enabled
+                self.log_and_show("User interrupted the process. File(s) have not been processed successfully.",
+                                  error=True)
+            else:
+                # Log the action if logging is enabled
+                self.log_and_show("File(s) have been processed successfully.")
+
+            # Stop the progress bar for the Name Normalizer function
+            self.stop_progress(self.progressbar)
+
+            # Reset GUI input fields if reset is True
+            if self.reset_var.get():
+                # Clear selection for the name_normalizer_window
+                self.clear_selection(frame_name="name_normalizer_window")
+
+            # Reset the variable back to false
+            self.interrupt_name_processing_thread_var = False
+
+            # Schedule the next check after 100 milliseconds
+            self.after(100, self.check_queue)
+
+        except Exception as e:
+            # Handle unexpected exceptions and log an error message
+            self.log_and_show(f"Error processing folder {folder_path}: {e}", create_messagebox=True, error=True)
+            # Stop the progress bar in case of an error
+            self.stop_progress(self.progressbar)
+
     def check_queue(self):
+        """
+        Check the queue for results from the Name Normalizer process.
+
+        This method is responsible for continuously checking the queue for results from the Name Normalizer process.
+        It retrieves results from the queue and appends them to the `nn_history` list.
+
+        Returns:
+            None
+
+        """
         try:
             while True:
                 result = self.queue.get_nowait()
@@ -6293,8 +6367,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     add_remove_window
     """
 
-    # Method to add artists to the artist file
     def add_artist_to_file(self):
+        """
+        Add an artist to the artist file and, if enabled, to the artist_common_categories dictionary.
+
+        This method reads the list of artists from the artist file, checks if the provided artist is already in the
+        list, adds the artist to the list, writes the updated list back to the artist file, and optionally adds the
+        artist to the artist_common_categories dictionary.
+
+        Returns:
+            None
+
+        """
         # Get the artist to be added from the entry widget
         add_artist = self.add_artist_entry.get().strip()
 
@@ -6341,8 +6425,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear add artist entry
             self.add_artist_entry.delete(0, ctk.END)
 
-    # Method to remove artists from the artist file
     def remove_artist_from_file(self):
+        """
+        Remove an artist from the artist file and, if found, from the artist_common_categories dictionary.
+
+        This method reads the list of artists from the artist file, checks if the provided artist is in the list,
+        removes the artist from the list, writes the updated list back to the artist file, and optionally removes the
+        artist from the artist_common_categories dictionary.
+
+        Returns:
+            None
+
+        """
         # Get the artist to be removed from the entry widget
         remove_artist = self.remove_artist_entry.get().strip()
 
@@ -6388,6 +6482,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.remove_artist_entry.delete(0, ctk.END)
 
     def add_artist_to_common_categories_dictionary(self, add_artist=None):
+        """
+        Add an artist to the artist_common_categories dictionary.
+
+        This method adds an artist as a key to the artist_common_categories dictionary with an empty list as the value.
+        It updates the JSON file with the modified artist_common_categories dictionary.
+
+        Args: add_artist (str, optional): The artist to be added. If not provided, it retrieves the artist from the
+        entry widget.
+
+        Returns:
+            None
+
+        """
         try:
             # Set the artist to be added from the entry widget
             add_artist = add_artist if add_artist else self.add_acc_record_entry.get().strip()
@@ -6417,6 +6524,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.add_acc_record_entry.delete(0, ctk.END)
 
     def remove_artist_from_common_categories_dictionary(self, remove_artist=None):
+        """
+        Remove an artist from the artist_common_categories dictionary.
+
+        This method removes the specified artist from the artist_common_categories dictionary.
+        It updates the JSON file with the modified artist_common_categories dictionary.
+
+        Args: remove_artist (str, optional): The artist to be removed. If not provided, it retrieves the artist from
+        the entry widget.
+
+        Returns:
+            None
+
+        """
         try:
             # Set the artist to be added from the entry widget
             remove_artist = remove_artist if remove_artist else self.remove_acc_record_entry.get().strip()
@@ -6443,8 +6563,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear remove acc record entry
             self.remove_acc_record_entry.delete(0, ctk.END)
 
-    # Method to create a NO-GO file
     def no_go_creation(self):
+        """
+        Create a NO-GO file and update the Tampermonkey Script text file.
+
+        This method creates a NO-GO file using the provided name. It also updates the Tampermonkey Script text file
+        to include the new NO-GO entry. If the NO-GO file or entry already exists, it logs the action and skips
+        creation.
+
+        Returns:
+            None
+
+        """
         try:
             # Attempt to get the contents from self.add_no_go_name_entry
             no_go_name = self.add_no_go_name_entry.get().strip()
@@ -6504,6 +6634,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.add_no_go_name_entry.delete(0, ctk.END)
 
     def no_go_removal(self):
+        """
+        Remove a NO-GO file and update the Tampermonkey Script text file.
+
+        This method removes a specified NO-GO file and updates the Tampermonkey Script text file to remove the
+        corresponding entry. If the NO-GO file or entry does not exist, it logs the action and skips removal.
+
+        Returns:
+            None
+
+        """
         try:
             # Attempt to get the contents from self.remove_no_go_name_entry
             remove_no_go_name = self.remove_no_go_name_entry.get().strip()
@@ -6571,8 +6711,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear remove no-go name entry and reset
             self.remove_no_go_name_entry.delete(0, ctk.END)
 
-    # Method to exclude folder from Artist Directory search
     def add_folder_to_excluded_folders(self):
+        """
+        Add a folder to the list of excluded folders and update the settings.
+
+        This method takes the folder name from the entry widget, checks if it's already in the excluded folders list
+        case-insensitively, and adds it to the list if not. It then updates the JSON file with the new excluded
+        folders list.
+
+        Returns:
+            None
+
+        """
         # Get the exclude name to be added from the entry widget
         exclude_name = self.add_exclude_name_entry.get().strip()
 
@@ -6617,8 +6767,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the exclude entry
             self.add_exclude_name_entry.delete(0, ctk.END)
 
-    # Method to include folder in Artist Directory search
     def remove_folder_from_excluded_folders(self):
+        """
+        Remove a folder from the list of excluded folders and update the settings.
+
+        This method takes the folder name from the entry widget, checks if it's in the excluded folders list
+        case-insensitively, and removes it from the list if found. It then updates the JSON file with the new
+        excluded folders list.
+
+        Returns:
+            None
+
+        """
         # Get the exclude name to be removed from the entry widget
         exclude_name = self.remove_exclude_name_entry.get().strip()
 
@@ -6663,8 +6823,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove entry if the action is successful
             self.remove_exclude_name_entry.delete(0, ctk.END)
 
-    # Method to add text to custom_text_to_replace dictionary
     def add_custom_text_to_replace(self):
+        """
+        Add custom text to the list of text replacements and update the settings.
+
+        This method retrieves custom text and replacement text from entry widgets, checks if the custom text is already in
+        the list case-insensitively, and adds it to the list with the specified replacement text. It then updates the JSON file
+        with the new custom text to replace dictionary.
+
+        Returns:
+            None
+
+        """
         # Get the custom text to be added from the entry widget
         custom_text = self.add_ctr_name_entry.get().strip()
 
@@ -6725,8 +6895,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear replacement text to replace entry
             self.replacement_text_entry.delete(0, ctk.END)
 
-    # Method to remove text from custom_text_to_replace dictionary
     def remove_custom_text_to_replace(self):
+        """
+        Remove custom text from the list of text replacements and update the settings.
+
+        This method retrieves custom text from the entry widget, checks if the custom text is in the dictionary
+        case-insensitively, and removes the corresponding key from the custom_text_to_replace dictionary. It then updates the
+        JSON file with the new custom text to replace dictionary.
+
+        Returns:
+            None
+
+        """
         # Get the custom text to be removed from the entry widget
         custom_text = self.remove_ctr_name_entry.get().strip()
 
@@ -6774,8 +6954,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove custom_text_to_replace entry if the action is successful
             self.remove_ctr_name_entry.delete(0, ctk.END)
 
-    # Method to add extension to file_extensions list
     def add_file_extension(self):
+        """
+        Add a file extension to the list of allowed file extensions and update the settings.
+
+        This method retrieves a file extension from the entry widget, checks if the file extension is in the list
+        case-insensitively, and appends it to the list of file extensions. It then updates the JSON file with the new
+        file extensions list.
+
+        Returns:
+            None
+
+        """
         # Get the extension to be added from the entry widget
         file_extension = self.add_file_extension_entry.get().strip()
 
@@ -6824,8 +7014,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the file extensions entry if the action is successful
             self.add_file_extension_entry.delete(0, ctk.END)
 
-    # Method to remove extension from file_extensions list
     def remove_file_extension(self):
+        """
+        Remove a file extension from the list of allowed file extensions and update the settings.
+
+        This method retrieves a file extension from the entry widget, checks if the file extension is in the list
+        case-insensitively, and removes it from the list of file extensions. It then updates the JSON file with the new
+        file extensions list.
+
+        Returns:
+            None
+
+        """
         # Get the extension to be removed from the entry widget
         file_extension = self.remove_file_extension_entry.get().strip()
 
@@ -6875,8 +7075,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove file_extensions entry if the action is successful
             self.remove_file_extension_entry.delete(0, ctk.END)
 
-    # Method to add extension to valid_extensions list
     def add_valid_extension(self):
+        """
+        Add a valid file extension to the list of allowed valid file extensions and update the settings.
+
+        This method retrieves a valid file extension from the entry widget, checks if the file extension is in the list
+        case-insensitively, and adds it to the list of valid file extensions. It then updates the JSON file with the new
+        valid file extensions list.
+
+        Returns:
+            None
+
+        """
         # Get the extension to be added from the entry widget
         valid_extension = self.add_valid_extension_entry.get().strip()
 
@@ -6925,8 +7135,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the valid extensions entry if the action is successful
             self.add_valid_extension_entry.delete(0, ctk.END)
 
-    # Method to remove extension from valid_extensions list
     def remove_valid_extension(self):
+        """
+        Remove a valid file extension from the list of allowed valid file extensions and update the settings.
+
+        This method retrieves a valid file extension from the entry widget, checks if the file extension is in the list
+        case-insensitively, and removes it from the list of valid file extensions. It then updates the JSON file with the new
+        valid file extensions list.
+
+        Returns:
+            None
+
+        """
         # Get the extension to be removed from the entry widget
         valid_extension = self.remove_valid_extension_entry.get().strip()
 
@@ -6977,8 +7197,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove valid_extensions entry if the action is successful
             self.remove_valid_extension_entry.delete(0, ctk.END)
 
-    # Method to add a custom tab name to the dictionary
     def add_custom_tab_name(self):
+        """
+        Add a new custom tab name with a specified weight to the dictionary and update the settings.
+
+        This method retrieves a new custom tab name and weight from the entry widgets, checks for duplicates
+        case-insensitively, and adds the new custom tab name to the dictionary under the specified weight. The updated
+        dictionary is then saved to the JSON file, and the category buttons in the GUI are refreshed.
+
+        Returns:
+            None
+
+        """
         # Get the new custom tab name from the add custom tab name entry widget
         new_custom_tab_name = self.custom_tab_name_entry.get().strip()
 
@@ -7024,8 +7254,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.custom_tab_name_entry.delete(0, ctk.END)
                 self.weight_entry1.delete(0, ctk.END)
 
-    # Remove a  custom tab name to the dictionary
     def remove_custom_tab_name(self):
+        """
+        Remove a custom tab name from the dictionary and update the settings.
+
+        This method retrieves the custom tab name to be removed from the entry widget, checks for a case-sensitive match
+        in values, and removes the custom tab name from the dictionary. The updated dictionary is then saved to the JSON file,
+        and the category buttons in the GUI are refreshed. If no case-sensitive match is found, it checks for a
+        case-insensitive match, and if found, removes the case-insensitive matched custom tab name from the dictionary.
+
+        Returns:
+            None
+
+        """
         # Get the custom tab name to be removed from the remove custom tab name entry widget
         ctn_to_remove = self.remove_custom_tab_name_entry.get().strip()
 
@@ -7072,7 +7313,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear the remove custom tab name entry field
             self.remove_custom_tab_name_entry.delete(0, ctk.END)
 
-    def browse_artist(self, mode):
+    def browse_artist(self, mode: str) -> None:
+        """
+        Browse and select an artist using either the "Detect" or "Browse" mode.
+
+        Parameters:
+            mode (str): The mode for artist selection. Should be either "Detect" or "Browse".
+
+        Returns:
+            None
+
+        Raises:
+            ValueError: If an invalid mode is provided or if "Detect" mode is selected without a file renamer input.
+
+        """
         try:
             # Clear the artist display entry widget
             self.acc_display_entry.delete(0, ctk.END)
@@ -7138,15 +7392,37 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Handle unexpected exceptions by logging and showing the error
             self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
-    # Method to update the acc display based on selected options
     def update_acc_display(self):
+        """
+        Update the Artist Category Customization (ACC) display with the selected artist and their common categories.
+
+        This method sets the artist's name and their common categories in the ACC display.
+
+        Returns:
+            None
+        """
         if self.acc_selected_artist:
-            common_categories = (self.artist_common_categories.get(self.acc_selected_artist, []))
+            common_categories = self.artist_common_categories.get(self.acc_selected_artist, [])
 
             # Set the artist and artist's common categories to the acc display
             self.acc_display_text.set(f"{self.acc_selected_artist}: {common_categories}")
 
     def add_artist_common_category(self):
+        """
+        Add a new common category for the selected artist in the Artist Category Customization (ACC).
+
+        This method retrieves the selected artist and a new common category from the GUI entry widget,
+        checks for duplicates, appends the new common category to the selected artist's list of common categories,
+        updates the JSON file with the modified dictionary, logs the action, updates the artist display,
+        and resets the entry if the action is successful.
+
+        Raises:
+            ValueError: If no artist is selected, the new common category is empty, or if the new common category
+                        already exists for the selected artist.
+
+        Returns:
+            None
+        """
         try:
             if not self.acc_selected_artist:
                 raise ValueError("No artist selected. Please select an artist and try again.")
@@ -7190,6 +7466,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"An unexpected error occurred: {str(e)}", create_messagebox=True, error=True)
 
     def remove_artist_common_category(self):
+        """
+        Remove a common category for the selected artist in the Artist Category Customization (ACC).
+
+        This method retrieves the selected artist and the common category to be removed from the GUI entry widget,
+        checks for empty inputs and the existence of the common category in the selected artist's list,
+        removes the common category from the list, updates the JSON file with the modified dictionary,
+        updates the artist display, and resets the entry if the action is successful.
+
+        Raises:
+            ValueError: If no artist is selected, the common category to be removed is empty,
+                        or if the common category is not found for the selected artist.
+
+        Returns:
+            None
+        """
         try:
             if not self.acc_selected_artist:
                 raise ValueError("No artist selected. Please select an artist and try again.")
@@ -7277,6 +7568,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         return tabview, tabs
 
     def refresh_buttons_and_tabs(self, *_):
+        """
+        Refreshes the category buttons and tabs in the user interface.
+
+        This method serves as a wrapper around the refresh_category_buttons method,
+        triggering an update of the buttons and tabs based on changes or events.
+
+        Parameters:
+            *_: Accepts any number of positional arguments (unused in the method).
+
+        Returns:
+            None
+        """
         self.refresh_category_buttons()
 
     def update_cache(self):
