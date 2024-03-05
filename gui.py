@@ -3969,12 +3969,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                     # Call the suggest output directory function to determine initial directory
                     initial_directory_check = self.suggest_output_directory()
 
-                    # If suggest output directory returned a single result, set it to initial_directory
-                    if len(initial_directory_check) == 1:
+                    # If suggest output directory returns a single result, set it to initial_directory
+                    if initial_directory_check and not isinstance(initial_directory_check, list):
                         initial_directory = initial_directory_check
 
-                    # If suggest output directory returned multiple results, then use SelectOptionWindow
-                    elif len(initial_directory_check) > 1:
+                    # If suggest output directory returns a list, then use SelectOptionWindow
+                    elif isinstance(initial_directory_check, list):
                         # Sanitize the list for display in the GUI
                         basename_list = self.get_basenames(initial_directory_check)
 
@@ -3992,6 +3992,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         else:
                             # If the choice is not in the matching_artists, use the default initial output directory
                             initial_directory = self.initial_output_directory
+
+                    # If suggest output directory returns None, set initial_directory to self.initial_output_directory
+                    elif initial_directory_check is None:
+                        initial_directory = self.initial_output_directory
 
                     # Catchall, use the default initial output directory
                     else:
@@ -4034,7 +4038,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Suggests an output directory based on the selected file's artist.
 
         Returns:
-        - If match(es), returns the list of matching artist folder(s).
+        - If there is a single match, return the matching artist folder.
+        - If matches, returns the list of matching artist folder(s).
         - If no matching artist folder is found or encountered an error, returns None.
         """
         # Check if an input is selected
@@ -4079,9 +4084,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                         matching_artists.append(artist_folder_path)
 
             # Check if there are multiple matches
-            if matching_artists:
-                # Return the list
+            if len(matching_artists) > 1:
+                # If multiple matches, return the list
                 return matching_artists
+
+            elif len(matching_artists) == 1:
+                # If only one match found, return that
+                return matching_artists[0]
 
             else:
                 # If no matching artist folder is found, return none
@@ -4556,6 +4565,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                     # If suggest output directory returns a result, use SelectOptionWindow to determine output directory
                     if suggested_output_directory:
+                        # If suggest output directory is a single result, convert it to a list (sanitize)
+                        if suggested_output_directory and not isinstance(suggested_output_directory, list):
+                            suggested_output_directory = [suggested_output_directory]
                         # Sanitize the list for display in the GUI
                         basename_list = self.get_basenames(suggested_output_directory)
 
@@ -4580,10 +4592,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                 "User did not choose the suggested output directory. Falling back to default "
                                 "directory.")
 
-                    else:
+                    elif suggested_output_directory is None:
                         # If suggest output directory returns none, use the previously set output directory
                         # Log the result and update the GUI
                         self.log_and_show(f"Suggest output directory returned no result. Using {self.output_directory}")
+
+                    # Catchall, use the previously set output directory
+                    else:
+                        # Log the result and update the GUI
+                        self.log_and_show(f"Suggest output directory could not function due to invalid return"
+                                          f" '{suggested_output_directory}'."
+                                          f"\nUsing {self.output_directory}")
 
                     new_path = os.path.join(self.output_directory, os.path.basename(name))
 
