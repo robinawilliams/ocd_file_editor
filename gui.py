@@ -289,8 +289,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_hashtag_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_hashtag_var",
                                                                          fallback=False))
 
-        self.remove_custom_text_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_custom_text_var",
-                                                                             fallback=False))
+        self.replace_custom_text_var = ctk.BooleanVar(value=config.getboolean("Settings", "replace_custom_text_var",
+                                                                              fallback=False))
 
         self.replace_mode_var = ctk.BooleanVar(value=config.getboolean("Settings", "replace_mode_var", fallback=False))
 
@@ -551,7 +551,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.checkbox_frame7 = None
         self.remove_parenthesis_trail_checkbox = None
         self.remove_hashtag_trail_checkbox = None
-        self.remove_custom_text_checkbox = None
+        self.replace_custom_text_checkbox = None
         self.replace_mode_switch = None
         self.remove_extra_whitespace_checkbox = None
         self.artist_identifier_checkbox = None
@@ -1360,11 +1360,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                              variable=self.remove_question_mark_var)
         self.remove_question_mark_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
-        # Checkbox to enable/disable remove custom text
-        self.remove_custom_text_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
-                                                           text="Replace custom text",
-                                                           variable=self.remove_custom_text_var)
-        self.remove_custom_text_checkbox.grid(row=0, column=4, padx=10, pady=10)
+        # Checkbox to enable/disable replace custom text
+        self.replace_custom_text_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
+                                                            text="Replace custom text",
+                                                            variable=self.replace_custom_text_var)
+        self.replace_custom_text_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Button Frame 7
         self.checkbox_frame7 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -4935,7 +4935,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return name
 
-    def remove_custom_text(self, name: str) -> str:
+    def replace_custom_text(self, name: str) -> str:
         """
         Remove custom text from the provided name.
 
@@ -5699,9 +5699,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Make file name a title while preserving lowercase letters after apostrophes in contractions
                 name = self.title_the_name(name)
 
-            if self.remove_custom_text_var.get():
-                # Remove custom text from the custom_text_to_replace dictionary
-                name = self.remove_custom_text(name)
+            if self.replace_custom_text_var.get():
+                # Replace custom text from the custom_text_to_replace dictionary
+                name = self.replace_custom_text(name)
 
             if self.artist_identifier_var.get():
                 # Process artist names to place identified artist(s) at the beginning
