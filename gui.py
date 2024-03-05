@@ -3571,8 +3571,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show("Nothing in the queue. Nothing to undo.",
                               create_messagebox=True, error=True)
 
-    # Method to undo the last file rename operation
     def undo_file_rename(self):
+        """
+        Undo the last file renaming or name normalization operation.
+
+        This method checks the current frame and attempts to revert the changes made
+        in the last file renaming or name normalization operation. It provides a confirmation
+        prompt before performing the undo operation.
+
+        Returns:
+            None
+        """
         if self.frame_name == "file_renamer_window":
             if self.history:
                 # Get the last operation from the history
@@ -3707,8 +3716,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show("No previous name normalizer operation. Nothing to undo.", create_messagebox=True,
                                   error=True)
 
-    # Method to clear the selection and reset related elements
-    def clear_selection(self, frame_name):
+    def clear_selection(self, frame_name: str) -> None:
+        """
+        Clear the selected options and input fields based on the provided frame name.
+
+        Parameters:
+            frame_name (str): The name of the frame for which to clear the selection.
+
+        Returns:
+            None
+        """
         if frame_name == "file_renamer_window":
             self.file_renamer_selected_file = ""
             self.file_renamer_queue = []
@@ -3882,8 +3899,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Update the corresponding attribute in your class
             setattr(self, target_attribute, selected_directory)
 
-    # Method to browse and select an input
-    def browse_input(self):
+    def browse_input(self) -> None:
+        """
+        Browse and select input files or directories based on the frame context.
+
+        Returns:
+            None
+        """
         if self.frame_name == "file_renamer_window":
             # Remove the default prefix text entry text
             self.prefix_text_entry.delete(0, ctk.END)
@@ -3959,8 +3981,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Log the action and display the message in the gui
                 self.log_and_show(f"Input selected via Browse: {filename}")
 
-    # Method to browse and select an output directory
-    def browse_output_directory(self):
+    def browse_output_directory(self) -> None:
+        """
+        Browse and select an output directory based on the frame context.
+
+        Returns:
+            None
+        """
         if self.frame_name == "file_renamer_window":
             # Check if an input is selected
             if self.file_renamer_selected_file:
