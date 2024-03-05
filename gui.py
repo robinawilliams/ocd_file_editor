@@ -4249,7 +4249,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     Category Management
     """
 
-    def add_category(self):
+    def add_category(self) -> None:
         """
         Add a new category to the dictionary with the specified weight,
         save the updated categories to the file, and refresh the category buttons in the GUI.
@@ -4260,9 +4260,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Get the new category from the add category entry widget
         new_category = self.category_entry.get().strip()
 
+        # Get the weight from the GUI entry field
+        weight_entry_value = self.weight_entry.get().strip()
+
         if not new_category:
             # If the new category is an empty string, log an error message and return
             self.log_and_show("Add Category cannot be empty.",
+                              create_messagebox=True, error=True)
+            return
+
+        try:
+            # Use the provided weight if it's an integer, otherwise use the default weight
+            weight = int(weight_entry_value) if weight_entry_value else int(self.default_weight)
+        except ValueError:
+            self.log_and_show("Weight must be an integer. Please try again with a number",
                               create_messagebox=True, error=True)
             return
 
@@ -4271,17 +4282,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             new_category_lower = new_category.lower()
             # Prevent duplicate entries in the json file
             if new_category_lower not in map(lambda x: x.lower(), self.categories.keys()):
-                # Get the weight from the GUI entry field
-                weight_entry_value = self.weight_entry.get().strip()
-
-                try:
-                    # Use the provided weight if it's an integer, otherwise use the default weight
-                    weight = int(weight_entry_value) if weight_entry_value else int(self.default_weight)
-                except ValueError:
-                    self.log_and_show("Weight must be an integer. Using default weight.",
-                                      create_messagebox=True, error=True)
-                    weight = int(self.default_weight)
-
                 # Add the new category to the dictionary with the specified weight
                 self.categories[new_category] = weight
                 # Save the updated categories to the file
@@ -7418,7 +7418,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reset the remove valid_extensions entry if the action is successful
             self.remove_valid_extension_entry.delete(0, ctk.END)
 
-    def add_custom_tab_name(self):
+    def add_custom_tab_name(self) -> None:
         """
         Add a new custom tab name with a specified weight to the dictionary and update the settings.
 
@@ -7433,9 +7433,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Get the new custom tab name from the add custom tab name entry widget
         new_custom_tab_name = self.custom_tab_name_entry.get().strip()
 
+        # Get the weight from the GUI entry field
+        weight_entry_value = self.weight_entry1.get().strip()
+
         if not new_custom_tab_name:
             # If the new custom tab name is an empty string, log an error message and return
             self.log_and_show("New Custom Tab cannot be empty.",
+                              create_messagebox=True, error=True)
+            return
+
+        try:
+            # Use the provided weight if it's an integer, otherwise use the default custom tab name weight
+            weight = int(weight_entry_value) if weight_entry_value else int(self.default_ctn_weight)
+        except ValueError:
+            self.log_and_show("Weight must be an integer. Please try again with a number",
                               create_messagebox=True, error=True)
             return
 
@@ -7444,16 +7455,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             new_custom_tab_name_lower = new_custom_tab_name.lower()
             # Prevent duplicate entries in the json file
             if new_custom_tab_name_lower not in map(lambda x: x.lower(), self.weight_to_tab_name.values()):
-                # Get the weight from the GUI entry field
-                weight_entry_value = self.weight_entry1.get().strip()
-
-                try:
-                    # Use the provided weight if it's an integer, otherwise use the default custom tab name weight
-                    weight = int(weight_entry_value) if weight_entry_value else self.default_ctn_weight
-                except ValueError:
-                    self.log_and_show("Weight must be an integer. Using default weight.",
-                                      create_messagebox=True, error=True)
-                    weight = self.default_ctn_weight
 
                 # Add the new custom tab name to the dictionary under the specified weight
                 self.weight_to_tab_name[weight] = new_custom_tab_name
