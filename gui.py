@@ -380,6 +380,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_successful_lines_var = ctk.BooleanVar(value=config.getboolean("Settings",
                                                                                   "remove_successful_lines_var",
                                                                                   fallback=False))
+        self.validate_entries = ctk.BooleanVar(value=config.getboolean("Settings", "validate_entries", fallback=False))
         self.default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
         """End Load Configuration"""
 
@@ -433,8 +434,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                      "File Extensions", "NO GO", "Valid Extensions"]
 
         # List of tab names for the settings_tabview
-        self.settings_tab_names = ["Appearance", "Artist", "File Operations", "Logging", "Messaging", "Reminders",
-                                   "Tabs"]
+        self.settings_tab_names = ["Appearance", "Artist", "Logging", "Misc", "Messaging", "Reminders", "Tabs"]
 
         # Initialize the standard output and error variables (Fix for MoviePy overriding user's logging choice)
         self.original_stdout = sys.stdout
@@ -629,6 +629,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.process_video_edits_button = None
         self.video_editor_checkbox_frame = None
         self.remove_successful_lines_checkbox = None
+        self.validate_entries_checkbox = None
         self.reset_video_checkbox = None
         self.video_editor_message_label_frame = None
         self.video_editor_message_label = None
@@ -731,7 +732,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_search_switch = None
         self.ignore_known_artists_switch = None
         self.artist_identifier_label = None
-        self.file_ops_frame = None
+        self.misc_frame = None
         self.file_ops_switch_frame = None
         self.open_on_file_drop_switch = None
         self.reminders_frame = None
@@ -1061,29 +1062,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.folder_operations_frame.grid(row=7, column=0, padx=10)
 
         # Checkbox to enable/disable resetting the Output Directory
-        self.reset_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
+        self.reset_output_directory_checkbox = ctk.CTkSwitch(self.folder_operations_frame,
                                                                text="Reset Output Dir.",
                                                                variable=self.reset_output_directory_var)
         self.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable suggesting an output directory
-        self.suggest_output_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Suggest Output "
+        self.suggest_output_directory_checkbox = ctk.CTkSwitch(self.folder_operations_frame, text="Suggest Output "
                                                                                                     "Dir.",
                                                                  variable=self.suggest_output_directory_var)
         self.suggest_output_directory_checkbox.grid(row=0, column=1, padx=5, pady=5)
 
         # Checkbox to enable/disable moving the file up one folder
-        self.move_up_directory_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Up One Dir.",
+        self.move_up_directory_checkbox = ctk.CTkSwitch(self.folder_operations_frame, text="Move Up One Dir.",
                                                           variable=self.move_up_directory_var)
         self.move_up_directory_checkbox.grid(row=0, column=2, padx=5, pady=5)
 
         # Checkbox to enable/disable move text between - and __-__
-        self.move_text_checkbox = ctk.CTkCheckBox(self.folder_operations_frame, text="Move Text",
+        self.move_text_checkbox = ctk.CTkSwitch(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var)
         self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
 
         # Checkbox to enable/disable add artist common categories
-        self.artist_common_categories_checkbox = ctk.CTkCheckBox(self.folder_operations_frame,
+        self.artist_common_categories_checkbox = ctk.CTkSwitch(self.folder_operations_frame,
                                                                  text="Add Artist Common Categories",
                                                                  variable=self.artist_common_categories_var)
         self.artist_common_categories_checkbox.grid(row=0, column=4, padx=5, pady=5)
@@ -1761,7 +1762,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.interrupt_button1.grid(row=0, column=3, padx=5, pady=5)
 
         # Process video button
-        self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
+        self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process Video(s)",
                                                         command=self.gather_and_validate_entries)
         self.process_video_edits_button.grid(row=0, column=4, padx=5, pady=5)
 
@@ -1789,13 +1790,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_checkbox_frame.grid(row=11, column=0, padx=10, pady=5)
 
         # Checkbox to enable/disable remove successful lines
-        self.remove_successful_lines_checkbox = ctk.CTkCheckBox(self.video_editor_checkbox_frame,
+        self.remove_successful_lines_checkbox = ctk.CTkSwitch(self.video_editor_checkbox_frame,
                                                                 text="Remove successful lines from input file",
                                                                 variable=self.remove_successful_lines_var)
         self.remove_successful_lines_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable reset video editor entries
-        self.reset_video_checkbox = ctk.CTkCheckBox(self.video_editor_checkbox_frame,
+        self.reset_video_checkbox = ctk.CTkSwitch(self.video_editor_checkbox_frame,
                                                     text="Reset entries",
                                                     variable=self.reset_video_entries_var)
         self.reset_video_checkbox.grid(row=0, column=1, padx=10, pady=10)
@@ -1979,7 +1980,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """Category Tab"""
         self.category_frame = ctk.CTkFrame(self.add_remove_tabs.get("Category"), corner_radius=0,
                                            fg_color="transparent")
-        self.category_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.category_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add Category Button
         self.add_category_button = ctk.CTkButton(self.category_frame, text="Add Category", command=self.add_category)
@@ -2003,7 +2004,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                          desired_type=int: self.validate_entry(var, default, desired_type))
 
         # Weight Entry
-        self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=35)
+        self.weight_entry = ctk.CTkEntry(self.category_frame, textvariable=self.weight_var, width=50)
         self.weight_entry.grid(row=0, column=3, padx=5)
 
         # Remove Category Button
@@ -2018,7 +2019,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """Custom Tab Name Tab"""
         self.ctn_frame = ctk.CTkFrame(self.add_remove_tabs.get("Custom Tab Name"), corner_radius=0,
                                       fg_color="transparent")
-        self.ctn_frame.grid(row=6, column=0, padx=10, pady=10)
+        self.ctn_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add Custom Tab Name Button
         self.add_ctn_button = ctk.CTkButton(self.ctn_frame, text="Add Custom Tab", command=self.add_custom_tab_name)
@@ -2042,7 +2043,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                           desired_type=int: self.validate_entry(var, default, desired_type))
 
         # Weight Entry1
-        self.weight_entry1 = ctk.CTkEntry(self.ctn_frame, textvariable=self.weight_var1, width=35)
+        self.weight_entry1 = ctk.CTkEntry(self.ctn_frame, textvariable=self.weight_var1, width=50)
         self.weight_entry1.grid(row=0, column=3, padx=5)
 
         # Remove Custom Tab Name Button
@@ -2058,7 +2059,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Custom Text to Replace frame
         self.ctr_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Custom Text to Replace"), corner_radius=0,
                                             fg_color="transparent")
-        self.ctr_entry_frame.grid(row=12, column=0, padx=10, pady=10)
+        self.ctr_entry_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add ctr button
         self.add_ctr_button = ctk.CTkButton(self.ctr_entry_frame, text="Add CTR",
@@ -2090,7 +2091,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Exclude frame
         self.exclude_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Exclude"), corner_radius=0,
                                                 fg_color="transparent")
-        self.exclude_entry_frame.grid(row=10, column=0, padx=10, pady=10)
+        self.exclude_entry_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add Exclude button
         self.add_exclude_button = ctk.CTkButton(self.exclude_entry_frame, text="Add Exclude",
@@ -2114,7 +2115,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # File Extension frame
         self.file_extension_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("File Extensions"), corner_radius=0,
                                                        fg_color="transparent")
-        self.file_extension_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+        self.file_extension_entry_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add File Extension button
         self.add_file_extension_button = ctk.CTkButton(self.file_extension_entry_frame, text="Add File Ext.",
@@ -2138,7 +2139,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # NO-GO frame
         self.no_go_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("NO GO"), corner_radius=0,
                                               fg_color="transparent")
-        self.no_go_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+        self.no_go_entry_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add NO-GO button
         self.add_no_go_button = ctk.CTkButton(self.no_go_entry_frame, text="Add NO GO",
@@ -2162,7 +2163,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Valid Extension frame
         self.valid_extension_entry_frame = ctk.CTkFrame(self.add_remove_tabs.get("Valid Extensions"), corner_radius=0,
                                                         fg_color="transparent")
-        self.valid_extension_entry_frame.grid(row=8, column=0, padx=10, pady=10)
+        self.valid_extension_entry_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Add Valid Extension button
         self.add_valid_extension_button = ctk.CTkButton(self.valid_extension_entry_frame, text="Add Valid Ext.",
@@ -2200,7 +2201,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.reset_add_remove_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable reset add/remove entries
-        self.reset_add_remove_checkbox = ctk.CTkCheckBox(self.reset_add_remove_frame,
+        self.reset_add_remove_checkbox = ctk.CTkSwitch(self.reset_add_remove_frame,
                                                          text="Reset entries",
                                                          variable=self.reset_add_remove_var)
         self.reset_add_remove_checkbox.grid(row=0, column=1, padx=10, pady=10)
@@ -2329,88 +2330,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                          self.artist_file))
         self.open_artist_file_button.grid(row=2, column=0, padx=5)
 
-        """File Operations Tab"""
-        # File Operations frame
-        self.file_ops_frame = ctk.CTkFrame(self.settings_tabs.get("File Operations"), corner_radius=0,
-                                           fg_color="transparent")
-        self.file_ops_frame.grid(row=0, column=0, padx=10)
-
-        # File Operations switch frame
-        self.file_ops_switch_frame = ctk.CTkFrame(self.file_ops_frame, corner_radius=0,
-                                                  fg_color="transparent")
-        self.file_ops_switch_frame.grid(row=0, column=0, padx=10)
-
-        # Switch to enable/disable open on drop behavior
-        self.open_on_file_drop_switch = ctk.CTkSwitch(self.file_ops_switch_frame, text="Open File on Drag and Drop",
-                                                      variable=self.open_on_file_drop_var)
-        self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
-
-        # Master Entry frame
-        self.master_entry_frame = ctk.CTkFrame(self.file_ops_frame, corner_radius=0, fg_color="transparent")
-        self.master_entry_frame.grid(row=1, column=0, padx=10, pady=10)
-
-        # Initial Directory frame
-        self.initial_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
-        self.initial_directory_frame.grid(row=0, column=0, padx=10, pady=10)
-
-        # Browse Initial Directory button
-        self.browse_initial_directory_button = ctk.CTkButton(self.initial_directory_frame, text="Initial Directory",
-                                                             command=lambda: self.browse_directory(
-                                                                 self.initial_directory_entry, 'initial_directory'))
-        self.browse_initial_directory_button.grid(row=0, column=0, padx=5, pady=5)
-
-        # Initial Directory entry
-        self.initial_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=855)
-        self.initial_directory_entry.insert(0, self.initial_directory)
-        self.initial_directory_entry.grid(row=0, column=1, padx=10, pady=10)
-
-        # Browse Initial Output Directory button
-        self.browse_initial_output_directory_button = ctk.CTkButton(self.initial_directory_frame,
-                                                                    text="Initial Output Directory",
-                                                                    command=lambda:
-                                                                    self.browse_directory(
-                                                                        self.initial_output_directory_entry,
-                                                                        'initial_output_directory')
-                                                                    )
-        self.browse_initial_output_directory_button.grid(row=1, column=0, padx=5, pady=5)
-
-        # Initial Directory entry
-        self.initial_output_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=855)
-        self.initial_output_directory_entry.insert(0, self.initial_output_directory)
-        self.initial_output_directory_entry.grid(row=1, column=1, padx=10, pady=10)
-
-        # Configuration File Frame
-        self.configuration_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
-                                                     fg_color="transparent")
-        self.configuration_file_frame.grid(row=1, column=0, padx=10, pady=10)
-
-        # Browse Configuration File button
-        self.open_configuration_file_button = ctk.CTkButton(self.configuration_file_frame, text="Open Config File",
-                                                            command=lambda: self.open_file(
-                                                                self.config_file_path))
-        self.open_configuration_file_button.grid(row=0, column=0, padx=5)
-
-        # Configuration File entry
-        self.configuration_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
-        self.configuration_file_entry.insert(0, self.config_file_path)
-        self.configuration_file_entry.grid(row=0, column=1, padx=10, pady=10)
-
-        # Dictionary File Frame
-        self.dictionary_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
-                                                  fg_color="transparent")
-        self.dictionary_file_frame.grid(row=2, column=0, padx=10, pady=10)
-
-        # Browse Dictionary File button
-        self.open_dictionary_file_button = ctk.CTkButton(self.dictionary_file_frame, text="Open Dictionary File",
-                                                         command=lambda: self.open_file(
-                                                             self.dictionary_file))
-        self.open_dictionary_file_button.grid(row=0, column=0, padx=5)
-
-        # Dictionary File entry
-        self.dictionary_file_entry = ctk.CTkEntry(self.dictionary_file_frame, width=890)
-        self.dictionary_file_entry.insert(0, self.dictionary_file)
-        self.dictionary_file_entry.grid(row=0, column=1, padx=10, pady=10)
-
         """Logging Tab"""
         # Logging frame
         self.logging_frame = ctk.CTkFrame(self.settings_tabs.get("Logging"), corner_radius=0,
@@ -2488,11 +2407,99 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                   variable=self.truncate_var)
         self.truncate_text_switch.grid(row=2, column=0, padx=10, pady=5)
 
+        """Misc Tab"""
+        # Misc frame
+        self.misc_frame = ctk.CTkFrame(self.settings_tabs.get("Misc"), corner_radius=0,
+                                       fg_color="transparent")
+        self.misc_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # File Operations switch frame
+        self.file_ops_switch_frame = ctk.CTkFrame(self.misc_frame, corner_radius=0,
+                                                  fg_color="transparent")
+        self.file_ops_switch_frame.grid(row=0, column=0, padx=10)
+
+        # Switch to enable/disable open on drop behavior
+        self.open_on_file_drop_switch = ctk.CTkSwitch(self.file_ops_switch_frame, text="Open File on Drag and Drop",
+                                                      variable=self.open_on_file_drop_var)
+        self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
+
+        # Checkbox to enable/disable validate entries
+        self.validate_entries_checkbox = ctk.CTkSwitch(self.file_ops_switch_frame,
+                                                       text="Validate Entries",
+                                                       variable=self.validate_entries)
+        self.validate_entries_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Master Entry frame
+        self.master_entry_frame = ctk.CTkFrame(self.misc_frame, corner_radius=0, fg_color="transparent")
+        self.master_entry_frame.grid(row=1, column=0, padx=10, pady=10)
+
+        # Initial Directory frame
+        self.initial_directory_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0, fg_color="transparent")
+        self.initial_directory_frame.grid(row=0, column=0, padx=10, pady=10)
+
+        # Browse Initial Directory button
+        self.browse_initial_directory_button = ctk.CTkButton(self.initial_directory_frame, text="Initial Directory",
+                                                             command=lambda: self.browse_directory(
+                                                                 self.initial_directory_entry, 'initial_directory'))
+        self.browse_initial_directory_button.grid(row=0, column=0, padx=5, pady=5)
+
+        # Initial Directory entry
+        self.initial_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=855)
+        self.initial_directory_entry.insert(0, self.initial_directory)
+        self.initial_directory_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Browse Initial Output Directory button
+        self.browse_initial_output_directory_button = ctk.CTkButton(self.initial_directory_frame,
+                                                                    text="Initial Output Directory",
+                                                                    command=lambda:
+                                                                    self.browse_directory(
+                                                                        self.initial_output_directory_entry,
+                                                                        'initial_output_directory')
+                                                                    )
+        self.browse_initial_output_directory_button.grid(row=1, column=0, padx=5, pady=5)
+
+        # Initial Directory entry
+        self.initial_output_directory_entry = ctk.CTkEntry(self.initial_directory_frame, width=855)
+        self.initial_output_directory_entry.insert(0, self.initial_output_directory)
+        self.initial_output_directory_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        # Configuration File Frame
+        self.configuration_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                                     fg_color="transparent")
+        self.configuration_file_frame.grid(row=1, column=0, padx=10, pady=10)
+
+        # Browse Configuration File button
+        self.open_configuration_file_button = ctk.CTkButton(self.configuration_file_frame, text="Open Config File",
+                                                            command=lambda: self.open_file(
+                                                                self.config_file_path))
+        self.open_configuration_file_button.grid(row=0, column=0, padx=5)
+
+        # Configuration File entry
+        self.configuration_file_entry = ctk.CTkEntry(self.configuration_file_frame, width=890)
+        self.configuration_file_entry.insert(0, self.config_file_path)
+        self.configuration_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Dictionary File Frame
+        self.dictionary_file_frame = ctk.CTkFrame(self.master_entry_frame, corner_radius=0,
+                                                  fg_color="transparent")
+        self.dictionary_file_frame.grid(row=2, column=0, padx=10, pady=10)
+
+        # Browse Dictionary File button
+        self.open_dictionary_file_button = ctk.CTkButton(self.dictionary_file_frame, text="Open Dictionary File",
+                                                         command=lambda: self.open_file(
+                                                             self.dictionary_file))
+        self.open_dictionary_file_button.grid(row=0, column=0, padx=5)
+
+        # Dictionary File entry
+        self.dictionary_file_entry = ctk.CTkEntry(self.dictionary_file_frame, width=890)
+        self.dictionary_file_entry.insert(0, self.dictionary_file)
+        self.dictionary_file_entry.grid(row=0, column=1, padx=10, pady=10)
+
         """Reminders Tab"""
         # Reminders frame
         self.reminders_frame = ctk.CTkFrame(self.settings_tabs.get("Reminders"), corner_radius=0,
                                             fg_color="transparent")
-        self.reminders_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.reminders_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Switch to enable/disable create double check reminder
         self.double_check_switch = ctk.CTkSwitch(self.reminders_frame, text="Create Double Check Reminder",
@@ -2539,7 +2546,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """Tabs"""
         # Tab name frame
         self.tab_name_frame = ctk.CTkFrame(self.settings_tabs.get("Tabs"), corner_radius=0, fg_color="transparent")
-        self.tab_name_frame.grid(row=3, column=0, padx=10, pady=10)
+        self.tab_name_frame.grid(row=0, column=0, padx=10, pady=10)
 
         # Switch to enable/disable use_custom_tab_names_var
         self.use_custom_tab_names_switch = ctk.CTkSwitch(self.tab_name_frame, text="Use Custom Tab Names",
@@ -2814,8 +2821,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             else:
                 label.configure(text=truncated_message)
 
-    @staticmethod
-    def validate_entry(var, default_value, desired_type):
+    def validate_entry(self, var, default_value, desired_type):
         """
         Validates and updates the value of a Tkinter variable based on the desired type.
 
@@ -2826,6 +2832,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         Note: Ensure this method is used to validate and update Tkinter variable values.
         """
+        if not self.validate_entries.get():
+            # Return if validate entries is disabled
+            return
+
         # Ensure the value is of the desired type
         current_value = var.get()
 
@@ -3809,6 +3819,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.second_entry.delete(0, ctk.END)
             self.second_entry1.delete(0, ctk.END)
 
+            """Set the default variables"""
+            # Set the decibel entry
+            self.decibel_var.set(self.default_decibel)
+
+            # Set the audio normalization entry
+            self.audio_normalization_var.set(self.default_audio_normalization)
+
+            # Set the minute entries
+            self.minute_var.set(self.default_minute)
+            self.minute_var1.set(self.default_minute)
+
+            # Set the second entries
+            self.second_var.set(self.default_second)
+            self.second_var1.set(self.default_second)
+
         elif frame_name == "add_remove_window":
             # Get the active tab from the add_remove_tabview
             active_tag = self.add_remove_tabview.get()
@@ -3845,6 +3870,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Clear remove category entry
                 self.remove_category_entry.delete(0, ctk.END)
 
+                # Set the default variable
+                self.weight_var.set(self.default_weight)
+
             elif active_tag == "Custom Tab Name":
                 # Clear add custom tab name entry
                 self.custom_tab_name_entry.delete(0, ctk.END)
@@ -3853,6 +3881,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                 # Clear remove custom tab name entry
                 self.remove_custom_tab_name_entry.delete(0, ctk.END)
+
+                # Set the default variable
+                self.weight_var1.set(self.default_ctn_weight)
 
             elif active_tag == "Custom Text to Replace":
                 # Clear add custom text to replace entry
@@ -4245,11 +4276,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
                 try:
                     # Use the provided weight if it's an integer, otherwise use the default weight
-                    weight = int(weight_entry_value) if weight_entry_value else self.default_weight
+                    weight = int(weight_entry_value) if weight_entry_value else int(self.default_weight)
                 except ValueError:
                     self.log_and_show("Weight must be an integer. Using default weight.",
                                       create_messagebox=True, error=True)
-                    weight = self.default_weight
+                    weight = int(self.default_weight)
 
                 # Add the new category to the dictionary with the specified weight
                 self.categories[new_category] = weight
@@ -4270,6 +4301,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear the category entry and weight entry fields
             self.category_entry.delete(0, ctk.END)
             self.weight_entry.delete(0, ctk.END)
+
+            # Set the default variable
+            self.weight_var.set(self.default_weight)
 
     def remove_category(self):
         """
@@ -7440,6 +7474,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Clear the custom_tab_name entry and weight entry fields
                 self.custom_tab_name_entry.delete(0, ctk.END)
                 self.weight_entry1.delete(0, ctk.END)
+
+                # Set the default variable
+                self.weight_var1.set(self.default_ctn_weight)
 
     def remove_custom_tab_name(self):
         """

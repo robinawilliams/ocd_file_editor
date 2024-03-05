@@ -147,6 +147,8 @@ auto_add_acc_record_var = False
 deep_walk_var = False
 ; Remove the successful line from the input file after video editor processing
 remove_successful_lines_var = False
+; Validate entries
+validate_entries = True
 ; Set the default placement for the words to be placed (prefix, special_character, suffix)
 default_placement_var = special_character
 ; Set the special character for the placement (alphanumeric character)
