@@ -570,7 +570,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.custom_text_label = None
         self.custom_text_removal_entry = None
         self.normalize_folder_frame = None
-        self.normalize_preview_button = None
         self.interrupt_button = None
         self.normalize_button = None
         self.send_to_module_frame1 = None
@@ -1612,20 +1611,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                                    command=self.load_last_used_file)
         self.name_normalizer_last_used_file_button.grid(row=0, column=2, padx=10, pady=10)
 
-        # Normalize Preview button
-        self.normalize_preview_button = ctk.CTkButton(self.normalize_folder_frame, text="Preview",
-                                                      command=lambda: self.process_name_normalizer(mode="preview"))
-        self.normalize_preview_button.grid(row=0, column=3, padx=5, pady=5)
-
         # Interrupt button
         self.interrupt_button = ctk.CTkButton(self.normalize_folder_frame, text="Interrupt",
                                               command=lambda: self.interrupt_processing("name_processing_thread"))
-        self.interrupt_button.grid(row=0, column=4, padx=5, pady=5)
+        self.interrupt_button.grid(row=0, column=3, padx=5, pady=5)
 
         # Normalize button
         self.normalize_button = ctk.CTkButton(self.normalize_folder_frame, text="Normalize",
-                                              command=lambda: self.process_name_normalizer(mode="action"))
-        self.normalize_button.grid(row=0, column=5, padx=5, pady=5)
+                                              command=self.process_name_normalizer)
+        self.normalize_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Send to Module frame
         self.send_to_module_frame1 = ctk.CTkFrame(self.name_normalizer_frame,
@@ -5826,8 +5820,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             return
 
         if self.preview_mode_var.get() and os.path.isfile(self.name_normalizer_selected_file):
-            # Call the preview name function to get the proposed name
-            proposed_name = self.preview_name(self.name_normalizer_selected_file)
+            # Call the construct name function to get the proposed name
+            proposed_name = self.construct_nn_name(self.name_normalizer_selected_file)
 
             # Sanitize for the GUI
             if proposed_name:
@@ -5843,9 +5837,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set the proposed name to the nn display
         self.nn_display_text.set(display_text)
 
-    def preview_name(self, file_path):
+    def construct_nn_name(self, file_path):
         """
-        Preview the modified file name based on various user settings.
+        Construct the modified file name based on various user settings.
 
         Parameters:
             file_path (str): The path of the file.
@@ -6050,8 +6044,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             tuple: A tuple containing the original file path and the final file path after renaming and, if applicable,
             moving.
         """
-        # Call the preview name function to get the name
-        new_path = self.preview_name(file_path)
+        # Call the construct name function to get the name
+        new_path = self.construct_nn_name(file_path)
 
         if new_path:
             try:
@@ -6100,12 +6094,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Return a tuple with file path and file path if no result
             return file_path, file_path
 
-    def process_name_normalizer(self, mode):
+    def process_name_normalizer(self):
         """
         Process the name normalization based on the specified mode.
-
-        Parameters:
-            mode (str): The mode indicating whether to preview or take action on the file(s).
 
         Returns:
             None
@@ -6141,23 +6132,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                   create_messagebox=True, error=True)
                 return
 
-        if mode == "preview":
-            preview_result = self.preview_name(self.name_normalizer_selected_file)
-            if preview_result:
-                self.log_and_show(f"Preview: \n{os.path.basename(preview_result)}", create_messagebox=True)
+        # Ask for confirmation before normalizing files
+        confirmation = self.ask_confirmation("Confirm Action",
+                                             "Are you sure you want normalize the file(s)? You may not be able "
+                                             "to undo this operation.")
+        if confirmation:
+            self.log_and_show(f"User confirmed the name normalization process for "
+                              f"{self.name_normalizer_selected_file}.")
+        else:
+            self.log_and_show(f"User cancelled the name normalization process for "
+                              f"{self.name_normalizer_selected_file}.")
             return
-        elif mode == "action":
-            # Ask for confirmation before normalizing files
-            confirmation = self.ask_confirmation("Confirm Action",
-                                                 "Are you sure you want normalize the file(s)? You may not be able "
-                                                 "to undo this operation.")
-            if confirmation:
-                self.log_and_show(f"User confirmed the name normalization process for "
-                                  f"{self.name_normalizer_selected_file}.")
-            else:
-                self.log_and_show(f"User cancelled the name normalization process for "
-                                  f"{self.name_normalizer_selected_file}.")
-                return
 
         try:
             if os.path.isfile(self.name_normalizer_selected_file):
