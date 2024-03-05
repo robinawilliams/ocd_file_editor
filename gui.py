@@ -273,8 +273,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_number_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_number_var",
                                                                         fallback=False))
 
-        self.tail_var = ctk.BooleanVar(value=config.getboolean("Settings", "tail_var", fallback=False))
-
         self.remove_parenthesis_trail_var = ctk.BooleanVar(value=config.getboolean("Settings",
                                                                                    "remove_parenthesis_trail_var",
                                                                                    fallback=False))
@@ -1143,11 +1141,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                             fg_color="transparent")
         self.checkbox_frame1.grid(row=2, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable Append '__-__ ' to the file name
-        self.tail_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
-                                             text="Append '__-__ '",
-                                             variable=self.tail_var)
-        self.tail_checkbox.grid(row=0, column=0, padx=10, pady=10)
+        # Checkbox to enable/disable Artist Identifier
+        self.artist_identifier_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
+                                                          text="Artist Identifier",
+                                                          variable=self.artist_identifier_var)
+        self.artist_identifier_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
         self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
@@ -1360,38 +1358,38 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                              variable=self.remove_question_mark_var)
         self.remove_question_mark_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
-        # Checkbox to enable/disable replace custom text
-        self.replace_custom_text_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
-                                                            text="Replace custom text",
-                                                            variable=self.replace_custom_text_var)
-        self.replace_custom_text_checkbox.grid(row=0, column=4, padx=10, pady=10)
+        # Checkbox to enable/disable remove extra whitespace
+        self.remove_extra_whitespace_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
+                                                                text="Remove extra whitespace",
+                                                                variable=self.remove_extra_whitespace_var)
+        self.remove_extra_whitespace_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
         # Button Frame 7
         self.checkbox_frame7 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
                                             fg_color="transparent")
         self.checkbox_frame7.grid(row=8, column=0, padx=10, pady=5)
 
-        # Checkbox to enable/disable remove extra whitespace
-        self.remove_extra_whitespace_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
-                                                                text="Remove extra spaces",
-                                                                variable=self.remove_extra_whitespace_var)
-        self.remove_extra_whitespace_checkbox.grid(row=0, column=0, padx=10, pady=10)
-
-        # Checkbox to enable/disable Titlefy the name
+        # Checkbox to enable/disable Title the name
         self.title_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
-                                              text="Titlefy",
+                                              text="Title the name",
                                               variable=self.title_var)
-        self.title_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        self.title_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
-        # Checkbox to enable/disable Artist Identifier
-        self.artist_identifier_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
-                                                          text="Artist Identifier",
-                                                          variable=self.artist_identifier_var)
-        self.artist_identifier_checkbox.grid(row=0, column=2, padx=10, pady=10)
+        # Checkbox to enable/disable replace custom text
+        self.replace_custom_text_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+                                                            text="Replace custom text",
+                                                            variable=self.replace_custom_text_var)
+        self.replace_custom_text_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Switch to enable/disable replace mode (case-sensitive vs case-insensitive)
+        self.replace_mode_switch = ctk.CTkSwitch(self.checkbox_frame7, text="Case-sensitive "
+                                                                            "/ Case-insensitive",
+                                                 variable=self.replace_mode_var)
+        self.replace_mode_switch.grid(row=0, column=2, padx=10)
 
         # Checkbox to enable/disable include subdirectories
         self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
-                                                  text="Subdirectories",
+                                                  text="Include subdirectories",
                                                   variable=self.deep_walk_var)
         self.deep_walk_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
@@ -1400,11 +1398,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               text="Reset entries",
                                               variable=self.reset_var)
         self.reset_checkbox.grid(row=0, column=4, padx=10, pady=10)
-
-        # Switch to enable/disable replace mode (case-sensitive vs case-insensitive)
-        self.replace_mode_switch = ctk.CTkSwitch(self.checkbox_frame7, text="Case sensitive/insensitive",
-                                                 variable=self.replace_mode_var)
-        self.replace_mode_switch.grid(row=0, column=5, padx=10)
 
         # String frame
         self.string_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -3777,6 +3770,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.name_normalizer_output_directory = ""
 
             self.nn_path_entry.delete(0, ctk.END)
+            self.prefix_entry.delete(0, ctk.END)
+            self.suffix_entry.delete(0, ctk.END)
+            self.original_entry.delete(0, ctk.END)
+            self.replace_entry.delete(0, ctk.END)
+
             self.move_directory_entry.delete(0, ctk.END)
             self.custom_text_removal_entry.delete(0, ctk.END)
 
@@ -4935,9 +4933,50 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return name
 
+    def replace_user_text(self, name: str) -> str:
+        """
+        Replace user-specified text from the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with user-specified text removed or replaced.
+        """
+        try:
+            # Get the original text and replacement text from the entry
+            original_entry = self.original_entry.get().strip()
+            replace_entry = self.replace_entry.get().strip()
+        except Exception as e:
+            self.log_and_show(f"An error occurred getting the original text or text to replace: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name
+
+        # Check if the original_entry is provided
+        if original_entry:
+            # Replace user-specified text from the name
+            if self.replace_mode_var.get():
+                # Check if the text to replace is present in name (case-insensitive)
+                pattern = re.compile(re.escape(original_entry), re.IGNORECASE)
+
+                # Replace the text with the specified replacement or remove if replacement is an empty string
+                name = pattern.sub(replace_entry, name)
+
+            else:
+                # Check if the text to remove is present in name (case-sensitive)
+                if original_entry in name:
+                    # Remove all instances of the text to remove from name
+                    name = name.replace(original_entry, replace_entry)
+
+            # Replace consecutive spaces with a single space when custom text is removed
+            name = re.sub(r'\s+', ' ', name)
+
+        return name
+
     def replace_custom_text(self, name: str) -> str:
         """
-        Remove custom text from the provided name.
+        Replace custom text from the custom_text_to_replace dictionary.
 
         Args:
         name (str): The original name.
@@ -4945,16 +4984,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with custom text removed or replaced.
         """
-        # Remove custom text from the custom_text_to_replace dictionary
+        # Replace custom text from the custom_text_to_replace dictionary
         if self.replace_mode_var.get():
             for text_to_replace, replacement in self.custom_text_to_replace.items():
-                # Check if the text to remove is present in name (case-insensitive)
+                # Check if the text to replace is present in name (case-insensitive)
                 pattern = re.compile(re.escape(text_to_replace), re.IGNORECASE)
 
                 # Replace the text with the specified replacement or remove if replacement is an empty string
                 name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
         else:
-            # Check if the text to remove is present in name (case-sensitive)
+            # Check if the text to replace is present in name (case-sensitive)
             for text_to_replace, replacement in self.custom_text_to_replace.items():
                 # Replace the text with the specified replacement or remove if replacement is an empty string
                 name = name.replace(text_to_replace, replacement) if replacement != "" else name.replace(
@@ -5468,6 +5507,58 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                               error=True)
         return name
 
+    def add_prefix(self, name: str) -> str:
+        """
+        Add a prefix to the beginning of the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with the added prefix.
+        """
+        try:
+            # Get the prefix_entry text from the entry
+            prefix_entry = self.prefix_entry.get().strip()
+
+            # Check if there is a prefix
+            if prefix_entry:
+                # Add prefix to the beginning of the name
+                name = f"{prefix_entry} {name}"
+
+            return name
+        except Exception as e:
+            self.log_and_show(f"An error occurred adding the prefix: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name
+
+    def add_suffix(self, name: str) -> str:
+        """
+        Add a suffix to the end of the provided name.
+
+        Args:
+        name (str): The original name.
+
+        Returns:
+        str: The modified name with the added suffix.
+        """
+        try:
+            # Get the suffix_entry text from the entry
+            suffix_entry = self.suffix_entry.get().strip()
+
+            # Check if there is a suffix
+            if suffix_entry:
+                # Add suffix to the end of the name
+                name += f" {suffix_entry}"
+
+            return name
+        except Exception as e:
+            self.log_and_show(f"An error occurred adding the suffix: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name
+
     @staticmethod
     def add_tail(name: str) -> str:
         """
@@ -5564,6 +5655,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if ext.lower() in self.file_extensions:
             # Remove custom text provided by the user
             name = self.remove_custom_user_text(name)
+
+            # Replace custom text provided by the user
+            name = self.replace_user_text(name)
 
             if self.remove_non_ascii_symbols_var.get():
                 # Remove non-ASCII characters
@@ -5711,9 +5805,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Remove extra white space
                 name = self.remove_extra_whitespace(name)
 
-            if self.tail_var.get():
-                # Add tail
-                name = self.add_tail(name)
+            # Add prefix
+            name = self.add_prefix(name)
+
+            # Add suffix
+            name = self.add_suffix(name)
 
             # Add the file extension back to the name
             name += ext
