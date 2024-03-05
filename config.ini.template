@@ -71,8 +71,6 @@ remove_most_symbols_var = False
 remove_non_ascii_symbols_var = False
 ; Remove numbers
 remove_number_var = False
-; Append '__-__ ' to the file name
-tail_var = False
 ; Remove text following the first '('
 remove_parenthesis_trail_var = False
 ; Remove '('
