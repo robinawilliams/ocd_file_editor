@@ -135,8 +135,10 @@ remove_extra_whitespace_var = False
 title_var = False
 ; Identify artists
 artist_identifier_var = False
-; Reset entries after each run
-reset_var = False
+; Preview mode for the name normalizer
+preview_mode_var = True
+; Reset name normalizer entries after each run
+reset_nn_var = False
 ; Reset video entries after each run
 reset_video_entries_var = False
 ; Reset add/remove entries after each run

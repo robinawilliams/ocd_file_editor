@@ -364,8 +364,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.artist_identifier_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "artist_identifier_var", fallback=False))
 
-        self.reset_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_var", fallback=False))
-
+        self.preview_mode_var = ctk.BooleanVar(value=config.getboolean("Settings", "preview_mode_var", fallback=False))
+        self.reset_nn_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_nn_var", fallback=False))
         self.reset_video_entries_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_video_entries_var",
                                                                               fallback=True))
 
@@ -488,11 +488,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.file_renamer_message_label_frame = None
         self.file_renamer_message_label = None
         self.folder_operations_frame = None
-        self.reset_output_directory_checkbox = None
-        self.suggest_output_directory_checkbox = None
-        self.move_up_directory_checkbox = None
-        self.move_text_checkbox = None
-        self.artist_common_categories_checkbox = None
+        self.reset_output_directory_switch = None
+        self.suggest_output_directory_switch = None
+        self.move_up_directory_switch = None
+        self.move_text_switch = None
+        self.artist_common_categories_switch = None
         self.send_to_module_frame = None
         self.send_to_video_editor_button = None
         self.send_to_name_normalizer_button = None
@@ -509,6 +509,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.name_normalizer_label = None
         self.checkbox_frame1 = None
         self.nn_browse_button = None
+        self.nn_display_text = None
         self.nn_path_entry = None
         self.tail_checkbox = None
         self.remove_all_symbols_checkbox = None
@@ -554,7 +555,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.remove_extra_whitespace_checkbox = None
         self.artist_identifier_checkbox = None
         self.deep_walk_checkbox = None
-        self.reset_checkbox = None
+        self.reset_nn_checkbox = None
         self.string_frame = None
         self.prefix_label = None
         self.prefix_entry = None
@@ -628,9 +629,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.interrupt_button1 = None
         self.process_video_edits_button = None
         self.video_editor_checkbox_frame = None
-        self.remove_successful_lines_checkbox = None
-        self.validate_entries_checkbox = None
-        self.reset_video_checkbox = None
+        self.remove_successful_lines_switch = None
+        self.validate_entries_switch = None
+        self.preview_mode_switch = None
+        self.reset_video_switch = None
         self.video_editor_message_label_frame = None
         self.video_editor_message_label = None
         self.send_to_module_frame2 = None
@@ -718,7 +720,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_add_remove_frame = None
         self.clear_add_remove_button = None
         self.reset_add_remove_frame = None
-        self.reset_add_remove_checkbox = None
+        self.reset_add_remove_switch = None
         self.add_remove_message_label_frame = None
         self.add_remove_message_label = None
 
@@ -1062,32 +1064,32 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.folder_operations_frame.grid(row=7, column=0, padx=10)
 
         # Checkbox to enable/disable resetting the Output Directory
-        self.reset_output_directory_checkbox = ctk.CTkSwitch(self.folder_operations_frame,
+        self.reset_output_directory_switch = ctk.CTkSwitch(self.folder_operations_frame,
                                                                text="Reset Output Dir.",
                                                                variable=self.reset_output_directory_var)
-        self.reset_output_directory_checkbox.grid(row=0, column=0, padx=10, pady=10)
+        self.reset_output_directory_switch.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable suggesting an output directory
-        self.suggest_output_directory_checkbox = ctk.CTkSwitch(self.folder_operations_frame, text="Suggest Output "
+        self.suggest_output_directory_switch = ctk.CTkSwitch(self.folder_operations_frame, text="Suggest Output "
                                                                                                     "Dir.",
                                                                  variable=self.suggest_output_directory_var)
-        self.suggest_output_directory_checkbox.grid(row=0, column=1, padx=5, pady=5)
+        self.suggest_output_directory_switch.grid(row=0, column=1, padx=5, pady=5)
 
         # Checkbox to enable/disable moving the file up one folder
-        self.move_up_directory_checkbox = ctk.CTkSwitch(self.folder_operations_frame, text="Move Up One Dir.",
+        self.move_up_directory_switch = ctk.CTkSwitch(self.folder_operations_frame, text="Move Up One Dir.",
                                                           variable=self.move_up_directory_var)
-        self.move_up_directory_checkbox.grid(row=0, column=2, padx=5, pady=5)
+        self.move_up_directory_switch.grid(row=0, column=2, padx=5, pady=5)
 
         # Checkbox to enable/disable move text between - and __-__
-        self.move_text_checkbox = ctk.CTkSwitch(self.folder_operations_frame, text="Move Text",
+        self.move_text_switch = ctk.CTkSwitch(self.folder_operations_frame, text="Move Text",
                                                   variable=self.move_text_var)
-        self.move_text_checkbox.grid(row=0, column=3, padx=5, pady=5)
+        self.move_text_switch.grid(row=0, column=3, padx=5, pady=5)
 
         # Checkbox to enable/disable add artist common categories
-        self.artist_common_categories_checkbox = ctk.CTkSwitch(self.folder_operations_frame,
+        self.artist_common_categories_switch = ctk.CTkSwitch(self.folder_operations_frame,
                                                                  text="Add Artist Common Categories",
                                                                  variable=self.artist_common_categories_var)
-        self.artist_common_categories_checkbox.grid(row=0, column=4, padx=5, pady=5)
+        self.artist_common_categories_switch.grid(row=0, column=4, padx=5, pady=5)
 
         # Bind the callback function to the artist_common_categories_var variable
         self.artist_common_categories_var.trace_add("write", self.handle_common_categories_state)
@@ -1133,9 +1135,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               command=self.browse_input)
         self.nn_browse_button.grid(row=0, column=0, padx=5, pady=5)
 
-        # Path Entry
-        self.nn_path_entry = ctk.CTkEntry(self.name_normalizer_top_frame, width=890)
-        self.nn_path_entry.insert(0, "Select a folder or file to normalize using the 'Browse' button...")
+        # Name Normalizer Display
+        self.nn_display_text = ctk.StringVar()
+        self.nn_display_text.set("Select a folder or file to normalize using the 'Browse' button...")
+        self.nn_path_entry = ctk.CTkEntry(self.name_normalizer_top_frame, width=890, textvariable=self.nn_display_text)
         self.nn_path_entry.grid(row=0, column=1, padx=10, pady=10)
 
         # Button Frame 1
@@ -1149,11 +1152,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                           variable=self.artist_identifier_var)
         self.artist_identifier_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.artist_identifier_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
         self.remove_all_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                                            text="Remove all symbols",
                                                            variable=self.remove_all_symbols_var)
         self.remove_all_symbols_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_all_symbols_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
         self.remove_most_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
@@ -1161,17 +1170,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                             variable=self.remove_most_symbols_var)
         self.remove_most_symbols_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_most_symbols_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove non-ascii symbols
         self.remove_non_ascii_symbols_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                                                  text="Remove non-ASCII symbols",
                                                                  variable=self.remove_non_ascii_symbols_var)
         self.remove_non_ascii_symbols_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_non_ascii_symbols_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove numbers
         self.remove_numbers_checkbox = ctk.CTkCheckBox(self.checkbox_frame1,
                                                        text="Remove numbers",
                                                        variable=self.remove_number_var)
         self.remove_numbers_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_number_var.trace_add("write", self.update_nn_display)
 
         # Button Frame 2
         self.checkbox_frame2 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1184,11 +1202,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                     variable=self.remove_dash_var)
         self.remove_dash_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_dash_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove endashes
         self.remove_endash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                       text="Remove endashes",
                                                       variable=self.remove_endash_var)
         self.remove_endash_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_endash_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove emdashes
         self.remove_emdash_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
@@ -1196,11 +1220,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.remove_emdash_var)
         self.remove_emdash_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_emdash_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove hashtags
         self.remove_hashtag_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                        text="Remove hashtags",
                                                        variable=self.remove_hashtag_var)
         self.remove_hashtag_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_hashtag_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove commas
         self.remove_comma_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
@@ -1208,11 +1238,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      variable=self.remove_comma_var)
         self.remove_comma_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_comma_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove parenthesis and trailing text
         self.remove_parenthesis_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame2,
                                                                  text="( onward",
                                                                  variable=self.remove_parenthesis_trail_var)
         self.remove_parenthesis_trail_checkbox.grid(row=0, column=5, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_parenthesis_trail_var.trace_add("write", self.update_nn_display)
 
         # Button Frame 3
         self.checkbox_frame3 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1225,11 +1261,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                          variable=self.remove_ampersand_var)
         self.remove_ampersand_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_ampersand_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove @
         self.remove_at_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
                                                   text="Remove @",
                                                   variable=self.remove_at_var)
         self.remove_at_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_at_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove underscores
         self.remove_underscore_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
@@ -1237,11 +1279,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                           variable=self.remove_underscore_var)
         self.remove_underscore_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_underscore_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove single quotes
         self.remove_single_quote_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
                                                             text="Remove single quotes",
                                                             variable=self.remove_single_quote_var)
         self.remove_single_quote_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_single_quote_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove double quotes
         self.remove_double_quote_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
@@ -1249,11 +1297,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                             variable=self.remove_double_quote_var)
         self.remove_double_quote_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_double_quote_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove hashtag and trailing text
         self.remove_hashtag_trail_checkbox = ctk.CTkCheckBox(self.checkbox_frame3,
                                                              text="# onward",
                                                              variable=self.remove_hashtag_trail_var)
         self.remove_hashtag_trail_checkbox.grid(row=0, column=5, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_hashtag_trail_var.trace_add("write", self.update_nn_display)
 
         # Button Frame 4
         self.checkbox_frame4 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1266,11 +1320,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       variable=self.remove_dollar_var)
         self.remove_dollar_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_dollar_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove colons
         self.remove_colon_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
                                                      text="Remove colons",
                                                      variable=self.remove_colon_var)
         self.remove_colon_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_colon_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable semicolons
         self.remove_semicolon_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
@@ -1278,11 +1338,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                          variable=self.remove_semicolon_var)
         self.remove_semicolon_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_semicolon_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove percents
         self.remove_percent_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
                                                        text="Remove percents",
                                                        variable=self.remove_percent_var)
         self.remove_percent_checkbox.grid(row=0, column=3, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_percent_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove carets
         self.remove_caret_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
@@ -1290,11 +1356,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      variable=self.remove_caret_var)
         self.remove_caret_checkbox.grid(row=0, column=4, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_caret_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove plus signs
         self.remove_plus_checkbox = ctk.CTkCheckBox(self.checkbox_frame4,
                                                     text="Remove plus signs",
                                                     variable=self.remove_plus_var)
         self.remove_plus_checkbox.grid(row=0, column=5, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_plus_var.trace_add("write", self.update_nn_display)
 
         # Button Frame 5
         self.checkbox_frame5 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1307,11 +1379,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                         variable=self.remove_asterisk_var)
         self.remove_asterisk_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_asterisk_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove parenthesis
         self.remove_parenthesis_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
                                                            text="Remove parenthesis",
                                                            variable=self.remove_parenthesis_var)
         self.remove_parenthesis_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_parenthesis_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove angle brackets
         self.remove_angle_bracket_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
@@ -1319,17 +1397,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                              variable=self.remove_angle_bracket_var)
         self.remove_angle_bracket_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_angle_bracket_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove curly braces
         self.remove_curly_brace_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
                                                            text="Remove curly braces",
                                                            variable=self.remove_curly_brace_var)
         self.remove_curly_brace_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_curly_brace_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove square brackets
         self.remove_square_bracket_checkbox = ctk.CTkCheckBox(self.checkbox_frame5,
                                                               text="Remove square brackets",
                                                               variable=self.remove_square_bracket_var)
         self.remove_square_bracket_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_square_bracket_var.trace_add("write", self.update_nn_display)
 
         # Button Frame 6
         self.checkbox_frame6 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1342,11 +1429,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                     variable=self.remove_pipe_var)
         self.remove_pipe_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_pipe_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove backslashes
         self.remove_backslash_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
                                                          text="Remove backslashes",
                                                          variable=self.remove_backslash_var)
         self.remove_backslash_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_backslash_var.trace_add("write", self.update_nn_display)
 
         # Checkbox to enable/disable remove equal signs
         self.remove_equal_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
@@ -1354,17 +1447,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                      variable=self.remove_equal_var)
         self.remove_equal_checkbox.grid(row=0, column=2, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_equal_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove question marks
         self.remove_question_mark_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
                                                              text="Remove question marks",
                                                              variable=self.remove_question_mark_var)
         self.remove_question_mark_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.remove_question_mark_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable remove extra whitespace
         self.remove_extra_whitespace_checkbox = ctk.CTkCheckBox(self.checkbox_frame6,
                                                                 text="Remove extra whitespace",
                                                                 variable=self.remove_extra_whitespace_var)
         self.remove_extra_whitespace_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.remove_extra_whitespace_var.trace_add("write", self.update_nn_display)
 
         # Button Frame 7
         self.checkbox_frame7 = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1377,11 +1479,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               variable=self.title_var)
         self.title_checkbox.grid(row=0, column=0, padx=10, pady=10)
 
+        # Trace the changes in the variable
+        self.title_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable replace custom text
         self.replace_custom_text_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                                             text="Replace custom text",
                                                             variable=self.replace_custom_text_var)
         self.replace_custom_text_checkbox.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.replace_custom_text_var.trace_add("write", self.update_nn_display)
 
         # Switch to enable/disable replace mode (case-sensitive vs case-insensitive)
         self.replace_mode_switch = ctk.CTkSwitch(self.checkbox_frame7, text="Case-sensitive "
@@ -1389,17 +1497,26 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                  variable=self.replace_mode_var)
         self.replace_mode_switch.grid(row=0, column=2, padx=10)
 
+        # Trace the changes in the variable
+        self.replace_mode_var.trace_add("write", self.update_nn_display)
+
         # Checkbox to enable/disable include subdirectories
         self.deep_walk_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
                                                   text="Include subdirectories",
                                                   variable=self.deep_walk_var)
         self.deep_walk_checkbox.grid(row=0, column=3, padx=10, pady=10)
 
-        # Checkbox to enable/disable reset entries
-        self.reset_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
-                                              text="Reset entries",
-                                              variable=self.reset_var)
-        self.reset_checkbox.grid(row=0, column=4, padx=10, pady=10)
+        # Trace the changes in the variable
+        self.deep_walk_var.trace_add("write", self.update_nn_display)
+
+        # Checkbox to enable/disable reset Name Normalizer entries
+        self.reset_nn_checkbox = ctk.CTkCheckBox(self.checkbox_frame7,
+                                                 text="Reset entries",
+                                                 variable=self.reset_nn_var)
+        self.reset_nn_checkbox.grid(row=0, column=4, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.reset_nn_var.trace_add("write", self.update_nn_display)
 
         # String frame
         self.string_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1414,6 +1531,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.prefix_entry = ctk.CTkEntry(self.string_frame, width=140)
         self.prefix_entry.grid(row=1, column=1, padx=10, pady=10)
 
+        # Bind the update_file_display function to the entry change event
+        self.prefix_entry.bind("<KeyRelease>", self.update_nn_display)
+
         # Suffix Label
         self.suffix_label = ctk.CTkLabel(self.string_frame, text="Suffix:")
         self.suffix_label.grid(row=1, column=2, padx=10, pady=10)
@@ -1421,6 +1541,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Suffix Entry
         self.suffix_entry = ctk.CTkEntry(self.string_frame, width=140)
         self.suffix_entry.grid(row=1, column=3, padx=10, pady=10)
+
+        # Bind the update_file_display function to the entry change event
+        self.suffix_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Replace Label
         self.replace_label = ctk.CTkLabel(self.string_frame, text="Replace (Original, Replacement):")
@@ -1430,9 +1553,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.original_entry = ctk.CTkEntry(self.string_frame, width=150)
         self.original_entry.grid(row=1, column=5, padx=10, pady=10)
 
+        # Bind the update_file_display function to the entry change event
+        self.original_entry.bind("<KeyRelease>", self.update_nn_display)
+
         # Replace Entry
         self.replace_entry = ctk.CTkEntry(self.string_frame, width=150)
         self.replace_entry.grid(row=1, column=10, pady=10)
+
+        # Bind the update_file_display function to the entry change event
+        self.replace_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Output directory move frame
         self.output_directory_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1455,6 +1584,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Custom Text Removal Entry
         self.custom_text_removal_entry = ctk.CTkEntry(self.output_directory_frame, width=385)
         self.custom_text_removal_entry.grid(row=0, column=3, padx=10, pady=10)
+
+        # Bind the update_file_display function to the entry change event
+        self.custom_text_removal_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Normalize Folder frame
         self.normalize_folder_frame = ctk.CTkFrame(self.name_normalizer_frame, corner_radius=0,
@@ -1790,16 +1922,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.video_editor_checkbox_frame.grid(row=11, column=0, padx=10, pady=5)
 
         # Checkbox to enable/disable remove successful lines
-        self.remove_successful_lines_checkbox = ctk.CTkSwitch(self.video_editor_checkbox_frame,
+        self.remove_successful_lines_switch = ctk.CTkSwitch(self.video_editor_checkbox_frame,
                                                                 text="Remove successful lines from input file",
                                                                 variable=self.remove_successful_lines_var)
-        self.remove_successful_lines_checkbox.grid(row=0, column=0, padx=10, pady=10)
+        self.remove_successful_lines_switch.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable reset video editor entries
-        self.reset_video_checkbox = ctk.CTkSwitch(self.video_editor_checkbox_frame,
+        self.reset_video_switch = ctk.CTkSwitch(self.video_editor_checkbox_frame,
                                                     text="Reset entries",
                                                     variable=self.reset_video_entries_var)
-        self.reset_video_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        self.reset_video_switch.grid(row=0, column=1, padx=10, pady=10)
 
         # Frame to display messages on the video editor frame
         self.video_editor_message_label_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -2201,10 +2333,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.reset_add_remove_frame.grid(row=3, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable reset add/remove entries
-        self.reset_add_remove_checkbox = ctk.CTkSwitch(self.reset_add_remove_frame,
+        self.reset_add_remove_switch = ctk.CTkSwitch(self.reset_add_remove_frame,
                                                          text="Reset entries",
                                                          variable=self.reset_add_remove_var)
-        self.reset_add_remove_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        self.reset_add_remove_switch.grid(row=0, column=1, padx=10, pady=10)
 
         # Frame to display messages on the add/remove frame
         self.add_remove_message_label_frame = ctk.CTkFrame(self.add_remove_frame, corner_radius=0,
@@ -2424,10 +2556,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.open_on_file_drop_switch.grid(row=0, column=0, padx=10, pady=10)
 
         # Checkbox to enable/disable validate entries
-        self.validate_entries_checkbox = ctk.CTkSwitch(self.file_ops_switch_frame,
+        self.validate_entries_switch = ctk.CTkSwitch(self.file_ops_switch_frame,
                                                        text="Validate Entries",
                                                        variable=self.validate_entries)
-        self.validate_entries_checkbox.grid(row=0, column=1, padx=10, pady=10)
+        self.validate_entries_switch.grid(row=0, column=1, padx=10, pady=10)
+
+        # Checkbox to enable/disable preview mode switch
+        self.preview_mode_switch = ctk.CTkSwitch(self.file_ops_switch_frame,
+                                                 text="Preview Mode",
+                                                 variable=self.preview_mode_var)
+        self.preview_mode_switch.grid(row=0, column=2, padx=10, pady=10)
+
+        # Trace the changes in the variable
+        self.preview_mode_var.trace_add("write", self.update_nn_display)
 
         # Master Entry frame
         self.master_entry_frame = ctk.CTkFrame(self.misc_frame, corner_radius=0, fg_color="transparent")
@@ -3305,8 +3446,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 filename = os.path.basename(self.name_normalizer_selected_file)
 
                 # Set the selected input to the input entry widget
-                self.nn_path_entry.delete(0, ctk.END)
-                self.nn_path_entry.insert(0, filename)
+                self.nn_display_text.set(filename)
 
                 # Log the action if logging is enabled
                 self.log_and_show(f"Last used Name Normalizer input selected: {filename}")
@@ -3397,7 +3537,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.clear_selection(frame_name=self.frame_name)
 
                 # Set the Name Normalizer selected file to the nn_path_entry
-                self.nn_path_entry.insert(0, self.name_normalizer_selected_file)
+                self.nn_display_text.set(self.name_normalizer_selected_file)
 
                 # Switch frames to the File Renamer
                 self.name_normalizer_button_event()
@@ -3471,8 +3611,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if self.frame_name == "name_normalizer_window":
             self.name_normalizer_selected_file = selected_file
 
-            self.nn_path_entry.delete(0, ctk.END)
-            self.nn_path_entry.insert(0, filename)
+            # Update the Name Normalizer display
+            self.update_nn_display()
         elif self.frame_name == "video_editor_window":
             self.video_editor_selected_file = selected_file
 
@@ -3788,8 +3928,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         elif frame_name == "name_normalizer_window":
             self.name_normalizer_selected_file = ""
             self.name_normalizer_output_directory = ""
+            self.nn_display_text.set("")
 
-            self.nn_path_entry.delete(0, ctk.END)
             self.prefix_entry.delete(0, ctk.END)
             self.suffix_entry.delete(0, ctk.END)
             self.original_entry.delete(0, ctk.END)
@@ -4020,15 +4160,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Set the name normalizer selected file
                 self.name_normalizer_selected_file = nn_input_method
 
-                # Extract just the file name, not the absolute file path
-                filename = os.path.basename(nn_input_method)
-
-                # Reset the entry and insert the filename
-                self.nn_path_entry.delete(0, ctk.END)
-                self.nn_path_entry.insert(0, filename)
+                # Update the Name Normalizer display
+                self.update_nn_display()
 
                 # Log the action if logging is enabled
-                self.log_and_show(f"Input selected via Browse: {filename}")
+                self.log_and_show(f"Input selected via Browse: {os.path.basename(nn_input_method)}")
 
         elif self.frame_name == "video_editor_window":
             # Initially ask for a file
@@ -5678,6 +5814,35 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return new_file_name
 
+    def update_nn_display(self, *_):
+        """
+        Update the display in the Name Normalizer window.
+
+        Returns:
+            None
+        """
+        if not self.name_normalizer_selected_file:
+            # If no file is selected, return
+            return
+
+        if self.preview_mode_var.get() and os.path.isfile(self.name_normalizer_selected_file):
+            # Call the preview name function to get the proposed name
+            proposed_name = self.preview_name(self.name_normalizer_selected_file)
+
+            # Sanitize for the GUI
+            if proposed_name:
+                # Display the basename of the proposed name
+                display_text = f"FILE: {os.path.basename(proposed_name)}"
+            else:
+                # Display the basename of the selected file
+                display_text = f"FILE: {os.path.basename(self.name_normalizer_selected_file)}"
+        else:
+            # Display the basename of the directory
+            display_text = f"DIR: {os.path.basename(self.name_normalizer_selected_file)}"
+
+        # Set the proposed name to the nn display
+        self.nn_display_text.set(display_text)
+
     def preview_name(self, file_path):
         """
         Preview the modified file name based on various user settings.
@@ -6043,7 +6208,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.stop_progress(self.progressbar)
 
             # Reset GUI input fields if reset is True
-            if self.reset_var.get():
+            if self.reset_nn_var.get():
                 # Clear selection for the name_normalizer_window
                 self.clear_selection(frame_name="name_normalizer_window")
 
@@ -6123,7 +6288,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.stop_progress(self.progressbar)
 
             # Reset GUI input fields if reset is True
-            if self.reset_var.get():
+            if self.reset_nn_var.get():
                 # Clear selection for the name_normalizer_window
                 self.clear_selection(frame_name="name_normalizer_window")
 
