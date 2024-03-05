@@ -622,7 +622,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.browse_video_editor_output_directory_button = None
         self.video_editor_output_directory_entry = None
         self.process_video_editor_frame = None
-        self.clear_video_editor_selection_button = None
+        self.clear_video_editor_values_button = None
+        self.clear_video_editor_entries_button = None
         self.video_editor_last_used_file_button = None
         self.interrupt_button1 = None
         self.process_video_edits_button = None
@@ -1733,28 +1734,36 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                        fg_color="transparent")
         self.process_video_editor_frame.grid(row=9, column=0, padx=10, pady=5)
 
-        # Clear process video editor Button
-        self.clear_video_editor_selection_button = ctk.CTkButton(self.process_video_editor_frame,
-                                                                 text="Clear",
+        # Clear video editor values Button
+        self.clear_video_editor_values_button = ctk.CTkButton(self.process_video_editor_frame,
+                                                              text="Clear Values",
                                                                  command=lambda: self.clear_selection(
                                                                      frame_name="video_editor_window"))
-        self.clear_video_editor_selection_button.grid(row=0, column=0, padx=10, pady=10)
+        self.clear_video_editor_values_button.grid(row=0, column=0, padx=10, pady=10)
+
+        # Clear video editor entries Button
+        self.clear_video_editor_entries_button = ctk.CTkButton(self.process_video_editor_frame,
+                                                               text="Clear Everything",
+                                                               command=lambda: self.clear_selection(
+                                                                   frame_name="video_editor_window",
+                                                                   reset_all=True))
+        self.clear_video_editor_entries_button.grid(row=0, column=1, padx=10, pady=10)
 
         # Select Video Editor Last Used File Button
         self.video_editor_last_used_file_button = ctk.CTkButton(self.process_video_editor_frame,
                                                                 text="Reload Last File",
                                                                 command=self.load_last_used_file)
-        self.video_editor_last_used_file_button.grid(row=0, column=1, padx=10, pady=10)
+        self.video_editor_last_used_file_button.grid(row=0, column=2, padx=10, pady=10)
 
         # Interrupt button1
         self.interrupt_button1 = ctk.CTkButton(self.process_video_editor_frame, text="Interrupt",
                                                command=lambda: self.interrupt_processing("video_processing_thread"))
-        self.interrupt_button1.grid(row=0, column=2, padx=5, pady=5)
+        self.interrupt_button1.grid(row=0, column=3, padx=5, pady=5)
 
         # Process video button
         self.process_video_edits_button = ctk.CTkButton(self.process_video_editor_frame, text="Process video(s)",
                                                         command=self.gather_and_validate_entries)
-        self.process_video_edits_button.grid(row=0, column=3, padx=5, pady=5)
+        self.process_video_edits_button.grid(row=0, column=4, padx=5, pady=5)
 
         # Frame to display messages on the video editor frame
         self.send_to_module_frame2 = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -3743,12 +3752,13 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show("No previous name normalizer operation. Nothing to undo.", create_messagebox=True,
                                   error=True)
 
-    def clear_selection(self, frame_name: str) -> None:
+    def clear_selection(self, frame_name: str, reset_all=False) -> None:
         """
         Clear the selected options and input fields based on the provided frame name.
 
         Parameters:
             frame_name (str): The name of the frame for which to clear the selection.
+            reset_all (bool, optional): Boolean to track whether to reset everything or just the values.
 
         Returns:
             None
@@ -3779,10 +3789,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.custom_text_removal_entry.delete(0, ctk.END)
 
         elif frame_name == "video_editor_window":
-            self.video_editor_selected_file = ""
+            if reset_all:
+                self.video_editor_selected_file = ""
 
-            self.input_method_entry.delete(0, ctk.END)
-            self.video_editor_output_directory_entry.delete(0, ctk.END)
+                self.input_method_entry.delete(0, ctk.END)
+                self.video_editor_output_directory_entry.delete(0, ctk.END)
 
             # Clear decibel entry
             self.decibel_entry.delete(0, ctk.END)
