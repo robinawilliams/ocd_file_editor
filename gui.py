@@ -14,6 +14,7 @@ import time  # Import the time module for handling time-related functionality
 import atexit  # Module for registering functions to be called when the program is closing
 import logging  # Logging module for capturing log messages
 from logging.handlers import TimedRotatingFileHandler, RotatingFileHandler  # Module to rotate logs
+from collections import OrderedDict  # Module to track order of list entries
 from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
@@ -333,7 +334,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.ignore_known_artists_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "ignore_known_artists_var", fallback=False))
         self.remove_artist_duplicates_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=True))
+            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=False))
+        self.remove_word_duplicates_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "remove_word_duplicates_var", fallback=False))
         self.activate_logging_var = ctk.BooleanVar(
             value=config.getboolean("Settings", "activate_logging_var", fallback=False))
         self.suppress_var = ctk.BooleanVar(value=config.getboolean("Settings", "suppress_var", fallback=False))
@@ -714,6 +717,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.settings_label = None
         self.settings_tabview = None
         self.remove_duplicates_switch = None
+        self.duplicate_removal_label = None
+        self.remove_word_duplicates_switch = None
         self.artist_switch_frame = None
         self.artist_search_label = None
         self.artist_search_switch = None
@@ -2409,6 +2414,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                                       text="Remove Artist Duplicates From Filename",
                                                       variable=self.remove_artist_duplicates_var)
         self.remove_duplicates_switch.grid(row=3, column=0, padx=10, pady=10)
+
+        # Duplicate removal label
+        self.duplicate_removal_label = ctk.CTkLabel(self.artist_switch_frame, text="Duplicate Removal")
+        self.duplicate_removal_label.grid(row=4, column=0, padx=10, pady=5)
+
+        # Switch to enable/disable remove word duplicates
+        self.remove_word_duplicates_switch = ctk.CTkSwitch(self.artist_switch_frame,
+                                                           text="Remove Word Duplicates From Filename",
+                                                           variable=self.remove_word_duplicates_var)
+        self.remove_word_duplicates_switch.grid(row=5, column=0, padx=10, pady=10)
 
         # Artist browse frame
         self.artist_browse_frame = ctk.CTkFrame(self.artist_frame, corner_radius=0,
@@ -5752,6 +5767,44 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         name = re.sub(r'__-____-__', '__-__', name).strip()
         return name
 
+    def remove_word_duplicates_from_filename(self, name: str) -> str:
+        """
+        Remove duplicate words from the filename, excluding words found in the artist list,
+        while preserving the original order of words.
+
+        Parameters:
+        - name (str): The filename with or without a path.
+
+        Returns:
+        - str: The modified filename with duplicate words removed and original word order preserved.
+        """
+        try:
+            # Extract the file name without the path
+            basename = os.path.basename(name)
+
+            # Split the basename into words while preserving the order
+            words = basename.split()
+
+            # Read the list of artists from the artist_file
+            with open(self.artist_file, 'r') as artist_list_file:
+                artist_list = [artist.strip() for artist in artist_list_file]
+
+            # Use OrderedDict to keep track of unique words in order
+            unique_words_dict = OrderedDict.fromkeys(words)
+
+            # Exclude artists from unique words
+            for artist in artist_list:
+                unique_words_dict.pop(artist, None)
+
+            # Join the unique words back into the basename while preserving order
+            new_basename = ' '.join(unique_words_dict)
+
+            return new_basename
+
+        except Exception as e:
+            self.log_and_show(f"Removing duplicate words failed: {e}", create_messagebox=True, error=True)
+            return name  # Return the original filename in case of an error
+
     def remove_artist_duplicates_from_filename(self, file_name: str) -> str:
         """
         Remove artist names from the given file name by processing the list of artists
@@ -6001,6 +6054,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.artist_identifier_var.get():
                 # Process artist names to place identified artist(s) at the beginning
                 name = self.artist_identifier(name)
+
+            if self.remove_word_duplicates_var.get():
+                # Remove duplicate words from filename
+                name = self.remove_word_duplicates_from_filename(name)
 
             if self.remove_extra_whitespace_var.get():
                 # Remove extra white space

@@ -141,6 +141,8 @@ artist_search_var = False
 ignore_known_artists_var = False
 ; Remove artist duplicates from the filename
 remove_artist_duplicates_var = False
+; Remove word duplicates from the filename
+remove_word_duplicates_var = False
 ; Activate logging
 activate_logging_var = False
 ; Suppress console outputs
