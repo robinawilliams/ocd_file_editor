@@ -3199,14 +3199,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         except FileNotFoundError:
             # Log that the file is not found
-            self.log_and_show(f"Exclusion file not found: {self.dictionary_file}")
+            self.log_and_show(f"Dictionary JSON file not found: {self.dictionary_file}")
 
         except json.JSONDecodeError as e:
             # Handle JSON decoding error
-            self.log_and_show(f"Error decoding JSON in exclusion file: {self.dictionary_file}, {str(e)}", error=True)
+            self.log_and_show(f"Error decoding JSON in dictionary file: {self.dictionary_file}, {str(e)}", error=True)
 
         except Exception as e:
-            self.log_and_show(f"Initialize exclusion_file failed: {self.dictionary_file}, {str(e)}", error=True)
+            self.log_and_show(f"Initialize JSON failed: {self.dictionary_file}, {str(e)}", error=True)
 
     def update_json(self, file_to_update, dictionary_name, updated_data):
         """
