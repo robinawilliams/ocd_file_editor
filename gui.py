@@ -11,8 +11,9 @@ import customtkinter as ctk  # Customtkinter for a modern gui
 import threading  # Importing threading module for concurrent execution
 import queue  # Importing queue module for implementing a simple FIFO queue
 import time  # Import the time module for handling time-related functionality
-import logging  # Logging module for capturing log messages
 import atexit  # Module for registering functions to be called when the program is closing
+import logging  # Logging module for capturing log messages
+from logging.handlers import TimedRotatingFileHandler, RotatingFileHandler  # Module to rotate logs
 from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
@@ -3238,9 +3239,20 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             with open(self.file_renamer_log, 'w'):
                 pass
 
-        # Initialize logging
-        logging.basicConfig(filename=self.file_renamer_log, level=logging.INFO, filemode='a',
-                            format='%(asctime)s - %(levelname)s: %(message)s')
+        # Initialize logging with both TimedRotatingFileHandler and RotatingFileHandler
+        timed_handler = TimedRotatingFileHandler(self.file_renamer_log, when="D", interval=1, backupCount=3)
+        size_handler = RotatingFileHandler(self.file_renamer_log, maxBytes=10 * 1024 * 1024, backupCount=5)
+
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+
+        timed_handler.setFormatter(formatter)
+        size_handler.setFormatter(formatter)
+
+        # Set up the logger with both handlers
+        logger = logging.getLogger()
+        logger.setLevel(logging.INFO)
+        logger.addHandler(timed_handler)
+        logger.addHandler(size_handler)
 
         logging.info("Logging started.")
 
