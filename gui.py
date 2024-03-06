@@ -408,6 +408,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Initialize the queue for FIFO queue module functionality
         self.queue = queue.Queue()
 
+        # Initialize the list of open windows for selection_window
+        self.open_windows = []
+
         """Threading"""
         self.name_processing_thread_single = ""
         self.name_processing_thread_multiple = ""
@@ -2754,12 +2757,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         """
         Cleanup method to be called on program exit.
 
-        Stops logging if it is currently running. Interrupt processing if threads are running.
-
         Note: Ensure this method is appropriately connected to an exit event or cleanup routine.
         """
         # Interrupt threads that are processing
         self.interrupt_processing("all")
+
+        # Destroy any open selection windows
+        for window in self.open_windows:
+            window.destroy()
 
         # Stop logging if currently running
         if self.activate_logging_var.get():
@@ -3111,8 +3116,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Automatically choose No if fallback state is False.
                 return False
 
-    @staticmethod
-    def selection_window(title: str, prompt: str, label_text: str, item_list: list, item_text=None) -> str:
+    def selection_window(self, title: str, prompt: str, label_text: str, item_list: list, item_text=None) -> str:
         """
         Display a selection window prompting the user to choose from a list of options.
 
@@ -3137,11 +3141,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                                               item_list=item_list,
                                               item_text=item_text)
 
+        # Keep track of the open window
+        self.open_windows.append(selection_window)
+
         # Wait for the user to respond before proceeding
         selection_window.wait_window()
 
         # Retrieve the selected directory
         selected_option = selection_window.get_selected_option()
+
+        # Remove the window from the list when it is closed
+        self.open_windows.remove(selection_window)
 
         return selected_option
 
