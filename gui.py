@@ -194,6 +194,167 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         config = configparser.ConfigParser()
         config.read(self.config_file_path)
 
+        # GUI
+        self.geometry(config.get('GUI', 'geometry', fallback='1280x850'))
+        self.scaling = config.get('GUI', 'scaling', fallback='100')
+        self.default_frame = config.get('GUI', 'default_frame', fallback="file_renamer_window")
+
+        # File Renamer
+        self.default_cat_tab = config.get('File Renamer', 'default_cat_tab', fallback="All")
+        self.default_most_number = int(config.get('File Renamer', 'default_most_number', fallback=9))
+        self.column_numbers = int(config.get('File Renamer', 'column_numbers', fallback=7))
+        self.default_placement_var = config.get("File Renamer", "default_placement_var", fallback="special_character")
+        self.special_character_var = config.get("File Renamer", "special_character_var", fallback="-")
+        self.reset_output_directory_var = ctk.BooleanVar(
+            value=config.getboolean("File Renamer", "reset_output_directory_var", fallback=True))
+        self.suggest_output_directory_var = ctk.BooleanVar(
+            value=config.getboolean("File Renamer", "suggest_output_directory_var", fallback=False))
+        self.move_up_directory_var = ctk.BooleanVar(
+            value=config.getboolean("File Renamer", "move_up_directory_var", fallback=False))
+        self.move_text_var = ctk.BooleanVar(value=config.getboolean('File Renamer', 'move_text_var', fallback=False))
+        self.artist_common_categories_var = ctk.BooleanVar(
+            value=config.getboolean("File Renamer", "artist_common_categories_var", fallback=False))
+
+        # Name Normalizer
+        self.artist_identifier_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "artist_identifier_var", fallback=False))
+        self.deep_walk_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "deep_walk_var", fallback=False))
+        self.remove_all_symbols_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_all_symbols_var", fallback=False))
+        self.remove_ampersand_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_ampersand_var",
+                                                                           fallback=False))
+        self.remove_angle_bracket_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer",
+                                                                               "remove_angle_bracket_var",
+                                                                               fallback=False))
+        self.remove_asterisk_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_asterisk_var",
+                                                                          fallback=False))
+        self.remove_at_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_at_var", fallback=False))
+        self.remove_backslash_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_backslash_var",
+                                                                           fallback=False))
+        self.remove_caret_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_caret_var", fallback=False))
+        self.remove_colon_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_colon_var", fallback=False))
+        self.remove_comma_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_comma_var", fallback=False))
+        self.remove_curly_brace_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_curly_brace_var", fallback=False))
+        self.remove_dash_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_dash_var", fallback=False))
+        self.remove_dollar_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_dollar_var",
+                                                                        fallback=False))
+        self.remove_double_quote_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_double_quote_var", fallback=False))
+        self.remove_emdash_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_emdash_var",
+                                                                        fallback=False))
+
+        self.remove_endash_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_endash_var",
+                                                                        fallback=False))
+        self.remove_equal_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_equal_var", fallback=False))
+        self.remove_extra_whitespace_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_extra_whitespace_var", fallback=False))
+        self.remove_hashtag_trail_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer",
+                                                                               "remove_hashtag_trail_var",
+                                                                               fallback=False))
+
+        self.remove_hashtag_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_hashtag_var",
+                                                                         fallback=False))
+        self.remove_most_symbols_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_most_symbols_var", fallback=False))
+
+        self.remove_non_ascii_symbols_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer",
+                                                                                   "remove_non_ascii_symbols_var",
+                                                                                   fallback=False))
+
+        self.remove_number_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_number_var",
+                                                                        fallback=False))
+
+        self.remove_parenthesis_trail_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer",
+                                                                                   "remove_parenthesis_trail_var",
+                                                                                   fallback=False))
+
+        self.remove_parenthesis_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_parenthesis_var", fallback=False))
+        self.remove_percent_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_percent_var",
+                                                                         fallback=False))
+        self.remove_pipe_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_pipe_var", fallback=False))
+        self.remove_plus_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_plus_var", fallback=False))
+        self.remove_question_mark_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer",
+                                                                               "remove_question_mark_var",
+                                                                               fallback=False))
+        self.remove_semicolon_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_semicolon_var",
+                                                                           fallback=False))
+        self.remove_single_quote_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "remove_single_quote_var", fallback=False))
+
+        self.remove_underscore_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "remove_underscore_var",
+                                                                            fallback=False))
+
+        self.remove_square_bracket_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer",
+                                                                                "remove_square_bracket_var",
+                                                                                fallback=False))
+        self.replace_custom_text_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "replace_custom_text_var", fallback=False))
+
+        self.replace_mode_var = ctk.BooleanVar(
+            value=config.getboolean("Name Normalizer", "replace_mode_var", fallback=False))
+
+        self.reset_nn_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "reset_nn_var", fallback=True))
+        self.title_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "title_var", fallback=False))
+
+        # Video Editor
+        self.default_rotation_var = config.get("Name Video Editor", "default_rotation_var", fallback="none")
+        self.default_decibel = config.get('Name Video Editor', 'default_decibel', fallback=0.0)
+        self.default_audio_normalization = config.get('Name Video Editor', 'default_audio_normalization', fallback=0.0)
+        self.default_minute = config.get('Name Video Editor', 'default_minute', fallback=0)
+        self.default_second = config.get('Name Video Editor', 'default_second', fallback=0)
+        self.remove_successful_lines_var = ctk.BooleanVar(value=config.getboolean("Name Video Editor",
+                                                                                  "remove_successful_lines_var",
+                                                                                  fallback=False))
+        self.reset_video_entries_var = ctk.BooleanVar(
+            value=config.getboolean("Name Video Editor", "reset_video_entries_var", fallback=True))
+
+        # Add/Remove
+        self.default_add_remove_tab = config.get('Add/Remove', 'default_add_remove_tab', fallback="Artist")
+        self.auto_add_acc_record_var = ctk.BooleanVar(value=config.getboolean("Add/Remove", "auto_add_acc_record_var",
+                                                                              fallback=False))
+        self.default_weight = config.get('Add/Remove', 'default_weight', fallback=9)
+        self.default_ctn_weight = config.get('Add/Remove', 'default_ctn_weight', fallback=1)
+        self.reset_add_remove_var = ctk.BooleanVar(value=config.getboolean("Add/Remove", "reset_add_remove_var",
+                                                                           fallback=True))
+
+        # Settings
+        self.artist_search_var = ctk.BooleanVar(value=config.getboolean("Settings", "artist_search_var",
+                                                                        fallback=False))
+        self.ignore_known_artists_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "ignore_known_artists_var", fallback=False))
+        self.remove_artist_duplicates_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=True))
+        self.activate_logging_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "activate_logging_var", fallback=False))
+        self.suppress_var = ctk.BooleanVar(value=config.getboolean("Settings", "suppress_var", fallback=False))
+        self.show_messageboxes_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "show_messageboxes_var", fallback=True))
+        self.show_confirmation_messageboxes_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "show_confirmation_messageboxes_var", fallback=True))
+        self.fallback_confirmation_var = ctk.BooleanVar(value=config.getboolean("Settings", "fallback_confirmation_var",
+                                                                                fallback=False))
+        self.truncate_var = ctk.BooleanVar(value=config.getboolean("Settings", "truncate_var", fallback=True))
+        self.open_on_file_drop_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "open_on_file_drop_var", fallback=False))
+        self.validate_entries = ctk.BooleanVar(value=config.getboolean("Settings", "validate_entries", fallback=False))
+        self.preview_mode_var = ctk.BooleanVar(value=config.getboolean("Settings", "preview_mode_var", fallback=False))
+        self.double_check_var = ctk.BooleanVar(value=config.getboolean("Settings", "double_check_var", fallback=False))
+        self.use_custom_tab_names_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "use_custom_tab_names_var", fallback=False))
+        self.sort_tab_names_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "sort_tab_names_var", fallback=False))
+        self.sort_reverse_order_var = ctk.BooleanVar(
+            value=config.getboolean("Settings", "sort_reverse_order_var", fallback=False))
+
         # Filepaths/Directories
         self.initial_directory = config.get('Filepaths', 'initial_directory', fallback='/path/to/folder')
         self.initial_output_directory = config.get('Filepaths', 'initial_output_directory', fallback='/path/to/folder')
@@ -205,184 +366,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.no_go_artist_file = config.get('Filepaths', 'no_go_artist_file', fallback='list_of_no_go_artists.txt')
         self.dictionary_file = config.get('Filepaths', 'dictionary_file', fallback='dictionary.json')
 
-        # Variables and window geometry
-        self.scaling = config.get('Settings', 'scaling', fallback='100')
-        self.default_weight = config.get('Settings', 'default_weight', fallback=9)
-        self.default_ctn_weight = config.get('Settings', 'default_ctn_weight', fallback=1)
-        self.default_decibel = config.get('Settings', 'default_decibel', fallback=0.0)
-        self.default_audio_normalization = config.get('Settings', 'default_audio_normalization', fallback=0.0)
-        self.default_minute = config.get('Settings', 'default_minute', fallback=0)
-        self.default_second = config.get('Settings', 'default_second', fallback=0)
-        self.default_frame = config.get('Settings', 'default_frame', fallback="file_renamer_window")
-        self.default_cat_tab = config.get('Settings', 'default_cat_tab', fallback="All")
-        self.default_add_remove_tab = config.get('Settings', 'default_add_remove_tab', fallback="Artist")
+        # Logs
         self.file_renamer_log = config.get('Logs', 'file_renamer_log', fallback="file_renamer.log")
-        self.default_placement_var = config.get("Settings", "default_placement_var", fallback="special_character")
-        self.special_character_var = config.get("Settings", "special_character_var", fallback="-")
-
-        self.geometry(config.get('Settings', 'geometry', fallback='1280x850'))
-        self.column_numbers = int(config.get('Settings', 'column_numbers', fallback=7))
-        self.default_most_number = int(config.get('Settings', 'default_most_number', fallback=9))
-        self.reset_output_directory_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "reset_output_directory_var", fallback=False))
-        self.use_custom_tab_names_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "use_custom_tab_names_var", fallback=False))
-        self.sort_tab_names_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "sort_tab_names_var", fallback=False))
-        self.sort_reverse_order_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "sort_reverse_order_var", fallback=False))
-        self.suggest_output_directory_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "suggest_output_directory_var", fallback=False))
-        self.artist_search_var = ctk.BooleanVar(value=config.getboolean("Settings", "artist_search_var",
-                                                                        fallback=False))
-        self.ignore_known_artists_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "ignore_known_artists_var", fallback=False))
-        self.artist_common_categories_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "artist_common_categories_var", fallback=False))
-        self.remove_artist_duplicates_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "remove_artist_duplicates_var", fallback=True))
-        self.move_up_directory_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "move_up_directory_var", fallback=False))
-        self.move_text_var = ctk.BooleanVar(value=config.getboolean('Settings', 'move_text_var', fallback=False))
-        self.open_on_file_drop_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "open_on_file_drop_var", fallback=False))
-        self.double_check_var = ctk.BooleanVar(value=config.getboolean("Settings", "double_check_var", fallback=False))
-        self.activate_logging_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "activate_logging_var", fallback=False))
-        self.suppress_var = ctk.BooleanVar(value=config.getboolean("Settings", "suppress_var", fallback=True))
-        self.show_messageboxes_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "show_messageboxes_var", fallback=True))
-        self.show_confirmation_messageboxes_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "show_confirmation_messageboxes_var",
-                                    fallback=True))
-        self.fallback_confirmation_var = ctk.BooleanVar(value=config.getboolean("Settings", "fallback_confirmation_var",
-                                                                                fallback=False))
-        self.truncate_var = ctk.BooleanVar(value=config.getboolean("Settings", "truncate_var", fallback=True))
-
-        # Name Normalizer
-        self.remove_all_symbols_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_all_symbols_var",
-                                                                             fallback=False))
-
-        self.remove_most_symbols_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_most_symbols_var",
-                                                                              fallback=False))
-
-        self.remove_non_ascii_symbols_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                                   "remove_non_ascii_symbols_var",
-                                                                                   fallback=False))
-
-        self.remove_number_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_number_var",
-                                                                        fallback=False))
-
-        self.remove_parenthesis_trail_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                                   "remove_parenthesis_trail_var",
-                                                                                   fallback=False))
-
-        self.remove_parenthesis_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_parenthesis_var",
-                                                                             fallback=False))
-
-        self.remove_hashtag_trail_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                               "remove_hashtag_trail_var",
-                                                                               fallback=False))
-
-        self.remove_hashtag_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_hashtag_var",
-                                                                         fallback=False))
-
-        self.replace_custom_text_var = ctk.BooleanVar(value=config.getboolean("Settings", "replace_custom_text_var",
-                                                                              fallback=False))
-
-        self.replace_mode_var = ctk.BooleanVar(value=config.getboolean("Settings", "replace_mode_var", fallback=False))
-
-        self.remove_dash_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_dash_var", fallback=False))
-
-        self.remove_endash_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_endash_var",
-                                                                        fallback=False))
-
-        self.remove_emdash_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_emdash_var",
-                                                                        fallback=False))
-
-        self.remove_ampersand_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_ampersand_var",
-                                                                           fallback=False))
-
-        self.remove_at_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_at_var", fallback=False))
-
-        self.remove_underscore_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_underscore_var",
-                                                                            fallback=False))
-
-        self.remove_comma_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_comma_var", fallback=False))
-
-        self.remove_single_quote_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_single_quote_var",
-                                                                              fallback=False))
-
-        self.remove_double_quote_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_double_quote_var",
-                                                                              fallback=False))
-
-        self.remove_colon_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_colon_var", fallback=False))
-
-        self.remove_semicolon_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_semicolon_var",
-                                                                           fallback=False))
-
-        self.remove_percent_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_percent_var",
-                                                                         fallback=False))
-
-        self.remove_caret_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_caret_var", fallback=False))
-
-        self.remove_dollar_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_dollar_var",
-                                                                        fallback=False))
-
-        self.remove_asterisk_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_asterisk_var",
-                                                                          fallback=False))
-
-        self.remove_plus_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_plus_var", fallback=False))
-
-        self.remove_equal_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_equal_var", fallback=False))
-
-        self.remove_curly_brace_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_curly_brace_var",
-                                                                             fallback=False))
-
-        self.remove_square_bracket_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                                "remove_square_bracket_var",
-                                                                                fallback=False))
-
-        self.remove_pipe_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_pipe_var", fallback=False))
-
-        self.remove_backslash_var = ctk.BooleanVar(value=config.getboolean("Settings", "remove_backslash_var",
-                                                                           fallback=False))
-
-        self.remove_angle_bracket_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                               "remove_angle_bracket_var",
-                                                                               fallback=False))
-
-        self.remove_question_mark_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                               "remove_question_mark_var",
-                                                                               fallback=False))
-
-        self.remove_extra_whitespace_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "remove_extra_whitespace_var", fallback=False))
-
-        self.title_var = ctk.BooleanVar(value=config.getboolean("Settings", "title_var", fallback=False))
-
-        self.artist_identifier_var = ctk.BooleanVar(
-            value=config.getboolean("Settings", "artist_identifier_var", fallback=False))
-
-        self.preview_mode_var = ctk.BooleanVar(value=config.getboolean("Settings", "preview_mode_var", fallback=False))
-        self.reset_nn_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_nn_var", fallback=False))
-        self.reset_video_entries_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_video_entries_var",
-                                                                              fallback=True))
-
-        self.reset_add_remove_var = ctk.BooleanVar(value=config.getboolean("Settings", "reset_add_remove_var",
-                                                                           fallback=True))
-        self.auto_add_acc_record_var = ctk.BooleanVar(value=config.getboolean("Settings", "auto_add_acc_record_var",
-                                                                              fallback=False))
-
-        self.deep_walk_var = ctk.BooleanVar(value=config.getboolean("Settings", "deep_walk_var", fallback=False))
-
-        # Video Editor
-        self.remove_successful_lines_var = ctk.BooleanVar(value=config.getboolean("Settings",
-                                                                                  "remove_successful_lines_var",
-                                                                                  fallback=False))
-        self.validate_entries = ctk.BooleanVar(value=config.getboolean("Settings", "validate_entries", fallback=False))
-        self.default_rotation_var = config.get("Settings", "default_rotation_var", fallback="none")
-        """End Load Configuration"""
 
         """Cache"""
         # Set the cache duration to 10 minutes (600 seconds)

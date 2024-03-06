@@ -1,14 +1,114 @@
-[Settings]
+[GUI]
 ; Starting size for window
 geometry = 1280x900
 ; Starting scaling for window
 scaling = 100
+; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, add_remove_window, settings_window)
+default_frame = file_renamer_window
+
+[File Renamer]
+; Default tab to open cat_tabview with (All, Most)
+default_cat_tab = All
+; Default number for Most Categories Weight, e.g. (9 for weights 1-9)
+default_most_number = 9
 ; Column size for the gui
 column_numbers = 7
-; Default weight for category
-default_weight = 9
-; Default weight for custom tab name
-default_ctn_weight = 1
+; Set the default placement for the words to be placed (prefix, special_character, suffix)
+default_placement_var = special_character
+; Set the special character for the placement (alphanumeric character)
+special_character_var = -
+; Reset the output directory after each run
+reset_output_directory_var = True
+; Suggest an output directory
+suggest_output_directory_var = False
+; Set output directory to one folder above the current directory
+move_up_directory_var = False
+; Move text between - and __-__
+move_text_var = False
+; Add artist's common categories to the queue
+artist_common_categories_var = False
+
+[Name Normalizer]
+; Identify artists
+artist_identifier_var = False
+; Explore subdirectories when name normalizing files (False just normalizes files in the root directory)
+deep_walk_var = False
+; Remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
+remove_all_symbols_var = False
+; Remove ampersands
+remove_ampersand_var = False
+; Remove angle brackets
+remove_angle_bracket_var = False
+; Remove asterisks
+remove_asterisk_var = False
+; remove_at_var
+remove_at_var = False
+; Remove backslashes
+remove_backslash_var = False
+; Remove carets
+remove_caret_var = False
+; Remove colons
+remove_colon_var = False
+; Remove commas
+remove_comma_var = False
+; Remove curly braces
+remove_curly_brace_var = False
+; Remove dashes
+remove_dash_var = False
+; Remove dollars
+remove_dollar_var = False
+; Remove double quotes
+remove_double_quote_var = False
+; Remove emdashes
+remove_emdash_var = False
+; Remove endashes
+remove_endash_var = False
+; Remove equal signs
+remove_equal_var = False
+; Remove extra whitespaces
+remove_extra_whitespace_var = False
+; Remove text following the first '#'
+remove_hashtag_trail_var = False
+; Remove '#'
+remove_hashtag_var = False
+; Remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
+remove_most_symbols_var = False
+; Remove non-ascii symbols
+remove_non_ascii_symbols_var = False
+; Remove numbers
+remove_number_var = False
+; Remove text following the first '('
+remove_parenthesis_trail_var = False
+; Remove '('
+remove_parenthesis_var = False
+; Remove percents
+remove_percent_var = False
+; Remove pipes
+remove_pipe_var = False
+; Remove plus signs
+remove_plus_var = False
+; Remove question marks
+remove_question_mark_var = False
+; Remove semicolons
+remove_semicolon_var = False
+; Remove single quotes
+remove_single_quote_var = False
+; Remove square brackets
+remove_square_bracket_var = False
+; Remove underscores
+remove_underscore_var = False
+; Replace custom text
+replace_custom_text_var = False
+; Replace mode text (case-sensitive[False] vs case-insensitive[True])
+replace_mode_var = False
+; Reset name normalizer entries after each run
+reset_nn_var = True
+; Titlefy the name
+title_var = False
+
+[Video Editor]
+; Set the default rotation for video editor (left, right, flip, mirror, none)
+default_rotation_var = none
 ; Default decibel for video editor
 default_decibel = 0.0
 ; Default audio normalization for video editor
@@ -17,40 +117,30 @@ default_audio_normalization = 0.0
 default_minute = 00
 ; Default second for video editor
 default_second = 00
-; Default number for Most Categories Weight, e.g. (9 for weights 1-9)
-default_most_number = 9
-; Default frame to open with (file_renamer_window, name_normalizer_window, video_editor_window, add_remove_window, settings_window)
-default_frame = file_renamer_window
-; Default tab to open cat_tabview with (All, Most)
-default_cat_tab = All
+; Remove the successful line from the input file after video editor processing
+remove_successful_lines_var = False
+; Reset video entries after each run
+reset_video_entries_var = True
+
+[Add/Remove]
 ; Default add/remove tab to open with (Artist, Category, Custom Tab Name, Custom Text to Replace, Exclude, File Extensions, NO GO, Valid Extensions)
 default_add_remove_tab = Artist
-; Use custom tab names
-use_custom_tab_names_var = False
-; Sort tab names
-sort_tab_names_var = True
-; Sort tab names reverse alphabetically (Z-A)
-sort_reverse_order_var = False
-; Reset the output directory after each run
-reset_output_directory_var = True
-; Suggest an output directory
-suggest_output_directory_var = False
+; Automatically add an Artist record in the Common Categories dictionary
+auto_add_acc_record_var = False
+; Default weight for category
+default_weight = 9
+; Default weight for custom tab name
+default_ctn_weight = 1
+; Reset add/remove entries after each run
+reset_add_remove_var = True
+
+[Settings]
 ; Artist Search variable
 artist_search_var = False
 ; Ignore known artists when identifying
 ignore_known_artists_var = False
-; Add artist's common categories to the queue
-artist_common_categories_var = False
 ; Remove artist duplicates from the filename
 remove_artist_duplicates_var = False
-; Set output directory to one folder above the current directory
-move_up_directory_var = False
-; Move text between - and __-__
-move_text_var = False
-; Open file when drag and dropped into window
-open_on_file_drop_var = False
-; Create a double check reminder file
-double_check_var = False
 ; Activate logging
 activate_logging_var = False
 ; Suppress console outputs
@@ -63,100 +153,20 @@ show_confirmation_messageboxes_var = True
 fallback_confirmation_var = False
 ; Truncate text in the file display
 truncate_var = True
-; Remove all symbols ,;:@$%^&#*+=(){}[]|\<>'"?_-–—
-remove_all_symbols_var = False
-; Remove most symbols ,;:@$%^&*+={}[]|\<>"?-–—
-remove_most_symbols_var = False
-; Remove non-ascii symbols
-remove_non_ascii_symbols_var = False
-; Remove numbers
-remove_number_var = False
-; Remove text following the first '('
-remove_parenthesis_trail_var = False
-; Remove '('
-remove_parenthesis_var = False
-; Remove text following the first '#'
-remove_hashtag_trail_var = False
-; Remove '#'
-remove_hashtag_var = False
-; Replace custom text
-replace_custom_text_var = False
-; Replace mode text (case-sensitive[False] vs case-insensitive[True])
-replace_mode_var = False
-; Remove dashes
-remove_dash_var = False
-; Remove endashes
-remove_endash_var = False
-; Remove emdashes
-remove_emdash_var = False
-; Remove ampersands
-remove_ampersand_var = False
-; remove_at_var
-remove_at_var = False
-; Remove underscores
-remove_underscore_var = False
-; Remove commas
-remove_comma_var = False
-; Remove single quotes
-remove_single_quote_var = False
-; Remove double quotes
-remove_double_quote_var = False
-; Remove colons
-remove_colon_var = False
-; Remove semicolons
-remove_semicolon_var = False
-; Remove percents
-remove_percent_var = False
-; Remove carets
-remove_caret_var = False
-; Remove dollars
-remove_dollar_var = False
-; Remove asterisks
-remove_asterisk_var = False
-; Remove plus signs
-remove_plus_var = False
-; Remove equal signs
-remove_equal_var = False
-; Remove curly braces
-remove_curly_brace_var = False
-; Remove square brackets
-remove_square_bracket_var = False
-; Remove pipes
-remove_pipe_var = False
-; Remove backslashes
-remove_backslash_var = False
-; Remove angle brackets
-remove_angle_bracket_var = False
-; Remove question marks
-remove_question_mark_var = False
-; Remove extra whitespaces
-remove_extra_whitespace_var = False
-; Titlefy the name
-title_var = False
-; Identify artists
-artist_identifier_var = False
+; Open file when drag and dropped into window
+open_on_file_drop_var = False
+; Validate entries
+validate_entries = False
 ; Preview mode for the name normalizer
 preview_mode_var = True
-; Reset name normalizer entries after each run
-reset_nn_var = False
-; Reset video entries after each run
-reset_video_entries_var = False
-; Reset add/remove entries after each run
-reset_add_remove_var = True
-; Automatically add an Artist record in the Common Categories dictionary
-auto_add_acc_record_var = False
-; Explore subdirectories when name normalizing files (False just normalizes files in the root directory)
-deep_walk_var = False
-; Remove the successful line from the input file after video editor processing
-remove_successful_lines_var = False
-; Validate entries
-validate_entries = True
-; Set the default placement for the words to be placed (prefix, special_character, suffix)
-default_placement_var = special_character
-; Set the special character for the placement (alphanumeric character)
-special_character_var = -
-; Set the default rotation for video editor (left, right, flip, mirror, none)
-default_rotation_var = none
+; Create a double check reminder file
+double_check_var = False
+; Use custom tab names
+use_custom_tab_names_var = False
+; Sort tab names
+sort_tab_names_var = True
+; Sort tab names reverse alphabetically (Z-A)
+sort_reverse_order_var = False
 
 [Filepaths]
 ; Starting directory for browse (Uncomment and replace /path/to/folder with your directory)
