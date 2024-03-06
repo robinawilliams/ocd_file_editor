@@ -4932,6 +4932,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         custom_text = self.custom_text_entry.get().strip()
         base_name, extension = os.path.splitext(os.path.basename(self.file_renamer_selected_file))
 
+        if self.remove_artist_duplicates_var.get():
+            # Remove duplicate artists from filename
+            base_name = self.remove_artist_duplicates_from_filename(base_name)
+
+        if self.remove_word_duplicates_var.get():
+            # Remove duplicate words from filename
+            base_name = self.remove_word_duplicates_from_filename(base_name)
+
         # Filter categories that are both in file_renamer_queue and categories
         weighted_categories = [category for category in self.file_renamer_queue if category in self.categories]
 
