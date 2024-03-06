@@ -308,16 +308,16 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.title_var = ctk.BooleanVar(value=config.getboolean("Name Normalizer", "title_var", fallback=False))
 
         # Video Editor
-        self.default_rotation_var = config.get("Name Video Editor", "default_rotation_var", fallback="none")
-        self.default_decibel = config.get('Name Video Editor', 'default_decibel', fallback=0.0)
-        self.default_audio_normalization = config.get('Name Video Editor', 'default_audio_normalization', fallback=0.0)
-        self.default_minute = config.get('Name Video Editor', 'default_minute', fallback=0)
-        self.default_second = config.get('Name Video Editor', 'default_second', fallback=0)
-        self.remove_successful_lines_var = ctk.BooleanVar(value=config.getboolean("Name Video Editor",
+        self.default_rotation_var = config.get("Video Editor", "default_rotation_var", fallback="none")
+        self.default_decibel = config.get('Video Editor', 'default_decibel', fallback=0.0)
+        self.default_audio_normalization = config.get('Video Editor', 'default_audio_normalization', fallback=0.0)
+        self.default_minute = config.get('Video Editor', 'default_minute', fallback=0)
+        self.default_second = config.get('Video Editor', 'default_second', fallback=0)
+        self.remove_successful_lines_var = ctk.BooleanVar(value=config.getboolean("Video Editor",
                                                                                   "remove_successful_lines_var",
                                                                                   fallback=False))
         self.reset_video_entries_var = ctk.BooleanVar(
-            value=config.getboolean("Name Video Editor", "reset_video_entries_var", fallback=True))
+            value=config.getboolean("Video Editor", "reset_video_entries_var", fallback=True))
 
         # Add/Remove
         self.default_add_remove_tab = config.get('Add/Remove', 'default_add_remove_tab', fallback="Artist")
