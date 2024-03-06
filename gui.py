@@ -5683,10 +5683,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Add artist prefix to the filename if artist_prefix is not empty
             name = f"{artist_prefix} - {name}" if artist_prefix else name
 
-            # Check if remove_artist_duplicates_var is set
-            if self.remove_artist_duplicates_var.get():
-                # Call the remove_artist_duplicates_from_filename function to modify name
-                name = self.remove_artist_duplicates_from_filename(str(name))
         except FileNotFoundError:
             self.log_and_show(f"File not found: {self.artist_file}", create_messagebox=True, error=True)
         except Exception as e:
@@ -5808,9 +5804,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def remove_artist_duplicates_from_filename(self, file_name: str) -> str:
         """
         Remove artist names from the given file name by processing the list of artists
-        read from the artist_file and modifying the file name accordingly. The intent is to give the user the option
-        to maintain the rest of the original file name after the Artist Identifier, or remove the now duplicate entries
-        for a clean file name.
+        read from the artist_file and modifying the file name accordingly.
 
         Parameters:
             file_name (str): The original file name.
@@ -5827,14 +5821,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             artist_list = [artist.strip() for artist in artist_list_file]
 
         # Extract the file name without the path
-        file_name = os.path.basename(file_name)
+        basename = os.path.basename(file_name)
 
         # Find the first occurrence of '-'
-        index = file_name.find('-')
+        index = basename.find('-')
 
         if index != -1:
             # Temporary removal of everything before the dash
-            temp_name = file_name[index + 1:]
+            temp_name = basename[index + 1:]
             temp_name = temp_name.strip()
 
             # Search for artist names and remove them
@@ -5844,10 +5838,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 temp_name = regex.sub('', temp_name)
 
             # Reattach the dash and any remaining text
-            new_file_name = f"{file_name[:index + 1]} {temp_name.strip()}"
+            new_file_name = f"{basename[:index + 1]} {temp_name.strip()}"
         else:
-            # No dash found, return the original filename
-            return file_name
+            # No dash found, remove artist duplicates while preserving the order
+            words = basename.split()
+            unique_words_dict = OrderedDict.fromkeys(words)
+            for artist in artist_list:
+                unique_words_dict.pop(artist, None)
+            new_file_name = ' '.join(unique_words_dict)
 
         # Sanitize file name. Remove extra whitespace.
         new_file_name = ' '.join(new_file_name.split()).strip()
@@ -6054,6 +6052,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.artist_identifier_var.get():
                 # Process artist names to place identified artist(s) at the beginning
                 name = self.artist_identifier(name)
+
+            if self.remove_artist_duplicates_var.get():
+                # Remove duplicate artists from filename
+                name = self.remove_artist_duplicates_from_filename(name)
 
             if self.remove_word_duplicates_var.get():
                 # Remove duplicate words from filename
