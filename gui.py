@@ -312,6 +312,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.default_rotation_var = config.get("Video Editor", "default_rotation_var", fallback="none")
         self.default_decibel = config.get('Video Editor', 'default_decibel', fallback=0.0)
         self.default_audio_normalization = config.get('Video Editor', 'default_audio_normalization', fallback=0.0)
+        self.default_hour = config.get('Video Editor', 'default_hour', fallback=0)
         self.default_minute = config.get('Video Editor', 'default_minute', fallback=0)
         self.default_second = config.get('Video Editor', 'default_second', fallback=0)
         self.remove_successful_lines_var = ctk.BooleanVar(value=config.getboolean("Video Editor",
@@ -600,15 +601,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.audio_normalization_entry = None
         self.trim_frame = None
         self.trim_label = None
+        self.hour_var = None
+        self.hour_entry = None
+        self.colon_label = None
         self.minute_var = None
         self.minute_entry = None
-        self.colon_label = None
+        self.colon_label1 = None
         self.second_var = None
         self.second_entry = None
         self.trim_label1 = None
+        self.hour_var1 = None
+        self.hour_entry1 = None
+        self.colon_label2 = None
         self.minute_var1 = None
         self.minute_entry1 = None
-        self.colon_label1 = None
+        self.colon_label3 = None
         self.second_var1 = None
         self.second_entry1 = None
         self.video_editor_output_directory_frame = None
@@ -1769,8 +1776,25 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.trim_frame.grid(row=6, column=0, padx=10, pady=5)
 
         # Trim label
-        self.trim_label = ctk.CTkLabel(self.trim_frame, text="Trim (Minutes:Seconds):")
+        self.trim_label = ctk.CTkLabel(self.trim_frame, text="Trim (Hours:Minutes:Seconds):")
         self.trim_label.grid(row=0, column=0, padx=10, pady=5)
+
+        # Initialize hour variable
+        self.hour_var = ctk.StringVar()
+        self.hour_var.set(self.default_hour)
+
+        # Trace the changes in the StringVar
+        self.hour_var.trace_add("write",
+                                lambda name, index, mode, var=self.hour_var, default=self.default_hour,
+                                         desired_type=int: self.validate_entry(var, default, desired_type))
+
+        # Hour entry
+        self.hour_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.hour_var, width=50)
+        self.hour_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        # Trim label
+        self.colon_label = ctk.CTkLabel(self.trim_frame, text=":")
+        self.colon_label.grid(row=0, column=2)
 
         # Initialize minute variable
         self.minute_var = ctk.StringVar()
@@ -1783,11 +1807,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Minute entry
         self.minute_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.minute_var, width=50)
-        self.minute_entry.grid(row=0, column=1, padx=10, pady=10)
+        self.minute_entry.grid(row=0, column=3, padx=10, pady=10)
 
-        # Trim label
-        self.colon_label = ctk.CTkLabel(self.trim_frame, text=":")
-        self.colon_label.grid(row=0, column=2)
+        # Trim label1
+        self.colon_label1 = ctk.CTkLabel(self.trim_frame, text=":")
+        self.colon_label1.grid(row=0, column=4)
 
         # Initialize second variable
         self.second_var = ctk.StringVar()
@@ -1800,11 +1824,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Second entry
         self.second_entry = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var, width=50)
-        self.second_entry.grid(row=0, column=3, padx=10, pady=10)
+        self.second_entry.grid(row=0, column=5, padx=10, pady=10)
 
         # Trim label
         self.trim_label1 = ctk.CTkLabel(self.trim_frame, text="-")
-        self.trim_label1.grid(row=0, column=4, padx=10, pady=5)
+        self.trim_label1.grid(row=0, column=6, padx=10, pady=5)
+
+        # Initialize hour variable1
+        self.hour_var1 = ctk.StringVar()
+        self.hour_var1.set(self.default_hour)
+
+        # Trace the changes in the StringVar
+        self.hour_var1.trace_add("write",
+                                 lambda name, index, mode, var=self.hour_var1, default=self.default_hour,
+                                        desired_type=int: self.validate_entry(var, default, desired_type))
+
+        # Hour entry1
+        self.hour_entry1 = ctk.CTkEntry(self.trim_frame, textvariable=self.hour_var1, width=50)
+        self.hour_entry1.grid(row=0, column=7, padx=10, pady=10)
+
+        # Trim label2
+        self.colon_label2 = ctk.CTkLabel(self.trim_frame, text=":")
+        self.colon_label2.grid(row=0, column=8)
 
         # Initialize minute variable1
         self.minute_var1 = ctk.StringVar()
@@ -1817,11 +1858,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Minute entry1
         self.minute_entry1 = ctk.CTkEntry(self.trim_frame, textvariable=self.minute_var1, width=50)
-        self.minute_entry1.grid(row=0, column=5, padx=10, pady=10)
+        self.minute_entry1.grid(row=0, column=9, padx=10, pady=10)
 
-        # Trim label1
-        self.colon_label1 = ctk.CTkLabel(self.trim_frame, text=":")
-        self.colon_label1.grid(row=0, column=6)
+        # Trim label3
+        self.colon_label3 = ctk.CTkLabel(self.trim_frame, text=":")
+        self.colon_label3.grid(row=0, column=10)
 
         # Initialize second variable
         self.second_var1 = ctk.StringVar()
@@ -1834,7 +1875,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         # Second entry1
         self.second_entry1 = ctk.CTkEntry(self.trim_frame, textvariable=self.second_var1, width=50)
-        self.second_entry1.grid(row=0, column=7, padx=10, pady=10)
+        self.second_entry1.grid(row=0, column=11, padx=10, pady=10)
 
         # Video Editor Output directory frame
         self.video_editor_output_directory_frame = ctk.CTkFrame(self.video_editor_frame, corner_radius=0,
@@ -3971,6 +4012,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Clear audio normalization entry
             self.audio_normalization_entry.delete(0, ctk.END)
 
+            # Clear hour entries
+            self.hour_entry.delete(0, ctk.END)
+            self.hour_entry1.delete(0, ctk.END)
+
             # Clear minute entries
             self.minute_entry.delete(0, ctk.END)
             self.minute_entry1.delete(0, ctk.END)
@@ -3985,6 +4030,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Set the audio normalization entry
             self.audio_normalization_var.set(self.default_audio_normalization)
+
+            # Set the hour entries
+            self.hour_var.set(self.default_hour)
+            self.hour_var1.set(self.default_hour)
 
             # Set the minute entries
             self.minute_var.set(self.default_minute)
@@ -6545,8 +6594,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             rotation = str(self.rotation_var.get())
             decibel = float(self.decibel_entry.get().strip())
             audio_normalization = float(self.audio_normalization_entry.get().strip())
+            hours = int(self.hour_entry.get().strip())
             minutes = int(self.minute_entry.get().strip())
             seconds = int(self.second_entry.get().strip())
+            hours1 = int(self.hour_entry1.get().strip())
             minutes1 = int(self.minute_entry1.get().strip())
             seconds1 = int(self.second_entry1.get().strip())
         except ValueError as e:
@@ -6555,20 +6606,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 create_messagebox=True, error=True)
             return
 
-        # Adjust minutes and seconds
+        # Adjusted hours, minutes, and seconds for start time
+        adjusted_hours = hours if hours != 0 else 0
         adjusted_minutes = minutes if minutes != 0 else 0
         adjusted_seconds = seconds if seconds != 0 else 0
 
-        # Convert time to seconds
-        total_start_time = adjusted_minutes * 60 + adjusted_seconds
+        # Convert time to seconds for start time
+        total_start_time = (adjusted_hours * 3600) + (adjusted_minutes * 60) + adjusted_seconds
 
-        # Adjust minutes1 and seconds1
+        # Adjusted hours, minutes, and seconds for end time
+        adjusted_hours1 = hours1 if hours1 != 0 else 0
         adjusted_minutes1 = minutes1 if minutes1 != 0 else 0
         adjusted_seconds1 = seconds1 if seconds1 != 0 else 0
 
-        # Convert time to seconds
-        total_end_time = adjusted_minutes1 * 60 + adjusted_seconds1
+        # Convert time to seconds for end time
+        total_end_time = (adjusted_hours1 * 3600) + (adjusted_minutes1 * 60) + adjusted_seconds1
 
+        # Calculate total time in seconds
         total_time = total_start_time + total_end_time
 
         # If there is nothing to trim, set trim to False

@@ -113,6 +113,8 @@ default_rotation_var = none
 default_decibel = 0.0
 ; Default audio normalization for video editor
 default_audio_normalization = 0.0
+; Default hour for video editor
+default_hour = 00
 ; Default minute for video editor
 default_minute = 00
 ; Default second for video editor
