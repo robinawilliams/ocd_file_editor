@@ -5783,8 +5783,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
     def remove_word_duplicates_from_filename(self, name: str) -> str:
         """
-        Remove duplicate words from the filename, excluding words found in the artist list,
-        while preserving the original order of words.
+        Remove duplicate words from the filename while preserving the original order of words.
 
         Parameters:
         - name (str): The filename with or without a path.
@@ -5799,16 +5798,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Split the basename into words while preserving the order
             words = basename.split()
 
-            # Read the list of artists from the artist_file
-            with open(self.artist_file, 'r') as artist_list_file:
-                artist_list = [artist.strip() for artist in artist_list_file]
-
             # Use OrderedDict to keep track of unique words in order
             unique_words_dict = OrderedDict.fromkeys(words)
-
-            # Exclude artists from unique words
-            for artist in artist_list:
-                unique_words_dict.pop(artist, None)
 
             # Join the unique words back into the basename while preserving order
             new_basename = ' '.join(unique_words_dict)
@@ -5858,12 +5849,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Reattach the dash and any remaining text
             new_file_name = f"{basename[:index + 1]} {temp_name.strip()}"
         else:
-            # No dash found, remove artist duplicates while preserving the order
-            words = basename.split()
-            unique_words_dict = OrderedDict.fromkeys(words)
-            for artist in artist_list:
-                unique_words_dict.pop(artist, None)
-            new_file_name = ' '.join(unique_words_dict)
+            # No dash found, return the original filename
+            return file_name
 
         # Sanitize file name. Remove extra whitespace.
         new_file_name = ' '.join(new_file_name.split()).strip()
