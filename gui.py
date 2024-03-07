@@ -8052,9 +8052,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         tabs = {}  # Dictionary to store tab references
 
         for tab_name in tab_names:
-            # Use the tab_name naming scheme
-            tab_name = f"{tab_name}"
-
             # Create the tab
             tab = tabview.add(tab_name)
 
