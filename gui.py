@@ -1536,7 +1536,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.suffix_entry = ctk.CTkEntry(self.string_frame, width=140)
         self.suffix_entry.grid(row=1, column=3, padx=10, pady=10)
 
-        # Bind the update_file_display function to the entry change event
+        # Bind the update_nn_display function to the entry change event
         self.suffix_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Replace Label
@@ -1547,14 +1547,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.original_entry = ctk.CTkEntry(self.string_frame, width=150)
         self.original_entry.grid(row=1, column=5, padx=10, pady=10)
 
-        # Bind the update_file_display function to the entry change event
+        # Bind the update_nn_display function to the entry change event
         self.original_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Replace Entry
         self.replace_entry = ctk.CTkEntry(self.string_frame, width=150)
         self.replace_entry.grid(row=1, column=10, pady=10)
 
-        # Bind the update_file_display function to the entry change event
+        # Bind the update_nn_display function to the entry change event
         self.replace_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Output directory move frame
@@ -1579,7 +1579,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.custom_text_removal_entry = ctk.CTkEntry(self.output_directory_frame, width=385)
         self.custom_text_removal_entry.grid(row=0, column=3, padx=10, pady=10)
 
-        # Bind the update_file_display function to the entry change event
+        # Bind the update_nn_display function to the entry change event
         self.custom_text_removal_entry.bind("<KeyRelease>", self.update_nn_display)
 
         # Normalize Folder frame
@@ -1860,15 +1860,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         self.clear_video_editor_values_button = ctk.CTkButton(self.process_video_editor_frame,
                                                               text="Clear Values",
                                                                  command=lambda: self.clear_selection(
-                                                                     frame_name="video_editor_window"))
+                                                                     frame_name="video_editor_window",
+                                                                     reset_all=False))
         self.clear_video_editor_values_button.grid(row=0, column=0, padx=10, pady=10)
 
         # Clear video editor entries Button
         self.clear_video_editor_entries_button = ctk.CTkButton(self.process_video_editor_frame,
                                                                text="Clear Everything",
                                                                command=lambda: self.clear_selection(
-                                                                   frame_name="video_editor_window",
-                                                                   reset_all=True))
+                                                                   frame_name="video_editor_window"))
         self.clear_video_editor_entries_button.grid(row=0, column=1, padx=10, pady=10)
 
         # Select Video Editor Last Used File Button
@@ -3460,13 +3460,14 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             if self.name_normalizer_last_used_file and os.path.exists(self.name_normalizer_last_used_file):
                 # Set the name normalizer selected input to the name normalizer last used input and update display
                 self.name_normalizer_selected_file = self.name_normalizer_last_used_file
-                filename = os.path.basename(self.name_normalizer_selected_file)
 
-                # Set the selected input to the input entry widget
-                self.nn_display_text.set(filename)
+                # Update the Name Normalizer display
+                self.update_nn_display()
 
                 # Log the action if logging is enabled
-                self.log_and_show(f"Last used Name Normalizer input selected: {filename}")
+                self.log_and_show(
+                    f"Last used Name Normalizer input selected: "
+                    f"{os.path.basename(self.name_normalizer_selected_file)}")
             else:
                 self.log_and_show("No last used Name Normalizer input found.",
                                   create_messagebox=True, error=True)
@@ -3512,88 +3513,79 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Invalid frame name
             return
 
+        if not selected_file:
+            # Input not selected
+            self.log_and_show("No input selected. Cannot send to module",
+                              create_messagebox=True, error=True)
+            return
+
         # Send to File Renamer
         if destination == "file_renamer_module":
-            if selected_file:
-                # Clear selection for the file_renamer_window
-                self.clear_selection(frame_name="file_renamer_window")
+            # Clear selection for the file_renamer_window
+            self.clear_selection(frame_name="file_renamer_window")
 
-                # Set the name normalizer selected file to the file renamer selected file and update display
-                self.file_renamer_selected_file = selected_file
+            # Set the name normalizer selected file to the file renamer selected file and update display
+            self.file_renamer_selected_file = selected_file
 
-                self.update_file_display()
+            # Update the File Renamer display
+            self.update_file_display()
 
-                # Log the action if logging is enabled
-                self.log_and_show(f"Input selected via send to module: "
-                                  f"{os.path.basename(self.file_renamer_selected_file)}")
+            # Log the action if logging is enabled
+            self.log_and_show(f"Input selected via send to module: "
+                              f"{os.path.basename(self.file_renamer_selected_file)}")
 
-                # Clear selection for the source module
-                self.clear_selection(frame_name=self.frame_name)
+            # Clear selection for the source module
+            self.clear_selection(frame_name=self.frame_name)
 
-                # Switch frames to the File Renamer
-                self.file_renamer_button_event()
-            else:
-                # Input not selected
-                self.log_and_show("No input selected. Cannot send to module",
-                                  create_messagebox=True, error=True)
+            # Switch frames to the File Renamer
+            self.file_renamer_button_event()
 
         # Send to Name Normalizer
         elif destination == "name_normalizer_module":
-            if selected_file:
-                # Clear selection for the name_normalizer_window
-                self.clear_selection(frame_name="name_normalizer_window")
+            # Clear selection for the name_normalizer_window
+            self.clear_selection(frame_name="name_normalizer_window")
 
-                # Set the source selected file to the Name Normalizer selected file
-                self.name_normalizer_selected_file = selected_file
+            # Set the source selected file to the Name Normalizer selected file
+            self.name_normalizer_selected_file = selected_file
 
-                # Log the action if logging is enabled
-                self.log_and_show(f"Input selected via send to module: "
-                                  f"{os.path.basename(self.name_normalizer_selected_file)}")
+            # Log the action if logging is enabled
+            self.log_and_show(f"Input selected via send to module: "
+                              f"{os.path.basename(self.name_normalizer_selected_file)}")
+
+            # Clear selection for the source module
+            self.clear_selection(frame_name=self.frame_name)
+
+            # Update the Name Normalizer display
+            self.update_nn_display()
+
+            # Switch frames to the Name Normalizer
+            self.name_normalizer_button_event()
+
+        # Send to Video Editor
+        elif destination == "video_editor_module":
+            # Confirm if the input is a valid file for the video editor window
+            if any(selected_file.lower().endswith(ext) for ext in self.valid_extensions):
+                # Clear selection for the video_editor_window
+                self.clear_selection(frame_name="video_editor_window")
+
+                # Initialize video editor selected file to selected file from source module
+                self.video_editor_selected_file = selected_file
+                filename = os.path.basename(self.video_editor_selected_file)
 
                 # Clear selection for the source module
                 self.clear_selection(frame_name=self.frame_name)
 
-                # Set the Name Normalizer selected file to the nn_path_entry
-                self.nn_display_text.set(self.name_normalizer_selected_file)
+                # Set the video editor selected file to the input_method_entry
+                self.input_method_entry.insert(0, filename)
 
-                # Switch frames to the File Renamer
-                self.name_normalizer_button_event()
+                # Log the action and display the message in the GUI
+                self.log_and_show(f"Input selected via send to module: {filename}")
+
+                # Switch frames to the video editor
+                self.video_editor_button_event()
             else:
                 # Input not selected
-                self.log_and_show("No input selected. Cannot send to module",
-                                  create_messagebox=True, error=True)
-
-        # Send to Video Editor
-        elif destination == "video_editor_module":
-            # Check if there is an input selected
-            if selected_file:
-                # Confirm if the input is a valid file for the video editor window
-                if any(selected_file.lower().endswith(ext) for ext in self.valid_extensions):
-                    # Clear selection for the video_editor_window
-                    self.clear_selection(frame_name="video_editor_window")
-
-                    # Initialize video editor selected file to selected file from source module
-                    self.video_editor_selected_file = selected_file
-                    filename = os.path.basename(self.video_editor_selected_file)
-
-                    # Clear selection for the source module
-                    self.clear_selection(frame_name=self.frame_name)
-
-                    # Set the video editor selected file to the input_method_entry
-                    self.input_method_entry.insert(0, filename)
-
-                    # Log the action and display the message in the GUI
-                    self.log_and_show(f"Input selected via send to module: {filename}")
-
-                    # Switch frames to the video editor
-                    self.video_editor_button_event()
-                else:
-                    # Input not selected
-                    self.log_and_show("Non-video input detected. Cannot send to Video Editor",
-                                      create_messagebox=True, error=True)
-            else:
-                # Input not selected
-                self.log_and_show("No input selected. Cannot send to module",
+                self.log_and_show("Non-video input detected. Cannot send to Video Editor",
                                   create_messagebox=True, error=True)
         else:
             # Invalid frame name
@@ -3689,12 +3681,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # If an error occurs while opening the file, log the error
                 self.log_and_show(f"{str(e)}", create_messagebox=True, error=True)
 
-    def update_file_display(self, *_):
+    def update_file_display(self, *_) -> None:
         """
         Update the file display based on the selected file and user input.
 
         Args:
         - *_: Variable number of arguments (unused in this method).
+
+        Returns:
+            None
 
         Notes:
         - Gathers data from the GUI including base name, weighted categories, prefix text, custom text, and extension.
@@ -3705,23 +3700,27 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         - Updates the file display and name length variables.
 
         """
-        if self.file_renamer_selected_file:
-            # Gather the data from the GUI
-            (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
+        if not self.file_renamer_selected_file:
+            # Set the file display to an empty string and return
+            self.file_display_text.set("")
+            return
 
-            # Construct the name
-            (proposed_name, char_length) = self.construct_new_name(base_name, weighted_categories, prefix_text,
-                                                                   custom_text, extension)
+        # Gather the data from the GUI
+        (base_name, weighted_categories, prefix_text, custom_text, extension) = self.gather_and_sort()
 
-            # Set the proposed name to the file display
-            self.file_display_text.set(proposed_name)
+        # Construct the name
+        (proposed_name, char_length) = self.construct_new_name(base_name, weighted_categories, prefix_text,
+                                                               custom_text, extension)
 
-            # Set the length of the name to the name_length_text
-            self.name_length_text.set(char_length)
+        # Set the proposed name to the file display
+        self.file_display_text.set(proposed_name)
 
-            # Handle name length constraints
-            if char_length > 255:
-                self.name_length_handler(char_length)
+        # Set the length of the name to the name_length_text
+        self.name_length_text.set(char_length)
+
+        # Handle name length constraints
+        if char_length > 255:
+            self.name_length_handler(char_length)
 
     def name_length_handler(self, char_length: int):
         """
@@ -3919,7 +3918,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 self.log_and_show("No previous name normalizer operation. Nothing to undo.", create_messagebox=True,
                                   error=True)
 
-    def clear_selection(self, frame_name: str, reset_all=False) -> None:
+    def clear_selection(self, frame_name: str, reset_all=True) -> None:
         """
         Clear the selected options and input fields based on the provided frame name.
 
@@ -3933,7 +3932,6 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         if frame_name == "file_renamer_window":
             self.file_renamer_selected_file = ""
             self.file_renamer_queue = []
-            self.file_display_text.set("")
             self.name_length_text.set("")
 
             # Clear text entries and reset output directory
@@ -3942,10 +3940,12 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.output_directory = ""
             self.output_directory_entry.delete(0, ctk.END)
 
+            # Update file display
+            self.update_file_display()
+
         elif frame_name == "name_normalizer_window":
             self.name_normalizer_selected_file = ""
             self.name_normalizer_output_directory = ""
-            self.nn_display_text.set("")
 
             self.prefix_entry.delete(0, ctk.END)
             self.suffix_entry.delete(0, ctk.END)
@@ -3954,6 +3954,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             self.move_directory_entry.delete(0, ctk.END)
             self.custom_text_removal_entry.delete(0, ctk.END)
+
+            # Update the Name Normalizer display
+            self.update_nn_display()
 
         elif frame_name == "video_editor_window":
             if reset_all:
@@ -5870,7 +5873,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             None
         """
         if not self.name_normalizer_selected_file:
-            # If no file is selected, return
+            # Set the name normalizer display to an empty string and return
+            self.nn_display_text.set("")
             return
 
         if self.preview_mode_var.get() and os.path.isfile(self.name_normalizer_selected_file):
@@ -5885,8 +5889,11 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Display the basename of the selected file
                 display_text = f"FILE: {os.path.basename(self.name_normalizer_selected_file)}"
         else:
-            # Display the basename of the directory
-            display_text = f"DIR: {os.path.basename(self.name_normalizer_selected_file)}"
+            # Set the type of the file to be displayed in the GUI
+            type_var = "DIR" if os.path.isdir(self.name_normalizer_selected_file) else "FILE"
+
+            # Display the basename of the selection
+            display_text = f"{type_var}: {os.path.basename(self.name_normalizer_selected_file)}"
 
         # Set the proposed name to the nn display
         self.nn_display_text.set(display_text)
