@@ -4045,9 +4045,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         elif frame_name == "add_remove_window":
             # Get the active tab from the add_remove_tabview
-            active_tag = self.add_remove_tabview.get()
+            active_tab = self.add_remove_tabview.get()
 
-            if active_tag == "Artist":
+            if active_tab == "Artist":
                 # Clear add artist entry
                 self.add_artist_entry.delete(0, ctk.END)
 
@@ -4070,7 +4070,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Clear remove acc entry
                 self.remove_acc_entry.delete(0, ctk.END)
 
-            elif active_tag == "Category":
+            elif active_tab == "Category":
                 # Clear add category entry
                 self.category_entry.delete(0, ctk.END)
 
@@ -4082,7 +4082,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Set the default variable
                 self.weight_var.set(self.default_weight)
 
-            elif active_tag == "Custom Tab Name":
+            elif active_tab == "Custom Tab Name":
                 # Clear add custom tab name entry
                 self.custom_tab_name_entry.delete(0, ctk.END)
 
@@ -4094,7 +4094,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Set the default variable
                 self.weight_var1.set(self.default_ctn_weight)
 
-            elif active_tag == "Custom Text to Replace":
+            elif active_tab == "Custom Text to Replace":
                 # Clear add custom text to replace entry
                 self.add_ctr_name_entry.delete(0, ctk.END)
 
@@ -4104,28 +4104,28 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Clear remove custom text to replace entry
                 self.remove_ctr_name_entry.delete(0, ctk.END)
 
-            elif active_tag == "Exclude":
+            elif active_tab == "Exclude":
                 # Clear add exclude entry
                 self.add_exclude_name_entry.delete(0, ctk.END)
 
                 # Clear remove exclude entry
                 self.remove_exclude_name_entry.delete(0, ctk.END)
 
-            elif active_tag == "File Extensions":
+            elif active_tab == "File Extensions":
                 # Clear add extension entry
                 self.add_file_extension_entry.delete(0, ctk.END)
 
                 # Clear remove extension entry
                 self.remove_file_extension_entry.delete(0, ctk.END)
 
-            elif active_tag == "NO GO":
+            elif active_tab == "NO GO":
                 # Clear add NO-GO entry
                 self.add_no_go_name_entry.delete(0, ctk.END)
 
                 # Clear remove NO-GO entry
                 self.remove_no_go_name_entry.delete(0, ctk.END)
 
-            elif active_tag == "Valid Extensions":
+            elif active_tab == "Valid Extensions":
                 # Clear add extension entry
                 self.add_valid_extension_entry.delete(0, ctk.END)
 
