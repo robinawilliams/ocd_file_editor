@@ -15,6 +15,7 @@ import atexit  # Module for registering functions to be called when the program 
 import logging  # Logging module for capturing log messages
 from logging.handlers import TimedRotatingFileHandler, RotatingFileHandler  # Module to rotate logs
 from collections import OrderedDict  # Module to track order of list entries
+from typing import Union  # Module for type hinting support
 from tkinter import filedialog, messagebox  # Tkinter modules for GUI file dialogs and message boxes
 from tkinterdnd2 import DND_FILES, TkinterDnD  # Drag-and-drop functionality
 from unidecode import unidecode  # Method that transliterates Unicode characters to their closest ASCII equivalents
@@ -5861,7 +5862,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return new_file_name
 
-    def update_nn_display(self, *_):
+    def update_nn_display(self, *_) -> None:
         """
         Update the display in the Name Normalizer window.
 
@@ -5890,7 +5891,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         # Set the proposed name to the nn display
         self.nn_display_text.set(display_text)
 
-    def construct_nn_name(self, file_path):
+    def construct_nn_name(self, file_path: str) -> Union[str, None]:
         """
         Construct the modified file name based on various user settings.
 
@@ -5898,7 +5899,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             file_path (str): The path of the file.
 
         Returns:
-            str: The modified file name.
+            Union[str, None]: The modified file name or None if ignored.
         """
         # Split the file path into directory path and filename
         dir_path, filename = os.path.split(file_path)
@@ -5906,7 +5907,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         if ext.lower() not in self.file_extensions:
             # Log that the input is ignored if not on the file extensions list
-            self.log_and_show(f"Ignored: {filename} (not on file extensions list)")
+            self.log_and_show(f"Ignored file not on file extensions list: {filename}")
+            return None
 
         # Check if the input has one of the video file extensions
         if ext.lower() in self.file_extensions:
@@ -6081,8 +6083,8 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
             # Skip renaming if the name is the same as the original
             if name == filename:
-                self.log_and_show(f"Skipped renaming: {filename} (no changes needed)")
-                return
+                logging.info(f"Skipped renaming: {filename} (no changes needed)")
+                return None
 
             # Construct the new file path
             new_path = os.path.join(dir_path, name)
