@@ -5848,14 +5848,29 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Extract the file name without the path
             basename = os.path.basename(name)
 
-            # Split the basename into words while preserving the order
-            words = basename.split()
+            # Find the first occurrence of '-'
+            index = basename.find('-')
+
+            if index != -1:
+                # Temporary removal of everything before the dash
+                temp_name = basename[index + 1:]
+                temp_name = temp_name.strip()
+
+                # Split the temp_name into words while preserving the order
+                words = temp_name.split()
+            else:
+                # Split the basename into words while preserving the order
+                words = basename.split()
 
             # Use OrderedDict to keep track of unique words in order
             unique_words_dict = OrderedDict.fromkeys(words)
 
             # Join the unique words back into the basename while preserving order
             new_basename = ' '.join(unique_words_dict)
+
+            if index != -1:
+                # Add the prefix back to the new_basename
+                new_basename = f"{basename[:index + 1]} {new_basename.strip()}"
 
             return new_basename
 
