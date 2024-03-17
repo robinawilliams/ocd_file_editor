@@ -5167,27 +5167,34 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"An error occurred getting the custom text to remove: {str(e)}",
                               create_messagebox=True,
                               error=True)
-            return name
+            return name  # Return original name if there's an error retrieving custom text
 
-        # Check if text to remove is provided
-        if text_to_remove:
-            if self.replace_mode_var.get():
-                # Check if the text to remove is present in name (case-insensitive)
-                pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
+        try:
+            # Check if text to remove is provided
+            if text_to_remove:
+                if self.replace_mode_var.get():
+                    # Check if the text to remove is present in name (case-insensitive)
+                    pattern = re.compile(re.escape(text_to_remove), re.IGNORECASE)
 
-                # Remove all instances of the text to remove from name
-                name = pattern.sub('', name)
-
-                # Replace consecutive spaces with a single space when custom text is removed
-                name = re.sub(r'\s+', ' ', name)
-            else:
-                # Check if the text to remove is present in name (case-sensitive)
-                if text_to_remove in name:
                     # Remove all instances of the text to remove from name
-                    name = name.replace(text_to_remove, '')
+                    name = pattern.sub('', name)
 
                     # Replace consecutive spaces with a single space when custom text is removed
                     name = re.sub(r'\s+', ' ', name)
+                else:
+                    # Check if the text to remove is present in name (case-sensitive)
+                    if text_to_remove in name:
+                        # Remove all instances of the text to remove from name
+                        name = name.replace(text_to_remove, '')
+
+                        # Replace consecutive spaces with a single space when custom text is removed
+                        name = re.sub(r'\s+', ' ', name)
+        except Exception as e:
+            self.log_and_show(f"An error occurred during text removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            # Return original name if there's an error during text removal
+            return name
 
         return name
 
@@ -5209,26 +5216,32 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.log_and_show(f"An error occurred getting the original text or text to replace: {str(e)}",
                               create_messagebox=True,
                               error=True)
-            return name
+            return name  # Return original name if there's an error retrieving original or replacement text
 
-        # Check if the original_entry is provided
-        if original_entry:
-            # Replace user-specified text from the name
-            if self.replace_mode_var.get():
-                # Check if the text to replace is present in name (case-insensitive)
-                pattern = re.compile(re.escape(original_entry), re.IGNORECASE)
+        try:
+            # Check if the original_entry is provided
+            if original_entry:
+                # Replace user-specified text from the name
+                if self.replace_mode_var.get():
+                    # Check if the text to replace is present in name (case-insensitive)
+                    pattern = re.compile(re.escape(original_entry), re.IGNORECASE)
 
-                # Replace the text with the specified replacement or remove if replacement is an empty string
-                name = pattern.sub(replace_entry, name)
+                    # Replace the text with the specified replacement or remove if replacement is an empty string
+                    name = pattern.sub(replace_entry, name)
 
-            else:
-                # Check if the text to remove is present in name (case-sensitive)
-                if original_entry in name:
-                    # Remove all instances of the text to remove from name
-                    name = name.replace(original_entry, replace_entry)
+                else:
+                    # Check if the text to remove is present in name (case-sensitive)
+                    if original_entry in name:
+                        # Remove all instances of the text to remove from name
+                        name = name.replace(original_entry, replace_entry)
 
-            # Replace consecutive spaces with a single space when custom text is removed
-            name = re.sub(r'\s+', ' ', name)
+                # Replace consecutive spaces with a single space when custom text is removed
+                name = re.sub(r'\s+', ' ', name)
+        except Exception as e:
+            self.log_and_show(f"An error occurred during text replacement: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return original name if there's an error during text replacement
 
         return name
 
@@ -5242,28 +5255,34 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with custom text removed or replaced.
         """
-        # Replace custom text from the custom_text_to_replace dictionary
-        if self.replace_mode_var.get():
-            for text_to_replace, replacement in self.custom_text_to_replace.items():
-                # Check if the text to replace is present in name (case-insensitive)
-                pattern = re.compile(re.escape(text_to_replace), re.IGNORECASE)
+        try:
+            # Replace custom text from the custom_text_to_replace dictionary
+            if self.replace_mode_var.get():
+                for text_to_replace, replacement in self.custom_text_to_replace.items():
+                    # Check if the text to replace is present in name (case-insensitive)
+                    pattern = re.compile(re.escape(text_to_replace), re.IGNORECASE)
 
-                # Replace the text with the specified replacement or remove if replacement is an empty string
-                name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
-        else:
-            # Check if the text to replace is present in name (case-sensitive)
-            for text_to_replace, replacement in self.custom_text_to_replace.items():
-                # Replace the text with the specified replacement or remove if replacement is an empty string
-                name = name.replace(text_to_replace, replacement) if replacement != "" else name.replace(
-                    text_to_replace, '')
+                    # Replace the text with the specified replacement or remove if replacement is an empty string
+                    name = pattern.sub(replacement, name) if replacement != "" else pattern.sub('', name)
+            else:
+                # Check if the text to replace is present in name (case-sensitive)
+                for text_to_replace, replacement in self.custom_text_to_replace.items():
+                    # Replace the text with the specified replacement or remove if replacement is an empty string
+                    name = name.replace(text_to_replace, replacement) if replacement != "" else name.replace(
+                        text_to_replace, '')
 
-        # Replace consecutive spaces with a single space when custom text is removed
-        name = re.sub(r'\s+', ' ', name)
+            # Replace consecutive spaces with a single space when custom text is removed
+            name = re.sub(r'\s+', ' ', name)
+
+        except Exception as e:
+            self.log_and_show(f"An error occurred during custom text replacement: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return original name if there's an error during text replacement
 
         return name
 
-    @staticmethod
-    def remove_non_ascii_symbols(name: str) -> str:
+    def remove_non_ascii_symbols(self, name: str) -> str:
         """
         Remove non-ASCII symbols from the provided name.
 
@@ -5273,16 +5292,23 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with non-ASCII symbols removed.
         """
-        # Get all printable ASCII characters
-        standard_chars = set(string.printable)
+        try:
+            # Get all printable ASCII characters
+            standard_chars = set(string.printable)
 
-        # Replace non-ASCII characters with their ASCII equivalents (ignore slashes)
-        name = ''.join(unidecode(char) if char not in standard_chars and char not in ['⁄', '／']
-                       else char if char not in ['⁄', '／'] else ' ' for char in name)
+            # Replace non-ASCII characters with their ASCII equivalents (ignore slashes)
+            name = ''.join(unidecode(char) if char not in standard_chars and char not in ['⁄', '／']
+                           else char if char not in ['⁄', '／'] else ' ' for char in name)
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during non-ASCII symbol removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during symbol removal
+
         return name
 
-    @staticmethod
-    def remove_symbols(name, remove_chars):
+    def remove_symbols(self, name, remove_chars):
         """
         Remove specified symbols from the provided name.
 
@@ -5293,12 +5319,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with specified symbols removed.
         """
-        for char in remove_chars:
-            name = name.replace(char, "")
+        try:
+            for char in remove_chars:
+                name = name.replace(char, "")
+        except Exception as e:
+            self.log_and_show(f"An error occurred during symbol removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during symbol removal
+
         return name
 
-    @staticmethod
-    def remove_numbers(name: str) -> str:
+    def remove_numbers(self, name: str) -> str:
         """
         Remove all numbers from the provided name.
 
@@ -5308,11 +5340,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with numbers removed.
         """
-        name = ''.join(char for char in name if not char.isdigit())
+        try:
+            name = ''.join(char for char in name if not char.isdigit())
+        except Exception as e:
+            self.log_and_show(f"An error occurred during number removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during number removal
+
         return name
 
-    @staticmethod
-    def remove_text_trailing(name, symbol):
+    def remove_text_trailing(self, name, symbol):
         """
         Remove text in parentheses and trailing text.
 
@@ -5323,13 +5361,19 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with trailing text removed.
         """
-        index = name.find(symbol)
-        if index != -1:
-            name = name[:index].strip()
+        try:
+            index = name.find(symbol)
+            if index != -1:
+                name = name[:index].strip()
+        except Exception as e:
+            self.log_and_show(f"An error occurred during trailing text removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during trailing text removal
+
         return name
 
-    @staticmethod
-    def remove_dashes(name: str) -> str:
+    def remove_dashes(self, name: str) -> str:
         """
         Remove dashes from the provided name.
 
@@ -5339,11 +5383,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with dashes removed.
         """
-        name = re.sub(r'-', '', name)
+        try:
+            name = re.sub(r'-', '', name)
+        except Exception as e:
+            self.log_and_show(f"An error occurred during dash removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during dash removal
+
         return name
 
-    @staticmethod
-    def remove_endashes(name: str) -> str:
+    def remove_endashes(self, name: str) -> str:
         """
         Remove endashes from the provided name.
 
@@ -5353,11 +5403,17 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with endashes removed.
         """
-        name = re.sub(r'–', '', name)
+        try:
+            name = re.sub(r'–', '', name)
+        except Exception as e:
+            self.log_and_show(f"An error occurred during endash removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during endash removal
+
         return name
 
-    @staticmethod
-    def remove_emdashes(name: str) -> str:
+    def remove_emdashes(self, name: str) -> str:
         """
         Remove emdashes from the provided name.
 
@@ -5367,11 +5423,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with emdashes removed.
         """
-        name = re.sub(r'—', '', name)
+        try:
+            name = re.sub(r'—', '', name)
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during emdash removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during emdash removal
+
         return name
 
-    @staticmethod
-    def remove_ampersands(name: str) -> str:
+    def remove_ampersands(self, name: str) -> str:
         """
         Remove ampersands from the provided name.
 
@@ -5381,11 +5444,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with ampersands removed.
         """
-        name = re.sub(r'&', '', name)
+        try:
+            name = re.sub(r'&', '', name)
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during ampersand removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during ampersand removal
+
         return name
 
-    @staticmethod
-    def remove_at_symbols(name: str) -> str:
+    def remove_at_symbols(self, name: str) -> str:
         """
         Remove at symbols from the provided name.
 
@@ -5395,11 +5465,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with at symbols removed.
         """
-        name = re.sub(r'@', '', name)
+        try:
+            name = re.sub(r'@', '', name)
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during at symbol removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during at symbol removal
+
         return name
 
-    @staticmethod
-    def remove_underscores(name: str) -> str:
+    def remove_underscores(self, name: str) -> str:
         """
         Remove underscores from the provided name.
 
@@ -5409,11 +5486,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with underscores replaced by spaces.
         """
-        name = name.replace('_', ' ')
+        try:
+            name = name.replace('_', ' ')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during underscore removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during underscore removal
+
         return name
 
-    @staticmethod
-    def remove_commas(name: str) -> str:
+    def remove_commas(self, name: str) -> str:
         """
         Remove commas from the provided name.
 
@@ -5423,11 +5507,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with commas removed.
         """
-        name = name.replace(',', '')
+        try:
+            name = name.replace(',', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during comma removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during comma removal
+
         return name
 
-    @staticmethod
-    def remove_single_quotes(name: str) -> str:
+    def remove_single_quotes(self, name: str) -> str:
         """
         Remove single quotes from the provided name.
 
@@ -5437,11 +5528,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with single quotes removed.
         """
-        name = name.replace('\'', '')
+        try:
+            name = name.replace('\'', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during single quote removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during single quote removal
+
         return name
 
-    @staticmethod
-    def remove_double_quotes(name: str) -> str:
+    def remove_double_quotes(self, name: str) -> str:
         """
         Remove double quotes from the provided name.
 
@@ -5451,11 +5549,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with double quotes removed.
         """
-        name = name.replace('\"', '')
+        try:
+            name = name.replace('\"', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during double quote removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during double quote removal
+
         return name
 
-    @staticmethod
-    def remove_colons(name: str) -> str:
+    def remove_colons(self, name: str) -> str:
         """
         Remove colons from the provided name.
 
@@ -5465,11 +5570,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with colons removed.
         """
-        name = name.replace(':', '')
+        try:
+            name = name.replace(':', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during colon removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during colon removal
+
         return name
 
-    @staticmethod
-    def remove_semicolons(name: str) -> str:
+    def remove_semicolons(self, name: str) -> str:
         """
         Remove semicolons from the provided name.
 
@@ -5479,11 +5591,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with semicolons removed.
         """
-        name = name.replace(';', '')
+        try:
+            name = name.replace(';', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during semicolon removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during semicolon removal
+
         return name
 
-    @staticmethod
-    def remove_percents(name: str) -> str:
+    def remove_percents(self, name: str) -> str:
         """
         Remove percents from the provided name.
 
@@ -5493,11 +5612,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with percents removed.
         """
-        name = name.replace('%', '')
+        try:
+            name = name.replace('%', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during percent removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during percent removal
+
         return name
 
-    @staticmethod
-    def remove_carets(name: str) -> str:
+    def remove_carets(self, name: str) -> str:
         """
         Remove carets from the provided name.
 
@@ -5507,11 +5633,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with carets removed.
         """
-        name = name.replace('^', '')
+        try:
+            name = name.replace('^', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during caret removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during caret removal
+
         return name
 
-    @staticmethod
-    def remove_parenthesis(name: str) -> str:
+    def remove_parenthesis(self, name: str) -> str:
         """
         Remove parenthesis from the provided name.
 
@@ -5521,11 +5654,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with parenthesis removed.
         """
-        name = name.replace('(', '').replace(')', '')
+        try:
+            name = name.replace('(', '').replace(')', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during parenthesis removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during parenthesis removal
+
         return name
 
-    @staticmethod
-    def remove_hashtags(name: str) -> str:
+    def remove_hashtags(self, name: str) -> str:
         """
         Remove hashtags from the provided name.
 
@@ -5535,11 +5675,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with hashtags removed.
         """
-        name = name.replace('#', '')
+        try:
+            name = name.replace('#', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during hashtag removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during hashtag removal
+
         return name
 
-    @staticmethod
-    def remove_dollar_signs(name: str) -> str:
+    def remove_dollar_signs(self, name: str) -> str:
         """
         Remove dollar signs from the provided name.
 
@@ -5549,11 +5696,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with dollar signs removed.
         """
-        name = name.replace('$', '')
+        try:
+            name = name.replace('$', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during dollar sign removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during dollar sign removal
+
         return name
 
-    @staticmethod
-    def remove_asterisks(name: str) -> str:
+    def remove_asterisks(self, name: str) -> str:
         """
         Remove asterisks from the provided name.
 
@@ -5563,11 +5717,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with asterisks removed.
         """
-        name = name.replace('*', '')
+        try:
+            name = name.replace('*', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during asterisk removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during asterisk removal
+
         return name
 
-    @staticmethod
-    def remove_plus_signs(name: str) -> str:
+    def remove_plus_signs(self, name: str) -> str:
         """
         Remove plus signs from the provided name.
 
@@ -5577,11 +5738,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with plus signs removed.
         """
-        name = name.replace('+', '')
+        try:
+            name = name.replace('+', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during plus sign removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during plus sign removal
+
         return name
 
-    @staticmethod
-    def remove_equal_signs(name: str) -> str:
+    def remove_equal_signs(self, name: str) -> str:
         """
         Remove equal signs from the provided name.
 
@@ -5591,11 +5759,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with equal signs removed.
         """
-        name = name.replace('=', '')
+        try:
+            name = name.replace('=', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during equal sign removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during equal sign removal
+
         return name
 
-    @staticmethod
-    def remove_curly_braces(name: str) -> str:
+    def remove_curly_braces(self, name: str) -> str:
         """
         Remove curly braces from the provided name.
 
@@ -5605,11 +5780,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with curly braces removed.
         """
-        name = name.replace('{', '').replace('}', '')
+        try:
+            name = name.replace('{', '').replace('}', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during curly brace removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during curly brace removal
+
         return name
 
-    @staticmethod
-    def remove_square_brackets(name: str) -> str:
+    def remove_square_brackets(self, name: str) -> str:
         """
         Remove square brackets from the provided name.
 
@@ -5619,11 +5801,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with square brackets removed.
         """
-        name = name.replace('[', '').replace(']', '')
+        try:
+            name = name.replace('[', '').replace(']', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during square bracket removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during square bracket removal
+
         return name
 
-    @staticmethod
-    def remove_pipes(name: str) -> str:
+    def remove_pipes(self, name: str) -> str:
         """
         Remove pipes from the provided name.
 
@@ -5633,11 +5822,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with pipes removed.
         """
-        name = name.replace('|', '')
+        try:
+            name = name.replace('|', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during pipe removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during pipe removal
+
         return name
 
-    @staticmethod
-    def remove_backslashes(name: str) -> str:
+    def remove_backslashes(self, name: str) -> str:
         """
         Remove backslashes from the provided name.
 
@@ -5647,11 +5843,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with backslashes removed.
         """
-        name = name.replace('\\', '')
+        try:
+            name = name.replace('\\', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during backslash removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during backslash removal
+
         return name
 
-    @staticmethod
-    def remove_angle_brackets(name: str) -> str:
+    def remove_angle_brackets(self, name: str) -> str:
         """
         Remove angle brackets from the provided name.
 
@@ -5661,11 +5864,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with angle brackets removed.
         """
-        name = name.replace('<', '').replace('>', '')
+        try:
+            name = name.replace('<', '').replace('>', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during angle bracket removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during angle bracket removal
+
         return name
 
-    @staticmethod
-    def remove_question_marks(name: str) -> str:
+    def remove_question_marks(self, name: str) -> str:
         """
         Remove question marks from the provided name.
 
@@ -5675,11 +5885,18 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with question marks removed.
         """
-        name = name.replace('?', '')
+        try:
+            name = name.replace('?', '')
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during question mark removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during question mark removal
+
         return name
 
-    @staticmethod
-    def title_the_name(name: str) -> str:
+    def title_the_name(self, name: str) -> str:
         """
         Make the file name a title while preserving lowercase letters after apostrophes in contractions.
 
@@ -5689,24 +5906,30 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with title case.
         """
-        words = name.split()
-        formatted_words = []
-        for word in words:
-            if "'" in word:
-                # If the word is a contraction with ', capitalize the first part and keep the rest in lowercase
-                parts = word.split("'")
-                formatted_word = "'".join([parts[0].capitalize()] + [part.lower() for part in parts[1:]])
-            else:
-                # Capitalize the word as usual
-                formatted_word = word.capitalize()
+        try:
+            words = name.split()
+            formatted_words = []
+            for word in words:
+                if "'" in word:
+                    # If the word is a contraction with ', capitalize the first part and keep the rest in lowercase
+                    parts = word.split("'")
+                    formatted_word = "'".join([parts[0].capitalize()] + [part.lower() for part in parts[1:]])
+                else:
+                    # Capitalize the word as usual
+                    formatted_word = word.capitalize()
 
-            formatted_words.append(formatted_word)
-        # Join the words back into a formatted name
-        name = ' '.join(formatted_words)
-        return name
+                formatted_words.append(formatted_word)
+            # Join the words back into a formatted name
+            name = ' '.join(formatted_words)
+            return name
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during title formatting: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during title formatting
 
-    @staticmethod
-    def remove_extra_whitespace(name: str) -> str:
+    def remove_extra_whitespace(self, name: str) -> str:
         """
         Sanitize the filename by removing extra whitespaces.
 
@@ -5716,7 +5939,15 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with extra whitespaces removed.
         """
-        name = ' '.join(name.split())
+        try:
+            name = ' '.join(name.split())
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during whitespace removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during whitespace removal
+
         return name
 
     def artist_identifier(self, name: str) -> str:
@@ -5813,8 +6044,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                               error=True)
             return name
 
-    @staticmethod
-    def add_tail(name: str) -> str:
+    def add_tail(self, name: str) -> str:
         """
         Add a tail to the end of the provided name.
 
@@ -5824,14 +6054,22 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
         str: The modified name with the added tail.
         """
-        # Add tail to the end of the name
-        name += "__-__ "
+        try:
+            # Add tail to the end of the name
+            name += "__-__ "
 
-        # Catchall for situations where only "artist -__-__" is present after operation
-        name = re.sub(r' -__-__', '', name).strip()
+            # Catchall for situations where only "artist -__-__" is present after operation
+            name = re.sub(r' -__-__', '', name).strip()
 
-        # Catchall for situations where the tail is already present "__-____-__"
-        name = re.sub(r'__-____-__', '__-__', name).strip()
+            # Catchall for situations where the tail is already present "__-____-__"
+            name = re.sub(r'__-____-__', '__-__', name).strip()
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during tail addition: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return name  # Return the original name if there's an error during tail addition
+
         return name
 
     def remove_word_duplicates_from_filename(self, name: str) -> str:
@@ -5893,41 +6131,48 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             self.remove_artist_duplicates_from_filename('Artist - A Title Artist - Album Version Artist')
             'Artist - A Title - Album Version'
         """
-        # Read the list of artists from the artist_file
-        with open(self.artist_file, 'r') as artist_list_file:
-            artist_list = [artist.strip() for artist in artist_list_file]
+        try:
+            # Read the list of artists from the artist_file
+            with open(self.artist_file, 'r') as artist_list_file:
+                artist_list = [artist.strip() for artist in artist_list_file]
 
-        # Extract the file name without the path
-        basename = os.path.basename(file_name)
+            # Extract the file name without the path
+            basename = os.path.basename(file_name)
 
-        # Find the first occurrence of '-'
-        index = basename.find('-')
+            # Find the first occurrence of '-'
+            index = basename.find('-')
 
-        if index != -1:
-            # Temporary removal of everything before the dash
-            temp_name = basename[index + 1:]
-            temp_name = temp_name.strip()
+            if index != -1:
+                # Temporary removal of everything before the dash
+                temp_name = basename[index + 1:]
+                temp_name = temp_name.strip()
 
-            # Search for artist names and remove them
-            for artist in artist_list:
-                # Make the search case-insensitive
-                regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
-                temp_name = regex.sub('', temp_name)
+                # Search for artist names and remove them
+                for artist in artist_list:
+                    # Make the search case-insensitive
+                    regex = re.compile(rf'\b{re.escape(artist)}\b', re.IGNORECASE)
+                    temp_name = regex.sub('', temp_name)
 
-            # Reattach the dash and any remaining text
-            new_file_name = f"{basename[:index + 1]} {temp_name.strip()}"
-        else:
-            # No dash found, return the original filename
-            return file_name
+                # Reattach the dash and any remaining text
+                new_file_name = f"{basename[:index + 1]} {temp_name.strip()}"
+            else:
+                # No dash found, return the original filename
+                return file_name
 
-        # Sanitize file name. Remove extra whitespace.
-        new_file_name = ' '.join(new_file_name.split()).strip()
+            # Sanitize file name. Remove extra whitespace.
+            new_file_name = ' '.join(new_file_name.split()).strip()
 
-        # Check for double dashes and remove the second dash
-        if ' - - ' in new_file_name:
-            new_file_name = new_file_name.replace(' - - ', ' - ', 1)
+            # Check for double dashes and remove the second dash
+            if ' - - ' in new_file_name:
+                new_file_name = new_file_name.replace(' - - ', ' - ', 1)
 
-        return new_file_name
+            return new_file_name
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during artist name removal: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
+            return file_name  # Return the original filename if there's an error
 
     def update_nn_display(self, *_) -> None:
         """
@@ -5936,31 +6181,37 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         Returns:
             None
         """
-        if not self.name_normalizer_selected_file:
-            # Set the name normalizer display to an empty string and return
-            self.nn_display_text.set("")
-            return
+        try:
+            if not self.name_normalizer_selected_file:
+                # Set the name normalizer display to an empty string and return
+                self.nn_display_text.set("")
+                return
 
-        if self.preview_mode_var.get() and os.path.isfile(self.name_normalizer_selected_file):
-            # Call the construct name function to get the proposed name
-            proposed_name = self.construct_nn_name(self.name_normalizer_selected_file)
+            if self.preview_mode_var.get() and os.path.isfile(self.name_normalizer_selected_file):
+                # Call the construct name function to get the proposed name
+                proposed_name = self.construct_nn_name(self.name_normalizer_selected_file)
 
-            # Sanitize for the GUI
-            if proposed_name:
-                # Display the basename of the proposed name
-                display_text = f"FILE: {os.path.basename(proposed_name)}"
+                # Sanitize for the GUI
+                if proposed_name:
+                    # Display the basename of the proposed name
+                    display_text = f"FILE: {os.path.basename(proposed_name)}"
+                else:
+                    # Display the basename of the selected file
+                    display_text = f"FILE: {os.path.basename(self.name_normalizer_selected_file)}"
             else:
-                # Display the basename of the selected file
-                display_text = f"FILE: {os.path.basename(self.name_normalizer_selected_file)}"
-        else:
-            # Set the type of the file to be displayed in the GUI
-            type_var = "DIR" if os.path.isdir(self.name_normalizer_selected_file) else "FILE"
+                # Set the type of the file to be displayed in the GUI
+                type_var = "DIR" if os.path.isdir(self.name_normalizer_selected_file) else "FILE"
 
-            # Display the basename of the selection
-            display_text = f"{type_var}: {os.path.basename(self.name_normalizer_selected_file)}"
+                # Display the basename of the selection
+                display_text = f"{type_var}: {os.path.basename(self.name_normalizer_selected_file)}"
 
-        # Set the proposed name to the nn display
-        self.nn_display_text.set(display_text)
+            # Set the proposed name to the nn display
+            self.nn_display_text.set(display_text)
+        except Exception as e:
+            # Log and handle the error
+            self.log_and_show(f"An error occurred during NN display update: {str(e)}",
+                              create_messagebox=True,
+                              error=True)
 
     def construct_nn_name(self, file_path: str) -> Union[str, None]:
         """
