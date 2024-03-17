@@ -5899,6 +5899,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
     def title_the_name(self, name: str) -> str:
         """
         Make the file name a title while preserving lowercase letters after apostrophes in contractions.
+        If [, {, or ( are used, capitalize the very next letter unless it's whitespace.
 
         Args:
         name (str): The original name.
@@ -5910,7 +5911,21 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             words = name.split()
             formatted_words = []
             for word in words:
-                if "'" in word:
+                # Check for edge cases with [,{, or (
+                if any(char in word for char in ['[', '{', '(']):
+                    new_word = ''
+                    capitalize_next = False
+                    for char in word:
+                        if char in ['[', '{', '(']:
+                            capitalize_next = True
+                            new_word += char
+                        elif char.isalpha() and capitalize_next:
+                            new_word += char.upper()
+                            capitalize_next = False
+                        else:
+                            new_word += char
+                    formatted_word = new_word
+                elif "'" in word:
                     # If the word is a contraction with ', capitalize the first part and keep the rest in lowercase
                     parts = word.split("'")
                     formatted_word = "'".join([parts[0].capitalize()] + [part.lower() for part in parts[1:]])
