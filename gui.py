@@ -3571,6 +3571,10 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
             # Update the File Renamer display
             self.update_file_display()
 
+            # Add artist common categories to the queue
+            if self.artist_common_categories_var.get():
+                self.add_remove_common_categories_to_queue()
+
             # Log the action if logging is enabled
             self.log_and_show(f"Input selected via send to module: "
                               f"{os.path.basename(self.file_renamer_selected_file)}")
