@@ -5070,7 +5070,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
 
         return name, name_length
 
-    def get_non_conflicting_filename(self, path):
+    def get_non_conflicting_filename(self, path: str) -> Union[str, None]:
         """
         Get a non-conflicting filename by appending a counter to the base filename if conflicts are detected.
 
@@ -5078,7 +5078,7 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
         - path (str): The original file path.
 
         Returns:
-        - str: The non-conflicting filename or None if an error occurs.
+        - Union[str, None]: The non-conflicting filename or None if an error occurs.
 
         Raises:
         - OSError: If an error occurs while checking for file existence or constructing the new filename.
@@ -6462,8 +6462,9 @@ class OCDFileRenamer(ctk.CTk, TkinterDnD.DnDWrapper):
                 # Log the renaming operation if logging is activated
                 self.log_and_show(f"Renamed: {os.path.basename(file_path)} -> {os.path.basename(new_path)}")
 
-                # Move the renamed input to the specified directory if name_normalizer_output_directory is provided
-                if self.name_normalizer_output_directory:
+                # Check if the output directory is provided and is different from the original directory
+                if self.name_normalizer_output_directory and os.path.abspath(
+                        self.name_normalizer_output_directory) != os.path.abspath(os.path.dirname(file_path)):
                     # Create the destination file path by joining the destination directory and the source file name
                     destination_file = os.path.join(self.name_normalizer_output_directory, os.path.basename(new_path))
 
